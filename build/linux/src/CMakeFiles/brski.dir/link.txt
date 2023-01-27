@@ -1,1 +1,0 @@
-/usr/bin/c++ -g CMakeFiles/brski.dir/brski.cpp.o -o brski  -Wl,-rpath,::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::: 

@@ -28,6 +28,7 @@
       "displayName": "Linux",
       "description": "Default build for Linux",
       "cacheVariables": {
+        "BUILD_CPPHTTPLIB_LIB": true,
         "BUILD_OPENSSL3_LIB": false
       }
     }
