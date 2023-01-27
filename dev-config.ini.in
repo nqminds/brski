@@ -1,0 +1,3 @@
+# Local Testing Config
+# Use `config.ini` for use after running `make install`
+[system]
