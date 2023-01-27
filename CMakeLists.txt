@@ -70,8 +70,8 @@ set(
 )
 
 option(BUILD_ONLY_DOCS "Build only docs" OFF)
-option(BUILD_CPPHTTPLIB_LIB "Build the cpp-httplib" OFF)
 option(BUILD_OPENSSL3_LIB "Build OpenSSL 3" OFF)
+option(BUILD_CPPHTTPLIB_LIB "Build the cpp-httplib" OFF)
 
 cmake_dependent_option(CONFIGURE_COVERAGE "Configure for code coverage (requires lcov)" OFF BUILD_TESTING OFF)
 
@@ -157,6 +157,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+
+set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH};${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Include the libraries
 include(openssl3)

@@ -10,6 +10,6 @@ add_compile_options(
   $<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes> # warn if creating a function without specifiying args
 )
 
-add_executable(brski brski.cpp)
-target_link_libraries(brski PRIVATE OpenSSL3::Crypto httplib::httplib)
-target_include_directories(brski PRIVATE ${PROJECT_BINARY_DIR})
+add_executable(brski-server brski-server.cpp)
+target_link_libraries(brski-server PRIVATE OpenSSL3::Crypto httplib::httplib)
+target_include_directories(brski-server PRIVATE ${PROJECT_BINARY_DIR})
