@@ -1,4 +1,4 @@
-if(BUILD_CPPHTTPLIB_LIB AND NOT BUILD_ONLY_DOCS)
+if(USE_CPPHTTPLIB_LIB AND NOT BUILD_ONLY_DOCS)
   FetchContent_Declare(
     cpp-httplib
     URL https://github.com/yhirose/cpp-httplib/archive/refs/tags/v0.11.4.tar.gz
