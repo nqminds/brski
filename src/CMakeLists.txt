@@ -11,5 +11,5 @@ add_compile_options(
 )
 
 add_executable(brski brski.cpp)
-target_link_libraries(brski PRIVATE OpenSSL3::Crypto)
+target_link_libraries(brski PRIVATE OpenSSL3::Crypto httplib::httplib)
 target_include_directories(brski PRIVATE ${PROJECT_BINARY_DIR})

@@ -160,6 +160,7 @@ set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
 # Include the libraries
 include(openssl3)
+include(cpp-httplib)
 
 # On Linux, creates a Threads::Threads target that points to pthread
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
