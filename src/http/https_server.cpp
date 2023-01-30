@@ -19,8 +19,14 @@ extern "C" {
 #include "httplib_wrapper.h"
 #endif
 
+void https_free_context(struct https_server_context *context) {
+  if (context != nullptr) {
+    delete context;
+  }
+}
+
 int https_start(struct https_server_context **context) {
-  *context = (struct https_server_context *) sys_zalloc(sizeof(struct https_server_context));
+  *context = new https_server_context();//(struct https_server_context *) sys_zalloc(sizeof(struct https_server_context));
   if (*context == NULL) {
     log_errno("sys_zalloc");
     return -1;
@@ -31,15 +37,15 @@ int https_start(struct https_server_context **context) {
   return httplib_start(*context);
 #else
   log_error("No https server defined");
+  https_free_context(*context);
   return -1;
 #endif
 }
 
 void https_stop(struct https_server_context *context) {
-  if (context != NULL) {
 #ifdef WITH_CPPHTTPLIB_LIB
   httplib_stop(context);
 #endif
-    sys_free(context);
-  }
+
+  https_free_context(context);
 }

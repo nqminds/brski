@@ -13,7 +13,7 @@ add_compile_options(
 add_subdirectory(utils)
 add_subdirectory(http)
 
-add_library(config config.c)
+add_library(config config.cpp)
 target_link_libraries(config PRIVATE MinIni::minIni os log)
 
 add_executable(brski_server brski_server.cpp)

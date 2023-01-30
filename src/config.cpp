@@ -21,16 +21,19 @@
 
 #include "config.h"
 
+extern "C" {
 #include "utils/log.h"
 #include "utils/os.h"
+}
+
 #include "http/http.h"
 
 int load_server_config(const char *filename, struct http_config *hconf) {
-  char *key = sys_malloc(INI_BUFFERSIZE);
+  char *key = new char[INI_BUFFERSIZE];
 
   ini_gets("server", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
   sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
-  sys_free(key);
+  delete [] key;
 
   return 0;
 }

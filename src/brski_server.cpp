@@ -8,9 +8,9 @@
 extern "C" {
 #include "utils/os.h"
 #include "utils/log.h"
-#include "config.h"
 }
 
+#include "config.h"
 #include "version.h"
 
 #define OPT_STRING ":c:dvh"
