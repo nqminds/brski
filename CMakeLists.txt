@@ -162,7 +162,7 @@ set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH};${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Include the libraries
 include(openssl3)
-include(cpp-httplib)
+include(httplib)
 
 # On Linux, creates a Threads::Threads target that points to pthread
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)

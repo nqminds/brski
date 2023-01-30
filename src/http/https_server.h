@@ -11,9 +11,7 @@
 #ifndef HTTPS_SERVER_H
 #define HTTPS_SERVER_H
 
-struct https_server_context {
-  void *server;
-};  
+#include "http.h"
 
 /**
  * @brief Starts the https server

@@ -11,6 +11,7 @@ add_compile_options(
 )
 
 add_subdirectory(utils)
+add_subdirectory(http)
 
 add_executable(brski_server brski_server.cpp)
 target_link_libraries(brski_server PRIVATE https_server log)
