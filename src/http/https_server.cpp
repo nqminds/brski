@@ -25,16 +25,17 @@ void https_free_context(struct https_server_context *context) {
   }
 }
 
-int https_start(struct https_server_context **context) {
-  *context = new https_server_context();//(struct https_server_context *) sys_zalloc(sizeof(struct https_server_context));
-  if (*context == NULL) {
-    log_errno("sys_zalloc");
+int https_start(struct http_config *config, struct https_server_context **context) {
+  try {
+    *context = new https_server_context();
+  } catch(...) {
+    log_error("failed to allocate https_server_context");
     return -1;
   }
 
-  log_info("Starting the HTTPS server...");
+  log_info("Starting the HTTPS server at %s:%d", config->bindAddress, config->port);
 #ifdef WITH_CPPHTTPLIB_LIB
-  return httplib_start(*context);
+  return httplib_start(config, *context);
 #else
   log_error("No https server defined");
   https_free_context(*context);

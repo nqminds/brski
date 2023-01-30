@@ -16,10 +16,11 @@
 /**
  * @brief Starts the http library server
  *
+ * @param[in] config The https server config
  * @param[out] context The https server context
  * @return int 0 on success, -1 on failure
  */
-int httplib_start(struct https_server_context *context);
+int httplib_start(struct http_config *config, struct https_server_context *context);
 
 /**
  * @brief Stops the http library server

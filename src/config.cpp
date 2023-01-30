@@ -29,11 +29,18 @@ extern "C" {
 #include "http/http.h"
 
 int load_server_config(const char *filename, struct http_config *hconf) {
-  char *key = new char[INI_BUFFERSIZE];
+  try {
+    char *key = new char[INI_BUFFERSIZE];
 
-  ini_gets("server", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
-  sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
-  delete [] key;
+    ini_gets("server", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
+    sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
+    delete [] key;
+
+    hconf->port = (unsigned int)ini_getl("server", "port", 0, filename);
+  } catch(...) {
+    log_error("failed to allocate key");
+    return -1;
+  }
 
   return 0;
 }

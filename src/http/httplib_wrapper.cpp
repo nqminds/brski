@@ -17,7 +17,7 @@ extern "C" {
 
 #include "http.h"
 
-int httplib_start(struct https_server_context *context) {
+int httplib_start(struct http_config *config, struct https_server_context *context) {
   if (context == nullptr) {
     log_error("context param is NULL");
     return -1;
@@ -26,8 +26,11 @@ int httplib_start(struct https_server_context *context) {
   try {
     const char *cert_path = "";
     const char *private_key_path = "";
-    httplib::SSLServer *server = new httplib::SSLServer(cert_path, private_key_path);
+    // httplib::SSLServer *server = new httplib::SSLServer(cert_path, private_key_path);
+    httplib::Server *server = new httplib::Server();
     context->server = static_cast<void*>(server);
+
+    server->listen("0.0.0.0", 8080);
   } catch (...) {
     log_error("httplib::SSLServer() fail");
     return -1;
@@ -39,7 +42,8 @@ int httplib_start(struct https_server_context *context) {
 void httplib_stop(struct https_server_context *context) {
   if (context != nullptr) {
     if (context->server != nullptr) {
-      httplib::SSLServer *server = static_cast<httplib::SSLServer *>(context->server);
+      // httplib::SSLServer *server = static_cast<httplib::SSLServer *>(context->server);
+      httplib::Server *server = static_cast<httplib::Server *>(context->server);
     }
   }
 }

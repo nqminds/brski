@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
   }
 
   struct https_server_context *context = NULL;
-  if (https_start(&context) < 0) {
+  if (https_start(&config.hconf, &context) < 0) {
     fprintf(stderr, "https_start fail");
     return EXIT_FAILURE;
   }

@@ -16,10 +16,11 @@
 /**
  * @brief Starts the https server
  *
+ * @param[in] confic The https server config
  * @param[out] context The https server context
  * @return int 0 on success, -1 on failure
  */
-int https_start(struct https_server_context **context);
+int https_start(struct http_config *config, struct https_server_context **context);
 
 /**
  * @brief Stops the https server

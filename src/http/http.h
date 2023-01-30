@@ -15,7 +15,7 @@
 
 struct http_config {
   char bindAddress[MAX_WEB_PATH_LEN];
-  int port;
+  unsigned int port;
 };
 
 struct https_server_context {
