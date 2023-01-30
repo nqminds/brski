@@ -10,11 +10,22 @@
 #include "../http/http.h"
 #include "../http/https_server.h"
 
-#include "registrar_server.h"
+extern "C" {
+#include "../utils/log.h"
+}
 
+#include "registrar_server.h"
+#include "registrar_routes.h"
 
 int registrar_start(struct http_config *config, struct https_server_context **context) {
-  return https_start(config, context);
+  std::vector<struct RouteTuple> routes;
+
+  if (setup_registrar_routes(routes) < 0) {
+    log_error("setup_registrar_routes fail");
+    return -1;
+  }
+
+  return https_start(config, routes, context);
 }
 
 void registrar_stop(struct https_server_context *context) {

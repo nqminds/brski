@@ -17,7 +17,9 @@ extern "C" {
 
 #include "http.h"
 
-int httplib_start(struct http_config *config, struct https_server_context *context) {
+int httplib_start(struct http_config *config,
+                  std::vector<struct RouteTuple> &routes,
+                  struct https_server_context *context) {
   if (context == nullptr) {
     log_error("context param is NULL");
     return -1;

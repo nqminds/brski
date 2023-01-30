@@ -25,7 +25,9 @@ void https_free_context(struct https_server_context *context) {
   }
 }
 
-int https_start(struct http_config *config, struct https_server_context **context) {
+int https_start(struct http_config *config,
+                std::vector<struct RouteTuple> &routes,
+                struct https_server_context **context) {
   try {
     *context = new https_server_context();
   } catch(...) {
@@ -35,7 +37,7 @@ int https_start(struct http_config *config, struct https_server_context **contex
 
   log_info("Starting the HTTPS server at %s:%d", config->bindAddress, config->port);
 #ifdef WITH_CPPHTTPLIB_LIB
-  return httplib_start(config, *context);
+  return httplib_start(config, routes, *context);
 #else
   log_error("No https server defined");
   https_free_context(*context);
