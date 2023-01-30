@@ -28,15 +28,15 @@ extern "C" {
 
 #include "http/http.h"
 
-int load_server_config(const char *filename, struct http_config *hconf) {
+int load_registrar_config(const char *filename, struct http_config *hconf) {
   try {
     char *key = new char[INI_BUFFERSIZE];
 
-    ini_gets("server", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
+    ini_gets("registrar", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
     sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
     delete [] key;
 
-    hconf->port = (unsigned int)ini_getl("server", "port", 0, filename);
+    hconf->port = (unsigned int)ini_getl("registrar", "port", 0, filename);
   } catch(...) {
     log_error("failed to allocate key");
     return -1;
@@ -55,7 +55,7 @@ int load_brski_config(const char *filename, struct brski_config *config) {
   }
   fclose(fp);
 
-  if (load_server_config(filename, &config->hconf) < 0) {
+  if (load_registrar_config(filename, &config->hconf) < 0) {
     log_error("load_server_config fail");
     return -1;
   }

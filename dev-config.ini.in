@@ -1,7 +1,7 @@
 # Local Testing Config
 # Use `config.ini` for use after running `make install`
 [system]
-[server]
+[registrar]
 bindAddress = "0.0.0.0"
 port = 12345
 
