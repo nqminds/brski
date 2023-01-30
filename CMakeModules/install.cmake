@@ -1,6 +1,6 @@
 include(GNUInstallDirs) # automagically setup install dir locations
 install(
-  TARGETS brski_server
+  TARGETS brski
   RUNTIME
 )
 

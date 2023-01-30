@@ -12,10 +12,11 @@ add_compile_options(
 
 add_subdirectory(utils)
 add_subdirectory(http)
+add_subdirectory(registrar)
 
 add_library(config config.cpp)
 target_link_libraries(config PRIVATE MinIni::minIni os log)
 
-add_executable(brski_server brski_server.cpp)
-target_link_libraries(brski_server PRIVATE https_server config log)
-target_include_directories(brski_server PRIVATE ${PROJECT_BINARY_DIR})
+add_executable(brski brski.cpp)
+target_link_libraries(brski PRIVATE https_server config log)
+target_include_directories(brski PRIVATE ${PROJECT_BINARY_DIR})

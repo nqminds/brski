@@ -1,0 +1,2 @@
+add_library(registrar_server registrar_server.cpp)
+target_link_libraries(registrar_server PRIVATE os log https_server)
