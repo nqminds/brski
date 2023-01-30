@@ -11,6 +11,13 @@
 #ifndef HTTP_H
 #define HTTP_H
 
+#define MAX_WEB_PATH_LEN 2048
+
+struct http_config {
+  char bindAddress[MAX_WEB_PATH_LEN];
+  int port;
+};
+
 struct https_server_context {
   void *server;
 };  

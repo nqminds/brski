@@ -12,7 +12,7 @@
 
 extern "C" {
 #include "../utils/log.h"
-#include "../utils/allocs.h"
+#include "../utils/os.h"
 }
 
 #include "http.h"

@@ -12,6 +12,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -19,11 +20,23 @@
 #include <unistd.h>
 
 #include "config.h"
-#include "utils/allocs.h"
-#include "utils/log.h"
 
-int load_app_config(const char *filename, struct app_config *config) {
-  (void)config;
+#include "utils/log.h"
+#include "utils/os.h"
+#include "http/http.h"
+
+int load_server_config(const char *filename, struct http_config *hconf) {
+  char *key = sys_malloc(INI_BUFFERSIZE);
+
+  ini_gets("server", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
+  sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
+  sys_free(key);
+
+  return 0;
+}
+
+
+int load_brski_config(const char *filename, struct brski_config *config) {
   FILE *fp = fopen(filename, "rb");
 
   if (fp == NULL) {
@@ -32,11 +45,10 @@ int load_app_config(const char *filename, struct app_config *config) {
   }
   fclose(fp);
 
-  return 0;
-}
-
-void free_app_config(struct app_config *config) {
-  if (config == NULL) {
-    return;
+  if (load_server_config(filename, &config->hconf) < 0) {
+    log_error("load_server_config fail");
+    return -1;
   }
+
+  return 0;
 }

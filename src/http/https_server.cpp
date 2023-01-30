@@ -12,7 +12,7 @@
 
 extern "C" {
 #include "../utils/log.h"
-#include "../utils/allocs.h"
+#include "../utils/os.h"
 }
 
 #ifdef WITH_CPPHTTPLIB_LIB

@@ -6,6 +6,7 @@
 #include "http/https_server.h"
 
 extern "C" {
+#include "utils/os.h"
 #include "utils/log.h"
 #include "config.h"
 }
@@ -40,14 +41,14 @@ void sighup_handler(int sig, void *ctx) {
   }
 }
 
-void show_app_version(void) {
+void show_version(void) {
   fprintf(stdout, "brkisi server version %s\n", BRSKI_VERSION);
 }
 
-void show_app_help(char *app_name) {
-  show_app_version();
+void show_help(char *name) {
+  show_version();
   fprintf(stdout, "Usage:\n");
-  fprintf(stdout, USAGE_STRING, basename(app_name));
+  fprintf(stdout, USAGE_STRING, basename(name));
   fprintf(stdout, "%s", description_string);
   fprintf(stdout, "\nOptions:\n");
   fprintf(stdout, "\t-c filename\t Path to the config file name\n");
@@ -75,17 +76,17 @@ void log_cmdline_error(const char *format, ...) {
   exit(EXIT_FAILURE);
 }
 
-void process_app_options(int argc, char *argv[], uint8_t *verbosity,
+void process_options(int argc, char *argv[], uint8_t *verbosity,
                          char **config_filename) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {
     switch (opt) {
       case 'h':
-        show_app_help(argv[0]);
+        show_help(argv[0]);
         break;
       case 'v':
-        show_app_version();
+        show_version();
         exit(EXIT_SUCCESS);
         break;
       case 'c':
@@ -101,22 +102,22 @@ void process_app_options(int argc, char *argv[], uint8_t *verbosity,
         log_cmdline_error("Unrecognized option -%c\n", optopt);
         break;
       default:
-        show_app_help(argv[0]);
+        show_help(argv[0]);
     }
   }
 }
 
 int main(int argc, char *argv[]) {
-  struct app_config config;
+  struct brski_config config;
 
   // Init the app config struct
-  memset(&config, 0, sizeof(struct app_config));
+  memset(&config, 0, sizeof(struct brski_config));
 
   uint8_t verbosity = 0;
   uint8_t level = 0;
   char *config_filename = NULL;
 
-  process_app_options(argc, argv, &verbosity, &config_filename);
+  process_options(argc, argv, &verbosity, &config_filename);
 
   if (verbosity > MAX_LOG_LEVELS) {
     level = 0;
@@ -127,7 +128,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (optind <= 1) {
-    show_app_help(argv[0]);
+    show_help(argv[0]);
   }
 
   if (pthread_mutex_init(&log_lock, NULL) != 0) {
@@ -140,8 +141,8 @@ int main(int argc, char *argv[]) {
   /* Set the log level */
   log_set_level(level);
 
-  if (load_app_config(config_filename, &config) < 0) {
-    fprintf(stderr, "load_app_config fail\n");
+  if (load_brski_config(config_filename, &config) < 0) {
+    fprintf(stderr, "load_config fail\n");
     return EXIT_FAILURE;
   }
 
@@ -153,12 +154,10 @@ int main(int argc, char *argv[]) {
 
   https_stop(context);
 
-  free_app_config(&config);
-
   if (config_filename != NULL) {
-    free(config_filename);
+    sys_free(config_filename);
   }
-  
+
   pthread_mutex_destroy(&log_lock);
 
   return EXIT_SUCCESS;

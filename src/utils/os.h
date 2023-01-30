@@ -1,23 +1,37 @@
 /**
  * @file
  * @author Alexandru Mereacre
- * @date 2020
+ * @date 2023
  * @copyright
- * SPDX-FileCopyrightText: © 2020 NQMCyber Ltd and edgesec contributors
+ * SPDX-FileCopyrightText: © 2023 NQMCyber Ltd and edgesec contributors
  * SPDX-License-Identifier: LGPL-3.0-or-later
- * @brief File containing the definition of the allocs functionalities.
+ * @brief File containing the definition of the os functionalities.
  */
-#ifndef ALLOCS_H
-#define ALLOCS_H
+
+#ifndef OS_H
+#define OS_H
 
 #include <stdarg.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
+#include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+
+#include "log.h"
+
+/* Common costant definitions */
+#define MAX_OS_PATH_LEN 4096
+#define MAX_WEB_PATH_LEN 2048
+#define MAX_RANDOM_UUID_LEN 37
+
+#define OS_HOST_NAME_MAX 64
+
+#ifndef ARRAY_SIZE
+#define ARRAY_SIZE(s) (sizeof(s) / sizeof(s[0]))
+#endif
 
 /**
  * @brief Allocate and zero memory
@@ -90,4 +104,18 @@ static inline void *sys_realloc_array(void *ptr, size_t nmemb, size_t size) {
  * @return char* The dublicate string pointer, NULL on error
  */
 char *sys_strdup(const char *s);
-#endif
+
+/**
+ * @brief Copy a string with size bound and NUL-termination
+ *
+ * This function matches in behavior with the strlcpy(3) function in OpenBSD.
+ *
+ * @param dest Destination string
+ * @param src Source string
+ * @param siz Size of the target buffer
+ * @return size_t Total length of the target string (length of src) (not
+ * including NUL-termination)
+ */
+size_t sys_strlcpy(char *dest, const char *src, size_t siz);
+
+#endif /* OS_H */

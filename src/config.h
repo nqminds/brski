@@ -10,30 +10,22 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "http/http.h"
+
 /**
- * @brief The App configuration structures. Used for configuring the networking
- * services.
+ * @brief The BRSKI configuration structures. Used for configuring the server/client/masa
  *
  */
-struct app_config {
-  bool test;
+struct brski_config {
+  struct http_config hconf;
 };
 
 /**
- * @brief Load the app configuration
+ * @brief Load the BRSKI configuration structure
  *
- * @param filename The app configuration file
+ * @param filename The BRSKI configuration file
  * @param config The configuration structure
  * @return 0 on success, -1 otherwise
  */
-int load_app_config(const char *filename, struct app_config *config);
-
-/**
- * @brief Frees the app configuration
- *
- * @param config The app configuration structure
- * @return true on success, false otherwise
- */
-void free_app_config(struct app_config *config);
-
+int load_brski_config(const char *filename, struct brski_config *config);
 #endif
