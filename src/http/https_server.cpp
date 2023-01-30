@@ -26,6 +26,7 @@ int https_start(struct https_server_context **context) {
     return -1;
   }
 
+  log_info("Starting the HTTPS server...");
 #ifdef WITH_CPPHTTPLIB_LIB
   return httplib_start(*context);
 #else

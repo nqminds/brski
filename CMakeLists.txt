@@ -71,6 +71,7 @@ set(
 
 option(BUILD_ONLY_DOCS "Build only docs" OFF)
 option(BUILD_OPENSSL3_LIB "Build OpenSSL 3" OFF)
+option(BUILD_LIB_MININI "Builds minIni library" ON)
 option(USE_CPPHTTPLIB_LIB "Build and use the cpp-httplib" OFF)
 
 cmake_dependent_option(CONFIGURE_COVERAGE "Configure for code coverage (requires lcov)" OFF BUILD_TESTING OFF)
@@ -163,6 +164,7 @@ set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH};${CMAKE_CURRENT_BINARY_DIR}/lib")
 # Include the libraries
 include(openssl3)
 include(httplib)
+include(minIni)
 
 # On Linux, creates a Threads::Threads target that points to pthread
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
