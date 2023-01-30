@@ -3,7 +3,7 @@
 #include <string.h>
 #include <pthread.h>
 
-#include "http/https_server.h"
+#include "registrar/registrar_server.h"
 
 extern "C" {
 #include "utils/os.h"
@@ -147,12 +147,12 @@ int main(int argc, char *argv[]) {
   }
 
   struct https_server_context *context = NULL;
-  if (https_start(&config.hconf, &context) < 0) {
+  if (registrar_start(&config.hconf, &context) < 0) {
     fprintf(stderr, "https_start fail");
     return EXIT_FAILURE;
   }
 
-  https_stop(context);
+  registrar_stop(context);
 
   if (config_filename != NULL) {
     sys_free(config_filename);

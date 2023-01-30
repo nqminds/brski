@@ -18,5 +18,5 @@ add_library(config config.cpp)
 target_link_libraries(config PRIVATE MinIni::minIni os log)
 
 add_executable(brski brski.cpp)
-target_link_libraries(brski PRIVATE https_server config log)
+target_link_libraries(brski PRIVATE registrar_server config log)
 target_include_directories(brski PRIVATE ${PROJECT_BINARY_DIR})
