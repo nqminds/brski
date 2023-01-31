@@ -14,8 +14,7 @@ extern "C" {
 #include "../utils/log.h"
 }
 
-#include "registrar_server.h"
-#include "registrar_routes.h"
+#include "registrar_api.h"
 #include "registrar.h"
 
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
