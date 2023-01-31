@@ -7,10 +7,6 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the registrar routes.
  */
-#include <vector>
-
-#include "../http/http.h"
-
 int post_brski_requestvoucher(void) {
   return 0;
 }
@@ -48,17 +44,5 @@ int post_est_serverkeygen(void) {
 }
 
 int get_est_csrattrs(void) {
-  return 0;
-}
-
-int setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
-  (void) routes;
-
-  routes.push_back({
-    .path = std::string("test"),
-    .method = HTTP_METHOD_POST,
-    .handle = post_brski_requestvoucher
-  });
-
   return 0;
 }
