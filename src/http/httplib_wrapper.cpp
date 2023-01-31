@@ -23,38 +23,50 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
     switch(route.method) {
       case HTTP_METHOD_GET:
         server->Get(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          route.handle();
-          res.set_content("Hello World!", "text/plain");
+          std::string content, content_type;
+          int status_code = route.handle(content, content_type);
+          res.set_content(content, content_type);
+          res.status = status_code;
         });
         break;
       case HTTP_METHOD_POST:
         server->Post(route.path, [&](const httplib::Request& req, httplib::Response& res) {
-          route.handle();
-          res.set_content("Hello World!", "text/plain");
+          std::string content, content_type;
+          int status_code = route.handle(content, content_type);
+          res.set_content(content, content_type);
+          res.status = status_code;
         });
         break;
       case HTTP_METHOD_PUT:
         server->Put(route.path, [&](const httplib::Request& req, httplib::Response& res) {
-          route.handle();
-          res.set_content("Hello World!", "text/plain");
+          std::string content, content_type;
+          int status_code = route.handle(content, content_type);
+          res.set_content(content, content_type);
+          res.status = status_code;
         });
         break;
       case HTTP_METHOD_DELETE:
         server->Delete(route.path, [&](const httplib::Request& req, httplib::Response& res) {
-          route.handle();
-          res.set_content("Hello World!", "text/plain");
+          std::string content, content_type;
+          int status_code = route.handle(content, content_type);
+          res.set_content(content, content_type);
+          res.status = status_code;
         });
         break;
       case HTTP_METHOD_OPTIONS:
         server->Options(route.path, [&](const httplib::Request& req, httplib::Response& res) {
-          route.handle();
-          res.set_content("Hello World!", "text/plain");
+          std::string content, content_type;
+          int status_code = route.handle(content, content_type);
+          res.set_content(content, content_type);
+          res.status = status_code;
         });
         break;
       case HTTP_METHOD_PATCH:
         server->Patch(route.path, [&](const httplib::Request& req, httplib::Response& res) {
-          route.handle();
-          res.set_content("Hello World!", "text/plain");
+          std::string content, content_type;
+          int status_code = route.handle(content, content_type);
+          res.set_content(content, content_type);
+          res.status = status_code;
         });
         break;
       case HTTP_METHOD_HEAD:

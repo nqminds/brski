@@ -7,56 +7,68 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the registrar routes.
  */
+#include <string>
+
 extern "C" {
 #include "../utils/log.h"
 }
 
-int post_brski_requestvoucher(void) {
-  log_trace("post_brski_requestvoucher");
-  return 0;
+int post_brski_requestvoucher(std::string &content, std::string &content_type) {
+  content.assign("post_brski_requestvoucher");
+  content_type.assign("text/plain");
+  return 200;
 }
 
-int post_brski_voucher_status(void) {
-  log_trace("post_brski_voucher_status");
-  return 0;
+int post_brski_voucher_status(std::string &content, std::string &content_type) {
+  content.assign("post_brski_voucher_status");
+  content_type.assign("text/plain");
+  return 200;
 }
 
-int post_brski_requestauditlog(void) {
-  log_trace("post_brski_requestauditlog");
-  return 0;
+int post_brski_requestauditlog(std::string &content, std::string &content_type) {
+  content.assign("post_brski_requestauditlog");
+  content_type.assign("text/plain");
+  return 200;
 }
 
-int post_brski_enrollstatus(void) {
-  log_trace("post_brski_enrollstatus");
-  return 0;
+int post_brski_enrollstatus(std::string &content, std::string &content_type) {
+  content.assign("post_brski_enrollstatus");
+  content_type.assign("text/plain");
+  return 200;
 }
 
-int get_est_cacerts(void) {
-  log_trace("get_est_cacerts");
-  return 0;
+int get_est_cacerts(std::string &content, std::string &content_type) {
+  content.assign("get_est_cacerts");
+  content_type.assign("text/plain");
+  return 503;
 }
 
-int post_est_simpleenroll(void) {
-  log_trace("post_est_simpleenroll");
-  return 0;
+int post_est_simpleenroll(std::string &content, std::string &content_type) {
+  content.assign("post_est_simpleenroll");
+  content_type.assign("text/plain");
+  return 503;
 }
 
-int post_est_simplereenroll(void) {
-  log_trace("post_est_simplereenroll");
-  return 0;
+int post_est_simplereenroll(std::string &content, std::string &content_type) {
+  content.assign("post_est_simplereenroll");
+  content_type.assign("text/plain");
+  return 503;
 }
 
-int post_est_fullcmc(void) {
-  log_trace("post_est_fullcmc");
-  return 0;
+int post_est_fullcmc(std::string &content, std::string &content_type) {
+  content.assign("post_est_fullcmc");
+  content_type.assign("text/plain");
+  return 503;
 }
 
-int post_est_serverkeygen(void) {
-  log_trace("post_est_serverkeygen");
-  return 0;
+int post_est_serverkeygen(std::string &content, std::string &content_type) {
+  content.assign("post_est_serverkeygen");
+  content_type.assign("text/plain");
+  return 503;
 }
 
-int get_est_csrattrs(void) {
-  log_trace("get_est_csrattrs");
-  return 0;
+int get_est_csrattrs(std::string &content, std::string &content_type) {
+  content.assign("get_est_csrattrs");
+  content_type.assign("text/plain");
+  return 503;
 }

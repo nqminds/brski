@@ -33,7 +33,7 @@ enum HTTP_METHOD {
   HTTP_METHOD_PRI
 };
 
-typedef std::function<int(void)> RouteHandle;
+typedef std::function<int(std::string &content, std::string &content_type)> RouteHandle;
 
 struct RouteTuple {
   std::string path;
