@@ -18,6 +18,8 @@ extern "C" {
 #include "../utils/os.h"
 }
 
+#define HTTP_ERROR_REPLY "Router error"
+
 enum HTTP_METHOD {
   HTTP_METHOD_GET = 0,
   HTTP_METHOD_HEAD,

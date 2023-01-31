@@ -1,5 +1,6 @@
 {
     "files.associations": {
-        "http.h": "c"
+        "http.h": "c",
+        "unordered_map": "cpp"
     }
 }
