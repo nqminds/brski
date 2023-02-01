@@ -146,7 +146,7 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  struct https_server_context *context = NULL;
+  struct RegistrarContext *context = NULL;
   if (registrar_start(&config.hconf, &context) < 0) {
     fprintf(stderr, "https_start fail");
     return EXIT_FAILURE;

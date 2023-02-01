@@ -38,17 +38,14 @@ typedef std::map<std::string, std::string> RequestHeader;
 typedef std::map<std::string, std::string> ResponseHeader;
 typedef std::function<int(RequestHeader &request_header,
                           ResponseHeader &response_header,
-                          std::string &response)> RouteHandle;
+                          std::string &response,
+                          void *user_ctx)> RouteHandle;
 
 struct RouteTuple {
   std::string path;
   enum HTTP_METHOD method;
   RouteHandle handle;
 };
-
-struct https_server_context {
-  void *server;
-};  
 
 struct http_config {
   char bindAddress[MAX_WEB_PATH_LEN];

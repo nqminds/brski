@@ -19,25 +19,15 @@ extern "C" {
 #include "httplib_wrapper.h"
 #endif
 
-void https_free_context(struct https_server_context *context) {
-  if (context != nullptr) {
-    delete context;
-  }
-}
-
 int https_start(struct http_config *config,
                 std::vector<struct RouteTuple> &routes,
-                struct https_server_context **context) {
-  try {
-    *context = new https_server_context();
-  } catch(...) {
-    log_error("failed to allocate https_server_context");
-    return -1;
-  }
+                void *user_ctx,
+                void **srv_ctx) {
+  *srv_ctx = nullptr;
 
   log_info("Starting the HTTPS server at %s:%d", config->bindAddress, config->port);
 #ifdef WITH_CPPHTTPLIB_LIB
-  return httplib_start(config, routes, *context);
+  return httplib_start(config, routes, user_ctx, srv_ctx);
 #else
   log_error("No https server defined");
   https_free_context(*context);
@@ -45,10 +35,8 @@ int https_start(struct http_config *config,
 #endif
 }
 
-void https_stop(struct https_server_context *context) {
+void https_stop(void *srv_ctx) {
 #ifdef WITH_CPPHTTPLIB_LIB
-  httplib_stop(context);
+  httplib_stop(srv_ctx);
 #endif
-
-  https_free_context(context);
 }

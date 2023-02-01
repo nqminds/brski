@@ -13,19 +13,23 @@
 
 #include "../http/http.h"
 
+struct RegistrarContext {
+  void *srv_ctx;
+};
+
 /**
  * @brief Starts the registrar server
  *
  * @param[in] confic The https server config
- * @param[out] context The https server context
+ * @param[out] context The registrar context
  * @return int 0 on success, -1 on failure
  */
-int registrar_start(struct http_config *config, struct https_server_context **context);
+int registrar_start(struct http_config *config, struct RegistrarContext **context);
 
 /**
  * @brief Stops the registrar server
  *
- * @param[in] context The https server context structure
+ * @param[in] context The registrar context structure
  */
-void registrar_stop(struct https_server_context *context);
+void registrar_stop(struct RegistrarContext *context);
 #endif

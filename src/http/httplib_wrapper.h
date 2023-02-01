@@ -18,17 +18,19 @@
  *
  * @param[in] config The https server config
  * @param[in] routes The https server routes
+ * @param[in] user_ctx The user context
  * @param[out] context The https server context
  * @return int 0 on success, -1 on failure
  */
 int httplib_start(struct http_config *config,
                   std::vector<struct RouteTuple> &routes,
-                  struct https_server_context *context);
+                  void *user_ctx,
+                  void **srv_ctx);
 
 /**
  * @brief Stops the http library server
  *
  * @param[in] context The https server context structure
  */
-void httplib_stop(struct https_server_context *context);
+void httplib_stop(void *srv_ctx);
 #endif

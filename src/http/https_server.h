@@ -19,17 +19,19 @@
  *
  * @param[in] confic The https server config
  * @param[in] routes The https server routes
- * @param[out] context The https server context
+ * @param[in] user_ctx The user context
+ * @param[out] srv_ctx The https server context
  * @return int 0 on success, -1 on failure
  */
 int https_start(struct http_config *config,
                 std::vector<struct RouteTuple> &routes,
-                struct https_server_context **context);
+                void *user_ctx,
+                void **srv_ctx);
 
 /**
  * @brief Stops the https server
  *
- * @param[in] context The supervisor context structure
+ * @param[in] context The server context
  */
-void https_stop(struct https_server_context *context);
+void https_stop(void *srv_ctx);
 #endif

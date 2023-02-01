@@ -41,7 +41,9 @@ void set_response(std::string &response, ResponseHeader &response_header, int st
   res.status = status_code;
 }
 
-int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTuple> &routes) {
+int httplib_register_routes(httplib::Server *server,
+                            std::vector<struct RouteTuple> &routes,
+                            void *user_ctx) {
   for (auto route : routes) {
     log_debug("Registering route=%s", route.path.c_str());
     switch(route.method) {
@@ -52,7 +54,7 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response);
+          int status_code = route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -62,7 +64,8 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
           std::string response;
           ResponseHeader response_header;
 
-          int status_code = route.handle(request_header, response_header, response);
+          get_request_header(req, request_header);
+          int status_code = route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -72,7 +75,8 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
           std::string response;
           ResponseHeader response_header;
 
-          int status_code = route.handle(request_header, response_header, response);
+          get_request_header(req, request_header);
+          int status_code = route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -82,7 +86,8 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
           std::string response;
           ResponseHeader response_header;
 
-          int status_code = route.handle(request_header, response_header, response);
+          get_request_header(req, request_header);
+          int status_code = route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -92,7 +97,8 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
           std::string response;
           ResponseHeader response_header;
 
-          int status_code = route.handle(request_header, response_header, response);
+          get_request_header(req, request_header);
+          int status_code = route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -102,7 +108,8 @@ int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTup
           std::string response;
           ResponseHeader response_header;
 
-          int status_code = route.handle(request_header, response_header, response);
+          get_request_header(req, request_header);
+          int status_code = route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -143,13 +150,20 @@ void set_exception_handler(httplib::Server *server) {
   });
 }
 
+void httplib_stop(void *srv_ctx) {
+  if (srv_ctx != nullptr) {
+    // httplib::SSLServer *server = static_cast<httplib::SSLServer *>(context->server);
+    httplib::Server *server = static_cast<httplib::Server *>(srv_ctx);
+    server->stop();
+    delete server;
+  }
+}
+
 int httplib_start(struct http_config *config,
                   std::vector<struct RouteTuple> &routes,
-                  struct https_server_context *context) {
-  if (context == nullptr) {
-    log_error("context param is NULL");
-    return -1;
-  }
+                  void *user_ctx,
+                  void **srv_ctx) {
+  *srv_ctx = nullptr;
 
   try {
     const char *cert_path = "";
@@ -157,7 +171,7 @@ int httplib_start(struct http_config *config,
     // httplib::SSLServer *server = new httplib::SSLServer(cert_path, private_key_path);
     httplib::Server *server = new httplib::Server();
 
-    if (httplib_register_routes(server, routes) < 0) {
+    if (httplib_register_routes(server, routes, user_ctx) < 0) {
       log_error("httplib_register_routes fail");
       delete server;
       return -1;
@@ -166,21 +180,13 @@ int httplib_start(struct http_config *config,
     set_error_handler(server);
     set_exception_handler(server);
 
-    context->server = static_cast<void*>(server);
+    *srv_ctx = static_cast<void*>(server);
     server->listen(config->bindAddress, config->port);
   } catch (...) {
     log_error("httplib::SSLServer() fail");
+    httplib_stop(srv_ctx);
     return -1;
   }
 
   return 0;
-}
-
-void httplib_stop(struct https_server_context *context) {
-  if (context != nullptr) {
-    if (context->server != nullptr) {
-      // httplib::SSLServer *server = static_cast<httplib::SSLServer *>(context->server);
-      httplib::Server *server = static_cast<httplib::Server *>(context->server);
-    }
-  }
 }

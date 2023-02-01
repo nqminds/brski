@@ -14,6 +14,7 @@ extern "C" {
 #include "../utils/log.h"
 }
 
+#include "registrar_server.h"
 #include "registrar_api.h"
 #include "registrar.h"
 
@@ -79,14 +80,26 @@ void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
   });
 }
 
-int registrar_start(struct http_config *config, struct https_server_context **context) {
+int registrar_start(struct http_config *config, struct RegistrarContext **context) {
   std::vector<struct RouteTuple> routes;
+
+  *context = nullptr;
+
+  try {
+    *context = new RegistrarContext();
+  } catch (...) {
+    log_error("failed to allocate RegistrarContext");
+    return -1;
+  }
 
   setup_registrar_routes(routes);
 
-  return https_start(config, routes, context);
+  return https_start(config, routes, static_cast<void *>(*context), &(*context)->srv_ctx);
 }
 
-void registrar_stop(struct https_server_context *context) {
-  https_stop(context);
+void registrar_stop(struct RegistrarContext *context) {
+  if (context != nullptr) {
+    https_stop(context->srv_ctx);
+    delete context;
+  }
 }
