@@ -15,62 +15,82 @@ extern "C" {
 #include "../utils/log.h"
 }
 
-int post_brski_requestvoucher(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_brski_requestvoucher");
-  // reply_header.assign("text/plain");
+int post_brski_requestvoucher(RequestHeader &request_header,
+                              ResponseHeader &response_header,
+                              std::string &response) {
+  response.assign("post_brski_requestvoucher");
+  response_header["Content-Type"] = "text/plain";
   return 200;
 }
 
-int post_brski_voucher_status(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_brski_voucher_status");
-  // reply_header.assign("text/plain");
+int post_brski_voucher_status(RequestHeader &request_header,
+                              ResponseHeader &response_header,
+                              std::string &response) {
+  response.assign("post_brski_voucher_status");
+  response_header["Content-Type"] = "text/plain";
   return 200;
 }
 
-int post_brski_requestauditlog(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_brski_requestauditlog");
-  // reply_header.assign("text/plain");
+int post_brski_requestauditlog(RequestHeader &request_header,
+                              ResponseHeader &response_header,
+                              std::string &response) {
+  response.assign("post_brski_requestauditlog");
+  response_header["Content-Type"] = "text/plain";
   return 200;
 }
 
-int post_brski_enrollstatus(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_brski_enrollstatus");
-  // reply_header.assign("text/plain");
+int post_brski_enrollstatus(RequestHeader &request_header,
+                            ResponseHeader &response_header,
+                            std::string &response) {
+  response.assign("post_brski_enrollstatus");
+  response_header["Content-Type"] = "text/plain";
   return 200;
 }
 
-int get_est_cacerts(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("get_est_cacerts");
-  // reply_header.assign("text/plain");
+int get_est_cacerts(RequestHeader &request_header,
+                    ResponseHeader &response_header,
+                    std::string &response) {
+  response.assign("get_est_cacerts");
+  response_header["Content-Type"] = "text/plain";
   return 503;
 }
 
-int post_est_simpleenroll(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_est_simpleenroll");
-  // reply_header.assign("text/plain");
+int post_est_simpleenroll(RequestHeader &request_header,
+                          ResponseHeader &response_header,
+                          std::string &response) {
+  response.assign("post_est_simpleenroll");
+  response_header["Content-Type"] = "text/plain";
   return 503;
 }
 
-int post_est_simplereenroll(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_est_simplereenroll");
-  // reply_header.assign("text/plain");
+int post_est_simplereenroll(RequestHeader &request_header,
+                            ResponseHeader &response_header,
+                            std::string &response) {
+  response.assign("post_est_simplereenroll");
+  response_header["Content-Type"] = "text/plain";
   return 503;
 }
 
-int post_est_fullcmc(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_est_fullcmc");
-  // reply_header.assign("text/plain");
+int post_est_fullcmc(RequestHeader &request_header,
+                     ResponseHeader &response_header,
+                     std::string &response) {
+  response.assign("post_est_fullcmc");
+  response_header["Content-Type"] = "text/plain";
   return 503;
 }
 
-int post_est_serverkeygen(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("post_est_serverkeygen");
-  // reply_header.assign("text/plain");
+int post_est_serverkeygen(RequestHeader &request_header,
+                          ResponseHeader &response_header,
+                          std::string &response) {
+  response.assign("post_est_serverkeygen");
+  response_header["Content-Type"] = "text/plain";
   return 503;
 }
 
-int get_est_csrattrs(ReplyHeader &reply_header, std::string &reply) {
-  reply.assign("get_est_csrattrs");
-  // reply_header.assign("text/plain");
+int get_est_csrattrs(RequestHeader &request_header,
+                     ResponseHeader &response_header,
+                     std::string &response) {
+  response.assign("get_est_csrattrs");
+  response_header["Content-Type"] = "text/plain";
   return 503;
 }

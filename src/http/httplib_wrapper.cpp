@@ -17,62 +17,93 @@ extern "C" {
 
 #include "http.h"
 
+void get_request_header(const httplib::Request& req, RequestHeader &request_header) {
+  for (auto iter : req.headers) {
+    try {
+      auto value = request_header.at(iter.first);
+      request_header[iter.first] = value + ", " + iter.second;
+    } catch (std::out_of_range &e) {
+      request_header[iter.first] = iter.second;
+    }
+  }
+}
+
+void set_response_header(httplib::Response& res, ResponseHeader &response_header) {
+  for (auto iter : response_header) {
+    res.set_header(iter.first, iter.second);
+  }
+}
+
+void set_response(std::string &response, ResponseHeader &response_header, int status_code, httplib::Response& res) {
+  set_response_header(res, response_header);
+  std::string content_type = response_header["Content-Type"];          
+  res.set_content(response, content_type);
+  res.status = status_code;
+}
+
 int httplib_register_routes(httplib::Server *server, std::vector<struct RouteTuple> &routes) {
   for (auto route : routes) {
     log_debug("Registering route=%s", route.path.c_str());
     switch(route.method) {
       case HTTP_METHOD_GET:
         server->Get(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          std::string reply;
-          ReplyHeader reply_header;
-          int status_code = route.handle(reply_header, reply);
-          // res.set_content(reply, reply_header);
-          res.status = status_code;
+          RequestHeader request_header;
+          std::string response;
+          ResponseHeader response_header;
+
+          get_request_header(req, request_header);
+          int status_code = route.handle(request_header, response_header, response);
+          set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_POST:
         server->Post(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          std::string reply;
-          ReplyHeader reply_header;
-          int status_code = route.handle(reply_header, reply);
-          // res.set_content(reply, reply_header);
-          res.status = status_code;
+          RequestHeader request_header;
+          std::string response;
+          ResponseHeader response_header;
+
+          int status_code = route.handle(request_header, response_header, response);
+          set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PUT:
         server->Put(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          std::string reply;
-          ReplyHeader reply_header;
-          int status_code = route.handle(reply_header, reply);
-          // res.set_content(reply, reply_header);
-          res.status = status_code;
+          RequestHeader request_header;
+          std::string response;
+          ResponseHeader response_header;
+
+          int status_code = route.handle(request_header, response_header, response);
+          set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_DELETE:
         server->Delete(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          std::string reply;
-          ReplyHeader reply_header;
-          int status_code = route.handle(reply_header, reply);
-          // res.set_content(reply, reply_header);
-          res.status = status_code;
+          RequestHeader request_header;
+          std::string response;
+          ResponseHeader response_header;
+
+          int status_code = route.handle(request_header, response_header, response);
+          set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_OPTIONS:
         server->Options(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          std::string reply;
-          ReplyHeader reply_header;
-          int status_code = route.handle(reply_header, reply);
-          // res.set_content(reply, reply_header);
-          res.status = status_code;
+          RequestHeader request_header;
+          std::string response;
+          ResponseHeader response_header;
+
+          int status_code = route.handle(request_header, response_header, response);
+          set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PATCH:
         server->Patch(route.path, [=](const httplib::Request& req, httplib::Response& res) {
-          std::string reply;
-          ReplyHeader reply_header;
-          int status_code = route.handle(reply_header, reply);
-          // res.set_content(reply, reply_header);
-          res.status = status_code;
+          RequestHeader request_header;
+          std::string response;
+          ResponseHeader response_header;
+
+          int status_code = route.handle(request_header, response_header, response);
+          set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_HEAD:

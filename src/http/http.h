@@ -34,8 +34,11 @@ enum HTTP_METHOD {
   HTTP_METHOD_PRI
 };
 
-typedef std::map<std::string, std::string> ReplyHeader;
-typedef std::function<int(ReplyHeader &reply_header, std::string &reply)> RouteHandle;
+typedef std::map<std::string, std::string> RequestHeader;
+typedef std::map<std::string, std::string> ResponseHeader;
+typedef std::function<int(RequestHeader &request_header,
+                          ResponseHeader &response_header,
+                          std::string &response)> RouteHandle;
 
 struct RouteTuple {
   std::string path;
