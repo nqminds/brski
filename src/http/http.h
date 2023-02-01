@@ -11,6 +11,7 @@
 #ifndef HTTP_H
 #define HTTP_H
 
+#include <map>
 #include <string>
 #include <functional>
 
@@ -33,7 +34,8 @@ enum HTTP_METHOD {
   HTTP_METHOD_PRI
 };
 
-typedef std::function<int(std::string &content, std::string &content_type)> RouteHandle;
+typedef std::map<std::string, std::string> ReplyHeader;
+typedef std::function<int(ReplyHeader &reply_header, std::string &reply)> RouteHandle;
 
 struct RouteTuple {
   std::string path;

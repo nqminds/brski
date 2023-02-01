@@ -20,69 +20,69 @@
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_requestvoucher(std::string &content, std::string &content_type);
+int post_brski_requestvoucher(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief BRSKI voucher status handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_voucher_status(std::string &content, std::string &content_type);
+int post_brski_voucher_status(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief BRSKI request audit log handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_requestauditlog(std::string &content, std::string &content_type);
+int post_brski_requestauditlog(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief BRSKI enroll status handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_enrollstatus(std::string &content, std::string &content_type);
+int post_brski_enrollstatus(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief EST CA certs handler
  *
  * @return int 0 on success, -1 on failure
  */
-int get_est_cacerts(std::string &content, std::string &content_type);
+int get_est_cacerts(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief EST simple enroll handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_simpleenroll(std::string &content, std::string &content_type);
+int post_est_simpleenroll(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief EST simple reenroll handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_simplereenroll(std::string &content, std::string &content_type);
+int post_est_simplereenroll(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief EST full cmc handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_fullcmc(std::string &content, std::string &content_type);
+int post_est_fullcmc(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief EST server keygen handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_serverkeygen(std::string &content, std::string &content_type);
+int post_est_serverkeygen(ReplyHeader &reply_header, std::string &reply);
 
 /**
  * @brief EST csr attrs handler
  *
  * @return int 0 on success, -1 on failure
  */
-int get_est_csrattrs(std::string &content, std::string &content_type);
+int get_est_csrattrs(ReplyHeader &reply_header, std::string &reply);
 
 #endif
