@@ -40,6 +40,19 @@ static void test_set_attr_bool_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_set_attr_time_voucher(void **state) {
+  (void)state;
+  struct Voucher *voucher = init_voucher();
+
+  assert_int_equal(set_attr_time_voucher(NULL, NULL, true), -1);
+  assert_int_equal(set_attr_time_voucher(voucher, "some-attribute", true), -1);
+  assert_int_equal(set_attr_time_voucher(voucher, CREATED_ON_NAME, 12345), 0);
+  assert_int_equal(set_attr_time_voucher(voucher, EXPIRES_ON_NAME, 12345), 0);
+  assert_int_equal(set_attr_time_voucher(voucher, LAST_RENEWAL_DATE_NAME, 12345), 0);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -48,7 +61,9 @@ int main(int argc, char *argv[]) {
 
   const struct CMUnitTest tests[] = {
       cmocka_unit_test(test_init_voucher),
-      cmocka_unit_test(test_set_attr_bool_voucher)};
+      cmocka_unit_test(test_set_attr_bool_voucher),
+      cmocka_unit_test(test_set_attr_time_voucher)
+  };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
