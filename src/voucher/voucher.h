@@ -224,4 +224,15 @@ void free_voucher(struct Voucher *voucher);
  * @return 0 on success, -1 on failure
  */
 int set_attr_bool_voucher(struct Voucher *voucher, char *name, bool value);
+
+/**
+ * @brief Sets the value for a voucher time attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] name The time attribute name
+ * @param[in] value The time attribute value
+ * @return 0 on success, -1 on failure
+ */
+int set_attr_time_voucher(struct Voucher *voucher, char *name, time_t value);
+
 #endif
