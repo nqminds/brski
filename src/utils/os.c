@@ -69,3 +69,12 @@ size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
     return strlen(src);
   }
 }
+
+size_t sys_strnlen_s(char *str, size_t max_len) {
+  char *end = (char *)memchr(str, '\0', max_len);
+
+  if (end == NULL)
+    return max_len;
+
+  return end - str;
+}

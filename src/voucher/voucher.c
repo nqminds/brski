@@ -15,6 +15,7 @@
 #include "voucher.h"
 
 #define MAX_ATTRIBUTE_SIZE 64
+#define MAX_SERIAL_NUMBER_SIZE 128
 
 struct Voucher *init_voucher(void) {
   struct Voucher *voucher = sys_zalloc(sizeof(struct Voucher));
@@ -159,4 +160,43 @@ int set_attr_enum_voucher(struct Voucher *voucher, char *name, int value) {
   }
 
   return 0;  
+}
+
+int set_attr_str_voucher(struct Voucher *voucher, char *name, char *value) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return -1;
+  }
+
+  if (name == NULL) {
+    log_error("name param is NULL");
+    return -1;
+  }
+
+  if (value == NULL) {
+    log_error("value param is NULL");
+    return -1;
+  }
+
+  if (check_attr_valid(name) < 0) {
+    log_error("Unknown attribute");
+    return -1;
+  }
+
+  if (strcmp(name, SERIAL_NUMBER_NAME) == 0) {
+    if (sys_strnlen_s(value, MAX_SERIAL_NUMBER_SIZE) < MAX_SERIAL_NUMBER_SIZE) {
+      if ((voucher->serial_number = sys_strdup(value)) == NULL) {
+        log_errno("sys_strdup");
+        return -1;
+      }
+    } else {
+      log_error("Attribute value exceeds max size");
+      return -1;
+    }
+  } else {
+    log_error("Wrong attribute name");
+    return -1;
+  }
+
+  return 0;
 }

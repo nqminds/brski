@@ -245,4 +245,14 @@ int set_attr_time_voucher(struct Voucher *voucher, char *name, time_t value);
  */
 int set_attr_enum_voucher(struct Voucher *voucher, char *name, int value);
 
+/**
+ * @brief Sets the value for a voucher string attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] name The string attribute name
+ * @param[in] value The string attribute value
+ * @return 0 on success, -1 on failure
+ */
+int set_attr_str_voucher(struct Voucher *voucher, char *name, char *value);
+
 #endif
