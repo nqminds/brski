@@ -7,10 +7,16 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the voucher structure.
  */
+#include <string.h>
+
 #include <jsmn.h>
 
 #include "voucher.h"
 #include "../utils/os.h"
+
+#define MAX_ATTRIBUTE_SIZE  64
+
+#define DOMAIN_CERT_REVOCATION_CHECKS  "domain-cert-revocation-checks"
 
 struct Voucher* init_voucher(void) {
   struct Voucher* voucher = sys_zalloc(sizeof(struct Voucher));
@@ -43,4 +49,24 @@ void free_voucher(struct Voucher* voucher) {
     free_binary_array(&voucher->nonce);
     sys_free(voucher);
   }
+}
+
+int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value) {
+  if (voucher == NULL) {
+    return 0;
+  }
+
+  if (name == NULL) {
+    log_error("name param is NULL");
+    return -1;
+  }
+
+  if (strncmp(name, DOMAIN_CERT_REVOCATION_CHECKS, MAX_ATTRIBUTE_SIZE) == 0) {
+    voucher->domain_cert_revocation_checks = value;
+  } else {
+    log_error("Wrong attribute name");
+    return -1;
+  }
+
+  return 0;
 }

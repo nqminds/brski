@@ -14,6 +14,25 @@
 #include <stdint.h>
 #include <stdbool.h>
 
+/**
+ * 
+ * module: ietf-voucher
+ *
+ *   yang-data voucher-artifact:
+ *       +---- voucher
+ *          +---- created-on                       yang:date-and-time
+ *          +---- expires-on?                      yang:date-and-time
+ *          +---- assertion                        enumeration
+ *          +---- serial-number                    string
+ *          +---- idevid-issuer?                   binary
+ *          +---- pinned-domain-cert               binary
+ *          +---- domain-cert-revocation-checks?   boolean
+ *          +---- nonce?                           binary
+ *          +---- last-renewal-date?               yang:date-and-time
+ *
+*/
+
+
 enum VoucherAssertions {
   /**
    * Indicates that the ownership has been positively
@@ -187,4 +206,14 @@ struct Voucher* init_voucher(void);
  * @param[in] voucher The allocated voucher structure
  */
 void free_voucher(struct Voucher* voucher);
+
+/**
+ * @brief Sets the value for a voucher bool attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] name The bool attribute name
+ * @param[in] value The bool attribute value
+ * @return 0 on success, -1 on failure
+ */
+int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value);
 #endif
