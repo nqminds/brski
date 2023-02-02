@@ -10,3 +10,5 @@ string(REPLACE "-flto=auto" "" CMAKE_C_FLAGS "${CMAKE_C_FLAGS}") # might be set 
 include_directories (
   "${PROJECT_SOURCE_DIR}/src"
 )
+
+add_subdirectory(voucher)

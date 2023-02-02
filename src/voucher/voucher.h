@@ -174,4 +174,6 @@ struct Voucher {
   time_t last_renewal_date;
 };
 
+struct Voucher* init_voucher(void);
+void free_voucher(struct Voucher*);
 #endif
