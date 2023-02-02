@@ -15,6 +15,7 @@
 #include <unistd.h>
 
 #include "utils/log.h"
+
 static void test_init_voucher(void **state) {
   (void)state;
 }

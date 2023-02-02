@@ -174,6 +174,17 @@ struct Voucher {
   time_t last_renewal_date;
 };
 
+/**
+ * @brief Initialises an empty voucher structure
+ *
+ * @return struct Voucher* pointer to allocated voucher, NULL on failure
+ */
 struct Voucher* init_voucher(void);
-void free_voucher(struct Voucher*);
+
+/**
+ * @brief Frees an allocated voucher structure
+ *
+ * @param[in] voucher The allocated voucher structure
+ */
+void free_voucher(struct Voucher* voucher);
 #endif
