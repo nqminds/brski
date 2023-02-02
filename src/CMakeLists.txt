@@ -13,6 +13,7 @@ add_compile_options(
 add_subdirectory(utils)
 add_subdirectory(http)
 add_subdirectory(registrar)
+add_subdirectory(voucher)
 
 add_library(config config.cpp)
 target_link_libraries(config PRIVATE MinIni::minIni os log)
