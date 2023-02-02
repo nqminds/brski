@@ -12,11 +12,11 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <minIni.h>
+#include <string.h>
 #include <unistd.h>
 
 #include "config.h"
@@ -32,19 +32,19 @@ int load_registrar_config(const char *filename, struct http_config *hconf) {
   try {
     char *key = new char[INI_BUFFERSIZE];
 
-    ini_gets("registrar", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE, filename);
+    ini_gets("registrar", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE,
+             filename);
     sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
-    delete [] key;
+    delete[] key;
 
     hconf->port = (unsigned int)ini_getl("registrar", "port", 0, filename);
-  } catch(...) {
+  } catch (...) {
     log_error("failed to allocate key");
     return -1;
   }
 
   return 0;
 }
-
 
 int load_brski_config(const char *filename, struct brski_config *config) {
   FILE *fp = fopen(filename, "rb");

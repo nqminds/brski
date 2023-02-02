@@ -8,24 +8,24 @@
  * @brief File containing the implementation of the os functionalities.
  */
 
-#include <string.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <fcntl.h>
 
 #include "log.h"
 #include "os.h"

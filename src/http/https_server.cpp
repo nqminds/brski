@@ -7,8 +7,8 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the https server.
  */
-#include "http.h"
 #include "https_server.h"
+#include "http.h"
 
 extern "C" {
 #include "../utils/log.h"
@@ -20,12 +20,12 @@ extern "C" {
 #endif
 
 int https_start(struct http_config *config,
-                std::vector<struct RouteTuple> &routes,
-                void *user_ctx,
+                std::vector<struct RouteTuple> &routes, void *user_ctx,
                 void **srv_ctx) {
   *srv_ctx = nullptr;
 
-  log_info("Starting the HTTPS server at %s:%d", config->bindAddress, config->port);
+  log_info("Starting the HTTPS server at %s:%d", config->bindAddress,
+           config->port);
 #ifdef WITH_CPPHTTPLIB_LIB
   return httplib_start(config, routes, user_ctx, srv_ctx);
 #else

@@ -17,7 +17,8 @@ extern "C" {
 
 #include "http.h"
 
-void get_request_header(const httplib::Request& req, RequestHeader &request_header) {
+void get_request_header(const httplib::Request &req,
+                        RequestHeader &request_header) {
   for (auto iter : req.headers) {
     try {
       auto value = request_header.at(iter.first);
@@ -28,15 +29,17 @@ void get_request_header(const httplib::Request& req, RequestHeader &request_head
   }
 }
 
-void set_response_header(httplib::Response& res, ResponseHeader &response_header) {
+void set_response_header(httplib::Response &res,
+                         ResponseHeader &response_header) {
   for (auto iter : response_header) {
     res.set_header(iter.first, iter.second);
   }
 }
 
-void set_response(std::string &response, ResponseHeader &response_header, int status_code, httplib::Response& res) {
+void set_response(std::string &response, ResponseHeader &response_header,
+                  int status_code, httplib::Response &res) {
   set_response_header(res, response_header);
-  std::string content_type = response_header["Content-Type"];          
+  std::string content_type = response_header["Content-Type"];
   res.set_content(response, content_type);
   res.status = status_code;
 }
@@ -46,70 +49,82 @@ int httplib_register_routes(httplib::Server *server,
                             void *user_ctx) {
   for (auto route : routes) {
     log_debug("Registering route=%s", route.path.c_str());
-    switch(route.method) {
+    switch (route.method) {
       case HTTP_METHOD_GET:
-        server->Get(route.path, [=](const httplib::Request& req, httplib::Response& res) {
+        server->Get(route.path, [=](const httplib::Request &req,
+                                    httplib::Response &res) {
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response, user_ctx);
+          int status_code =
+              route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_POST:
-        server->Post(route.path, [=](const httplib::Request& req, httplib::Response& res) {
+        server->Post(route.path, [=](const httplib::Request &req,
+                                     httplib::Response &res) {
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response, user_ctx);
+          int status_code =
+              route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PUT:
-        server->Put(route.path, [=](const httplib::Request& req, httplib::Response& res) {
+        server->Put(route.path, [=](const httplib::Request &req,
+                                    httplib::Response &res) {
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response, user_ctx);
+          int status_code =
+              route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_DELETE:
-        server->Delete(route.path, [=](const httplib::Request& req, httplib::Response& res) {
+        server->Delete(route.path, [=](const httplib::Request &req,
+                                       httplib::Response &res) {
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response, user_ctx);
+          int status_code =
+              route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_OPTIONS:
-        server->Options(route.path, [=](const httplib::Request& req, httplib::Response& res) {
+        server->Options(route.path, [=](const httplib::Request &req,
+                                        httplib::Response &res) {
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response, user_ctx);
+          int status_code =
+              route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PATCH:
-        server->Patch(route.path, [=](const httplib::Request& req, httplib::Response& res) {
+        server->Patch(route.path, [=](const httplib::Request &req,
+                                      httplib::Response &res) {
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, response_header, response, user_ctx);
+          int status_code =
+              route.handle(request_header, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -128,15 +143,18 @@ int httplib_register_routes(httplib::Server *server,
 }
 
 void set_error_handler(httplib::Server *server) {
-  server->set_error_handler([](const httplib::Request& req, httplib::Response& res) {
-    char buf[BUFSIZ];
-    snprintf(buf, sizeof(buf), HTTP_ERROR_REPLY);
-    res.set_content(buf, "text/plain");
-  });
+  server->set_error_handler(
+      [](const httplib::Request &req, httplib::Response &res) {
+        char buf[BUFSIZ];
+        snprintf(buf, sizeof(buf), HTTP_ERROR_REPLY);
+        res.set_content(buf, "text/plain");
+      });
 }
 
 void set_exception_handler(httplib::Server *server) {
-  server->set_exception_handler([](const httplib::Request& req, httplib::Response& res, std::exception_ptr ep) {
+  server->set_exception_handler([](const httplib::Request &req,
+                                   httplib::Response &res,
+                                   std::exception_ptr ep) {
     char buf[BUFSIZ];
     try {
       std::rethrow_exception(ep);
@@ -152,7 +170,8 @@ void set_exception_handler(httplib::Server *server) {
 
 void httplib_stop(void *srv_ctx) {
   if (srv_ctx != nullptr) {
-    // httplib::SSLServer *server = static_cast<httplib::SSLServer *>(context->server);
+    // httplib::SSLServer *server = static_cast<httplib::SSLServer
+    // *>(context->server);
     httplib::Server *server = static_cast<httplib::Server *>(srv_ctx);
     server->stop();
     delete server;
@@ -160,15 +179,15 @@ void httplib_stop(void *srv_ctx) {
 }
 
 int httplib_start(struct http_config *config,
-                  std::vector<struct RouteTuple> &routes,
-                  void *user_ctx,
+                  std::vector<struct RouteTuple> &routes, void *user_ctx,
                   void **srv_ctx) {
   *srv_ctx = nullptr;
 
   try {
     const char *cert_path = "";
     const char *private_key_path = "";
-    // httplib::SSLServer *server = new httplib::SSLServer(cert_path, private_key_path);
+    // httplib::SSLServer *server = new httplib::SSLServer(cert_path,
+    // private_key_path);
     httplib::Server *server = new httplib::Server();
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
@@ -180,7 +199,7 @@ int httplib_start(struct http_config *config,
     set_error_handler(server);
     set_exception_handler(server);
 
-    *srv_ctx = static_cast<void*>(server);
+    *srv_ctx = static_cast<void *>(server);
     server->listen(config->bindAddress, config->port);
   } catch (...) {
     log_error("httplib::SSLServer() fail");

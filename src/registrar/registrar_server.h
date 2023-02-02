@@ -24,7 +24,8 @@ struct RegistrarContext {
  * @param[out] context The registrar context
  * @return int 0 on success, -1 on failure
  */
-int registrar_start(struct http_config *config, struct RegistrarContext **context);
+int registrar_start(struct http_config *config,
+                    struct RegistrarContext **context);
 
 /**
  * @brief Stops the registrar server

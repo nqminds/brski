@@ -10,12 +10,12 @@
 #ifndef VOUCHER_H
 #define VOUCHER_H
 
-#include <time.h>
-#include <stdint.h>
 #include <stdbool.h>
+#include <stdint.h>
+#include <time.h>
 
 /**
- * 
+ *
  * module: ietf-voucher
  *
  *   yang-data voucher-artifact:
@@ -30,23 +30,23 @@
  *          +---- nonce?                           binary
  *          +---- last-renewal-date?               yang:date-and-time
  *
-*/
-#define CREATED_ON_NAME  "created-on"
-#define EXPIRES_ON_NAME  "expires-on"
-#define ASSERTION_NAME  "assertion"
-#define SERIAL_NUMBER_NAME  "serial-number"
-#define IDEVID_ISSUER_NAME  "idevid-issuer"
-#define PINNED_DOMAIN_CERT_NAME  "pinned-domain-cert"
-#define DOMAIN_CERT_REVOCATION_CHECKS_NAME  "domain-cert-revocation-checks"
-#define NONCE_NAME  "nonce"
-#define LAST_RENEWAL_DATE_NAME  "last-renewal-date"
+ */
+#define CREATED_ON_NAME "created-on"
+#define EXPIRES_ON_NAME "expires-on"
+#define ASSERTION_NAME "assertion"
+#define SERIAL_NUMBER_NAME "serial-number"
+#define IDEVID_ISSUER_NAME "idevid-issuer"
+#define PINNED_DOMAIN_CERT_NAME "pinned-domain-cert"
+#define DOMAIN_CERT_REVOCATION_CHECKS_NAME "domain-cert-revocation-checks"
+#define NONCE_NAME "nonce"
+#define LAST_RENEWAL_DATE_NAME "last-renewal-date"
 
 enum VoucherAssertions {
   /**
    * Indicates that the ownership has been positively
    * verified by the MASA (e.g., through sales channel
    * integration).
-  */
+   */
   VOUCHER_ASSERTION_VERIFIED = 0,
   /**
    * Indicates that the voucher has been issued after
@@ -58,9 +58,9 @@ enum VoucherAssertions {
    * unsecured trust-on-first-use principles but with the
    * logging providing a basis for detecting unexpected
    * events.
-  */
+   */
   VOUCHER_ASSERTION_LOGGED = 1,
-  
+
   /**
    * Indicates that the voucher has been issued after
    * the MASA verified a proximity proof provided by the
@@ -70,7 +70,7 @@ enum VoucherAssertions {
    * verification that the pledge and owner are
    * in communication but is still dependent on analysis of
    * the logs to detect unexpected events.
-  */
+   */
   VOUCHER_ASSERTION_PROXIMITY = 2
 };
 
@@ -99,7 +99,7 @@ struct Voucher {
    * node is primarily for human consumption and auditing.  Future
    * work MAY create verification requirements based on this
    * node.
-  */
+   */
   time_t created_on;
 
   /**
@@ -113,7 +113,7 @@ struct Voucher {
    *
    * The expires-on value MUST NOT exceed the expiration date
    * of any of the listed 'pinned-domain-cert' certificates.
-  */
+   */
   time_t expires_on;
 
   /**
@@ -122,7 +122,7 @@ struct Voucher {
    * to support more detailed policy checks.  Pledges MUST
    * ensure that the assertion provided is acceptable, per
    * local policy, before processing the voucher.
-  */
+   */
   enum VoucherAssertions assertion;
 
   /**
@@ -130,7 +130,7 @@ struct Voucher {
    * voucher, a pledge MUST ensure that its serial-number
    * matches this value.  If no match occurs, then the
    * pledge MUST NOT process this voucher.
-  */
+   */
   char *serial_number;
 
   /**
@@ -143,18 +143,18 @@ struct Voucher {
    * When processing a voucher, a pledge MUST ensure that its
    * IDevID Authority Key Identifier matches this value.  If no
    * match occurs, then the pledge MUST NOT process this voucher.
-   * 
+   *
    * When issuing a voucher, the MASA MUST ensure that this field
    * is populated for serial-numbers that are not otherwise unique
    * within the scope of the MASA.
-  */
+   */
   struct BinaryArray idevid_issuer;
-  
+
   /**
    * An X.509 v3 certificate structure, as specified by RFC 5280,
    * using Distinguished Encoding Rules (DER) encoding, as defined
    * in ITU-T X.690.
-   * 
+   *
    * This certificate is used by a pledge to trust a Public Key
    * Infrastructure in order to verify a domain certificate
    * supplied to the pledge separately by the bootstrapping
@@ -162,7 +162,7 @@ struct Voucher {
    * somewhere in its chain of certificates.  This certificate
    * MAY be an end-entity certificate, including a self-signed
    * entity.
-  */
+   */
   struct BinaryArray pinned_domain_cert;
 
   /**
@@ -171,7 +171,7 @@ struct Voucher {
    * pinned domain certificate.  If this field is not set, then
    * normal PKIX behavior applies to validation of the domain
    * certificate.
-  */
+   */
   bool domain_cert_revocation_checks;
 
   /**
@@ -179,25 +179,25 @@ struct Voucher {
    * protocols to enable anti-replay protection.  This node is
    * optional because it is not used by all bootstrapping
    * protocols.
-   * 
+   *
    * When present, the pledge MUST compare the provided nonce
    * value with another value that the pledge randomly generated
    * and sent to a bootstrap server in an earlier bootstrapping
    * message.  If the values do not match, then the pledge MUST
    * NOT process this voucher.
-  */
+   */
   struct BinaryArray nonce;
 
   /**
    * The date that the MASA projects to be the last date it
    * will renew a voucher on.  This field is merely informative;
    * it is not processed by pledges.
-   * 
+   *
    * Circumstances may occur after a voucher is generated that
    * may alter a voucher's validity period.  For instance, a
    * vendor may associate validity periods with support contracts,
    * which may be terminated or extended over time.
-  */
+   */
   time_t last_renewal_date;
 };
 
@@ -206,14 +206,14 @@ struct Voucher {
  *
  * @return struct Voucher* pointer to allocated voucher, NULL on failure
  */
-struct Voucher* init_voucher(void);
+struct Voucher *init_voucher(void);
 
 /**
  * @brief Frees an allocated voucher structure
  *
  * @param[in] voucher The allocated voucher structure
  */
-void free_voucher(struct Voucher* voucher);
+void free_voucher(struct Voucher *voucher);
 
 /**
  * @brief Sets the value for a voucher bool attribute
@@ -223,5 +223,5 @@ void free_voucher(struct Voucher* voucher);
  * @param[in] value The bool attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value);
+int set_attr_bool_voucher(struct Voucher *voucher, char *name, bool value);
 #endif

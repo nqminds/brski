@@ -11,13 +11,13 @@
 
 #include <jsmn.h>
 
-#include "voucher.h"
 #include "../utils/os.h"
+#include "voucher.h"
 
-#define MAX_ATTRIBUTE_SIZE  64
+#define MAX_ATTRIBUTE_SIZE 64
 
-struct Voucher* init_voucher(void) {
-  struct Voucher* voucher = sys_zalloc(sizeof(struct Voucher));
+struct Voucher *init_voucher(void) {
+  struct Voucher *voucher = sys_zalloc(sizeof(struct Voucher));
 
   if (voucher == NULL) {
     log_errno("syz_zalloc");
@@ -36,7 +36,7 @@ void free_binary_array(struct BinaryArray *bin_array) {
   }
 }
 
-void free_voucher(struct Voucher* voucher) {
+void free_voucher(struct Voucher *voucher) {
   if (voucher != NULL) {
     if (voucher->serial_number != NULL) {
       sys_free(voucher->serial_number);
@@ -49,7 +49,7 @@ void free_voucher(struct Voucher* voucher) {
   }
 }
 
-int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value) {
+int set_attr_bool_voucher(struct Voucher *voucher, char *name, bool value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -60,7 +60,8 @@ int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value) {
     return -1;
   }
 
-  if (strncmp(name, DOMAIN_CERT_REVOCATION_CHECKS_NAME, MAX_ATTRIBUTE_SIZE) == 0) {
+  if (strncmp(name, DOMAIN_CERT_REVOCATION_CHECKS_NAME, MAX_ATTRIBUTE_SIZE) ==
+      0) {
     voucher->domain_cert_revocation_checks = value;
   } else {
     log_error("Wrong attribute name");
