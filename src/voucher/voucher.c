@@ -17,18 +17,29 @@
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
 
-struct Voucher *init_voucher(void) {
-  struct Voucher *voucher = sys_zalloc(sizeof(struct Voucher));
-
-  if (voucher == NULL) {
-    log_errno("syz_zalloc");
-    return NULL;
+static int check_binary_array_nonempty(struct VoucherBinaryArray *value) {
+  if (value == NULL) {
+    return -1;
   }
 
-  return voucher;
+  if (value->array == NULL || !value->length) {
+    return -1;
+  }
+
+  return 0;
 }
 
-void free_binary_array(struct VoucherBinaryArray *bin_array) {
+static int copy_binary_array(struct VoucherBinaryArray *dst, struct VoucherBinaryArray *src) {
+  dst->length = src->length;
+  if ((dst->array = sys_memdup((uint8_t *)src->array, src->length)) == NULL) {
+    log_errno("sys_memdup");
+    return -1;
+  }
+
+  return 0;
+}
+
+static void free_binary_array(struct VoucherBinaryArray *bin_array) {
   if (bin_array != NULL) {
     if (bin_array->array != NULL) {
       sys_free(bin_array->array);
@@ -37,20 +48,7 @@ void free_binary_array(struct VoucherBinaryArray *bin_array) {
   }
 }
 
-void free_voucher(struct Voucher *voucher) {
-  if (voucher != NULL) {
-    if (voucher->serial_number != NULL) {
-      sys_free(voucher->serial_number);
-    }
-
-    free_binary_array(&voucher->idevid_issuer);
-    free_binary_array(&voucher->pinned_domain_cert);
-    free_binary_array(&voucher->nonce);
-    sys_free(voucher);
-  }
-}
-
-int check_attr_valid(char *name) {
+static int check_attr_valid(char *name) {
   if (strncmp(name, CREATED_ON_NAME, MAX_ATTRIBUTE_SIZE) == 0) {
     return 0;
   } else if (strncmp(name, EXPIRES_ON_NAME, MAX_ATTRIBUTE_SIZE) == 0) {
@@ -72,6 +70,30 @@ int check_attr_valid(char *name) {
   } else {
     return -1;
   }
+}
+
+void free_voucher(struct Voucher *voucher) {
+  if (voucher != NULL) {
+    if (voucher->serial_number != NULL) {
+      sys_free(voucher->serial_number);
+    }
+
+    free_binary_array(&voucher->idevid_issuer);
+    free_binary_array(&voucher->pinned_domain_cert);
+    free_binary_array(&voucher->nonce);
+    sys_free(voucher);
+  }
+}
+
+struct Voucher *init_voucher(void) {
+  struct Voucher *voucher = sys_zalloc(sizeof(struct Voucher));
+
+  if (voucher == NULL) {
+    log_errno("syz_zalloc");
+    return NULL;
+  }
+
+  return voucher;
 }
 
 int set_attr_bool_voucher(struct Voucher *voucher, char *name, bool value) {
@@ -199,4 +221,48 @@ int set_attr_str_voucher(struct Voucher *voucher, char *name, char *value) {
   }
 
   return 0;
+}
+
+int set_attr_array_voucher(struct Voucher *voucher, char *name, struct VoucherBinaryArray *value) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return -1;
+  }
+
+  if (name == NULL) {
+    log_error("name param is NULL");
+    return -1;
+  }
+
+  if (check_binary_array_nonempty(value) < 0) {
+    log_error("value is empty");
+    return -1;
+  }
+
+  if (check_attr_valid(name) < 0) {
+    log_error("Unknown attribute");
+    return -1;
+  }
+  
+  if (strcmp(name, IDEVID_ISSUER_NAME) == 0) {
+    if (copy_binary_array(&voucher->idevid_issuer, value) < 0) {
+      goto set_attr_array_voucher_fail;
+    }
+  } else if (strcmp(name, PINNED_DOMAIN_CERT_NAME) == 0) {
+    if (copy_binary_array(&voucher->idevid_issuer, value) < 0) {
+      goto set_attr_array_voucher_fail;
+    }
+  } else if (strcmp(name, NONCE_NAME) == 0) {
+    if (copy_binary_array(&voucher->idevid_issuer, value) < 0) {
+      goto set_attr_array_voucher_fail;
+    }
+  } else {
+    log_error("Wrong attribute name");
+    return -1;
+  }
+
+  return 0;
+set_attr_array_voucher_fail:
+  log_error("copy_voucher_array fail");
+  return -1;
 }

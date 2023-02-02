@@ -32,6 +32,20 @@
 
 void *sys_zalloc(size_t size) { return sys_calloc(size, 1); }
 
+void *sys_memdup(const void *src, size_t len) {
+  if (src == NULL) {
+    return NULL;
+  }
+
+  void *r = sys_malloc(len);
+
+  if (r != NULL) {
+    sys_memcpy(r, src, len);
+  }
+
+  return r;
+}
+
 char *sys_strdup(const char *s) {
   char *dest = NULL;
   size_t len = strlen(s) + 1;
@@ -46,14 +60,6 @@ char *sys_strdup(const char *s) {
   }
 
   return dest;
-}
-
-void *sys_memdup(const void *src, size_t len) {
-  void *r = sys_malloc(len);
-
-  if (r && src)
-    sys_memcpy(r, src, len);
-  return r;
 }
 
 size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
