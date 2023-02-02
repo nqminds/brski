@@ -53,6 +53,20 @@ static void test_set_attr_time_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_set_attr_enum_voucher(void **state) {
+  (void)state;
+  struct Voucher *voucher = init_voucher();
+
+  assert_int_equal(set_attr_enum_voucher(NULL, NULL, true), -1);
+  assert_int_equal(set_attr_enum_voucher(voucher, "some-attribute", true), -1);
+  assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, 12345), -1);
+  assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, VOUCHER_ASSERTION_VERIFIED), 0);
+  assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, VOUCHER_ASSERTION_LOGGED), 0);
+  assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, VOUCHER_ASSERTION_PROXIMITY), 0);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -62,7 +76,8 @@ int main(int argc, char *argv[]) {
   const struct CMUnitTest tests[] = {
       cmocka_unit_test(test_init_voucher),
       cmocka_unit_test(test_set_attr_bool_voucher),
-      cmocka_unit_test(test_set_attr_time_voucher)
+      cmocka_unit_test(test_set_attr_time_voucher),
+      cmocka_unit_test(test_set_attr_enum_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
