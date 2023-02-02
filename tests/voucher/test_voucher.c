@@ -15,10 +15,17 @@
 #include <unistd.h>
 
 #include "utils/log.h"
+#include "voucher/voucher.h"
 
 static void test_init_voucher(void **state) {
   (void)state;
+
+  struct Voucher* voucher = init_voucher();
+
+  assert_non_null(voucher);
+  free_voucher(voucher);
 }
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
