@@ -16,8 +16,6 @@
 
 #define MAX_ATTRIBUTE_SIZE  64
 
-#define DOMAIN_CERT_REVOCATION_CHECKS  "domain-cert-revocation-checks"
-
 struct Voucher* init_voucher(void) {
   struct Voucher* voucher = sys_zalloc(sizeof(struct Voucher));
 
@@ -53,7 +51,8 @@ void free_voucher(struct Voucher* voucher) {
 
 int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value) {
   if (voucher == NULL) {
-    return 0;
+    log_error("voucher param is NULL");
+    return -1;
   }
 
   if (name == NULL) {

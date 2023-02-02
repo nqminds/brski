@@ -31,7 +31,7 @@
  *          +---- last-renewal-date?               yang:date-and-time
  *
 */
-
+#define DOMAIN_CERT_REVOCATION_CHECKS  "domain-cert-revocation-checks"
 
 enum VoucherAssertions {
   /**

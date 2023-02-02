@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 #include <cmocka.h>
 #include <fcntl.h>
 #include <inttypes.h>
@@ -26,6 +27,17 @@ static void test_init_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_set_attr_bool_voucher(void **state) {
+  (void)state;
+  struct Voucher* voucher = init_voucher();
+
+  assert_int_equal(set_attr_bool_voucher(NULL, NULL, true), -1);
+  assert_int_equal(set_attr_bool_voucher(voucher, "some-attribute", true), -1);
+  assert_int_equal(set_attr_bool_voucher(voucher, DOMAIN_CERT_REVOCATION_CHECKS, true), 0);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -34,6 +46,7 @@ int main(int argc, char *argv[]) {
 
   const struct CMUnitTest tests[] = {
     cmocka_unit_test(test_init_voucher),
+    cmocka_unit_test(test_set_attr_bool_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
