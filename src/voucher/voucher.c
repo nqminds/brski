@@ -7,6 +7,7 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the voucher structure.
  */
+#include <jsmn.h>
 
 #include "voucher.h"
 
