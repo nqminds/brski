@@ -18,6 +18,11 @@
 #include "utils/log.h"
 #include "voucher/voucher.h"
 
+#define SERIALNAME_LONG "abcdabcdabcdabcdabcdabcdabcdabcd" \
+                        "abcdabcdabcdabcdabcdabcdabcdabcd" \
+                        "abcdabcdabcdabcdabcdabcdabcdabcd" \
+                        "abcdabcdabcdabcdabcdabcdabcdabcd"
+
 static void test_init_voucher(void **state) {
   (void)state;
 
@@ -44,7 +49,7 @@ static void test_set_attr_time_voucher(void **state) {
   (void)state;
   struct Voucher *voucher = init_voucher();
 
-  assert_int_equal(set_attr_time_voucher(NULL, NULL, true), -1);
+  assert_int_equal(set_attr_time_voucher(NULL, NULL, 0), -1);
   assert_int_equal(set_attr_time_voucher(voucher, "some-attribute", true), -1);
   assert_int_equal(set_attr_time_voucher(voucher, CREATED_ON_NAME, 12345), 0);
   assert_int_equal(set_attr_time_voucher(voucher, EXPIRES_ON_NAME, 12345), 0);
@@ -57,12 +62,24 @@ static void test_set_attr_enum_voucher(void **state) {
   (void)state;
   struct Voucher *voucher = init_voucher();
 
-  assert_int_equal(set_attr_enum_voucher(NULL, NULL, true), -1);
+  assert_int_equal(set_attr_enum_voucher(NULL, NULL, 0), -1);
   assert_int_equal(set_attr_enum_voucher(voucher, "some-attribute", true), -1);
   assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, 12345), -1);
   assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, VOUCHER_ASSERTION_VERIFIED), 0);
   assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, VOUCHER_ASSERTION_LOGGED), 0);
   assert_int_equal(set_attr_enum_voucher(voucher, ASSERTION_NAME, VOUCHER_ASSERTION_PROXIMITY), 0);
+
+  free_voucher(voucher);
+}
+
+static void test_set_attr_str_voucher(void **state) {
+  (void)state;
+  struct Voucher *voucher = init_voucher();
+
+  assert_int_equal(set_attr_str_voucher(NULL, NULL, NULL), -1);
+  assert_int_equal(set_attr_str_voucher(voucher, "some-attribute", NULL), -1);
+  assert_int_equal(set_attr_str_voucher(voucher, SERIAL_NUMBER_NAME, SERIALNAME_LONG), -1);
+  assert_int_equal(set_attr_str_voucher(voucher, SERIAL_NUMBER_NAME, "test"), 0);
 
   free_voucher(voucher);
 }
@@ -74,10 +91,11 @@ int main(int argc, char *argv[]) {
   log_set_quiet(false);
 
   const struct CMUnitTest tests[] = {
-      cmocka_unit_test(test_init_voucher),
-      cmocka_unit_test(test_set_attr_bool_voucher),
-      cmocka_unit_test(test_set_attr_time_voucher),
-      cmocka_unit_test(test_set_attr_enum_voucher)
+    cmocka_unit_test(test_init_voucher),
+    cmocka_unit_test(test_set_attr_bool_voucher),
+    cmocka_unit_test(test_set_attr_time_voucher),
+    cmocka_unit_test(test_set_attr_enum_voucher),
+    cmocka_unit_test(test_set_attr_str_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
