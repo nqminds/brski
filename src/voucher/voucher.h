@@ -74,7 +74,7 @@ enum VoucherAssertions {
   VOUCHER_ASSERTION_PROXIMITY = 2
 };
 
-struct BinaryArray {
+struct VoucherBinaryArray {
   uint8_t *array;
   size_t length;
 };
@@ -148,7 +148,7 @@ struct Voucher {
    * is populated for serial-numbers that are not otherwise unique
    * within the scope of the MASA.
    */
-  struct BinaryArray idevid_issuer;
+  struct VoucherBinaryArray idevid_issuer;
 
   /**
    * An X.509 v3 certificate structure, as specified by RFC 5280,
@@ -163,7 +163,7 @@ struct Voucher {
    * MAY be an end-entity certificate, including a self-signed
    * entity.
    */
-  struct BinaryArray pinned_domain_cert;
+  struct VoucherBinaryArray pinned_domain_cert;
 
   /**
    * A processing instruction to the pledge that it MUST (true)
@@ -186,7 +186,7 @@ struct Voucher {
    * message.  If the values do not match, then the pledge MUST
    * NOT process this voucher.
    */
-  struct BinaryArray nonce;
+  struct VoucherBinaryArray nonce;
 
   /**
    * The date that the MASA projects to be the last date it
@@ -234,5 +234,15 @@ int set_attr_bool_voucher(struct Voucher *voucher, char *name, bool value);
  * @return 0 on success, -1 on failure
  */
 int set_attr_time_voucher(struct Voucher *voucher, char *name, time_t value);
+
+/**
+ * @brief Sets the value for a voucher enum attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] name The enum attribute name
+ * @param[in] value The enum attribute value
+ * @return 0 on success, -1 on failure
+ */
+int set_attr_enum_voucher(struct Voucher *voucher, char *name, int value);
 
 #endif

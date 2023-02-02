@@ -27,7 +27,7 @@ struct Voucher *init_voucher(void) {
   return voucher;
 }
 
-void free_binary_array(struct BinaryArray *bin_array) {
+void free_binary_array(struct VoucherBinaryArray *bin_array) {
   if (bin_array != NULL) {
     if (bin_array->array != NULL) {
       sys_free(bin_array->array);
@@ -128,4 +128,35 @@ int set_attr_time_voucher(struct Voucher *voucher, char *name, time_t value) {
   }
 
   return 0;
+}
+
+int set_attr_enum_voucher(struct Voucher *voucher, char *name, int value) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return -1;
+  }
+
+  if (name == NULL) {
+    log_error("name param is NULL");
+    return -1;
+  }
+
+  if (check_attr_valid(name) < 0) {
+    log_error("Unknown attribute");
+    return -1;
+  }
+
+  if (strcmp(name, ASSERTION_NAME) == 0) {
+    if (value >= (int) VOUCHER_ASSERTION_VERIFIED && value <= VOUCHER_ASSERTION_PROXIMITY) {
+      voucher->assertion = (enum VoucherAssertions) value;
+    } else {
+      log_error("Wrong attribute value");
+      return -1; 
+    }
+  } else {
+    log_error("Wrong attribute name");
+    return -1;
+  }
+
+  return 0;  
 }
