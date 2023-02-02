@@ -84,6 +84,45 @@ static void test_set_attr_str_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_set_attr_array_voucher(void **state) {
+  (void)state;
+  struct Voucher *voucher = init_voucher();
+
+  assert_int_equal(set_attr_array_voucher(NULL, NULL, NULL), -1);
+  assert_int_equal(set_attr_array_voucher(voucher, "some-attribute", NULL), -1);
+
+  struct VoucherBinaryArray arr1 = {
+    .array = NULL,
+    .length = 10
+  };
+
+  assert_int_equal(set_attr_array_voucher(voucher, IDEVID_ISSUER_NAME, &arr1), -1);
+
+  uint8_t array2[] = {1, 2, 3, 4};
+  struct VoucherBinaryArray arr2 = {
+    .array = array2,
+    .length = 0
+  };
+
+  assert_int_equal(set_attr_array_voucher(voucher, IDEVID_ISSUER_NAME, &arr2), -1);
+
+  struct VoucherBinaryArray arr3 = {
+    .array = array2,
+    .length = 4
+  };
+
+  assert_int_equal(set_attr_array_voucher(voucher, IDEVID_ISSUER_NAME, &arr3), 0);
+  assert_memory_equal(voucher->idevid_issuer.array, arr3.array, arr3.length);
+
+  assert_int_equal(set_attr_array_voucher(voucher, PINNED_DOMAIN_CERT_NAME, &arr3), 0);
+  assert_memory_equal(voucher->pinned_domain_cert.array, arr3.array, arr3.length);
+
+  assert_int_equal(set_attr_array_voucher(voucher, NONCE_NAME, &arr3), 0);
+  assert_memory_equal(voucher->nonce.array, arr3.array, arr3.length);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -95,7 +134,8 @@ int main(int argc, char *argv[]) {
     cmocka_unit_test(test_set_attr_bool_voucher),
     cmocka_unit_test(test_set_attr_time_voucher),
     cmocka_unit_test(test_set_attr_enum_voucher),
-    cmocka_unit_test(test_set_attr_str_voucher)
+    cmocka_unit_test(test_set_attr_str_voucher),
+    cmocka_unit_test(test_set_attr_array_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

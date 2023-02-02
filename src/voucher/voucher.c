@@ -249,11 +249,11 @@ int set_attr_array_voucher(struct Voucher *voucher, char *name, struct VoucherBi
       goto set_attr_array_voucher_fail;
     }
   } else if (strcmp(name, PINNED_DOMAIN_CERT_NAME) == 0) {
-    if (copy_binary_array(&voucher->idevid_issuer, value) < 0) {
+    if (copy_binary_array(&voucher->pinned_domain_cert, value) < 0) {
       goto set_attr_array_voucher_fail;
     }
   } else if (strcmp(name, NONCE_NAME) == 0) {
-    if (copy_binary_array(&voucher->idevid_issuer, value) < 0) {
+    if (copy_binary_array(&voucher->nonce, value) < 0) {
       goto set_attr_array_voucher_fail;
     }
   } else {
