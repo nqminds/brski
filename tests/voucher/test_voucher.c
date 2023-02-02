@@ -33,7 +33,7 @@ static void test_set_attr_bool_voucher(void **state) {
 
   assert_int_equal(set_attr_bool_voucher(NULL, NULL, true), -1);
   assert_int_equal(set_attr_bool_voucher(voucher, "some-attribute", true), -1);
-  assert_int_equal(set_attr_bool_voucher(voucher, DOMAIN_CERT_REVOCATION_CHECKS, true), 0);
+  assert_int_equal(set_attr_bool_voucher(voucher, DOMAIN_CERT_REVOCATION_CHECKS_NAME, true), 0);
 
   free_voucher(voucher);
 }

@@ -60,7 +60,7 @@ int set_attr_bool_voucher(struct Voucher* voucher, char *name, bool value) {
     return -1;
   }
 
-  if (strncmp(name, DOMAIN_CERT_REVOCATION_CHECKS, MAX_ATTRIBUTE_SIZE) == 0) {
+  if (strncmp(name, DOMAIN_CERT_REVOCATION_CHECKS_NAME, MAX_ATTRIBUTE_SIZE) == 0) {
     voucher->domain_cert_revocation_checks = value;
   } else {
     log_error("Wrong attribute name");

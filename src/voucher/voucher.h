@@ -31,7 +31,15 @@
  *          +---- last-renewal-date?               yang:date-and-time
  *
 */
-#define DOMAIN_CERT_REVOCATION_CHECKS  "domain-cert-revocation-checks"
+#define CREATED_ON_NAME  "created-on"
+#define EXPIRES_ON_NAME  "expires-on"
+#define ASSERTION_NAME  "assertion"
+#define SERIAL_NUMBER_NAME  "serial-number"
+#define IDEVID_ISSUER_NAME  "idevid-issuer"
+#define PINNED_DOMAIN_CERT_NAME  "pinned-domain-cert"
+#define DOMAIN_CERT_REVOCATION_CHECKS_NAME  "domain-cert-revocation-checks"
+#define NONCE_NAME  "nonce"
+#define LAST_RENEWAL_DATE_NAME  "last-renewal-date"
 
 enum VoucherAssertions {
   /**
