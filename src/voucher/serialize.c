@@ -161,12 +161,12 @@ static uint8_t *base64_gen_decode(const uint8_t *src, size_t len,
   return out;
 }
 
-uint8_t *serialize_to_base64(const uint8_t *src, size_t len,
+uint8_t *serialize_array2base64(const uint8_t *src, size_t len,
                              size_t *out_len) {
   return base64_gen_encode(src, len, out_len, base64_table, 1);
 }
 
-uint8_t *deserialize_from_base64(const uint8_t *src, size_t length,
+uint8_t *serialize_base642array(const uint8_t *src, size_t length,
                              size_t *out_length) {
   return base64_gen_decode(src, length, out_length, base64_table);
 }

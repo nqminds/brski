@@ -27,7 +27,7 @@
  * @param[out] out_length The length of the encoded buffer
  * @return uint8_t * encoded buffer, NULL on failure
  */
-uint8_t *serialize_to_base64(const uint8_t *src, size_t length,
+uint8_t *serialize_array2base64(const uint8_t *src, size_t length,
                              size_t *out_len);
 
 /**
@@ -40,6 +40,6 @@ uint8_t *serialize_to_base64(const uint8_t *src, size_t length,
  * @param[out] out_length The length of the decoded buffer
  * @return uint8_t * decoded buffer, NULL on failure
  */
-uint8_t *deserialize_from_base64(const uint8_t *src, size_t length,
+uint8_t *serialize_base642array(const uint8_t *src, size_t length,
                              size_t *out_length);
 #endif
