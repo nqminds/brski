@@ -15,28 +15,43 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#include "utils/os.h"
 #include "utils/log.h"
 #include "voucher/serialize.h"
 
 #define STR_TO_BASE64 "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
 #define STR_FROM_BASE64 "BRSKI protocol server/client implementation."
 
-static void test_serialize_array2base64(void **state) {
+static void test_serialize_array2base64str(void **state) {
   (void)state;
   char *str = STR_FROM_BASE64;
   size_t out_len;
-  char *out = (char *)serialize_array2base64((const uint8_t *)str, strlen(str), &out_len);
+  char *out = (char *)serialize_array2base64str((const uint8_t *)str, strlen(str), &out_len);
   assert_non_null(out);
   assert_string_equal(out, STR_TO_BASE64);
 }
 
-static void test_serialize_base642array(void **state) {
+static void test_serialize_base64str2array(void **state) {
   (void)state;
   char *str = STR_TO_BASE64;
   size_t out_len;
-  char *out = (char *)serialize_base642array((const uint8_t *)str, strlen(str), &out_len);
+  char *out = (char *)serialize_base64str2array((const uint8_t *)str, strlen(str), &out_len);
   assert_non_null(out);
   assert_string_equal(out, STR_FROM_BASE64);
+}
+
+static void test_serialize_bool2str(void **state) {
+  (void)state;
+
+  char *out = serialize_bool2str(true);
+  assert_non_null(out);
+  assert_string_equal(out, "true");
+  sys_free(out);
+
+  out = serialize_bool2str(false);
+  assert_non_null(out);
+  assert_string_equal(out, "false");
+  sys_free(out);
 }
 
 int main(int argc, char *argv[]) {
@@ -46,8 +61,9 @@ int main(int argc, char *argv[]) {
   log_set_quiet(false);
 
   const struct CMUnitTest tests[] = {
-    cmocka_unit_test(test_serialize_array2base64),
-    cmocka_unit_test(test_serialize_base642array)
+    cmocka_unit_test(test_serialize_array2base64str),
+    cmocka_unit_test(test_serialize_base64str2array),
+    cmocka_unit_test(test_serialize_bool2str)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
