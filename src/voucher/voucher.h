@@ -281,4 +281,13 @@ int set_attr_str_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
 int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
                            struct VoucherBinaryArray *value);
 
+/**
+ * @brief Sets the value for a voucher attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The array voucher attribute name
+ * @param[in] __VA_ARGS__ The list of attribute values
+ * @return 0 on success, -1 on failure
+ */
+int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
 #endif

@@ -206,3 +206,49 @@ set_attr_array_voucher_fail:
   log_error("copy_voucher_array fail");
   return -1;
 }
+
+int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...) {
+  (void)voucher;
+
+  va_list args;
+  va_start(args, attr);
+
+  int res = 0;
+  time_t time_value;
+  int enum_value;
+  char *str_value;
+  struct VoucherBinaryArray *array_value;
+  bool bool_value;
+
+  switch (attr) {
+    case ATTR_CREATED_ON:
+    case ATTR_EXPIRES_ON:
+    case ATTR_LAST_RENEWAL_DATE:
+      time_value = va_arg(args, time_t);
+      res = set_attr_time_voucher(voucher, attr, time_value);
+      break;
+    case ATTR_ASSERTION:
+      enum_value = va_arg(args, int);
+      res = set_attr_enum_voucher(voucher, attr, enum_value);
+      break;
+    case ATTR_SERIAL_NUMBER:
+      str_value = va_arg(args, char*);
+      res = set_attr_str_voucher(voucher, attr, str_value);
+      break;
+    case ATTR_IDEVID_ISSUER:
+    case ATTR_PINNED_DOMAIN_CERT:
+    case ATTR_NONCE:
+      array_value = va_arg(args, struct VoucherBinaryArray *);
+      res = set_attr_array_voucher(voucher, attr, array_value);
+      break;
+    case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
+      bool_value = (bool)va_arg(args, int);
+      res = set_attr_bool_voucher(voucher, attr, bool_value);
+      break;
+    default:
+      log_error("Wrong attribute name");
+      res = -1;
+  }
+  va_end(args);
+  return res;
+}
