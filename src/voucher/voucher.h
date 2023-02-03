@@ -37,9 +37,20 @@
 #define SERIAL_NUMBER_NAME "serial-number"
 #define IDEVID_ISSUER_NAME "idevid-issuer"
 #define PINNED_DOMAIN_CERT_NAME "pinned-domain-cert"
-#define DOMAIN_CERT_REVOCATION_CHECKS_NAME "domain-cert-revocation-checks"
 #define NONCE_NAME "nonce"
 #define LAST_RENEWAL_DATE_NAME "last-renewal-date"
+
+enum VoucherAttributes {
+  ATTR_CREATED_ON = 0,
+  ATTR_EXPIRES_ON,
+  ATTR_ASSERTION,
+  ATTR_SERIAL_NUMBER,
+  ATTR_IDEVID_ISSUER,
+  ATTR_PINNED_DOMAIN_CERT,
+  ATTR_DOMAIN_CERT_REVOCATION_CHECKS,
+  ATTR_NONCE,
+  ATTR_LAST_RENEWAL_DATE
+};
 
 enum VoucherAssertions {
   /**
@@ -219,50 +230,55 @@ void free_voucher(struct Voucher *voucher);
  * @brief Sets the value for a voucher bool attribute
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] name The bool attribute name
+ * @param[in] attr The bool voucher attribute
  * @param[in] value The bool attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_bool_voucher(struct Voucher *voucher, char *name, bool value);
+int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                          bool value);
 
 /**
  * @brief Sets the value for a voucher time attribute
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] name The time attribute name
+ * @param[in] attr The time voucher attribute
  * @param[in] value The time attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_time_voucher(struct Voucher *voucher, char *name, time_t value);
+int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                          time_t value);
 
 /**
  * @brief Sets the value for a voucher enum attribute
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] name The enum attribute name
+ * @param[in] attr The enum voucher attribute
  * @param[in] value The enum attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_enum_voucher(struct Voucher *voucher, char *name, int value);
+int set_attr_enum_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                          int value);
 
 /**
  * @brief Sets the value for a voucher string attribute
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] name The string attribute name
+ * @param[in] attr The string voucher attribute name
  * @param[in] value The string attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_str_voucher(struct Voucher *voucher, char *name, char *value);
+int set_attr_str_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                         char *value);
 
 /**
  * @brief Sets the value for a voucher array attribute
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] name The array attribute name
+ * @param[in] attr The array voucher attribute name
  * @param[in] value The array attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_array_voucher(struct Voucher *voucher, char *name, struct VoucherBinaryArray *value);
+int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                           struct VoucherBinaryArray *value);
 
 #endif
