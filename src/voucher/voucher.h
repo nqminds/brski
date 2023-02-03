@@ -29,16 +29,10 @@
  *          +---- domain-cert-revocation-checks?   boolean
  *          +---- nonce?                           binary
  *          +---- last-renewal-date?               yang:date-and-time
+ *          +-- prior-signed-voucher-request?      binary
+ *          +-- proximity-registrar-cert?          binary
  *
  */
-#define CREATED_ON_NAME "created-on"
-#define EXPIRES_ON_NAME "expires-on"
-#define ASSERTION_NAME "assertion"
-#define SERIAL_NUMBER_NAME "serial-number"
-#define IDEVID_ISSUER_NAME "idevid-issuer"
-#define PINNED_DOMAIN_CERT_NAME "pinned-domain-cert"
-#define NONCE_NAME "nonce"
-#define LAST_RENEWAL_DATE_NAME "last-renewal-date"
 
 enum VoucherAttributes {
   ATTR_CREATED_ON = 0,
@@ -49,7 +43,9 @@ enum VoucherAttributes {
   ATTR_PINNED_DOMAIN_CERT,
   ATTR_DOMAIN_CERT_REVOCATION_CHECKS,
   ATTR_NONCE,
-  ATTR_LAST_RENEWAL_DATE
+  ATTR_LAST_RENEWAL_DATE,
+  ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
+  ATTR_PROXIMITY_REGISTRAR_CERT
 };
 
 enum VoucherAssertions {
@@ -210,6 +206,45 @@ struct Voucher {
    * which may be terminated or extended over time.
    */
   time_t last_renewal_date;
+
+  /**
+   * If it is necessary to change a voucher, or re-sign and
+   * forward a voucher that was previously provided along a
+   * protocol path, then the previously signed voucher SHOULD
+   * be included in this field.
+   *
+   * For example, a pledge might sign a voucher-request
+   * with a proximity-registrar-cert, and the registrar
+   * then includes it as the prior-signed-voucher-request
+   * field.  This is a simple mechanism for a chain of
+   * trusted parties to change a voucher-request, while
+   * maintaining the prior signature information.
+   *
+   * The registrar and MASA MAY examine the prior-signed
+   * voucher information for the
+   * purposes of policy decisions.  For example, this
+   * information could be useful to a MASA to determine
+   * that both the pledge and registrar agree on proximity
+   * assertions.  The MASA SHOULD remove all
+   * prior-signed-voucher-request information when
+   * signing a voucher for imprinting so as to minimize
+   * the final voucher size.
+  */
+  struct VoucherBinaryArray prior_signed_voucher_request;
+
+  /**
+   * An X.509 v3 certificate structure, as specified by
+   * RFC 5280, Section 4, encoded using the ASN.1
+   * distinguished encoding rules (DER), as specified
+   * in ITU X.690.
+   *
+   * The first certificate in the registrar TLS server
+   * certificate_list sequence (the end-entity TLS
+   * certificate; see RFC 8446) presented by the registrar
+   * to the pledge.  This MUST be populated in a pledge's
+   * voucher-re
+  */
+  struct VoucherBinaryArray proximity_registrar_cert;
 };
 
 /**
