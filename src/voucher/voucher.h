@@ -229,7 +229,7 @@ struct Voucher {
    * prior-signed-voucher-request information when
    * signing a voucher for imprinting so as to minimize
    * the final voucher size.
-  */
+   */
   struct VoucherBinaryArray prior_signed_voucher_request;
 
   /**
@@ -243,7 +243,7 @@ struct Voucher {
    * certificate; see RFC 8446) presented by the registrar
    * to the pledge.  This MUST be populated in a pledge's
    * voucher-re
-  */
+   */
   struct VoucherBinaryArray proximity_registrar_cert;
 };
 

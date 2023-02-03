@@ -197,7 +197,8 @@ int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
       }
       break;
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      if (copy_binary_array(&voucher->prior_signed_voucher_request, value) < 0) {
+      if (copy_binary_array(&voucher->prior_signed_voucher_request, value) <
+          0) {
         goto set_attr_array_voucher_fail;
       }
       break;
@@ -217,7 +218,8 @@ set_attr_array_voucher_fail:
   return -1;
 }
 
-int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...) {
+int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                     ...) {
   (void)voucher;
 
   va_list args;
@@ -242,7 +244,7 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...) 
       res = set_attr_enum_voucher(voucher, attr, enum_value);
       break;
     case ATTR_SERIAL_NUMBER:
-      str_value = va_arg(args, char*);
+      str_value = va_arg(args, char *);
       res = set_attr_str_voucher(voucher, attr, str_value);
       break;
     case ATTR_IDEVID_ISSUER:

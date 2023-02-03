@@ -153,31 +153,47 @@ static void test_set_attr_voucher(void **state) {
   assert_int_equal(set_attr_voucher(voucher, ATTR_SERIAL_NUMBER, str_value), 0);
   assert_string_equal(voucher->serial_number, str_value);
 
-  assert_int_equal(set_attr_voucher(voucher, ATTR_IDEVID_ISSUER, &array_value), 0);
+  assert_int_equal(set_attr_voucher(voucher, ATTR_IDEVID_ISSUER, &array_value),
+                   0);
   assert_int_equal(voucher->idevid_issuer.length, array_value.length);
-  assert_memory_equal(voucher->idevid_issuer.array, array_value.array, array_value.length);
+  assert_memory_equal(voucher->idevid_issuer.array, array_value.array,
+                      array_value.length);
 
-  assert_int_equal(set_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &array_value), 0);
+  assert_int_equal(
+      set_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &array_value), 0);
   assert_int_equal(voucher->pinned_domain_cert.length, array_value.length);
-  assert_memory_equal(voucher->pinned_domain_cert.array, array_value.array, array_value.length);
+  assert_memory_equal(voucher->pinned_domain_cert.array, array_value.array,
+                      array_value.length);
 
-  assert_int_equal(set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, bool_value), 0);
+  assert_int_equal(
+      set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, bool_value),
+      0);
   assert_int_equal(voucher->domain_cert_revocation_checks, bool_value);
 
   assert_int_equal(set_attr_voucher(voucher, ATTR_NONCE, &array_value), 0);
   assert_int_equal(voucher->nonce.length, array_value.length);
-  assert_memory_equal(voucher->nonce.array, array_value.array, array_value.length);
+  assert_memory_equal(voucher->nonce.array, array_value.array,
+                      array_value.length);
 
-  assert_int_equal(set_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE, time_value), 0);
+  assert_int_equal(
+      set_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE, time_value), 0);
   assert_int_equal(voucher->last_renewal_date, time_value);
 
-  assert_int_equal(set_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, &array_value), 0);
-  assert_int_equal(voucher->prior_signed_voucher_request.length, array_value.length);
-  assert_memory_equal(voucher->prior_signed_voucher_request.array, array_value.array, array_value.length);
+  assert_int_equal(set_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
+                                    &array_value),
+                   0);
+  assert_int_equal(voucher->prior_signed_voucher_request.length,
+                   array_value.length);
+  assert_memory_equal(voucher->prior_signed_voucher_request.array,
+                      array_value.array, array_value.length);
 
-  assert_int_equal(set_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, &array_value), 0);
-  assert_int_equal(voucher->proximity_registrar_cert.length, array_value.length);
-  assert_memory_equal(voucher->proximity_registrar_cert.array, array_value.array, array_value.length);
+  assert_int_equal(
+      set_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, &array_value),
+      0);
+  assert_int_equal(voucher->proximity_registrar_cert.length,
+                   array_value.length);
+  assert_memory_equal(voucher->proximity_registrar_cert.array,
+                      array_value.array, array_value.length);
 
   free_voucher(voucher);
 }
