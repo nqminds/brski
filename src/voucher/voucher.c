@@ -196,6 +196,16 @@ int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
         goto set_attr_array_voucher_fail;
       }
       break;
+    case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
+      if (copy_binary_array(&voucher->prior_signed_voucher_request, value) < 0) {
+        goto set_attr_array_voucher_fail;
+      }
+      break;
+    case ATTR_PROXIMITY_REGISTRAR_CERT:
+      if (copy_binary_array(&voucher->proximity_registrar_cert, value) < 0) {
+        goto set_attr_array_voucher_fail;
+      }
+      break;
     default:
       log_error("Wrong attribute name");
       return -1;
@@ -238,6 +248,8 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...) 
     case ATTR_IDEVID_ISSUER:
     case ATTR_PINNED_DOMAIN_CERT:
     case ATTR_NONCE:
+    case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
+    case ATTR_PROXIMITY_REGISTRAR_CERT:
       array_value = va_arg(args, struct VoucherBinaryArray *);
       res = set_attr_array_voucher(voucher, attr, array_value);
       break;
