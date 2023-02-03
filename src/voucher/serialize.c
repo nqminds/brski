@@ -8,6 +8,7 @@
  * @brief File containing the definition of the serialization utilities.
  */
 #include <stdint.h>
+#include <time.h>
 
 #include "../utils/os.h"
 
@@ -175,6 +176,22 @@ char *serialize_bool2str(bool value) {
     sprintf(buf, "true");
   } else {
     sprintf(buf, "false");
+  }
+
+  return sys_strdup(buf);
+}
+
+char *serialize_time2str(time_t value) {
+  char buf[sizeof("9999-12-31T24:59:59Z") + 1];
+  struct tm result;
+  if (gmtime_r(&value, &result) == NULL) {
+    log_errno("gmtime_r");
+    return NULL;
+  }
+
+  if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &result) == 0) {
+    log_error("strftime fail");
+    return NULL;
   }
 
   return sys_strdup(buf);

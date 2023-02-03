@@ -57,6 +57,17 @@ static void test_serialize_bool2str(void **state) {
   sys_free(out);
 }
 
+static void test_serialize_time2str(void **state) {
+  (void)state;
+  time_t time = 123456789;
+
+  char *out = serialize_time2str(time);
+  assert_non_null(out);
+  assert_string_equal(out, "1973-11-29T21:33:09Z");
+
+  sys_free(out);
+} 
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -66,7 +77,9 @@ int main(int argc, char *argv[]) {
   const struct CMUnitTest tests[] = {
       cmocka_unit_test(test_serialize_array2base64str),
       cmocka_unit_test(test_serialize_base64str2array),
-      cmocka_unit_test(test_serialize_bool2str)};
+      cmocka_unit_test(test_serialize_bool2str),
+      cmocka_unit_test(test_serialize_time2str)
+  };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
