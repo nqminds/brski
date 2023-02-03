@@ -3,8 +3,8 @@
  * @author Alexandru Mereacre
  * @date 2023
  * @copyright
- * SPDX-FileCopyrightText: Copyright (c) 2005, Jouni Malinen <j@w1.fi>, 2023 Nquiringminds Ltd
- * SPDX-License-Identifier: MIT
+ * SPDX-FileCopyrightText: Copyright (c) 2005, Jouni Malinen <j@w1.fi>, 2023
+ * Nquiringminds Ltd SPDX-License-Identifier: MIT
  * @brief File containing the definition of the serialization utilities.
  */
 #include <stdint.h>
@@ -15,9 +15,8 @@ static const uint8_t base64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
 static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
-                                        size_t *out_len,
-                                        const uint8_t *table,
-                                        int add_pad) {
+                                  size_t *out_len, const uint8_t *table,
+                                  int add_pad) {
   uint8_t *out, *pos;
   const uint8_t *end, *in;
   size_t olen;
@@ -33,7 +32,7 @@ static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
     olen += olen / 72; /* line feeds */
   }
 
-  olen++;              /* nul termination */
+  olen++; /* nul termination */
 
   if (olen < len) {
     log_error("Integer overflow");
@@ -81,8 +80,7 @@ static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
 }
 
 static uint8_t *base64_gen_decode(const uint8_t *src, size_t len,
-                                        size_t *out_len,
-                                        const uint8_t *table) {
+                                  size_t *out_len, const uint8_t *table) {
   uint8_t dtable[256], *out, *pos, block[4], tmp;
   size_t i, count, olen;
   int pad = 0;
@@ -162,12 +160,12 @@ static uint8_t *base64_gen_decode(const uint8_t *src, size_t len,
 }
 
 uint8_t *serialize_array2base64str(const uint8_t *src, size_t len,
-                             size_t *out_len) {
+                                   size_t *out_len) {
   return base64_gen_encode(src, len, out_len, base64_table, 1);
 }
 
 uint8_t *serialize_base64str2array(const uint8_t *src, size_t length,
-                             size_t *out_length) {
+                                   size_t *out_length) {
   return base64_gen_decode(src, length, out_length, base64_table);
 }
 

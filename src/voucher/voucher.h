@@ -33,7 +33,6 @@
  *          +-- proximity-registrar-cert?          binary
  *
  */
-
 enum VoucherAttributes {
   ATTR_CREATED_ON = 0,
   ATTR_EXPIRES_ON,
@@ -48,13 +47,24 @@ enum VoucherAttributes {
   ATTR_PROXIMITY_REGISTRAR_CERT
 };
 
+#define VOUCHER_ATTRIBUTE_NAMES                                                \
+  {                                                                            \
+    "created-on", "expires-on", "assertion", "serial-number", "idevid-issuer", \
+        "pinned-domain-cert", "domain-cert-revocation-checks", "nonce",        \
+        "last-renewal-date", "prior-signed-voucher-request",                   \
+        "proximity-registrar-cert"                                             \
+  }
+
 enum VoucherAssertions {
+  VOUCHER_ASSERTION_NONE = 0,
+
   /**
    * Indicates that the ownership has been positively
    * verified by the MASA (e.g., through sales channel
    * integration).
    */
-  VOUCHER_ASSERTION_VERIFIED = 0,
+  VOUCHER_ASSERTION_VERIFIED = 1,
+
   /**
    * Indicates that the voucher has been issued after
    * minimal verification of ownership or control.  The
@@ -66,7 +76,7 @@ enum VoucherAssertions {
    * logging providing a basis for detecting unexpected
    * events.
    */
-  VOUCHER_ASSERTION_LOGGED = 1,
+  VOUCHER_ASSERTION_LOGGED = 2,
 
   /**
    * Indicates that the voucher has been issued after
@@ -78,8 +88,11 @@ enum VoucherAssertions {
    * in communication but is still dependent on analysis of
    * the logs to detect unexpected events.
    */
-  VOUCHER_ASSERTION_PROXIMITY = 2
+  VOUCHER_ASSERTION_PROXIMITY = 3
 };
+
+#define VOUCHER_ASSERTION_NAMES                                                \
+  { NULL, "verified", "logged", "proximity" }
 
 struct VoucherBinaryArray {
   uint8_t *array;
