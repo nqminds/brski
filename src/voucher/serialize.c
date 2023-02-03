@@ -12,8 +12,35 @@
 
 #include "../utils/os.h"
 
+#include "serialize.h"
+
 static const uint8_t base64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+
+
+struct keyvalue_list *init_keyvalue_list(void) {
+  struct keyvalue_list *kv_list = NULL;
+
+  if ((kv_list = sys_zalloc(sizeof(struct keyvalue_list))) == NULL) {
+    log_errno("sys_zalloc");
+    return NULL;
+  }
+
+  return kv_list;
+}
+
+void free_keyvalue_list(struct keyvalue_list *kv_list) {
+  (void)kv_list;
+}
+
+int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value, bool escape) {
+  (void)kv_list;
+  (void)key;
+  (void)value;
+  (void)escape;
+
+  return 0;
+}
 
 static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
                                   size_t *out_len, const uint8_t *table,
