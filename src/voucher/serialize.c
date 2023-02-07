@@ -90,6 +90,29 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value, bo
   return 0;
 }
 
+char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
+  if (kv_list == NULL) {
+    log_error("kv_list param is NULL");
+    return NULL;
+  }
+
+  unsigned int count = dl_list_len(&kv_list->list);
+
+  if (!count) {
+    log_error("kv_list is empty");
+    return NULL;
+  }
+
+  struct keyvalue_list *el = NULL;
+
+  dl_list_for_each(el, &kv_list->list, struct keyvalue_list, list) {
+
+  }
+
+  return NULL;
+}
+
+
 static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
                                   size_t *out_len, const uint8_t *table,
                                   int add_pad) {
@@ -270,4 +293,23 @@ char *serialize_time2str(time_t value) {
   }
 
   return sys_strdup(buf);
+}
+
+char *serialize_escapestr(char *str) {
+  if (str == NULL) {
+    log_error("str param is NULL");
+    return NULL;
+  }
+
+  size_t length = strlen(str);
+  /* ""(2 chars) + \0 (1 char) = 3 chars*/
+  char *serialized = sys_malloc(length + 3);
+
+  if (serialized == NULL) {
+    log_errno("sys_malloc");
+    return NULL;
+  }
+  sprintf(serialized, "\"%s\"", str);
+
+  return serialized;
 }

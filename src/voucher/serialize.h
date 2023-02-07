@@ -97,4 +97,25 @@ char *serialize_bool2str(bool value);
  */
 char *serialize_time2str(time_t value);
 
+/**
+ * @brief Adds "" to a string
+ *
+ * Caller is responsible for freeing the string
+ *
+ * @param[in] value The input string to escape
+ * @return char * the escaped string, NULL on failure
+ */
+char *serialize_escapestr(char *str);
+
+/**
+ * @brief Encodes a key/value list to a json
+ * Example:
+ * key1:value1,key2:value2 => {key1: value1, key2: value2}
+ *
+ * Caller is responsible for freeing the string
+ *
+ * @param[in] kv_list The key/value list
+ * @return char * encoded json, NULL on failure
+ */
+char *serialize_keyvalue2json(struct keyvalue_list *kv_list);
 #endif
