@@ -350,4 +350,14 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
  * @return char* serialized voucher, NULL on failure
  */
 char *serialize_voucher(struct Voucher *voucher);
+
+/**
+ * @brief Deserializes a json string to a voucher
+ *
+ * Caller is responsible for freeing the voucher struct
+ *
+ * @param[in] json The json string
+ * @return struct Voucher * voucher, NULL on failure
+ */
+struct Voucher *deserialize_voucher(char *json);
 #endif

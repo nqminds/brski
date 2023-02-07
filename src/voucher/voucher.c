@@ -17,6 +17,7 @@
 
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
+#define MAX_VOUCHER_JSON_TOKENS 32
 
 static bool check_binary_array_nonempty(struct VoucherBinaryArray *value) {
   if (value == NULL) {
@@ -440,4 +441,37 @@ char *serialize_voucher(struct Voucher *voucher) {
 
   free_keyvalue_list(kv_list);
   return json;
+}
+
+static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
+  if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
+      strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
+    return 0;
+  }
+  return -1;
+}
+
+struct Voucher *deserialize_voucher(char *json) {
+  if (json == NULL) {
+    log_error("json param is NULL");
+    return NULL;
+  }
+
+  jsmn_parser parser;
+  jsmntok_t tokens[MAX_VOUCHER_JSON_TOKENS];
+
+  jsmn_init(&parser);
+
+  int count = jsmn_parse(&parser, json, strlen(json), tokens, MAX_VOUCHER_JSON_TOKENS);
+  if (count < 0) {
+    log_error("failed to parse json: %d", count);
+    return NULL;
+  }
+
+  if (count < 1 || tokens[0].type != JSMN_OBJECT) {
+    log_error("json object expected");
+    return NULL;
+  }
+
+  return NULL;
 }
