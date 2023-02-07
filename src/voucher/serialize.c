@@ -90,26 +90,90 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value, bo
   return 0;
 }
 
+char *concatenate_keyvalue(char *key, char *value, bool separator) {
+  size_t key_size = strlen(key);
+  size_t value_length = strlen(value);
+
+  /* key + ":" + value + ","*/
+  size_t length = key_size + value_length + 2;
+  if (separator) {
+    length ++;
+  }
+
+  char *concat = sys_malloc(length);
+
+  if (concat == NULL) {
+    log_errno("sys_malloc");
+    return NULL;
+  }
+
+  if (separator) {
+    sprintf(concat, "%s:%s,", key, value);
+  } else {
+    sprintf(concat, "%s:%s", key, value);
+  }
+
+  return concat;
+}
+
 char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
   if (kv_list == NULL) {
     log_error("kv_list param is NULL");
     return NULL;
   }
 
-  unsigned int count = dl_list_len(&kv_list->list);
+  unsigned int count = dl_list_len(&kv_list->list), idx = 0;
 
   if (!count) {
     log_error("kv_list is empty");
     return NULL;
   }
 
-  struct keyvalue_list *el = NULL;
-
-  dl_list_for_each(el, &kv_list->list, struct keyvalue_list, list) {
-
+  char *json = sys_malloc(2);
+  if (json == NULL) {
+    log_errno("sys_malloc");
+    return NULL;
   }
 
-  return NULL;
+  strcat(json, "{");
+
+  struct keyvalue_list *el = NULL;
+  size_t length = strlen(json) + 1;
+
+  dl_list_for_each(el, &kv_list->list, struct keyvalue_list, list) {
+    char *concat = concatenate_keyvalue(el->key, el->value, (idx < count - 1));
+    if (concat == NULL) {
+      log_error("concatenate_keyvalue fail");
+      sys_free(json);
+      return NULL;
+    }
+
+    length += strlen(concat);
+
+    if ((json = sys_realloc(json, length)) == NULL) {
+      log_errno("sys_realloc");
+      sys_free(concat);
+      sys_free(json);
+      return NULL;
+    }
+
+    strcat(json, concat);
+
+    sys_free(concat);
+    idx ++;
+  }
+
+  length ++;
+
+  if ((json = sys_realloc(json, length)) == NULL) {
+    log_errno("sys_realloc");
+    sys_free(json);
+    return NULL;
+  }
+
+  strcat(json, "}");
+
+  return json;
 }
 
 
