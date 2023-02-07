@@ -94,6 +94,17 @@ static void test_push_keyvalue_list(void **state) {
   assert_string_equal(kv_list_last->value, "value3");
   free_keyvalue_list(kv_list);
 }
+
+static void test_serialize_escapestr(void **state) {
+  (void)state;
+  char *out = serialize_escapestr("test");
+  assert_string_equal(out, "\"test\"");
+  sys_free(out);
+
+  out = serialize_escapestr(NULL);
+  assert_null(out);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -106,7 +117,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_bool2str),
       cmocka_unit_test(test_serialize_time2str),
       cmocka_unit_test(test_init_keyvalue_list),
-      cmocka_unit_test(test_push_keyvalue_list)
+      cmocka_unit_test(test_push_keyvalue_list),
+      cmocka_unit_test(test_serialize_escapestr)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
