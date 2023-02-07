@@ -26,6 +26,8 @@ struct keyvalue_list *init_keyvalue_list(void) {
     return NULL;
   }
 
+  dl_list_init(&kv_list->list);
+
   return kv_list;
 }
 

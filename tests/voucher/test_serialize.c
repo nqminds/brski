@@ -68,6 +68,16 @@ static void test_serialize_time2str(void **state) {
   sys_free(out);
 } 
 
+static void test_init_keyvalue_list(void **state) {
+  (void)state;
+
+  struct keyvalue_list *kv_list = init_keyvalue_list();
+
+  assert_non_null(kv_list);
+
+  free_keyvalue_list(kv_list);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -78,7 +88,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_array2base64str),
       cmocka_unit_test(test_serialize_base64str2array),
       cmocka_unit_test(test_serialize_bool2str),
-      cmocka_unit_test(test_serialize_time2str)
+      cmocka_unit_test(test_serialize_time2str),
+      cmocka_unit_test(test_init_keyvalue_list)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
