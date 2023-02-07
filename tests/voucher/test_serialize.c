@@ -83,9 +83,9 @@ static void test_push_keyvalue_list(void **state) {
 
   struct keyvalue_list *kv_list = init_keyvalue_list();
 
-  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"), true);
-  push_keyvalue_list(kv_list, sys_strdup("key2"), sys_strdup("value2"), false);
-  push_keyvalue_list(kv_list, sys_strdup("key3"), sys_strdup("value3"), true);
+  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"));
+  push_keyvalue_list(kv_list, sys_strdup("key2"), sys_strdup("value2"));
+  push_keyvalue_list(kv_list, sys_strdup("key3"), sys_strdup("value3"));
 
   assert_int_equal(dl_list_len(&kv_list->list), 3);
 
@@ -105,6 +105,44 @@ static void test_serialize_escapestr(void **state) {
   assert_null(out);
 }
 
+static void test_serialize_keyvalue2json(void **state) {
+  (void)state;
+
+  struct keyvalue_list *kv_list = init_keyvalue_list();
+
+  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"));
+  push_keyvalue_list(kv_list, sys_strdup("key2"), sys_strdup("value2"));
+  push_keyvalue_list(kv_list, sys_strdup("key3"), sys_strdup("value3"));
+
+  char *json = serialize_keyvalue2json(kv_list);
+  assert_non_null(json);
+
+  assert_string_equal(json, "{key1:value1,key2:value2,key3:value3}");
+
+  sys_free(json);
+  free_keyvalue_list(kv_list);
+
+  kv_list = init_keyvalue_list();
+
+  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"));
+
+  json = serialize_keyvalue2json(kv_list);
+  assert_non_null(json);
+
+  assert_string_equal(json, "{key1:value1}");
+
+  sys_free(json);
+  free_keyvalue_list(kv_list);
+
+  kv_list = init_keyvalue_list();
+
+
+  json = serialize_keyvalue2json(kv_list);
+  assert_null(json);
+
+  free_keyvalue_list(kv_list);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -118,7 +156,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_time2str),
       cmocka_unit_test(test_init_keyvalue_list),
       cmocka_unit_test(test_push_keyvalue_list),
-      cmocka_unit_test(test_serialize_escapestr)
+      cmocka_unit_test(test_serialize_escapestr),
+      cmocka_unit_test(test_serialize_keyvalue2json)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

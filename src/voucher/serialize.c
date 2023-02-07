@@ -58,7 +58,7 @@ void free_keyvalue_list(struct keyvalue_list *kv_list) {
   free_keyvalue_list_el(kv_list);
 }
 
-int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value, bool escape) {
+int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value) {
   if (kv_list == NULL) {
     log_error("kv_list param is empty");
     return -1;
@@ -83,7 +83,6 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value, bo
 
   el->key = key;
   el->value = value;
-  el->escape = escape;
 
   dl_list_add_tail(&kv_list->list, &el->list);
 
@@ -129,7 +128,7 @@ char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
     return NULL;
   }
 
-  char *json = sys_malloc(2);
+  char *json = sys_zalloc(2);
   if (json == NULL) {
     log_errno("sys_malloc");
     return NULL;
@@ -359,7 +358,7 @@ char *serialize_time2str(time_t value) {
   return sys_strdup(buf);
 }
 
-char *serialize_escapestr(char *str) {
+char *serialize_escapestr(const char *str) {
   if (str == NULL) {
     log_error("str param is NULL");
     return NULL;

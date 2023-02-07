@@ -20,7 +20,6 @@
 struct keyvalue_list {
   char *key;                  /**< The attribute name */  
   char *value;                /**< The attribute value */
-  bool escape;                /**< If true add "" to attribute value */
   struct dl_list list;        /**< List definition */
 };
 
@@ -44,9 +43,9 @@ void free_keyvalue_list(struct keyvalue_list *kv_list);
  * @param[in] kv_list The key/value list
  * @param[in] key The key attribute
  * @param[in] value The attribute value
- * @param[in] escape The escape param
+ * @return int 0 on success, -1 on failure
  */
-int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value, bool escape);
+int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value);
 
 /**
  * @brief Encodes an array to base64
@@ -105,7 +104,7 @@ char *serialize_time2str(time_t value);
  * @param[in] value The input string to escape
  * @return char * the escaped string, NULL on failure
  */
-char *serialize_escapestr(char *str);
+char *serialize_escapestr(const char *str);
 
 /**
  * @brief Encodes a key/value list to a json

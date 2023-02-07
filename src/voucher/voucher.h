@@ -47,6 +47,8 @@ enum VoucherAttributes {
   ATTR_PROXIMITY_REGISTRAR_CERT
 };
 
+#define VOUCHER_ROOT_NAME "ietf-voucher:voucher"
+
 #define VOUCHER_ATTRIBUTE_NAMES                                                \
   {                                                                            \
     "created-on", "expires-on", "assertion", "serial-number", "idevid-issuer", \
@@ -338,4 +340,14 @@ int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @return 0 on success, -1 on failure
  */
 int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
+
+/**
+ * @brief Serializes a voucher to a string
+ *
+ * Caller is responsible for freeing the string
+ * 
+ * @param[in] voucher The allocated voucher structure
+ * @return char* serialized voucher, NULL on failure
+ */
+char *serialize_voucher(struct Voucher *voucher);
 #endif
