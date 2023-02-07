@@ -16,6 +16,7 @@
 #include <unistd.h>
 
 #include "utils/log.h"
+#include "utils/os.h"
 #include "voucher/voucher.h"
 
 #define SERIALNAME_LONG                                                        \
@@ -198,6 +199,61 @@ static void test_set_attr_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_serialize_voucher(void **state) {
+  (void)state;
+
+  time_t time_value = 12345;
+  enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
+  char *str_array_value = "12345";
+  uint8_t array[] = {1, 2, 3, 4, 5};
+  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  bool bool_value = true;
+
+  struct Voucher *voucher = init_voucher();
+  char *serialized_json = serialize_voucher(voucher);
+  char *json =
+      "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":false}}";
+  assert_string_equal(serialized_json, json);
+  sys_free(serialized_json);
+  free_voucher(voucher);
+
+  voucher = init_voucher();
+  set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, bool_value);
+  serialized_json = serialize_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true}}";
+  assert_string_equal(serialized_json, json);
+  sys_free(serialized_json);
+  free_voucher(voucher);
+
+  voucher = init_voucher();
+  set_attr_voucher(voucher, ATTR_ASSERTION, enum_value);
+  set_attr_voucher(voucher, ATTR_SERIAL_NUMBER, str_array_value);
+  serialized_json = serialize_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"assertion\":\"logged\",\"serial-"
+         "number\":\"12345\",\"domain-cert-revocation-checks\":false}}";
+  assert_string_equal(serialized_json, json);
+  sys_free(serialized_json);
+  free_voucher(voucher);
+
+  voucher = init_voucher();
+  set_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, &array_value);
+  serialized_json = serialize_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":false,"
+         "\"prior-signed-voucher-request\":\"AQIDBAU=\"}}";
+  assert_string_equal(serialized_json, json);
+  sys_free(serialized_json);
+  free_voucher(voucher);
+
+  voucher = init_voucher();
+  set_attr_voucher(voucher, ATTR_CREATED_ON, time_value);
+  serialized_json = serialize_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"created-on\":\"1970-01-01T03:25:45Z\","
+         "\"domain-cert-revocation-checks\":false}}";
+  assert_string_equal(serialized_json, json);
+  sys_free(serialized_json);
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -211,7 +267,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_set_attr_enum_voucher),
       cmocka_unit_test(test_set_attr_str_voucher),
       cmocka_unit_test(test_set_attr_array_voucher),
-      cmocka_unit_test(test_set_attr_voucher)};
+      cmocka_unit_test(test_set_attr_voucher),
+      cmocka_unit_test(test_serialize_voucher)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

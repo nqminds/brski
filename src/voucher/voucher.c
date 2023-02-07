@@ -306,11 +306,12 @@ static char *serialize_attr_voucher(struct Voucher *voucher,
 
   switch (attr) {
     case ATTR_CREATED_ON:
-      return serialize_time2str(voucher->created_on);
+      return serialize_escapestr(serialize_time2str(voucher->created_on));
     case ATTR_EXPIRES_ON:
-      return serialize_time2str(voucher->expires_on);
+      return serialize_escapestr(serialize_time2str(voucher->expires_on));
     case ATTR_LAST_RENEWAL_DATE:
-      return serialize_time2str(voucher->last_renewal_date);
+      return serialize_escapestr(
+          serialize_time2str(voucher->last_renewal_date));
     case ATTR_ASSERTION:
       return serialize_escapestr(assertion_names[voucher->assertion]);
     case ATTR_SERIAL_NUMBER:
@@ -341,7 +342,7 @@ static char *serialize_attr_voucher(struct Voucher *voucher,
   }
 }
 
-struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
+static struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
   struct keyvalue_list *kv_list = init_keyvalue_list();
 
   if (kv_list == NULL) {
@@ -381,7 +382,7 @@ struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
   return kv_list;
 }
 
-char *serialize_child_voucher(struct Voucher *voucher) {
+static char *serialize_child_voucher(struct Voucher *voucher) {
   struct keyvalue_list *kv_list = voucher_to_keyvalue(voucher);
 
   if (kv_list == NULL) {
