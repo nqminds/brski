@@ -17,7 +17,6 @@
 static const uint8_t base64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-
 struct keyvalue_list *init_keyvalue_list(void) {
   struct keyvalue_list *kv_list = NULL;
 
@@ -51,7 +50,8 @@ void free_keyvalue_list(struct keyvalue_list *kv_list) {
     return;
   }
 
-  while ((el = dl_list_first(&kv_list->list, struct keyvalue_list, list)) != NULL) {
+  while ((el = dl_list_first(&kv_list->list, struct keyvalue_list, list)) !=
+         NULL) {
     free_keyvalue_list_el(el);
   }
 
@@ -96,7 +96,7 @@ char *concatenate_keyvalue(char *key, char *value, bool separator) {
   /* key + ":" + value + ","*/
   size_t length = key_size + value_length + 2;
   if (separator) {
-    length ++;
+    length++;
   }
 
   char *concat = sys_malloc(length);
@@ -159,10 +159,10 @@ char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
     strcat(json, concat);
 
     sys_free(concat);
-    idx ++;
+    idx++;
   }
 
-  length ++;
+  length++;
 
   if ((json = sys_realloc(json, length)) == NULL) {
     log_errno("sys_realloc");
@@ -174,7 +174,6 @@ char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
 
   return json;
 }
-
 
 static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
                                   size_t *out_len, const uint8_t *table,

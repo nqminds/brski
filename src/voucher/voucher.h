@@ -345,7 +345,7 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
  * @brief Serializes a voucher to a string
  *
  * Caller is responsible for freeing the string
- * 
+ *
  * @param[in] voucher The allocated voucher structure
  * @return char* serialized voucher, NULL on failure
  */

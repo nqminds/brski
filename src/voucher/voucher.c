@@ -12,8 +12,8 @@
 #include <jsmn.h>
 
 #include "../utils/os.h"
-#include "voucher.h"
 #include "serialize.h"
+#include "voucher.h"
 
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
@@ -268,7 +268,8 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
   return res;
 }
 
-static bool is_attr_voucher_nonempty(struct Voucher *voucher, enum VoucherAttributes attr) {
+static bool is_attr_voucher_nonempty(struct Voucher *voucher,
+                                     enum VoucherAttributes attr) {
   switch (attr) {
     case ATTR_CREATED_ON:
       return (voucher->created_on > 0);
@@ -287,7 +288,8 @@ static bool is_attr_voucher_nonempty(struct Voucher *voucher, enum VoucherAttrib
     case ATTR_NONCE:
       return check_binary_array_nonempty(&voucher->nonce);
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      return check_binary_array_nonempty(&voucher->prior_signed_voucher_request);
+      return check_binary_array_nonempty(
+          &voucher->prior_signed_voucher_request);
     case ATTR_PROXIMITY_REGISTRAR_CERT:
       return check_binary_array_nonempty(&voucher->proximity_registrar_cert);
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
@@ -297,7 +299,8 @@ static bool is_attr_voucher_nonempty(struct Voucher *voucher, enum VoucherAttrib
   }
 }
 
-static char* serialize_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr) {
+static char *serialize_attr_voucher(struct Voucher *voucher,
+                                    enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
   size_t out_len = 0;
 
@@ -313,15 +316,24 @@ static char* serialize_attr_voucher(struct Voucher *voucher, enum VoucherAttribu
     case ATTR_SERIAL_NUMBER:
       return serialize_escapestr(voucher->serial_number);
     case ATTR_IDEVID_ISSUER:
-      return serialize_escapestr((const char*)serialize_array2base64str(voucher->idevid_issuer.array, voucher->idevid_issuer.length, &out_len));
+      return serialize_escapestr((const char *)serialize_array2base64str(
+          voucher->idevid_issuer.array, voucher->idevid_issuer.length,
+          &out_len));
     case ATTR_PINNED_DOMAIN_CERT:
-      return serialize_escapestr((const char*)serialize_array2base64str(voucher->pinned_domain_cert.array, voucher->pinned_domain_cert.length, &out_len));
+      return serialize_escapestr((const char *)serialize_array2base64str(
+          voucher->pinned_domain_cert.array, voucher->pinned_domain_cert.length,
+          &out_len));
     case ATTR_NONCE:
-      return serialize_escapestr((const char*)serialize_array2base64str(voucher->nonce.array, voucher->nonce.length, &out_len));
+      return serialize_escapestr((const char *)serialize_array2base64str(
+          voucher->nonce.array, voucher->nonce.length, &out_len));
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      return serialize_escapestr((const char*)serialize_array2base64str(voucher->prior_signed_voucher_request.array, voucher->prior_signed_voucher_request.length, &out_len));
+      return serialize_escapestr((const char *)serialize_array2base64str(
+          voucher->prior_signed_voucher_request.array,
+          voucher->prior_signed_voucher_request.length, &out_len));
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      return serialize_escapestr((const char*)serialize_array2base64str(voucher->proximity_registrar_cert.array, voucher->proximity_registrar_cert.length, &out_len));
+      return serialize_escapestr((const char *)serialize_array2base64str(
+          voucher->proximity_registrar_cert.array,
+          voucher->proximity_registrar_cert.length, &out_len));
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
       return serialize_bool2str(voucher->domain_cert_revocation_checks);
     default:
@@ -339,7 +351,7 @@ struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
 
   enum VoucherAttributes attr = ATTR_CREATED_ON;
   const char *attr_names[] = VOUCHER_ATTRIBUTE_NAMES;
-  while(attr <= ATTR_PROXIMITY_REGISTRAR_CERT) {
+  while (attr <= ATTR_PROXIMITY_REGISTRAR_CERT) {
     if (is_attr_voucher_nonempty(voucher, attr)) {
       char *key = serialize_escapestr(attr_names[attr]);
       if (key == NULL) {
@@ -364,7 +376,7 @@ struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
         return NULL;
       }
     }
-    attr ++;
+    attr++;
   }
   return kv_list;
 }

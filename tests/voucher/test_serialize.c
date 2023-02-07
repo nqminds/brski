@@ -66,7 +66,7 @@ static void test_serialize_time2str(void **state) {
   assert_string_equal(out, "1973-11-29T21:33:09Z");
 
   sys_free(out);
-} 
+}
 
 static void test_init_keyvalue_list(void **state) {
   (void)state;
@@ -89,7 +89,8 @@ static void test_push_keyvalue_list(void **state) {
 
   assert_int_equal(dl_list_len(&kv_list->list), 3);
 
-  struct keyvalue_list *kv_list_last = dl_list_last(&kv_list->list, struct keyvalue_list, list);
+  struct keyvalue_list *kv_list_last =
+      dl_list_last(&kv_list->list, struct keyvalue_list, list);
   assert_string_equal(kv_list_last->key, "key3");
   assert_string_equal(kv_list_last->value, "value3");
   free_keyvalue_list(kv_list);
@@ -136,7 +137,6 @@ static void test_serialize_keyvalue2json(void **state) {
 
   kv_list = init_keyvalue_list();
 
-
   json = serialize_keyvalue2json(kv_list);
   assert_null(json);
 
@@ -157,8 +157,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_init_keyvalue_list),
       cmocka_unit_test(test_push_keyvalue_list),
       cmocka_unit_test(test_serialize_escapestr),
-      cmocka_unit_test(test_serialize_keyvalue2json)
-  };
+      cmocka_unit_test(test_serialize_keyvalue2json)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

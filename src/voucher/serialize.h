@@ -18,9 +18,9 @@
 #include "list.h"
 
 struct keyvalue_list {
-  char *key;                  /**< The attribute name */  
-  char *value;                /**< The attribute value */
-  struct dl_list list;        /**< List definition */
+  char *key;           /**< The attribute name */
+  char *value;         /**< The attribute value */
+  struct dl_list list; /**< List definition */
 };
 
 /**
@@ -86,7 +86,7 @@ uint8_t *serialize_base64str2array(const uint8_t *src, size_t length,
 char *serialize_bool2str(bool value);
 
 /**
- * @brief Encodes a time(stamp) value to a string using 
+ * @brief Encodes a time(stamp) value to a string using
  * ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
  *
  * Caller is responsible for freeing the string
