@@ -78,6 +78,22 @@ static void test_init_keyvalue_list(void **state) {
   free_keyvalue_list(kv_list);
 }
 
+static void test_push_keyvalue_list(void **state) {
+  (void)state;
+
+  struct keyvalue_list *kv_list = init_keyvalue_list();
+
+  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"), true);
+  push_keyvalue_list(kv_list, sys_strdup("key2"), sys_strdup("value2"), false);
+  push_keyvalue_list(kv_list, sys_strdup("key3"), sys_strdup("value3"), true);
+
+  assert_int_equal(dl_list_len(&kv_list->list), 3);
+
+  struct keyvalue_list *kv_list_last = dl_list_last(&kv_list->list, struct keyvalue_list, list);
+  assert_string_equal(kv_list_last->key, "key3");
+  assert_string_equal(kv_list_last->value, "value3");
+  free_keyvalue_list(kv_list);
+}
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -89,7 +105,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_base64str2array),
       cmocka_unit_test(test_serialize_bool2str),
       cmocka_unit_test(test_serialize_time2str),
-      cmocka_unit_test(test_init_keyvalue_list)
+      cmocka_unit_test(test_init_keyvalue_list),
+      cmocka_unit_test(test_push_keyvalue_list)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
