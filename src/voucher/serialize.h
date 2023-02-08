@@ -86,6 +86,16 @@ uint8_t *serialize_base64str2array(const uint8_t *src, size_t length,
 char *serialize_bool2str(bool value);
 
 /**
+ * @brief Encodes a string value to a bool
+ *
+ *
+ * @param[in] str The string value
+ * @param[in] length The string length
+ * @return int 0=>false, 1=>true, -1 on failure
+ */
+int serialize_str2bool(char *str, size_t length);
+
+/**
  * @brief Encodes a time(stamp) value to a string using
  * ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
  *

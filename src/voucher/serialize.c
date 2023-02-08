@@ -9,6 +9,7 @@
  */
 #include <stdint.h>
 #include <time.h>
+#include <ctype.h>
 
 #include "../utils/os.h"
 
@@ -339,6 +340,45 @@ char *serialize_bool2str(bool value) {
   }
 
   return sys_strdup(buf);
+}
+
+int serialize_str2bool(char *str, size_t length) {
+  if (str == NULL) {
+    log_error("str param is NULL");
+    return -1;
+  }
+
+  if (!length) {
+    log_error("length param is NULL");
+    return -1;
+  }
+
+  char buf[6];
+
+  if (length > 5) {
+    return -1;
+  }
+
+  if (strncmp(str, "0", 1) == 0 && length == 1) {
+    return 0;
+  } else if (strncmp(str, "1", 1) == 0 && length == 1) {
+    return 1;
+  } else {
+    size_t idx = 0;
+    while (idx < length) {
+      buf[idx] = tolower(str[idx]);
+      idx ++;
+    }
+    buf[idx] = '\0';
+
+    if (strcmp(buf, "false") == 0) {
+      return 0;
+    } else if (strcmp(buf, "true") == 0) {
+      return 1;
+    } else {
+      return -1;
+    }
+  }
 }
 
 char *serialize_time2str(time_t value) {

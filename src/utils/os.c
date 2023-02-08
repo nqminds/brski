@@ -46,20 +46,23 @@ void *sys_memdup(const void *src, size_t len) {
   return r;
 }
 
-char *sys_strdup(const char *s) {
+char *sys_strndup(const char *s, size_t length) {
   char *dest = NULL;
-  size_t len = strlen(s) + 1;
 
   if (s != NULL) {
-    dest = (char *)sys_malloc(len);
+    dest = (char *)sys_zalloc(length + 1);
     if (dest == NULL) {
       return NULL;
     }
 
-    strcpy(dest, s);
+    strncpy(dest, s, length);
   }
 
   return dest;
+}
+
+char *sys_strdup(const char *s) {
+  return sys_strndup(s, strlen(s));
 }
 
 size_t sys_strlcpy(char *dest, const char *src, size_t siz) {

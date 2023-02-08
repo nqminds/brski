@@ -57,6 +57,33 @@ static void test_serialize_bool2str(void **state) {
   sys_free(out);
 }
 
+static void test_serialize_str2bool(void **state) {
+  (void)state;
+
+  char *str = "true";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), 1);
+  str = "false";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), 0);
+
+  str = "tRue";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), 1);
+
+  str = "False";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), 0);
+
+  str = "0";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), 0);
+
+  str = "1";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), 1);
+
+  str = "truu";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), -1);
+
+  str = "11";
+  assert_int_equal(serialize_str2bool(str, strlen(str)), -1);
+}
+
 static void test_serialize_time2str(void **state) {
   (void)state;
   time_t time = 123456789;
@@ -153,6 +180,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_array2base64str),
       cmocka_unit_test(test_serialize_base64str2array),
       cmocka_unit_test(test_serialize_bool2str),
+      cmocka_unit_test(test_serialize_str2bool),
       cmocka_unit_test(test_serialize_time2str),
       cmocka_unit_test(test_init_keyvalue_list),
       cmocka_unit_test(test_push_keyvalue_list),
