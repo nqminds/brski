@@ -244,6 +244,24 @@ set_attr_array_voucher_fail:
   return -1;
 }
 
+int set_attr_base64_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                           char *value, size_t length) {
+  struct VoucherBinaryArray binary_array;
+  
+  if ((binary_array.array = serialize_base64str2array((const uint8_t *)value, length,
+                                 &binary_array.length)) == NULL) {
+    log_error("serialize_base64str2array fail");
+    return -1;
+  }
+  if (set_attr_array_voucher(voucher, attr, &binary_array) < 0) {
+    log_error("set_attr_voucher fail");
+    sys_free(binary_array.array);
+    return -1;
+  }
+
+  return 0;
+}
+
 int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
                      ...) {
   (void)voucher;
@@ -499,7 +517,10 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_l
       return -1;
     }
   } else if (strncmp(attr_names[ATTR_NONCE], key, key_length) == 0) {
-
+    if (set_attr_base64_voucher(voucher, ATTR_NONCE, value, value_length) < 0) {
+      log_error("set_attr_base64_voucher fail");
+      return -1;
+    }
   } else if (strncmp(attr_names[ATTR_LAST_RENEWAL_DATE], key, key_length) == 0) {
   
   } else if (strncmp(attr_names[ATTR_PRIOR_SIGNED_VOUCHER_REQUEST], key, key_length) == 0) {
