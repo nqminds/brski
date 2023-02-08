@@ -254,6 +254,16 @@ static void test_serialize_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_deserialize_voucher(void **state) {
+  (void)state;
+
+  char *json = "{\"ietf-voucher:voucher\":{\"assertion\":\"logged\",\"serial-"
+         "number\":\"12345\",\"domain-cert-revocation-checks\":false}}";
+  struct Voucher *voucher = deserialize_voucher(json);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -268,7 +278,9 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_set_attr_str_voucher),
       cmocka_unit_test(test_set_attr_array_voucher),
       cmocka_unit_test(test_set_attr_voucher),
-      cmocka_unit_test(test_serialize_voucher)};
+      cmocka_unit_test(test_serialize_voucher),
+      cmocka_unit_test(test_deserialize_voucher)
+  };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -443,12 +443,11 @@ char *serialize_voucher(struct Voucher *voucher) {
   return json;
 }
 
-static int jsoneq(const char *json, jsmntok_t *tok, const char *s) {
-  if (tok->type == JSMN_STRING && (int)strlen(s) == tok->end - tok->start &&
-      strncmp(json + tok->start, s, tok->end - tok->start) == 0) {
-    return 0;
-  }
-  return -1;
+static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_length, char *value, size_t value_length) {
+  (void)voucher;
+
+  log_trace("%.*s:%.*s", key_length, key, value_length, value);
+  return 0;
 }
 
 struct Voucher *deserialize_voucher(char *json) {
@@ -473,5 +472,43 @@ struct Voucher *deserialize_voucher(char *json) {
     return NULL;
   }
 
+  struct Voucher *voucher = init_voucher();
+
+  for (int idx = 1; idx < count; idx++) {
+    int length = tokens[idx].end - tokens[idx].start;
+    /* Find the voucher root key */
+    if (strncmp(VOUCHER_ROOT_NAME, json + tokens[idx].start, length) == 0) {
+      idx ++;
+      if (idx < count && tokens[idx].type == JSMN_OBJECT) {
+        /* Iterate over all the key/value pairs of the voucher root */
+        for (int j = 0; j < tokens[idx].size; j++) {
+          int key_idx = idx + j + 1;
+          int value_idx = idx + j*2 + 1 + 1;
+          if (key_idx < count && value_idx < count) {
+            jsmntok_t *key_idx = &tokens[idx + j + 1];
+            jsmntok_t *value_idx = &tokens[idx + j*2 + 2];
+            size_t key_length = key_idx->end - key_idx->start;
+            size_t value_length = value_idx->end - value_idx->start;
+            char *key = json + key_idx->start;
+            char *value = json + value_idx->start;
+            if (set_keyvalue_voucher(voucher, key, key_length, value, value_length) < 0) {
+              goto deserialize_voucher_fail;
+            }
+          } else {
+            goto deserialize_voucher_fail;
+          }
+        }
+        break;
+      } else {
+        goto deserialize_voucher_fail;
+      }
+    }
+  }
+
+  return voucher;
+
+deserialize_voucher_fail:
+  log_error("Malformed voucher json");
+  free_voucher(voucher);
   return NULL;
 }
