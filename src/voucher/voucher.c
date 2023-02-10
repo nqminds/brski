@@ -504,9 +504,15 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_l
       return -1;
     }
   } else if (strncmp(attr_names[ATTR_IDEVID_ISSUER], key, key_length) == 0) {
-
+    if (set_attr_base64_voucher(voucher, ATTR_IDEVID_ISSUER, value, value_length) < 0) {
+      log_error("set_attr_base64_voucher fail");
+      return -1;
+    }
   } else if (strncmp(attr_names[ATTR_PINNED_DOMAIN_CERT], key, key_length) == 0) {
-
+    if (set_attr_base64_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, value, value_length) < 0) {
+      log_error("set_attr_base64_voucher fail");
+      return -1;
+    }
   } else if (strncmp(attr_names[ATTR_DOMAIN_CERT_REVOCATION_CHECKS], key, key_length) == 0) {
     int bool_value = serialize_str2bool(value, value_length);
     if (bool_value < 0) {
@@ -524,9 +530,15 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_l
   } else if (strncmp(attr_names[ATTR_LAST_RENEWAL_DATE], key, key_length) == 0) {
   
   } else if (strncmp(attr_names[ATTR_PRIOR_SIGNED_VOUCHER_REQUEST], key, key_length) == 0) {
-
+    if (set_attr_base64_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, value, value_length) < 0) {
+      log_error("set_attr_base64_voucher fail");
+      return -1;
+    }
   } else if (strncmp(attr_names[ATTR_PROXIMITY_REGISTRAR_CERT], key, key_length) == 0) {
-
+    if (set_attr_base64_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, value, value_length) < 0) {
+      log_error("set_attr_base64_voucher fail");
+      return -1;
+    }
   } else {
     log_error("Unknown voucher json key");
     return -1;
