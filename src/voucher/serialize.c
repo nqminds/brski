@@ -381,10 +381,13 @@ int serialize_str2bool(char *str, size_t length) {
   }
 }
 
-char *serialize_time2str(time_t value) {
+char *serialize_time2str(time_t timestamp) {
   char buf[sizeof("9999-12-31T24:59:59Z") + 1];
   struct tm result;
-  if (gmtime_r(&value, &result) == NULL) {
+
+  sys_memset(&result, 0, sizeof(struct tm));
+
+  if (gmtime_r(&timestamp, &result) == NULL) {
     log_errno("gmtime_r");
     return NULL;
   }
@@ -395,6 +398,29 @@ char *serialize_time2str(time_t value) {
   }
 
   return sys_strdup(buf);
+}
+
+time_t serialize_str2time(char *str) {
+  if (str == NULL) {
+    log_error("str param is NULL");
+    return -1;
+  }
+
+  struct tm tm;
+  sys_memset(&tm, 0, sizeof(struct tm));
+
+  if (strptime(str, "%Y-%m-%dT%H:%M:%SZ", &tm) == NULL) {
+    log_error("strptime fail");
+    return -1;
+  }
+
+  time_t timestamp = mktime(&tm);
+  if (timestamp < 0) {
+    log_error("mktime fail");
+    return -1;
+  }
+
+  return timestamp;
 }
 
 char *serialize_escapestr(const char *str) {

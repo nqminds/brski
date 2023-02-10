@@ -101,10 +101,21 @@ int serialize_str2bool(char *str, size_t length);
  *
  * Caller is responsible for freeing the string
  *
- * @param[in] value The time(stamp) value
+ * @param[in] timestamp The timestamp value
  * @return char * encoded time, NULL on failure
  */
-char *serialize_time2str(time_t value);
+char *serialize_time2str(time_t timestamp);
+
+/**
+ * @brief decodes a ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
+ * formated string to a timestamp value
+ *
+ * Caller is responsible for freeing the string
+ *
+ * @param[in] str The iso encoded time string
+ * @return time_t the timestamp, -1 on failure
+ */
+time_t serialize_str2time(char *str);
 
 /**
  * @brief Adds "" to a string
