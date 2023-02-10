@@ -122,7 +122,7 @@ struct Voucher {
    * work MAY create verification requirements based on this
    * node.
    */
-  time_t created_on;
+  struct tm created_on;
 
   /**
    * A value indicating when this voucher expires.  The node is
@@ -136,7 +136,7 @@ struct Voucher {
    * The expires-on value MUST NOT exceed the expiration date
    * of any of the listed 'pinned-domain-cert' certificates.
    */
-  time_t expires_on;
+  struct tm expires_on;
 
   /**
    * The assertion is a statement from the MASA regarding how
@@ -220,7 +220,7 @@ struct Voucher {
    * vendor may associate validity periods with support contracts,
    * which may be terminated or extended over time.
    */
-  time_t last_renewal_date;
+  struct tm last_renewal_date;
 
   /**
    * If it is necessary to change a voucher, or re-sign and
@@ -296,7 +296,7 @@ int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @return 0 on success, -1 on failure
  */
 int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          time_t value);
+                          struct tm *value);
 
 /**
  * @brief Sets the value for a voucher enum attribute

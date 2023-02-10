@@ -109,7 +109,7 @@ static int set_attr_strbool_voucher(struct Voucher *voucher, enum VoucherAttribu
 }
 
 int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          time_t value) {
+                          struct tm *value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -117,13 +117,13 @@ int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
 
   switch (attr) {
     case ATTR_CREATED_ON:
-      voucher->created_on = value;
+      sys_memcpy(&voucher->created_on, value, sizeof(struct tm));
       break;
     case ATTR_EXPIRES_ON:
-      voucher->expires_on = value;
+      sys_memcpy(&voucher->expires_on, value, sizeof(struct tm));
       break;
     case ATTR_LAST_RENEWAL_DATE:
-      voucher->last_renewal_date = value;
+      sys_memcpy(&voucher->last_renewal_date, value, sizeof(struct tm));
       break;
     default:
       log_error("Wrong attribute name");
@@ -286,7 +286,7 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
   va_start(args, attr);
 
   int res = 0;
-  time_t time_value;
+  struct tm *time_value;
   int enum_value;
   char *str_value;
   struct VoucherBinaryArray *array_value;
@@ -296,7 +296,7 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
     case ATTR_CREATED_ON:
     case ATTR_EXPIRES_ON:
     case ATTR_LAST_RENEWAL_DATE:
-      time_value = va_arg(args, time_t);
+      time_value = va_arg(args, struct tm*);
       res = set_attr_time_voucher(voucher, attr, time_value);
       break;
     case ATTR_ASSERTION:
@@ -327,15 +327,24 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
   return res;
 }
 
+static bool is_attr_time_nonempty(struct tm *tm) {
+  if (!tm->tm_year && !tm->tm_yday && !tm->tm_mon && !tm->tm_wday && !tm->tm_mday &&
+      !tm->tm_hour && !tm->tm_min && !tm->tm_sec) {
+    return false;
+  }
+
+  return true;
+}
+
 static bool is_attr_voucher_nonempty(struct Voucher *voucher,
                                      enum VoucherAttributes attr) {
   switch (attr) {
     case ATTR_CREATED_ON:
-      return (voucher->created_on > 0);
+      return is_attr_time_nonempty(&voucher->created_on);
     case ATTR_EXPIRES_ON:
-      return (voucher->expires_on > 0);
+      return is_attr_time_nonempty(&voucher->expires_on);
     case ATTR_LAST_RENEWAL_DATE:
-      return (voucher->last_renewal_date > 0);
+      return is_attr_time_nonempty(&voucher->last_renewal_date);
     case ATTR_ASSERTION:
       return (voucher->assertion != VOUCHER_ASSERTION_NONE);
     case ATTR_SERIAL_NUMBER:
@@ -365,12 +374,12 @@ static char *serialize_attr_voucher(struct Voucher *voucher,
 
   switch (attr) {
     case ATTR_CREATED_ON:
-      return serialize_escapestr(serialize_time2str(voucher->created_on));
+      return serialize_escapestr(serialize_time2str(&voucher->created_on));
     case ATTR_EXPIRES_ON:
-      return serialize_escapestr(serialize_time2str(voucher->expires_on));
+      return serialize_escapestr(serialize_time2str(&voucher->expires_on));
     case ATTR_LAST_RENEWAL_DATE:
       return serialize_escapestr(
-          serialize_time2str(voucher->last_renewal_date));
+          serialize_time2str(&voucher->last_renewal_date));
     case ATTR_ASSERTION:
       return serialize_escapestr(assertion_names[voucher->assertion]);
     case ATTR_SERIAL_NUMBER:
@@ -503,15 +512,15 @@ char *serialize_voucher(struct Voucher *voucher) {
 
 static int set_attr_strtime_voucher(struct Voucher *voucher, enum VoucherAttributes attr, char *value, size_t value_length) {
   char buf[64];
-  snprintf(buf, 64, "%*.s", (int)value_length, value);
+  snprintf(buf, 64, "%.*s", (int)value_length, value);
 
-  time_t timestamp = serialize_str2time(buf);
-  if (timestamp < 0) {
+  struct tm tm;
+  if (serialize_str2time(buf, &tm) < 0) {
     log_error("serialize_str2time fail");
     return -1;
   }
 
-  if (set_attr_time_voucher(voucher, attr, timestamp) < 0) {
+  if (set_attr_time_voucher(voucher, attr, &tm) < 0) {
     log_error("set_attr_time_voucher fail");
     return -1;
   }
@@ -520,8 +529,6 @@ static int set_attr_strtime_voucher(struct Voucher *voucher, enum VoucherAttribu
 }
 
 static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_length, char *value, size_t value_length) {
-  (void)voucher;
-
   const char *attr_names[] = VOUCHER_ATTRIBUTE_NAMES;
   if (strncmp(attr_names[ATTR_CREATED_ON], key, key_length) == 0) {
     if (set_attr_strtime_voucher(voucher, ATTR_CREATED_ON, value, value_length) < 0) {
@@ -608,12 +615,14 @@ struct Voucher *deserialize_voucher(char *json) {
     return NULL;
   }
 
-  struct Voucher *voucher = init_voucher();
+  struct Voucher *voucher = NULL;
 
   for (int idx = 1; idx < count; idx++) {
     int length = tokens[idx].end - tokens[idx].start;
     /* Find the voucher root key */
     if (strncmp(VOUCHER_ROOT_NAME, json + tokens[idx].start, length) == 0) {
+      voucher = init_voucher();
+
       idx ++;
       if (idx < count && tokens[idx].type == JSMN_OBJECT) {
         /* Iterate over all the key/value pairs of the voucher root */
@@ -628,23 +637,30 @@ struct Voucher *deserialize_voucher(char *json) {
             char *key = json + key_token->start;
             char *value = json + value_token->start;
             if (set_keyvalue_voucher(voucher, key, key_length, value, value_length) < 0) {
+              log_trace("set_keyvalue_voucher fail");
               goto deserialize_voucher_fail;
             }
           } else {
+            log_error("Malformed voucher json");
             goto deserialize_voucher_fail;
           }
         }
-        break;
       } else {
+        log_error("Malformed voucher json");
         goto deserialize_voucher_fail;
       }
+
+      break;
     }
+  }
+
+  if (voucher == NULL) {
+    log_error("Malformed voucher json");
   }
 
   return voucher;
 
 deserialize_voucher_fail:
-  log_error("Malformed voucher json");
   free_voucher(voucher);
   return NULL;
 }

@@ -10,6 +10,7 @@
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
 
+#include <time.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -96,26 +97,25 @@ char *serialize_bool2str(bool value);
 int serialize_str2bool(char *str, size_t length);
 
 /**
- * @brief Encodes a time(stamp) value to a string using
+ * @brief Encodes a time struct value to a string using
  * ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
  *
  * Caller is responsible for freeing the string
  *
- * @param[in] timestamp The timestamp value
+ * @param[in] value The time struct
  * @return char * encoded time, NULL on failure
  */
-char *serialize_time2str(time_t timestamp);
+char *serialize_time2str(struct tm *value);
 
 /**
  * @brief decodes a ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
- * formated string to a timestamp value
- *
- * Caller is responsible for freeing the string
+ * formated string to a time struct value
  *
  * @param[in] str The iso encoded time string
- * @return time_t the timestamp, -1 on failure
+ * @param[out] tm The output time struct value
+ * @return 0 on success, -1 on failure
  */
-time_t serialize_str2time(char *str);
+int serialize_str2time(char *str, struct tm *tm);
 
 /**
  * @brief Adds "" to a string

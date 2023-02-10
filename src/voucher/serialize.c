@@ -381,18 +381,10 @@ int serialize_str2bool(char *str, size_t length) {
   }
 }
 
-char *serialize_time2str(time_t timestamp) {
+char *serialize_time2str(struct tm *value) {
   char buf[sizeof("9999-12-31T24:59:59Z") + 1];
-  struct tm result;
 
-  sys_memset(&result, 0, sizeof(struct tm));
-
-  if (gmtime_r(&timestamp, &result) == NULL) {
-    log_errno("gmtime_r");
-    return NULL;
-  }
-
-  if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", &result) == 0) {
+  if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", value) == 0) {
     log_error("strftime fail");
     return NULL;
   }
@@ -400,27 +392,25 @@ char *serialize_time2str(time_t timestamp) {
   return sys_strdup(buf);
 }
 
-time_t serialize_str2time(char *str) {
+int serialize_str2time(char *str, struct tm *tm) {
   if (str == NULL) {
     log_error("str param is NULL");
     return -1;
   }
 
-  struct tm tm;
-  sys_memset(&tm, 0, sizeof(struct tm));
+  if (tm == NULL) {
+    log_error("tm param is NULL");
+    return -1;
+  }
 
-  if (strptime(str, "%Y-%m-%dT%H:%M:%SZ", &tm) == NULL) {
+  sys_memset(tm, 0, sizeof(struct tm));
+
+  if (strptime(str, "%Y-%m-%dT%H:%M:%SZ", tm) == NULL) {
     log_error("strptime fail");
     return -1;
   }
 
-  time_t timestamp = mktime(&tm);
-  if (timestamp < 0) {
-    log_error("mktime fail");
-    return -1;
-  }
-
-  return timestamp;
+  return 0;
 }
 
 char *serialize_escapestr(const char *str) {
