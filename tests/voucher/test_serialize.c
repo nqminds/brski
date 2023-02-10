@@ -95,6 +95,19 @@ static void test_serialize_time2str(void **state) {
   sys_free(out);
 }
 
+static void test_serialize_str2time(void **state) {
+  (void)state;
+
+  char *str = "1973-11-29T21:33:09Z";
+
+  time_t timestamp = serialize_str2time(str);
+  assert_int_equal(timestamp == 123456789, 1);
+
+  str = "0000-11-29T21:33:09Z";
+  timestamp = serialize_str2time(str);
+  assert_int_equal(timestamp == -1, 1);
+}
+
 static void test_init_keyvalue_list(void **state) {
   (void)state;
 
@@ -182,6 +195,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_bool2str),
       cmocka_unit_test(test_serialize_str2bool),
       cmocka_unit_test(test_serialize_time2str),
+      cmocka_unit_test(test_serialize_str2time),
       cmocka_unit_test(test_init_keyvalue_list),
       cmocka_unit_test(test_push_keyvalue_list),
       cmocka_unit_test(test_serialize_escapestr),

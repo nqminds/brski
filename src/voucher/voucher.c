@@ -92,6 +92,22 @@ int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
   return 0;
 }
 
+static int set_attr_strbool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+                          char *value, size_t value_length) {
+  int bool_value = serialize_str2bool(value, value_length);
+  if (bool_value < 0) {
+    log_error("serialize_str2bool fail");
+    return -1;
+  }
+
+  if (set_attr_bool_voucher(voucher, attr, (bool)bool_value) < 0) {
+    log_error("set_attr_voucher fail");
+    return -1;
+  }
+
+  return 0;
+}
+
 int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
                           time_t value) {
   if (voucher == NULL) {
@@ -485,14 +501,38 @@ char *serialize_voucher(struct Voucher *voucher) {
   return json;
 }
 
+static int set_attr_strtime_voucher(struct Voucher *voucher, enum VoucherAttributes attr, char *value, size_t value_length) {
+  char buf[64];
+  snprintf(buf, 64, "%*.s", (int)value_length, value);
+
+  time_t timestamp = serialize_str2time(buf);
+  if (timestamp < 0) {
+    log_error("serialize_str2time fail");
+    return -1;
+  }
+
+  if (set_attr_time_voucher(voucher, attr, timestamp) < 0) {
+    log_error("set_attr_time_voucher fail");
+    return -1;
+  }
+
+  return 0;
+}
+
 static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_length, char *value, size_t value_length) {
   (void)voucher;
 
   const char *attr_names[] = VOUCHER_ATTRIBUTE_NAMES;
   if (strncmp(attr_names[ATTR_CREATED_ON], key, key_length) == 0) {
-
+    if (set_attr_strtime_voucher(voucher, ATTR_CREATED_ON, value, value_length) < 0) {
+      log_error("set_attr_strtime_voucher fail");
+      return -1;
+    }
   } else if (strncmp(attr_names[ATTR_EXPIRES_ON], key, key_length) == 0) {
-
+    if (set_attr_strtime_voucher(voucher, ATTR_EXPIRES_ON, value, value_length) < 0) {
+      log_error("set_attr_strtime_voucher fail");
+      return -1;
+    }
   } else if (strncmp(attr_names[ATTR_ASSERTION], key, key_length) == 0) {
     if (set_attr_strenum_voucher(voucher, ATTR_ASSERTION, value, value_length) < 0) {
       log_error("set_attr_strenum_voucher fail");
@@ -514,12 +554,8 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_l
       return -1;
     }
   } else if (strncmp(attr_names[ATTR_DOMAIN_CERT_REVOCATION_CHECKS], key, key_length) == 0) {
-    int bool_value = serialize_str2bool(value, value_length);
-    if (bool_value < 0) {
-      goto set_keyvalue_voucher_fail;
-    }
-    if (set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, (bool)bool_value) < 0) {
-      log_error("set_attr_voucher fail");
+    if (set_attr_strbool_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, value, value_length) < 0) {
+      log_error("set_attr_strbool_voucher fail");
       return -1;
     }
   } else if (strncmp(attr_names[ATTR_NONCE], key, key_length) == 0) {
@@ -528,7 +564,10 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_l
       return -1;
     }
   } else if (strncmp(attr_names[ATTR_LAST_RENEWAL_DATE], key, key_length) == 0) {
-  
+    if (set_attr_strtime_voucher(voucher, ATTR_LAST_RENEWAL_DATE, value, value_length) < 0) {
+      log_error("set_attr_strtime_voucher fail");
+      return -1;
+    }  
   } else if (strncmp(attr_names[ATTR_PRIOR_SIGNED_VOUCHER_REQUEST], key, key_length) == 0) {
     if (set_attr_base64_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, value, value_length) < 0) {
       log_error("set_attr_base64_voucher fail");
@@ -544,12 +583,7 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_l
     return -1;
   }
 
-  log_trace("%.*s:%.*s", key_length, key, value_length, value);
   return 0;
-
-set_keyvalue_voucher_fail:
-  log_error("Unknown voucher json value");
-  return -1;
 }
 
 struct Voucher *deserialize_voucher(char *json) {
