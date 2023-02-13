@@ -19,6 +19,14 @@
 #define MAX_SERIAL_NUMBER_SIZE 128
 #define MAX_VOUCHER_JSON_TOKENS 32
 
+static bool check_size_str_equal(const char *src, const char *dst, size_t dst_length)  {
+  if (strncmp(src, dst, dst_length) == 0 && strlen(src) == dst_length) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
 static bool check_binary_array_nonempty(struct VoucherBinaryArray *value) {
   if (value == NULL) {
     return false;
@@ -160,7 +168,7 @@ static int set_attr_strenum_voucher(struct Voucher *voucher, enum VoucherAttribu
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
   enum VoucherAssertions assertion = VOUCHER_ASSERTION_VERIFIED;
   while (assertion <= VOUCHER_ASSERTION_PROXIMITY) {
-    if (strncmp(assertion_names[assertion], value, length) == 0) {
+    if (check_size_str_equal(assertion_names[assertion], value, (size_t) length)) {
       return set_attr_enum_voucher(voucher, attr, (int) assertion);
     }
     assertion ++;
@@ -530,57 +538,58 @@ static int set_attr_strtime_voucher(struct Voucher *voucher, enum VoucherAttribu
 
 static int set_keyvalue_voucher(struct Voucher *voucher, char *key, size_t key_length, char *value, size_t value_length) {
   const char *attr_names[] = VOUCHER_ATTRIBUTE_NAMES;
-  if (strncmp(attr_names[ATTR_CREATED_ON], key, key_length) == 0) {
+  if (check_size_str_equal(attr_names[ATTR_CREATED_ON], key, key_length)) {
     if (set_attr_strtime_voucher(voucher, ATTR_CREATED_ON, value, value_length) < 0) {
       log_error("set_attr_strtime_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_EXPIRES_ON], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_EXPIRES_ON], key, key_length)) {
     if (set_attr_strtime_voucher(voucher, ATTR_EXPIRES_ON, value, value_length) < 0) {
       log_error("set_attr_strtime_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_ASSERTION], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_ASSERTION], key, key_length)) {
     if (set_attr_strenum_voucher(voucher, ATTR_ASSERTION, value, value_length) < 0) {
       log_error("set_attr_strenum_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_SERIAL_NUMBER], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_SERIAL_NUMBER], key, key_length)) {
     if (set_attr_nstr_voucher(voucher, ATTR_SERIAL_NUMBER, value, value_length) < 0) {
       log_error("set_attr_nstr_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_IDEVID_ISSUER], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_IDEVID_ISSUER], key, key_length)) {
     if (set_attr_base64_voucher(voucher, ATTR_IDEVID_ISSUER, value, value_length) < 0) {
       log_error("set_attr_base64_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_PINNED_DOMAIN_CERT], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_PINNED_DOMAIN_CERT], key, key_length)) {
     if (set_attr_base64_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, value, value_length) < 0) {
       log_error("set_attr_base64_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_DOMAIN_CERT_REVOCATION_CHECKS], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_DOMAIN_CERT_REVOCATION_CHECKS], key, key_length)) {
+    log_trace("HHHHHHH %.*s", key_length, key);
     if (set_attr_strbool_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, value, value_length) < 0) {
       log_error("set_attr_strbool_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_NONCE], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_NONCE], key, key_length)) {
     if (set_attr_base64_voucher(voucher, ATTR_NONCE, value, value_length) < 0) {
       log_error("set_attr_base64_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_LAST_RENEWAL_DATE], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_LAST_RENEWAL_DATE], key, key_length)) {
     if (set_attr_strtime_voucher(voucher, ATTR_LAST_RENEWAL_DATE, value, value_length) < 0) {
       log_error("set_attr_strtime_voucher fail");
       return -1;
     }  
-  } else if (strncmp(attr_names[ATTR_PRIOR_SIGNED_VOUCHER_REQUEST], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_PRIOR_SIGNED_VOUCHER_REQUEST], key, key_length)) {
     if (set_attr_base64_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, value, value_length) < 0) {
       log_error("set_attr_base64_voucher fail");
       return -1;
     }
-  } else if (strncmp(attr_names[ATTR_PROXIMITY_REGISTRAR_CERT], key, key_length) == 0) {
+  } else if (check_size_str_equal(attr_names[ATTR_PROXIMITY_REGISTRAR_CERT], key, key_length)) {
     if (set_attr_base64_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, value, value_length) < 0) {
       log_error("set_attr_base64_voucher fail");
       return -1;

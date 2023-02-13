@@ -88,13 +88,14 @@ static void test_serialize_str2bool(void **state) {
 
 static void test_serialize_time2str(void **state) {
   (void)state;
-  struct tm tm;
-  tm.tm_year = 73;
-  tm.tm_mon = 10;
-  tm.tm_mday = 29;
-  tm.tm_hour = 21;
-  tm.tm_min = 33;
-  tm.tm_sec = 9;
+  struct tm tm = {
+    .tm_year = 73,
+    .tm_mon = 10,
+    .tm_mday = 29,
+    .tm_hour = 21,
+    .tm_min = 33,
+    .tm_sec = 9
+  };
 
   char *out = serialize_time2str(&tm);
   assert_non_null(out);
@@ -106,18 +107,16 @@ static void test_serialize_time2str(void **state) {
 static void test_serialize_str2time(void **state) {
   (void)state;
 
-  // char *str = "1973-11-29T21:33:09Z";
+  struct tm tm;
+  char *str = "1973-11-29T21:33:09Z";
 
-  // time_t timestamp = serialize_str2time(str);
-  // assert_int_equal(timestamp == 123456789, 1);
-
-  // str = "1970-01-01T03:25:45Z";
-  // timestamp = serialize_str2time(str);
-  // assert_int_equal(timestamp == 12345, 1);
-
-  // str = "0000-11-29T21:33:09Z";
-  // timestamp = serialize_str2time(str);
-  // assert_int_equal(timestamp == -1, 1);
+  assert_int_equal(serialize_str2time(str, &tm), 0);
+  assert_int_equal(tm.tm_year, 73);
+  assert_int_equal(tm.tm_mon, 10);
+  assert_int_equal(tm.tm_mday, 29);
+  assert_int_equal(tm.tm_hour, 21);
+  assert_int_equal(tm.tm_min, 33);
+  assert_int_equal(tm.tm_sec, 9);
 }
 
 static void test_init_keyvalue_list(void **state) {
