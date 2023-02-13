@@ -13,9 +13,8 @@
 #include <string.h>
 #include <sys/stat.h>
 #include <sys/types.h>
-#include <unistd.h>
-#include <string.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "utils/log.h"
 #include "utils/os.h"
@@ -88,14 +87,12 @@ static void test_serialize_str2bool(void **state) {
 
 static void test_serialize_time2str(void **state) {
   (void)state;
-  struct tm tm = {
-    .tm_year = 73,
-    .tm_mon = 10,
-    .tm_mday = 29,
-    .tm_hour = 21,
-    .tm_min = 33,
-    .tm_sec = 9
-  };
+  struct tm tm = {.tm_year = 73,
+                  .tm_mon = 10,
+                  .tm_mday = 29,
+                  .tm_hour = 21,
+                  .tm_min = 33,
+                  .tm_sec = 9};
 
   char *out = serialize_time2str(&tm);
   assert_non_null(out);
@@ -210,8 +207,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_init_keyvalue_list),
       cmocka_unit_test(test_push_keyvalue_list),
       cmocka_unit_test(test_serialize_escapestr),
-      cmocka_unit_test(test_serialize_keyvalue2json)
-      };
+      cmocka_unit_test(test_serialize_keyvalue2json)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

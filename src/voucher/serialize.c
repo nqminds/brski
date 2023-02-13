@@ -8,8 +8,8 @@
  * @brief File containing the definition of the serialization utilities.
  */
 #include <stdint.h>
-#include <time.h>
 #include <ctype.h>
+#include <time.h>
 
 #include "../utils/os.h"
 
@@ -367,7 +367,7 @@ int serialize_str2bool(char *str, size_t length) {
     size_t idx = 0;
     while (idx < length) {
       buf[idx] = tolower(str[idx]);
-      idx ++;
+      idx++;
     }
     buf[idx] = '\0';
 

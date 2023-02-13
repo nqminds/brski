@@ -109,7 +109,6 @@ static inline void *sys_realloc_array(void *ptr, size_t nmemb, size_t size) {
  */
 void *sys_memdup(const void *src, size_t len);
 
-
 /**
  * @brief Returns a pointer to a new string which is a duplicate of the string s
  * for a given string length

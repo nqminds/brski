@@ -61,9 +61,7 @@ char *sys_strndup(const char *s, size_t length) {
   return dest;
 }
 
-char *sys_strdup(const char *s) {
-  return sys_strndup(s, strlen(s));
-}
+char *sys_strdup(const char *s) { return sys_strndup(s, strlen(s)); }
 
 size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
   /* Copy string up to the maximum size of the dest buffer */

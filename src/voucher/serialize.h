@@ -10,11 +10,11 @@
 #ifndef SERIALIZE_H
 #define SERIALIZE_H
 
-#include <time.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 #include "list.h"
 
