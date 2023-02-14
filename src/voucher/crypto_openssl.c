@@ -82,11 +82,76 @@ ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
   }
 
   if (!EVP_PKEY_keygen(ctx, &pkey)) {
-    log_trace("EVP_PKEY_keygen fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_keygen fail with code=%d", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
   
+  ssize_t length = evpkey_to_buf(pkey, key);
+
+  if (length < 0) {
+    log_error("evpkey_to_buf fail");
+    EVP_PKEY_free(pkey);
+    EVP_PKEY_CTX_free(ctx);
+    return -1;
+  }
+  
+  EVP_PKEY_free(pkey);
+  EVP_PKEY_CTX_free(ctx);
+  return length;
+}
+
+ssize_t crypto_generate_eckey(uint8_t **key) {
+  EVP_PKEY_CTX *ctx;
+  EVP_PKEY *pkey = NULL, *params = NULL;
+
+  *key = NULL;
+  if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)) == NULL) {
+    log_error("EVP_PKEY_CTX_new_id fail with code=%d", ERR_get_error());
+    return -1;
+  }
+
+  if (!EVP_PKEY_paramgen_init(ctx)) {
+    log_error("EVP_PKEY_paramgen_init fail with code=%d", ERR_get_error());
+    EVP_PKEY_CTX_free(ctx);
+    return -1;
+  }
+
+  if (!EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, NID_X9_62_prime256v1)) {
+    log_error("EVP_PKEY_CTX_set_ec_paramgen_curve_nid fail with code=%d",
+              ERR_get_error());
+    EVP_PKEY_CTX_free(ctx);
+    return -1;
+  }
+
+  if (!EVP_PKEY_paramgen(ctx, &params)) {
+    log_error("EVP_PKEY_paramgen fail with code=%d", ERR_get_error());
+    EVP_PKEY_CTX_free(ctx);
+    return -1;
+  }
+
+  EVP_PKEY_CTX_free(ctx);
+
+  if ((ctx = EVP_PKEY_CTX_new(params, NULL)) == NULL) {
+    log_error("EVP_PKEY_CTX_new fail with code=%d", ERR_get_error());
+    EVP_PKEY_free(params);
+    return -1;
+  }
+
+  EVP_PKEY_free(params);
+
+  if (!EVP_PKEY_keygen_init(ctx)) {
+    log_error("EVP_PKEY_keygen_init fail with code=%d", ERR_get_error());
+    EVP_PKEY_CTX_free(ctx);
+    return -1;
+  }
+
+  if (!EVP_PKEY_keygen(ctx, &pkey)) {
+    log_error("EVP_PKEY_keygen fail with code=%d", ERR_get_error());
+    EVP_PKEY_CTX_free(ctx);
+    return -1;
+  }
+
   ssize_t length = evpkey_to_buf(pkey, key);
 
   if (length < 0) {

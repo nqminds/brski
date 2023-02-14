@@ -26,4 +26,15 @@
  */
 ssize_t crypto_generate_rsakey(int bits, uint8_t **key);
 
+/**
+ * @brief Generate a private EC key of the type prime256v1
+ * The generated key is binary (DER) raw format
+ * 
+ * Caller is responsible for freeing the key buffer
+ * 
+ * @param key[out] The output key string
+ * @return ssize_t the size of the key buffer, -1 on failure
+ */
+ssize_t crypto_generate_eckey(uint8_t **key);
+
 #endif
