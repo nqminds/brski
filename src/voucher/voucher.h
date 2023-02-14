@@ -48,6 +48,7 @@ enum VoucherAttributes {
 };
 
 #define VOUCHER_ROOT_NAME "ietf-voucher:voucher"
+#define VOUCHER_REQUEST_ROOT_NAME "ietf-voucher-request:voucher"
 
 #define VOUCHER_ATTRIBUTE_NAMES                                                \
   {                                                                            \

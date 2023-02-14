@@ -29,7 +29,10 @@
       "description": "Default build for Linux",
       "cacheVariables": {
         "USE_CPPHTTPLIB_LIB": true,
-        "BUILD_OPENSSL3_LIB": false
+        "BUILD_OPENSSL3_LIB": false,
+        "BUILD_WOLFSSL_LIB": false,
+        "USE_VOUCHER_WITH_OPENSSL": true,
+        "USE_VOUCHER_WITH_WOLFSSL": false
       }
     }
   ],
