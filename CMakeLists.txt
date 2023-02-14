@@ -75,8 +75,8 @@ option(BUILD_WOLFSSL_LIB "Build WolfSSL" OFF)
 option(BUILD_LIB_MININI "Builds minIni library" ON)
 option(USE_CPPHTTPLIB_LIB "Build and use the cpp-httplib" OFF)
 
-option(USE_VOUCHER_WITH_OPENSSL "Build voucher library with openssl support" OFF)
-option(USE_VOUCHER_WITH_WOLFSSL "Build voucher library with wolfssl support" OFF)
+option(USE_VOUCHER_OPENSSL "Build voucher library with openssl support" OFF)
+option(USE_VOUCHER_WOLFSSL "Build voucher library with wolfssl support" OFF)
 
 cmake_dependent_option(CONFIGURE_COVERAGE "Configure for code coverage (requires lcov)" OFF BUILD_TESTING OFF)
 

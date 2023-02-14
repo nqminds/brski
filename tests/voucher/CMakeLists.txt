@@ -2,6 +2,7 @@ include_directories (
   "${PROJECT_SOURCE_DIR}/src"
 )
 
+
 if (USE_VOUCHER_WITH_OPENSSL OR USE_VOUCHER_WITH_WOLFSSL)
   add_cmocka_test(test_crypto
     SOURCES test_crypto.c
@@ -11,8 +12,10 @@ endif ()
 
 if (USE_VOUCHER_WITH_OPENSSL AND (NOT USE_VOUCHER_WITH_WOLFSSL))
   target_link_libraries(test_crypto PRIVATE crypto_openssl)
+  target_compile_definitions(test_crypto PRIVATE WITH_CRYPTO_OPENSSL)
 elseif (USE_VOUCHER_WITH_WOLFSSL)
-  target_link_libraries(test_crypto PRIVATE crypto_wolfss)
+  target_link_libraries(test_crypto PRIVATE crypto_wolfssl)
+  target_compile_definitions(test_crypto PRIVATE WITH_CRYPTO_WOLFSSL)
 endif()
 
 add_cmocka_test(test_serialize

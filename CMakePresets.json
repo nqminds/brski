@@ -31,8 +31,8 @@
         "USE_CPPHTTPLIB_LIB": true,
         "BUILD_OPENSSL3_LIB": false,
         "BUILD_WOLFSSL_LIB": false,
-        "USE_VOUCHER_WITH_OPENSSL": true,
-        "USE_VOUCHER_WITH_WOLFSSL": false
+        "USE_VOUCHER_OPENSSL": true,
+        "USE_VOUCHER_WOLFSSL": false
       }
     }
   ],
