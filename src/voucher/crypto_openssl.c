@@ -3,7 +3,7 @@
  * @author Alexandru Mereacre
  * @date 2023
  * @copyright
- * SPDX-FileCopyrightText: Copyright (c) 2005, Jouni Malinen <j@w1.fi>, 2023
+ * SPDX-FileCopyrightText: Copyright (c) 2023
  * Nquiringminds Ltd SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the openssl crypto wrapper utilities.
  */
@@ -27,6 +27,8 @@
 
 #include "../utils/os.h"
 #include "../utils/log.h"
+
+#include "crypto_defs.h"
 
 ssize_t evpkey_to_buf(const EVP_PKEY *pkey, uint8_t **key) {
   BUF_MEM *ptr = NULL;
@@ -164,4 +166,31 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
   EVP_PKEY_free(pkey);
   EVP_PKEY_CTX_free(ctx);
   return length;
+}
+
+CRYPTO_KEY crypto_eckey2context(uint8_t *key, size_t length) {
+  EVP_PKEY *pkey = NULL;
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, (const unsigned char **)&key, (long) length)) == NULL) {
+    log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  CRYPTO_KEY ctx = (CRYPTO_KEY)pkey;
+  return ctx;
+}
+
+CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
+  EVP_PKEY *pkey = NULL;
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, (const unsigned char **)&key, (long) length)) == NULL) {
+    log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  CRYPTO_KEY ctx = (CRYPTO_KEY)pkey;
+  return ctx;
+}
+
+void crypto_free_keycontext(CRYPTO_KEY ctx) {
+  EVP_PKEY *pkey = (EVP_PKEY *) ctx;
+  EVP_PKEY_free(pkey);
 }

@@ -3,7 +3,7 @@
  * @author Alexandru Mereacre
  * @date 2023
  * @copyright
- * SPDX-FileCopyrightText: Copyright (c) 2005, Jouni Malinen <j@w1.fi>, 2023
+ * SPDX-FileCopyrightText: Copyright (c) 2023
  * Nquiringminds Ltd SPDX-License-Identifier: MIT
  * @brief File containing the definition of the crypto types.
  */
@@ -14,7 +14,10 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+/* The generalized context for a private key */
 typedef void * CRYPTO_KEY;
+
+/* The generalized context for a certificate */
 typedef void * CRYPTO_CERT;
 
 #endif
