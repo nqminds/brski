@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "crypto_defs.h"
+
 /**
  *
  * module: ietf-voucher

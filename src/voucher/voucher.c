@@ -15,6 +15,12 @@
 #include "serialize.h"
 #include "voucher.h"
 
+#ifdef WITH_OPENSSL
+#include "crypto_openssl.h"
+#elif WITH_WOLFSSL
+#include "crypto_wolfssl.h" 
+#endif
+
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
 #define MAX_VOUCHER_JSON_TOKENS 32
