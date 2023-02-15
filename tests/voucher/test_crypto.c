@@ -19,12 +19,6 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#ifdef WITH_CRYPTO_OPENSSL
-#include "voucher/crypto_openssl.h"
-#elif WITH_CRYPTO_WOLFSSL
-#include "voucher/crypto_wolfssl.h"
-#endif
-
 #include "voucher/crypto_defs.h"
 
 static void test_crypto_generate_rsakey(void **state) {

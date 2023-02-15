@@ -14,12 +14,7 @@
 #include "../utils/os.h"
 #include "serialize.h"
 #include "voucher.h"
-
-#ifdef WITH_OPENSSL
-#include "crypto_openssl.h"
-#elif WITH_WOLFSSL
-#include "crypto_wolfssl.h" 
-#endif
+#include "crypto_defs.h"
 
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
