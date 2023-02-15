@@ -31,38 +31,21 @@
 #include "crypto_defs.h"
 
 ssize_t evpkey_to_buf(const EVP_PKEY *pkey, uint8_t **key) {
-  BUF_MEM *ptr = NULL;
-  BIO *mem = BIO_new_ex(NULL, BIO_s_mem());
+  *key = NULL;
 
-  if (mem == NULL) {
-    log_error("BIO_new fail");
+  int length = i2d_PrivateKey(pkey, key);
+  if (length < 0) {
+    log_error("i2d_PrivateKey fail with code=%d", ERR_get_error());
     return -1;
   }
 
-  if (i2d_PrivateKey_bio(mem, pkey) != 1) {
-    log_error("i2d_PrivateKey_bio fail");
-    BIO_free(mem);
-    return -1;
-  }
-
-  BIO_get_mem_ptr(mem, &ptr);
-  ssize_t length = ptr->length;
-  if ((*key = (uint8_t *)sys_zalloc(ptr->length)) == NULL) {
-    log_errno("sys_zalloc");
-    BIO_free(mem);
-    return -1;
-  }
-
-  sys_memcpy(*key, ptr->data, ptr->length);
-
-  BIO_free(mem);
-  return length;
+  return (ssize_t)length;
 }
 
 ssize_t cert_to_buf(const X509 *x509, uint8_t **cert) {
   /*
   For OpenSSL 0.9.7 and later if *cert is NULL memory will be allocated
-  for a buffer and the encoded data written to it. In this case *out is
+  for a buffer and the encoded data written to it. In this case *cert is
   not incremented and it points to the start of the data just written.
   */
 
@@ -271,9 +254,10 @@ X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
       return NULL;
     }
 
+    log_trace("%s %s", el->key, el->value);
     if (!X509_NAME_add_entry_by_txt(name, el->key, MBSTRING_ASC,
                                     (unsigned char *)el->value, -1, -1, 0)) {
-      log_error("X509_NAME_add_entry_by_txt fail");
+      log_error("X509_NAME_add_entry_by_txt code=%d", ERR_get_error());
       X509_NAME_free(name);
       return NULL;
     }
@@ -366,13 +350,15 @@ ssize_t x509_to_certificate_buf(X509 *x509, EVP_PKEY *pkey, uint8_t **cert) {
 
 ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
                                size_t key_length, uint8_t **cert) {
+  *cert = NULL;
+
   if (meta == NULL) {
     log_error("met aparam is NULL");
     return -1;
   }
 
   if (key == NULL) {
-    log_error("key aparam is NULL");
+    log_error("key param is NULL");
     return -1;
   }
 
@@ -416,6 +402,8 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
 
 ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
                                 size_t key_length, uint8_t **cert) {
+  *cert = NULL;
+
   if (meta == NULL) {
     log_error("met aparam is NULL");
     return -1;

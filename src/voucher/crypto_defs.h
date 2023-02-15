@@ -26,6 +26,21 @@ struct crypto_cert_meta {
   uint64_t serial_number;
   long not_before;
   long not_after;
+
+  /*
+    Example key/value pairs:
+    [C]=US,
+    [ST]=State or Province,
+    [L]=locality name,
+    [O]=orhanization name,
+    [OU]=org unit,
+    [CN]=common name,
+    [emailAddress]=bob@example.com,
+    [serialNumber]=1234,
+    [SN]=surname,
+    [GN]=given name,
+    [GN]=name given
+  */
   struct keyvalue_list *issuer;
   struct keyvalue_list *subject;
 };

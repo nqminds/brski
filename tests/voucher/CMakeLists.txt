@@ -6,7 +6,7 @@ include_directories (
 if (USE_VOUCHER_WITH_OPENSSL OR USE_VOUCHER_WITH_WOLFSSL)
   add_cmocka_test(test_crypto
     SOURCES test_crypto.c
-    LINK_LIBRARIES log cmocka::cmocka
+    LINK_LIBRARIES list log cmocka::cmocka
   )
 endif ()
 
