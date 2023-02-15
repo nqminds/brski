@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <sys/types.h>
 
+#include "list.h"
+
 /* The generalized context for a private key */
 typedef void *CRYPTO_KEY;
 
@@ -24,6 +26,8 @@ struct crypto_cert_meta {
   uint64_t serial_number;
   long not_before;
   long not_after;
+  struct keyvalue_list *issuer;
+  struct keyvalue_list *subject;
 };
 
 /**
@@ -79,16 +83,32 @@ CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length);
 void crypto_free_keycontext(CRYPTO_KEY ctx);
 
 /**
- * @brief Generate a certificate for an private key
+ * @brief Generate a certificate and sign with a EC private key
+ * using sha256
  *
  * Caller is responsible for freeing the cert buffer
  *
  * @param meta[in] The certificate metadata
- * @param key[in] The private key buffer
+ * @param key[in] The EC private key buffer
  * @param key_length[in] The private key buffer length
  * @param cert[out] The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
-ssize_t crypto_generate_cert(struct crypto_cert_meta *meta, uint8_t *key,
+ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
+                             size_t key_length, uint8_t **cert);
+
+/**
+ * @brief Generate a certificate and sign with a RSA private key
+ * using sha256
+ *
+ * Caller is responsible for freeing the cert buffer
+ *
+ * @param meta[in] The certificate metadata
+ * @param key[in] The RSA private key buffer
+ * @param key_length[in] The private key buffer length
+ * @param cert[out] The output certificate buffer
+ * @return ssize_t the size of the certificate buffer, -1 on failure
+ */
+ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
                              size_t key_length, uint8_t **cert);
 #endif

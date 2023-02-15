@@ -18,36 +18,6 @@
 
 #include "list.h"
 
-struct keyvalue_list {
-  char *key;           /**< The attribute name */
-  char *value;         /**< The attribute value */
-  struct dl_list list; /**< List definition */
-};
-
-/**
- * @brief Initializes the key/value list
- *
- * @return struct keyvalue_list * initialised key/value list, NULL on failure
- */
-struct keyvalue_list *init_keyvalue_list(void);
-
-/**
- * @brief Frees the key/value list and all of its elements
- *
- * @param[in] kv_list The key/value list
- */
-void free_keyvalue_list(struct keyvalue_list *kv_list);
-
-/**
- * @brief Pushes the key/value/escape elements into the list
- *
- * @param[in] kv_list The key/value list
- * @param[in] key The key attribute
- * @param[in] value The attribute value
- * @return int 0 on success, -1 on failure
- */
-int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value);
-
 /**
  * @brief Encodes an array to base64
  *

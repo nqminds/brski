@@ -4,10 +4,10 @@
  * @date 2023
  * @copyright
  * SPDX-FileCopyrightText: © 2023 NQMCyber Ltd and edgesec contributors
- * Copyright (c) 2009-2019, Jouni Malinen <j@w1.fi>
+ * Copyright (c) 2009-2019, Jouni Malinen <j@w1.fi> and Alexandru Mereacre
  * SPDX-License-Identifier: BSD licence
  * @version hostapd-2.10
- * @brief Doubly-linked list
+ * @brief Doubly-linked list and key/value list definition
  */
 
 #ifndef LIST_H
@@ -92,5 +92,35 @@ static inline unsigned int dl_list_len(const struct dl_list *list) {
        item = dl_list_entry(item->member.prev, type, member))
 
 #define DEFINE_DL_LIST(name) struct dl_list name = {&(name), &(name)}
+
+struct keyvalue_list {
+  char *key;           /**< The attribute name */
+  char *value;         /**< The attribute value */
+  struct dl_list list; /**< List definition */
+};
+
+/**
+ * @brief Initializes the key/value list
+ *
+ * @return struct keyvalue_list * initialised key/value list, NULL on failure
+ */
+struct keyvalue_list *init_keyvalue_list(void);
+
+/**
+ * @brief Frees the key/value list and all of its elements
+ *
+ * @param[in] kv_list The key/value list
+ */
+void free_keyvalue_list(struct keyvalue_list *kv_list);
+
+/**
+ * @brief Pushes the key/value/escape elements into the list
+ *
+ * @param[in] kv_list The key/value list
+ * @param[in] key The key attribute
+ * @param[in] value The attribute value
+ * @return int 0 on success, -1 on failure
+ */
+int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value);
 
 #endif /* LIST_H */
