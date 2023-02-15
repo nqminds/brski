@@ -53,8 +53,35 @@ static void test_crypto_eckey2context(void **state) {
   ssize_t length = crypto_generate_rsakey(2048, &key);
 
   CRYPTO_KEY ctx = crypto_eckey2context(key, length);
+  assert_null(ctx);
+  crypto_free_keycontext(ctx);
+  sys_free(key);
+
+  length = crypto_generate_eckey(&key);
+
+  ctx = crypto_eckey2context(key, length);
   assert_non_null(ctx);
   crypto_free_keycontext(ctx);
+  sys_free(key);
+}
+
+static void test_crypto_rsakey2context(void **state) {
+  (void)state;
+
+  uint8_t *key = NULL;
+  ssize_t length = crypto_generate_eckey(&key);
+
+  CRYPTO_KEY ctx = crypto_rsakey2context(key, length);
+  assert_null(ctx);
+  crypto_free_keycontext(ctx);
+  sys_free(key);
+
+  length = crypto_generate_rsakey(2048, &key);
+
+  ctx = crypto_rsakey2context(key, length);
+  assert_non_null(ctx);
+  crypto_free_keycontext(ctx);
+  sys_free(key);
 }
 
 static void test_crypto_free_keycontext(void **state) {
@@ -72,6 +99,7 @@ int main(int argc, char *argv[]) {
     cmocka_unit_test(test_crypto_generate_rsakey),
     cmocka_unit_test(test_crypto_generate_eckey),
     cmocka_unit_test(test_crypto_eckey2context),
+    cmocka_unit_test(test_crypto_rsakey2context),
     cmocka_unit_test(test_crypto_free_keycontext),
   };
 
