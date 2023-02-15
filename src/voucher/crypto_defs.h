@@ -126,4 +126,23 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
  */
 ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
                                 size_t key_length, uint8_t **cert);
+
+/**
+ * @brief Signs a buffer using CMS
+ *
+ * Caller is responsible for freeing the cms buffer
+ *
+ * @param data[in] The data buffer to be signed
+ * @param data_length[in] The data buffer length
+ * @param cert[in] The certificate buffer for signing
+ * @param cert_length[in] The certificate buffer length
+ * @param key[in] The private key buffer of the certificate
+ * @param key_length[in] The length of the private key buffer
+ * @param certs[in] The list of additional certificate buffers
+ * @param cms[out] The output cms buffer
+ * @return ssize_t the size of the cms buffer, -1 on failure
+ */
+ssize_t crypto_sign_cms(uint8_t *data, size_t data_length, uint8_t *cert,
+                        size_t cert_length, uint8_t *key, size_t key_length,
+                        struct buffer_list *certs, uint8_t **cms);
 #endif

@@ -94,8 +94,8 @@ static inline unsigned int dl_list_len(const struct dl_list *list) {
 #define DEFINE_DL_LIST(name) struct dl_list name = {&(name), &(name)}
 
 struct keyvalue_list {
-  char *key;           /**< The attribute name */
-  char *value;         /**< The attribute value */
+  char *key;           /**< The attribute name (heap allocated) */
+  char *value;         /**< The attribute value (heap allocated) */
   struct dl_list list; /**< List definition */
 };
 
@@ -122,5 +122,38 @@ void free_keyvalue_list(struct keyvalue_list *kv_list);
  * @return int 0 on success, -1 on failure
  */
 int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value);
+
+struct buffer_list {
+  uint8_t *buf;        /**< The buffer (heap allocated) */
+  size_t length;       /**< The buffer length (heap allocated) */
+  int flags;           /**< The buffer flags */
+  struct dl_list list; /**< List definition */
+};
+
+/**
+ * @brief Initializes the buffer list
+ *
+ * @return struct buffer_list * initialised buffer list, NULL on failure
+ */
+struct buffer_list *init_buffer_list(void);
+
+/**
+ * @brief Frees the buffer list and all of its elements
+ *
+ * @param[in] buf_list The buffer list
+ */
+void free_buffer_list(struct buffer_list *buf_list);
+
+/**
+ * @brief Pushes the buffer pointer into the list
+ *
+ * @param[in] buf_list The buffer list
+ * @param[in] buf The buffer pointer
+ * @param[in] length The buffer length
+ * @param[in] flags The buffer generic flags
+ * @return int 0 on success, -1 on failure
+ */
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
+                     int flags);
 
 #endif /* LIST_H */

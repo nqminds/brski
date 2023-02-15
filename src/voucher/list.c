@@ -87,3 +87,69 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value) {
 
   return 0;
 }
+
+struct buffer_list *init_buffer_list(void) {
+  struct buffer_list *buf_list = NULL;
+
+  if ((buf_list = sys_zalloc(sizeof(struct buffer_list))) == NULL) {
+    log_errno("sys_zalloc");
+    return NULL;
+  }
+
+  dl_list_init(&buf_list->list);
+
+  return buf_list;
+}
+
+static void free_buffer_list_el(struct buffer_list *el) {
+  if (el != NULL) {
+    if (el->buf != NULL) {
+      sys_free(el->buf);
+    }
+    dl_list_del(&el->list);
+    sys_free(el);
+  }
+}
+
+void free_buffer_list(struct buffer_list *buf_list) {
+  struct buffer_list *el;
+
+  if (buf_list == NULL) {
+    return;
+  }
+
+  while ((el = dl_list_first(&buf_list->list, struct buffer_list, list)) !=
+         NULL) {
+    free_buffer_list_el(el);
+  }
+
+  free_buffer_list_el(buf_list);
+}
+
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
+                     int flags) {
+  if (buf_list == NULL) {
+    log_error("buf_list param is empty");
+    return -1;
+  }
+
+  if (buf == NULL) {
+    log_error("buf param is empty");
+    return -1;
+  }
+
+  struct buffer_list *el = init_buffer_list();
+
+  if (el == NULL) {
+    log_error("init_buffer_list fail");
+    return -1;
+  }
+
+  el->buf = buf;
+  el->length = length;
+  el->flags = flags;
+
+  dl_list_add_tail(&buf_list->list, &el->list);
+
+  return 0;
+}
