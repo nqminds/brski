@@ -95,7 +95,7 @@ void crypto_free_keycontext(CRYPTO_KEY ctx);
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
-                             size_t key_length, uint8_t **cert);
+                               size_t key_length, uint8_t **cert);
 
 /**
  * @brief Generate a certificate and sign with a RSA private key
@@ -110,5 +110,5 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
-                             size_t key_length, uint8_t **cert);
+                                size_t key_length, uint8_t **cert);
 #endif

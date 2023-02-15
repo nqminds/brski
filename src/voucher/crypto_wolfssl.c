@@ -43,7 +43,7 @@ CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
 void crypto_free_keycontext(CRYPTO_KEY ctx) { (void)ctx; }
 
 ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
-                             size_t key_length, uint8_t **cert) {
+                               size_t key_length, uint8_t **cert) {
   (void)meta;
   (void)key;
   (void)key_length;
@@ -52,7 +52,7 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
 }
 
 ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
-                             size_t key_length, uint8_t **cert) {
+                                size_t key_length, uint8_t **cert) {
   (void)meta;
   (void)key;
   (void)key_length;

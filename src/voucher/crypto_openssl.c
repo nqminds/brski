@@ -74,7 +74,7 @@ ssize_t cert_to_buf(const X509 *x509, uint8_t **cert) {
     return -1;
   }
 
-  return (ssize_t) length;
+  return (ssize_t)length;
 }
 
 ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
@@ -249,7 +249,7 @@ int set_certificate_serialnumber(X509 *x509, uint64_t serial_number) {
   return 0;
 }
 
-X509_NAME* add_x509name_keyvalues(struct keyvalue_list *pairs) {
+X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
   X509_NAME *name = X509_NAME_new();
 
   if (name == NULL) {
@@ -271,7 +271,8 @@ X509_NAME* add_x509name_keyvalues(struct keyvalue_list *pairs) {
       return NULL;
     }
 
-    if (!X509_NAME_add_entry_by_txt(name, el->key, MBSTRING_ASC, (unsigned char *) el->value, -1, -1, 0)) {
+    if (!X509_NAME_add_entry_by_txt(name, el->key, MBSTRING_ASC,
+                                    (unsigned char *)el->value, -1, -1, 0)) {
       log_error("X509_NAME_add_entry_by_txt fail");
       X509_NAME_free(name);
       return NULL;
@@ -364,8 +365,7 @@ ssize_t x509_to_certificate_buf(X509 *x509, EVP_PKEY *pkey, uint8_t **cert) {
 }
 
 ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
-                             size_t key_length, uint8_t **cert) {
-  (void)cert;
+                               size_t key_length, uint8_t **cert) {
   if (meta == NULL) {
     log_error("met aparam is NULL");
     return -1;
@@ -396,7 +396,7 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
     return -1;
   }
 
-  EVP_PKEY *pkey = (EVP_PKEY*) crypto_eckey2context(key, key_length);
+  EVP_PKEY *pkey = (EVP_PKEY *)crypto_eckey2context(key, key_length);
   if (pkey == NULL) {
     log_error("crypto_eckey2context fail");
     X509_free(x509);
@@ -415,10 +415,7 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
 }
 
 ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
-                             size_t key_length, uint8_t **cert) {
-  (void)key;
-  (void)key_length;
-  (void)cert;
+                                size_t key_length, uint8_t **cert) {
   if (meta == NULL) {
     log_error("met aparam is NULL");
     return -1;
@@ -447,7 +444,7 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
     return -1;
   }
 
-  EVP_PKEY *pkey = (EVP_PKEY*) crypto_rsakey2context(key, key_length);
+  EVP_PKEY *pkey = (EVP_PKEY *)crypto_rsakey2context(key, key_length);
   if (pkey == NULL) {
     log_error("crypto_eckey2context fail");
     X509_free(x509);
