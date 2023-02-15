@@ -12,9 +12,9 @@
 #include <jsmn.h>
 
 #include "../utils/os.h"
+#include "crypto_defs.h"
 #include "serialize.h"
 #include "voucher.h"
-#include "crypto_defs.h"
 
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128

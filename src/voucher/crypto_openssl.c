@@ -5,12 +5,11 @@
  * @copyright
  * SPDX-FileCopyrightText: Copyright (c) 2023
  * Nquiringminds Ltd SPDX-License-Identifier: MIT
- * @brief File containing the implementation of the openssl crypto wrapper utilities.
+ * @brief File containing the implementation of the openssl crypto wrapper
+ * utilities.
  */
 
 #include <stddef.h>
-#include <stdint.h>
-#include <sys/types.h>
 #include <stdint.h>
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
@@ -21,12 +20,13 @@
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
 #include <openssl/x509v3.h>
+#include <sys/types.h>
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
 #endif
 
-#include "../utils/os.h"
 #include "../utils/log.h"
+#include "../utils/os.h"
 
 #include "crypto_defs.h"
 
@@ -62,7 +62,7 @@ ssize_t evpkey_to_buf(const EVP_PKEY *pkey, uint8_t **key) {
 ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
   EVP_PKEY_CTX *ctx;
   EVP_PKEY *pkey = NULL;
-  
+
   *key = NULL;
 
   if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL)) == NULL) {
@@ -88,7 +88,7 @@ ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
-  
+
   ssize_t length = evpkey_to_buf(pkey, key);
 
   if (length < 0) {
@@ -97,7 +97,7 @@ ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
-  
+
   EVP_PKEY_free(pkey);
   EVP_PKEY_CTX_free(ctx);
   return length;
@@ -162,7 +162,7 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
-  
+
   EVP_PKEY_free(pkey);
   EVP_PKEY_CTX_free(ctx);
   return length;
@@ -170,7 +170,8 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
 
 CRYPTO_KEY crypto_eckey2context(uint8_t *key, size_t length) {
   EVP_PKEY *pkey = NULL;
-  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, (const unsigned char **)&key, (long) length)) == NULL) {
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, (const unsigned char **)&key,
+                             (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
     return NULL;
   }
@@ -181,7 +182,8 @@ CRYPTO_KEY crypto_eckey2context(uint8_t *key, size_t length) {
 
 CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
   EVP_PKEY *pkey = NULL;
-  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, (const unsigned char **)&key, (long) length)) == NULL) {
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, (const unsigned char **)&key,
+                             (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
     return NULL;
   }
@@ -191,6 +193,15 @@ CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
 }
 
 void crypto_free_keycontext(CRYPTO_KEY ctx) {
-  EVP_PKEY *pkey = (EVP_PKEY *) ctx;
+  EVP_PKEY *pkey = (EVP_PKEY *)ctx;
   EVP_PKEY_free(pkey);
+}
+
+ssize_t crypto_generate_cert(struct crypto_cert_meta *meta, uint8_t *key,
+                             size_t key_length, uint8_t **cert) {
+  (void)meta;
+  (void)key;
+  (void)key_length;
+  (void)cert;
+  return -1;
 }

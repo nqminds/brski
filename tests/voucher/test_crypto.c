@@ -32,7 +32,7 @@ static void test_crypto_generate_rsakey(void **state) {
 
 static void test_crypto_generate_eckey(void **state) {
   (void)state;
-  
+
   uint8_t *key = NULL;
   ssize_t length = crypto_generate_eckey(&key);
   assert_non_null(key);
@@ -78,10 +78,7 @@ static void test_crypto_rsakey2context(void **state) {
   sys_free(key);
 }
 
-static void test_crypto_free_keycontext(void **state) {
-  (void)state;
-}
-
+static void test_crypto_free_keycontext(void **state) { (void)state; }
 
 int main(int argc, char *argv[]) {
   (void)argc;
@@ -90,11 +87,11 @@ int main(int argc, char *argv[]) {
   log_set_quiet(false);
 
   const struct CMUnitTest tests[] = {
-    cmocka_unit_test(test_crypto_generate_rsakey),
-    cmocka_unit_test(test_crypto_generate_eckey),
-    cmocka_unit_test(test_crypto_eckey2context),
-    cmocka_unit_test(test_crypto_rsakey2context),
-    cmocka_unit_test(test_crypto_free_keycontext),
+      cmocka_unit_test(test_crypto_generate_rsakey),
+      cmocka_unit_test(test_crypto_generate_eckey),
+      cmocka_unit_test(test_crypto_eckey2context),
+      cmocka_unit_test(test_crypto_rsakey2context),
+      cmocka_unit_test(test_crypto_free_keycontext),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

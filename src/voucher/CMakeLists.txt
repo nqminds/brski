@@ -13,4 +13,3 @@ elseif (USE_VOUCHER_WOLFSSL)
 else ()
     target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE serialize os)
 endif ()
-

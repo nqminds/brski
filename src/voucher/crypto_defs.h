@@ -15,17 +15,23 @@
 #include <sys/types.h>
 
 /* The generalized context for a private key */
-typedef void * CRYPTO_KEY;
+typedef void *CRYPTO_KEY;
 
 /* The generalized context for a certificate */
-typedef void * CRYPTO_CERT;
+typedef void *CRYPTO_CERT;
+
+struct crypto_cert_meta {
+  uint64_t serial_number;
+  long not_before;
+  long not_after;
+};
 
 /**
  * @brief Generate a private RSA key for a given number of bits
  * The generated key is binary (DER) raw format
- * 
+ *
  * Caller is responsible for freeing the key buffer
- * 
+ *
  * @param bits[in] Number of key bits for RSA
  * @param key[out] The output key buffer
  * @return ssize_t the size of the key buffer, -1 on failure
@@ -35,9 +41,9 @@ ssize_t crypto_generate_rsakey(int bits, uint8_t **key);
 /**
  * @brief Generate a private EC key of the type prime256v1
  * The generated key is binary (DER) raw format
- * 
+ *
  * Caller is responsible for freeing the key buffer
- * 
+ *
  * @param key[out] The output key buffer
  * @return ssize_t the size of the key buffer, -1 on failure
  */
@@ -45,9 +51,9 @@ ssize_t crypto_generate_eckey(uint8_t **key);
 
 /**
  * @brief Maps a private EC key to a key context
- * 
+ *
  * Caller is responsible for freeing the key context
- * 
+ *
  * @param key[in] The input key buffer
  * @param length[in] The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
@@ -56,9 +62,9 @@ CRYPTO_KEY crypto_eckey2context(uint8_t *key, size_t length);
 
 /**
  * @brief Maps a private RSA key to a key context
- * 
+ *
  * Caller is responsible for freeing the key context
- * 
+ *
  * @param key[in] The input key buffer
  * @param length[in] The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
@@ -67,8 +73,22 @@ CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length);
 
 /**
  * @brief Frees a private key context
- * 
+ *
  * @param ctx[in] The key context
  */
 void crypto_free_keycontext(CRYPTO_KEY ctx);
+
+/**
+ * @brief Generate a certificate for an private key
+ *
+ * Caller is responsible for freeing the cert buffer
+ *
+ * @param meta[in] The certificate metadata
+ * @param key[in] The private key buffer
+ * @param key_length[in] The private key buffer length
+ * @param cert[out] The output certificate buffer
+ * @return ssize_t the size of the certificate buffer, -1 on failure
+ */
+ssize_t crypto_generate_cert(struct crypto_cert_meta *meta, uint8_t *key,
+                             size_t key_length, uint8_t **cert);
 #endif

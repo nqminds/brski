@@ -5,15 +5,15 @@
  * @copyright
  * SPDX-FileCopyrightText: Copyright (c) 2023
  * Nquiringminds Ltd SPDX-License-Identifier: MIT
- * @brief File containing the implementation of the wolfssl crypto wrapper utilities.
+ * @brief File containing the implementation of the wolfssl crypto wrapper
+ * utilities.
  */
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/types.h>
-#include <stdint.h>
 
-#include "../utils/os.h"
 #include "../utils/log.h"
+#include "../utils/os.h"
 
 #include "crypto_defs.h"
 
@@ -40,6 +40,13 @@ CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
   return NULL;
 }
 
-void crypto_free_keycontext(CRYPTO_KEY ctx) {
-  (void)ctx;
+void crypto_free_keycontext(CRYPTO_KEY ctx) { (void)ctx; }
+
+ssize_t crypto_generate_cert(struct crypto_cert_meta *meta, uint8_t *key,
+                             size_t key_length, uint8_t **cert) {
+  (void)meta;
+  (void)key;
+  (void)key_length;
+  (void)cert;
+  return -1;
 }
