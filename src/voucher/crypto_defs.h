@@ -45,6 +45,14 @@ struct crypto_cert_meta {
   struct keyvalue_list *subject;
 };
 
+/* Types of certificate to be used in certificate store */
+enum CRYPTO_CERTIFICATE_TYPE {
+  /* A valid certificate */
+  CRYPTO_CERTIFICATE_VALID = 0,
+  /* A certificate revocation type*/
+  CRYPTO_CERTIFICATE_CRL,
+};
+
 /**
  * @brief Generate a private RSA key for a given number of bits
  * The generated key is binary (DER) raw format
@@ -164,5 +172,23 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
 ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
                         size_t cert_length, uint8_t *key, size_t key_length,
                         struct buffer_list *certs, uint8_t **cms);
+
+/**
+ * @brief Verifies a CMS buffer and extract the data
+ * buffer
+ *
+ * Caller is responsible for freeing the data buffer
+ *
+ * @param data[in] The data buffer to be signed
+ * @param data_length[in] The data buffer length
+ * @param cert[in] The certificate buffer for signing
+ * @param cert_length[in] The certificate buffer length
+ * @param key[in] The RSA private key buffer of the certificate
+ * @param key_length[in] The length of the private key buffer
+ * @param certs[in] The list of additional certificate buffers
+ * @param cms[out] The output cms buffer
+ * @return ssize_t the size of the cms buffer, -1 on failure
+ */
+ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length, struct buffer_list *certs, uint8_t **data);
 
 #endif
