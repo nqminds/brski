@@ -494,7 +494,7 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
   return length;
 }
 
-STACK_OF(X509) *get_certificate_stack(struct buffer_list *certs) {
+static STACK_OF(X509) *get_certificate_stack(struct buffer_list *certs) {
   STACK_OF(X509) *cert_stack = sk_X509_new_null();
 
   if (cert_stack == NULL) {
@@ -516,12 +516,74 @@ STACK_OF(X509) *get_certificate_stack(struct buffer_list *certs) {
   return cert_stack;
 }
 
+static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length, uint8_t *cert,
+                        size_t cert_length, EVP_PKEY *pkey,
+                        struct buffer_list *certs, uint8_t **cms) {
+  unsigned int flags = CMS_BINARY;
+  
+  BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
+
+  if (BIO_write(mem_data, data, data_length) < 0) {
+    log_trace("BIO_write fail with code=%d", ERR_get_error());
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  X509 *signcert = crypto_cert2context(cert, cert_length);
+  if (signcert == NULL) {
+    log_error("crypto_cert2context fail");
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  STACK_OF(X509) *cert_stack = NULL;
+  if (certs != NULL) {
+    if((cert_stack = get_certificate_stack(certs)) == NULL) {
+      log_error("get_certificate_stack fail");
+      X509_free(signcert);
+      BIO_free(mem_data);
+      return -1;
+    }
+  }
+
+  CMS_ContentInfo *content = CMS_sign(signcert, pkey, cert_stack,
+                          mem_data, flags);
+  
+  if (content == NULL) {
+    log_trace("CMS_sign fail with code=%d", ERR_get_error());
+    X509_free(signcert);
+    sk_X509_pop_free(cert_stack, X509_free);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  if (!CMS_final(content, mem_data, NULL, flags)) {
+    log_trace("CMS_final fail with code=%d", ERR_get_error());
+    X509_free(signcert);
+    sk_X509_pop_free(cert_stack, X509_free);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  /* Get the DER format of the CMS structure */
+  ssize_t length = cms_to_derbuf(content, cms);
+  if (length < 0) {
+    log_error("cms_to_derbuf fail");
+    X509_free(signcert);
+    sk_X509_pop_free(cert_stack, X509_free);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  X509_free(signcert);
+  sk_X509_pop_free(cert_stack, X509_free);
+  BIO_free(mem_data);
+  return length;
+}
+
 ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
                         size_t cert_length, uint8_t *key, size_t key_length,
                         struct buffer_list *certs, uint8_t **cms) {
-  (void)certs;
-  (void)cms;
-
   if (data == NULL) {
     log_error("data param is NULL");
     return -1;
@@ -544,77 +606,63 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
 
   *cms = NULL;
 
-  unsigned int flags = CMS_BINARY;
-  
-  BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
-
-  if (BIO_write(mem_data, data, data_length) < 0) {
-    log_trace("BIO_write fail with code=%d", ERR_get_error());
-    BIO_free(mem_data);
-    return -1;
-  }
-
   EVP_PKEY *pkey = (EVP_PKEY *)crypto_eckey2context(key, key_length);
   if (pkey == NULL) {
     log_error("crypto_eckey2context fail");
-    BIO_free(mem_data);
     return -1;
   }
 
-  X509 *signcert = crypto_cert2context(cert, cert_length);
-  if (signcert == NULL) {
-    log_error("crypto_cert2context fail");
-    EVP_PKEY_free(pkey);
-    BIO_free(mem_data);
-    return -1;
-  }
+  ssize_t length = sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
 
-  STACK_OF(X509) *cert_stack = NULL;
-  if (certs != NULL) {
-    if((cert_stack = get_certificate_stack(certs)) == NULL) {
-      log_error("get_certificate_stack fail");
-      X509_free(signcert);    
-      EVP_PKEY_free(pkey);
-      BIO_free(mem_data);
-      return -1;
-    }
-  }
-
-  CMS_ContentInfo *content = CMS_sign(signcert, pkey, cert_stack,
-                          mem_data, flags);
-  
-  if (content == NULL) {
-    log_trace("CMS_sign fail with code=%d", ERR_get_error());
-    X509_free(signcert);
-    sk_X509_pop_free(cert_stack, X509_free);
-    EVP_PKEY_free(pkey);
-    BIO_free(mem_data);
-    return -1;
-  }
-
-  if (!CMS_final(content, mem_data, NULL, flags)) {
-    log_trace("CMS_final fail with code=%d", ERR_get_error());
-    X509_free(signcert);
-    sk_X509_pop_free(cert_stack, X509_free);
-    EVP_PKEY_free(pkey);
-    BIO_free(mem_data);
-    return -1;
-  }
-
-  /* Get the DER format of the CMS structure */
-  ssize_t length = cms_to_derbuf(content, cms);
   if (length < 0) {
-    log_error("cms_to_derbuf fail");
-    X509_free(signcert);
-    sk_X509_pop_free(cert_stack, X509_free);
+    log_error("sign_withkey_eccms fail");
     EVP_PKEY_free(pkey);
-    BIO_free(mem_data);
     return -1;
   }
 
-  X509_free(signcert);
-  sk_X509_pop_free(cert_stack, X509_free);
   EVP_PKEY_free(pkey);
-  BIO_free(mem_data);
-  return -1;
+  return length;
+}
+
+ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
+                        size_t cert_length, uint8_t *key, size_t key_length,
+                        struct buffer_list *certs, uint8_t **cms) {
+  if (data == NULL) {
+    log_error("data param is NULL");
+    return -1;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (key == NULL) {
+    log_error("key param is NULL");
+    return -1;
+  }
+
+  if (cms == NULL) {
+    log_error("cms param is NULL");
+    return -1;
+  }
+
+  *cms = NULL;
+
+  EVP_PKEY *pkey = (EVP_PKEY *)crypto_rsakey2context(key, key_length);
+  if (pkey == NULL) {
+    log_error("crypto_eckey2context fail");
+    return -1;
+  }
+
+  ssize_t length = sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
+
+  if (length < 0) {
+    log_error("sign_withkey_eccms fail");
+    EVP_PKEY_free(pkey);
+    return -1;
+  }
+
+  EVP_PKEY_free(pkey);
+  return length;
 }

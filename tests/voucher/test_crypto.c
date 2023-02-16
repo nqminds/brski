@@ -184,6 +184,75 @@ static void test_crypto_generate_rsacert(void **state) {
 
 static void test_crypto_sign_eccms(void **state) {
   (void)state;
+  uint8_t data[5] = {1, 2, 3, 4, 5};
+  ssize_t data_length = 5;
+  uint8_t *cms = NULL;
+  uint8_t *key = NULL;
+  uint8_t *cert = NULL;
+  struct buffer_list *certs = init_buffer_list();
+  struct crypto_cert_meta meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+
+  ssize_t key_length = crypto_generate_eckey(&key);
+  assert_non_null(key);
+  meta.issuer = init_keyvalue_list();
+  meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
+                     sys_strdup("issuertest.info"));
+
+  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjecttest.info"));
+
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
+
+  uint8_t *key_in_list = NULL;
+  ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
+  uint8_t *cert_in_list = NULL;
+  ssize_t cert_in_list_length = crypto_generate_eccert(&meta, key_in_list, key_in_list_length, &cert_in_list);
+
+  assert_int_equal(push_buffer_list(certs, cert_in_list, cert_in_list_length), 0);
+
+  ssize_t length = crypto_sign_eccms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
+
+  assert_true(length < 0);
+  assert_null(cms);
+
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, NULL, 0, NULL, &cms);
+  assert_true(length < 0);
+  assert_null(cms);
+
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, NULL, &cms);
+  assert_true(length > 0);
+  assert_non_null(cms);
+  sys_free(cms);
+
+  cms = NULL;
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  assert_true(length > 0);
+  assert_non_null(cms);
+  sys_free(cms);
+  sys_free(key);
+  sys_free(cert);
+
+  cms = NULL;
+  key_length = crypto_generate_rsakey(2048, &key);
+  assert_non_null(key);
+  cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  assert_true(length < 0);
+  assert_null(cms);
+  sys_free(cms);
+  sys_free(key);
+  sys_free(cert);
+
+  free_buffer_list(certs);
 }
 
 int main(int argc, char *argv[]) {
