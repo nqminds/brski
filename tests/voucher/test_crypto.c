@@ -182,6 +182,10 @@ static void test_crypto_generate_rsacert(void **state) {
   free_keyvalue_list(meta.subject);
 }
 
+static void test_crypto_sign_eccms(void **state) {
+  (void)state;
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -195,7 +199,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_crypto_rsakey2context),
       cmocka_unit_test(test_crypto_free_keycontext),
       cmocka_unit_test(test_crypto_generate_eccert),
-      cmocka_unit_test(test_crypto_generate_rsacert)};
+      cmocka_unit_test(test_crypto_generate_rsacert),
+      cmocka_unit_test(test_crypto_sign_eccms)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

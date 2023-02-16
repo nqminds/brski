@@ -68,6 +68,8 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "variant": "cpp",
-        "os.h": "c"
+        "os.h": "c",
+        "x509.h": "c",
+        "cms.h": "c"
     }
 }

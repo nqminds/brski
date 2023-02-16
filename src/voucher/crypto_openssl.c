@@ -19,7 +19,10 @@
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
 #include <openssl/sha.h>
+#include <openssl/x509.h>
 #include <openssl/x509v3.h>
+#include <openssl/cms.h>
+#include <openssl/safestack.h>
 #include <sys/types.h>
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
@@ -30,7 +33,7 @@
 
 #include "crypto_defs.h"
 
-ssize_t evpkey_to_buf(const EVP_PKEY *pkey, uint8_t **key) {
+static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
   *key = NULL;
 
   int length = i2d_PrivateKey(pkey, key);
@@ -42,7 +45,7 @@ ssize_t evpkey_to_buf(const EVP_PKEY *pkey, uint8_t **key) {
   return (ssize_t)length;
 }
 
-ssize_t cert_to_buf(const X509 *x509, uint8_t **cert) {
+static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
   /*
   For OpenSSL 0.9.7 and later if *cert is NULL memory will be allocated
   for a buffer and the encoded data written to it. In this case *cert is
@@ -58,6 +61,35 @@ ssize_t cert_to_buf(const X509 *x509, uint8_t **cert) {
   }
 
   return (ssize_t)length;
+}
+
+static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
+  *cms = NULL;
+
+  BIO *mem = BIO_new_ex(NULL, BIO_s_mem());
+
+  if (!i2d_CMS_bio(mem, content)) {
+    log_error("i2d_CMS_bio fail with code=%d", ERR_get_error());
+    BIO_free(mem);
+    return -1;
+  }
+
+  BUF_MEM *ptr = NULL;
+
+  BIO_get_mem_ptr(mem, &ptr);
+  ssize_t length = ptr->length;
+
+  if ((*cms = (uint8_t *)sys_zalloc(length)) == NULL) {
+    log_errno("sys_zalloc");
+    BIO_free(mem);
+    return -1;
+  }
+
+  sys_memcpy(*cms, ptr->data, length);
+
+  BIO_free(mem);
+
+  return length;
 }
 
 ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
@@ -95,10 +127,10 @@ ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
     return -1;
   }
 
-  ssize_t length = evpkey_to_buf(pkey, key);
+  ssize_t length = evpkey_to_derbuf(pkey, key);
 
   if (length < 0) {
-    log_error("evpkey_to_buf fail");
+    log_error("evpkey_to_derbuf fail");
     EVP_PKEY_free(pkey);
     EVP_PKEY_CTX_free(ctx);
     return -1;
@@ -165,10 +197,10 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
     return -1;
   }
 
-  ssize_t length = evpkey_to_buf(pkey, key);
+  ssize_t length = evpkey_to_derbuf(pkey, key);
 
   if (length < 0) {
-    log_error("evpkey_to_buf fail");
+    log_error("evpkey_to_derbuf fail");
     EVP_PKEY_free(pkey);
     EVP_PKEY_CTX_free(ctx);
     return -1;
@@ -179,9 +211,9 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
   return length;
 }
 
-CRYPTO_KEY crypto_eckey2context(uint8_t *key, size_t length) {
+CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length) {
   EVP_PKEY *pkey = NULL;
-  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, (const unsigned char **)&key,
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, &key,
                              (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
     return NULL;
@@ -191,15 +223,27 @@ CRYPTO_KEY crypto_eckey2context(uint8_t *key, size_t length) {
   return ctx;
 }
 
-CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
+CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, size_t length) {
   EVP_PKEY *pkey = NULL;
-  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, (const unsigned char **)&key,
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, &key,
                              (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
     return NULL;
   }
 
   CRYPTO_KEY ctx = (CRYPTO_KEY)pkey;
+  return ctx;
+}
+
+CRYPTO_CERT crypto_cert2context(const uint8_t *cert, size_t length) {
+  X509 *pcert = NULL;
+  const unsigned char *pp = (unsigned char *) cert; 
+  if (d2i_X509(&pcert, &pp, length) == NULL) {
+    log_error("d2i_X509 fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  CRYPTO_CERT ctx = (CRYPTO_CERT)pcert;
   return ctx;
 }
 
@@ -208,7 +252,7 @@ void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY_free(pkey);
 }
 
-int set_certificate_serialnumber(X509 *x509, uint64_t serial_number) {
+static int set_certificate_serialnumber(X509 *x509, uint64_t serial_number) {
   ASN1_INTEGER *sn = ASN1_INTEGER_new();
 
   if (sn == NULL) {
@@ -232,7 +276,7 @@ int set_certificate_serialnumber(X509 *x509, uint64_t serial_number) {
   return 0;
 }
 
-X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
+static X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
   X509_NAME *name = X509_NAME_new();
 
   if (name == NULL) {
@@ -266,7 +310,7 @@ X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
   return name;
 }
 
-int set_certificate_meta(X509 *x509, struct crypto_cert_meta *meta) {
+static int set_certificate_meta(X509 *x509, struct crypto_cert_meta *meta) {
   if (set_certificate_serialnumber(x509, meta->serial_number) < 0) {
     log_error("set_certificate_serialnumber fail");
     return -1;
@@ -318,7 +362,7 @@ int set_certificate_meta(X509 *x509, struct crypto_cert_meta *meta) {
   return 0;
 }
 
-int sign_sha256_certificate(X509 *x509, EVP_PKEY *pkey) {
+static int sign_sha256_certificate(X509 *x509, EVP_PKEY *pkey) {
   if (!X509_set_pubkey(x509, pkey)) {
     log_error("X509_set_pubkey fail with code=%d", ERR_get_error());
     return -1;
@@ -333,15 +377,15 @@ int sign_sha256_certificate(X509 *x509, EVP_PKEY *pkey) {
   return 0;
 }
 
-ssize_t x509_to_certificate_buf(X509 *x509, EVP_PKEY *pkey, uint8_t **cert) {
+static ssize_t unsigned_cert_to_derbuf(X509 *x509, EVP_PKEY *pkey, uint8_t **cert) {
   if (sign_sha256_certificate(x509, pkey) < 0) {
     log_error("sign_sha256_certificate fail");
     return -1;
   }
 
-  ssize_t length = cert_to_buf(x509, cert);
+  ssize_t length = cert_to_derbuf(x509, cert);
   if (length < 0) {
-    log_error("cert_to_buf fail");
+    log_error("cert_to_derbuf fail");
     return -1;
   }
 
@@ -353,7 +397,7 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
   *cert = NULL;
 
   if (meta == NULL) {
-    log_error("met aparam is NULL");
+    log_error("met param is NULL");
     return -1;
   }
 
@@ -389,9 +433,9 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
     return -1;
   }
 
-  ssize_t length = x509_to_certificate_buf(x509, pkey, cert);
+  ssize_t length = unsigned_cert_to_derbuf(x509, pkey, cert);
   if (length < 0) {
-    log_error("x509_to_certificate_buf fail");
+    log_error("unsigned_cert_to_derbuf fail");
   }
 
   EVP_PKEY_free(pkey);
@@ -439,9 +483,9 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
     return -1;
   }
 
-  ssize_t length = x509_to_certificate_buf(x509, pkey, cert);
+  ssize_t length = unsigned_cert_to_derbuf(x509, pkey, cert);
   if (length < 0) {
-    log_error("x509_to_certificate_buf fail");
+    log_error("unsigned_cert_to_derbuf fail");
   }
 
   EVP_PKEY_free(pkey);
@@ -450,17 +494,127 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
   return length;
 }
 
-ssize_t crypto_sign_cms(uint8_t *data, size_t data_length, uint8_t *cert,
+STACK_OF(X509) *get_certificate_stack(struct buffer_list *certs) {
+  STACK_OF(X509) *cert_stack = sk_X509_new_null();
+
+  if (cert_stack == NULL) {
+    log_trace("sk_X509_new_null fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  struct buffer_list *el = NULL;
+  dl_list_for_each(el, &certs->list, struct buffer_list, list) {
+    X509 *x509 = crypto_cert2context(el->buf, el->length);
+    if (x509 == NULL) {
+      log_error("crypto_cert2context fail");
+      sk_X509_pop_free(cert_stack, X509_free);
+      return NULL;
+    }
+    sk_X509_push(cert_stack, x509);
+  }
+
+  return cert_stack;
+}
+
+ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
                         size_t cert_length, uint8_t *key, size_t key_length,
                         struct buffer_list *certs, uint8_t **cms) {
-  (void)data;
-  (void)data_length;
-  (void)cert;
-  (void)cert_length;
-  (void)key;
-  (void)key_length;
   (void)certs;
   (void)cms;
 
+  if (data == NULL) {
+    log_error("data param is NULL");
+    return -1;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (key == NULL) {
+    log_error("key param is NULL");
+    return -1;
+  }
+
+  if (cms == NULL) {
+    log_error("cms param is NULL");
+    return -1;
+  }
+
+  *cms = NULL;
+
+  unsigned int flags = CMS_BINARY;
+  
+  BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
+
+  if (BIO_write(mem_data, data, data_length) < 0) {
+    log_trace("BIO_write fail with code=%d", ERR_get_error());
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  EVP_PKEY *pkey = (EVP_PKEY *)crypto_eckey2context(key, key_length);
+  if (pkey == NULL) {
+    log_error("crypto_eckey2context fail");
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  X509 *signcert = crypto_cert2context(cert, cert_length);
+  if (signcert == NULL) {
+    log_error("crypto_cert2context fail");
+    EVP_PKEY_free(pkey);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  STACK_OF(X509) *cert_stack = NULL;
+  if (certs != NULL) {
+    if((cert_stack = get_certificate_stack(certs)) == NULL) {
+      log_error("get_certificate_stack fail");
+      X509_free(signcert);    
+      EVP_PKEY_free(pkey);
+      BIO_free(mem_data);
+      return -1;
+    }
+  }
+
+  CMS_ContentInfo *content = CMS_sign(signcert, pkey, cert_stack,
+                          mem_data, flags);
+  
+  if (content == NULL) {
+    log_trace("CMS_sign fail with code=%d", ERR_get_error());
+    X509_free(signcert);
+    sk_X509_pop_free(cert_stack, X509_free);
+    EVP_PKEY_free(pkey);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  if (!CMS_final(content, mem_data, NULL, flags)) {
+    log_trace("CMS_final fail with code=%d", ERR_get_error());
+    X509_free(signcert);
+    sk_X509_pop_free(cert_stack, X509_free);
+    EVP_PKEY_free(pkey);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  /* Get the DER format of the CMS structure */
+  ssize_t length = cms_to_derbuf(content, cms);
+  if (length < 0) {
+    log_error("cms_to_derbuf fail");
+    X509_free(signcert);
+    sk_X509_pop_free(cert_stack, X509_free);
+    EVP_PKEY_free(pkey);
+    BIO_free(mem_data);
+    return -1;
+  }
+
+  X509_free(signcert);
+  sk_X509_pop_free(cert_stack, X509_free);
+  EVP_PKEY_free(pkey);
+  BIO_free(mem_data);
   return -1;
 }

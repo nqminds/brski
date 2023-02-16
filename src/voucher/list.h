@@ -126,7 +126,6 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value);
 struct buffer_list {
   uint8_t *buf;        /**< The buffer (heap allocated) */
   size_t length;       /**< The buffer length (heap allocated) */
-  int flags;           /**< The buffer flags */
   struct dl_list list; /**< List definition */
 };
 
@@ -150,10 +149,8 @@ void free_buffer_list(struct buffer_list *buf_list);
  * @param[in] buf_list The buffer list
  * @param[in] buf The buffer pointer
  * @param[in] length The buffer length
- * @param[in] flags The buffer generic flags
  * @return int 0 on success, -1 on failure
  */
-int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
-                     int flags);
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length);
 
 #endif /* LIST_H */
