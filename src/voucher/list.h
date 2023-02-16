@@ -154,6 +154,7 @@ void free_buffer_list(struct buffer_list *buf_list);
  * @param[in] flags The buffer flags
  * @return int 0 on success, -1 on failure
  */
-int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length, int flags);
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
+                     int flags);
 
 #endif /* LIST_H */

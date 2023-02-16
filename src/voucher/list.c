@@ -126,7 +126,8 @@ void free_buffer_list(struct buffer_list *buf_list) {
   free_buffer_list_el(buf_list);
 }
 
-int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length, int flags) {
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
+                     int flags) {
   if (buf_list == NULL) {
     log_error("buf_list param is empty");
     return -1;

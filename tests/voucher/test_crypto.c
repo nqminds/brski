@@ -214,26 +214,32 @@ static void test_crypto_sign_eccms(void **state) {
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
   uint8_t *cert_in_list = NULL;
-  ssize_t cert_in_list_length = crypto_generate_eccert(&meta, key_in_list, key_in_list_length, &cert_in_list);
+  ssize_t cert_in_list_length = crypto_generate_eccert(
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  assert_int_equal(push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
+  assert_int_equal(
+      push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
 
-  ssize_t length = crypto_sign_eccms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
+  ssize_t length =
+      crypto_sign_eccms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
 
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_eccms(data, data_length, cert, cert_length, NULL, 0, NULL, &cms);
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, NULL, 0,
+                             NULL, &cms);
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, NULL, &cms);
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, key,
+                             key_length, NULL, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
 
   cms = NULL;
-  length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, key,
+                             key_length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
@@ -245,7 +251,8 @@ static void test_crypto_sign_eccms(void **state) {
   assert_non_null(key);
   cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
 
-  length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  length = crypto_sign_eccms(data, data_length, cert, cert_length, key,
+                             key_length, certs, &cms);
   assert_true(length < 0);
   assert_null(cms);
   sys_free(cms);
@@ -287,26 +294,32 @@ static void test_crypto_sign_rsacms(void **state) {
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
   uint8_t *cert_in_list = NULL;
-  ssize_t cert_in_list_length = crypto_generate_rsacert(&meta, key_in_list, key_in_list_length, &cert_in_list);
+  ssize_t cert_in_list_length = crypto_generate_rsacert(
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  assert_int_equal(push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
+  assert_int_equal(
+      push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
 
-  ssize_t length = crypto_sign_rsacms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
+  ssize_t length =
+      crypto_sign_rsacms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
 
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, NULL, 0, NULL, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length, NULL, 0,
+                              NULL, &cms);
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key, key_length, NULL, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key,
+                              key_length, NULL, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
 
   cms = NULL;
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key,
+                              key_length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
@@ -318,7 +331,8 @@ static void test_crypto_sign_rsacms(void **state) {
   assert_non_null(key);
   cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key,
+                              key_length, certs, &cms);
   assert_true(length < 0);
   assert_null(cms);
   sys_free(cms);
@@ -343,8 +357,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_crypto_generate_eccert),
       cmocka_unit_test(test_crypto_generate_rsacert),
       cmocka_unit_test(test_crypto_sign_eccms),
-      cmocka_unit_test(test_crypto_sign_rsacms)
-  };
+      cmocka_unit_test(test_crypto_sign_rsacms)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

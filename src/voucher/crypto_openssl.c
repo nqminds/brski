@@ -11,6 +11,7 @@
 
 #include <stddef.h>
 #include <stdint.h>
+#include <openssl/cms.h>
 #include <openssl/conf.h>
 #include <openssl/crypto.h>
 #include <openssl/err.h>
@@ -18,11 +19,10 @@
 #include <openssl/pem.h>
 #include <openssl/rand.h>
 #include <openssl/rsa.h>
+#include <openssl/safestack.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
-#include <openssl/cms.h>
-#include <openssl/safestack.h>
 #include <sys/types.h>
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
@@ -213,8 +213,7 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
 
 CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length) {
   EVP_PKEY *pkey = NULL;
-  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, &key,
-                             (long)length)) == NULL) {
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, &key, (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
     return NULL;
   }
@@ -225,8 +224,7 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length) {
 
 CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, size_t length) {
   EVP_PKEY *pkey = NULL;
-  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, &key,
-                             (long)length)) == NULL) {
+  if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, &key, (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
     return NULL;
   }
@@ -237,7 +235,7 @@ CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, size_t length) {
 
 CRYPTO_CERT crypto_cert2context(const uint8_t *cert, size_t length) {
   X509 *pcert = NULL;
-  const unsigned char *pp = (unsigned char *) cert; 
+  const unsigned char *pp = (unsigned char *)cert;
   if (d2i_X509(&pcert, &pp, length) == NULL) {
     log_error("d2i_X509 fail with code=%d", ERR_get_error());
     return NULL;
@@ -377,7 +375,8 @@ static int sign_sha256_certificate(X509 *x509, EVP_PKEY *pkey) {
   return 0;
 }
 
-static ssize_t unsigned_cert_to_derbuf(X509 *x509, EVP_PKEY *pkey, uint8_t **cert) {
+static ssize_t unsigned_cert_to_derbuf(X509 *x509, EVP_PKEY *pkey,
+                                       uint8_t **cert) {
   if (sign_sha256_certificate(x509, pkey) < 0) {
     log_error("sign_sha256_certificate fail");
     return -1;
@@ -494,7 +493,7 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
   return length;
 }
 
-static STACK_OF(X509) *get_certificate_stack(struct buffer_list *certs) {
+static STACK_OF(X509) * get_certificate_stack(struct buffer_list *certs) {
   STACK_OF(X509) *cert_stack = sk_X509_new_null();
 
   if (cert_stack == NULL) {
@@ -516,11 +515,12 @@ static STACK_OF(X509) *get_certificate_stack(struct buffer_list *certs) {
   return cert_stack;
 }
 
-static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length, uint8_t *cert,
-                        size_t cert_length, EVP_PKEY *pkey,
-                        struct buffer_list *certs, uint8_t **cms) {
+static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
+                                uint8_t *cert, size_t cert_length,
+                                EVP_PKEY *pkey, struct buffer_list *certs,
+                                uint8_t **cms) {
   unsigned int flags = CMS_BINARY;
-  
+
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
 
   if (BIO_write(mem_data, data, data_length) < 0) {
@@ -538,7 +538,7 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length, uint8_t *cert
 
   STACK_OF(X509) *cert_stack = NULL;
   if (certs != NULL) {
-    if((cert_stack = get_certificate_stack(certs)) == NULL) {
+    if ((cert_stack = get_certificate_stack(certs)) == NULL) {
       log_error("get_certificate_stack fail");
       X509_free(signcert);
       BIO_free(mem_data);
@@ -546,9 +546,9 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length, uint8_t *cert
     }
   }
 
-  CMS_ContentInfo *content = CMS_sign(signcert, pkey, cert_stack,
-                          mem_data, flags);
-  
+  CMS_ContentInfo *content =
+      CMS_sign(signcert, pkey, cert_stack, mem_data, flags);
+
   if (content == NULL) {
     log_trace("CMS_sign fail with code=%d", ERR_get_error());
     X509_free(signcert);
@@ -582,8 +582,8 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length, uint8_t *cert
 }
 
 ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
-                        size_t cert_length, uint8_t *key, size_t key_length,
-                        struct buffer_list *certs, uint8_t **cms) {
+                          size_t cert_length, uint8_t *key, size_t key_length,
+                          struct buffer_list *certs, uint8_t **cms) {
   if (data == NULL) {
     log_error("data param is NULL");
     return -1;
@@ -612,7 +612,8 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
     return -1;
   }
 
-  ssize_t length = sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
+  ssize_t length =
+      sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
 
   if (length < 0) {
     log_error("sign_withkey_eccms fail");
@@ -625,8 +626,8 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
 }
 
 ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
-                        size_t cert_length, uint8_t *key, size_t key_length,
-                        struct buffer_list *certs, uint8_t **cms) {
+                           size_t cert_length, uint8_t *key, size_t key_length,
+                           struct buffer_list *certs, uint8_t **cms) {
   if (data == NULL) {
     log_error("data param is NULL");
     return -1;
@@ -655,7 +656,8 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
     return -1;
   }
 
-  ssize_t length = sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
+  ssize_t length =
+      sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
 
   if (length < 0) {
     log_error("sign_withkey_eccms fail");
