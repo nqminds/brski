@@ -92,6 +92,17 @@ static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
   return length;
 }
 
+static CMS_ContentInfo* derbuf_to_cms(uint8_t *cms, ssize_t cms_length) {
+  CMS_ContentInfo *content = NULL;
+  const unsigned char *pp = (unsigned char *)cms;
+  if (d2i_CMS_ContentInfo(&content, &pp, cms_length) == NULL) {
+    log_error("d2i_CMS_ContentInfo fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  return content;
+}
+
 ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
   EVP_PKEY_CTX *ctx;
   EVP_PKEY *pkey = NULL;
@@ -667,4 +678,28 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
 
   EVP_PKEY_free(pkey);
   return length;
+}
+
+ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
+                          struct buffer_list *certs, struct buffer_list *store, uint8_t **data) {
+  (void)certs;
+  (void)store;
+  (void)data;
+  if (cms == NULL) {
+    log_error("cms param is NULL");
+    return -1;
+  }
+
+  if (data == NULL) {
+    log_error("data param is NULL");
+    return -1;
+  }
+
+  CMS_ContentInfo *content = derbuf_to_cms(cms, cms_length);
+  if (content == NULL) {
+    log_error("derbuf_to_cms fail");
+    return -1;
+  }
+
+  return -1;
 }

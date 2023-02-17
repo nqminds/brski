@@ -49,7 +49,7 @@ struct crypto_cert_meta {
 enum CRYPTO_CERTIFICATE_TYPE {
   /* A valid certificate */
   CRYPTO_CERTIFICATE_VALID = 0,
-  /* A certificate revocation type*/
+  /* A certificate revocation type */
   CRYPTO_CERTIFICATE_CRL,
 };
 
@@ -179,17 +179,14 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
  *
  * Caller is responsible for freeing the data buffer
  *
- * @param data[in] The data buffer to be signed
- * @param data_length[in] The data buffer length
- * @param cert[in] The certificate buffer for signing
- * @param cert_length[in] The certificate buffer length
- * @param key[in] The RSA private key buffer of the certificate
- * @param key_length[in] The length of the private key buffer
+ * @param cms[in] The cms buffer to be verified
+ * @param cms_length[in] The cms buffer length
  * @param certs[in] The list of additional certificate buffers
- * @param cms[out] The output cms buffer
- * @return ssize_t the size of the cms buffer, -1 on failure
+ * @param store[in] The list of trusted certificate for store
+ * @param data[out] The output data buffer
+ * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
-                          struct buffer_list *certs, uint8_t **data);
+                          struct buffer_list *certs, struct buffer_list *store, uint8_t **data);
 
 #endif
