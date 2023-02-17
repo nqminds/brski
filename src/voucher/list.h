@@ -157,4 +157,38 @@ void free_buffer_list(struct buffer_list *buf_list);
 int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
                      int flags);
 
+struct ptr_list {
+  void *ptr;            /**< The pointer (points to heap memory) */
+  int flags;            /**< The generic pointer flags */
+  struct dl_list list;  /**< List definition */
+};
+
+typedef void (*ptr_free_fn)(void *ptr, int flag);
+
+/**
+ * @brief Initializes the ptr list
+ *
+ * @return struct ptr_list * initialised ptr list, NULL on failure
+ */
+struct ptr_list *init_ptr_list(void);
+
+/**
+ * @brief Frees the ptr list and all of its elements
+ * using a a user supplied callback function
+ *
+ * @param[in] ptr_list The ptr list
+ * @param[in] cb The user supplied callback functio to free the ptr element
+ */
+void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb);
+
+/**
+ * @brief Pushes a pointer into the list and assigns the flags
+ *
+ * @param[in] ptr_list The ptr list
+ * @param[in] ptr The ptr value
+ * @param[in] flags The ptr flags
+ * @return int 0 on success, -1 on failure
+ */
+int push_ptr_list(struct ptr_list *ptr_list, void *ptr, int flags);
+
 #endif /* LIST_H */

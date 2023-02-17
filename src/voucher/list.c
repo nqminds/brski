@@ -153,3 +153,67 @@ int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
 
   return 0;
 }
+
+struct ptr_list *init_ptr_list(void) {
+  struct ptr_list *ptr_list = NULL;
+
+  if ((ptr_list = sys_zalloc(sizeof(struct ptr_list))) == NULL) {
+    log_errno("sys_zalloc");
+    return NULL;
+  }
+
+  dl_list_init(&ptr_list->list);
+
+  return ptr_list;
+}
+
+static void free_ptr_list_el(struct ptr_list *el, ptr_free_fn cb) {
+  if (el != NULL) {
+    if (el->ptr != NULL && cb != NULL) {
+      cb(el->ptr, el->flags);
+    }
+    dl_list_del(&el->list);
+    sys_free(el);
+  }
+}
+
+void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb) {
+  struct ptr_list *el;
+
+  if (ptr_list == NULL) {
+    return;
+  }
+
+  while ((el = dl_list_first(&ptr_list->list, struct ptr_list, list)) !=
+         NULL) {
+    free_ptr_list_el(el, cb);
+  }
+
+  free_ptr_list_el(ptr_list, cb);
+}
+
+int push_ptr_list(struct ptr_list *ptr_list, void *ptr, int flags) {
+  if (ptr_list == NULL) {
+    log_error("ptr_list param is empty");
+    return -1;
+  }
+
+  if (ptr == NULL) {
+    log_error("ptr param is empty");
+    return -1;
+  }
+
+  struct ptr_list *el = init_ptr_list();
+
+  if (el == NULL) {
+    log_error("init_ptr_list fail");
+    return -1;
+  }
+
+  el->ptr = ptr;
+  el->flags = flags;
+
+  dl_list_add_tail(&ptr_list->list, &el->list);
+
+  return 0;
+}

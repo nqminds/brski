@@ -23,6 +23,7 @@
 #include <openssl/sha.h>
 #include <openssl/x509.h>
 #include <openssl/x509v3.h>
+#include <openssl/x509_vfy.h>
 #include <sys/types.h>
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
@@ -63,10 +64,34 @@ static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
   return (ssize_t)length;
 }
 
+static ssize_t bio_to_ptr(BIO *mem, uint8_t **data) {
+  *data = NULL;
+
+  BUF_MEM *ptr = NULL;
+  BIO_get_mem_ptr(mem, &ptr);
+  ssize_t length = ptr->length;
+
+  if (length) {
+    if ((*data = (uint8_t *)sys_zalloc(length)) == NULL) {
+      log_errno("sys_zalloc");
+      return -1;
+    }
+
+    sys_memcpy(*data, ptr->data, length);
+  }
+
+  return length;
+}
+
 static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
   *cms = NULL;
 
   BIO *mem = BIO_new_ex(NULL, BIO_s_mem());
+
+  if (mem == NULL) {
+    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    return -1;
+  }
 
   if (!i2d_CMS_bio(mem, content)) {
     log_error("i2d_CMS_bio fail with code=%d", ERR_get_error());
@@ -74,22 +99,27 @@ static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
     return -1;
   }
 
-  BUF_MEM *ptr = NULL;
 
-  BIO_get_mem_ptr(mem, &ptr);
-  ssize_t length = ptr->length;
-
-  if ((*cms = (uint8_t *)sys_zalloc(length)) == NULL) {
-    log_errno("sys_zalloc");
+  ssize_t length = bio_to_ptr(mem, cms);
+  if (length < 0) {
+    log_error("bio_to_ptr fail");
     BIO_free(mem);
     return -1;
   }
 
-  sys_memcpy(*cms, ptr->data, length);
-
   BIO_free(mem);
-
   return length;
+}
+
+static X509_CRL *derbuf_to_crl(const uint8_t *crl, size_t length) {
+  X509_CRL *crl_cert = NULL;
+  const unsigned char *pp = (unsigned char *)crl;
+  if (d2i_X509_CRL(&crl_cert, &pp, length) == NULL) {
+    log_error("d2i_X509_CRL fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  return crl_cert;
 }
 
 static CMS_ContentInfo* derbuf_to_cms(uint8_t *cms, ssize_t cms_length) {
@@ -307,7 +337,6 @@ static X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
       return NULL;
     }
 
-    log_trace("%s %s", el->key, el->value);
     if (!X509_NAME_add_entry_by_txt(name, el->key, MBSTRING_ASC,
                                     (unsigned char *)el->value, -1, -1, 0)) {
       log_error("X509_NAME_add_entry_by_txt code=%d", ERR_get_error());
@@ -508,7 +537,7 @@ static STACK_OF(X509) * get_certificate_stack(struct buffer_list *certs) {
   STACK_OF(X509) *cert_stack = sk_X509_new_null();
 
   if (cert_stack == NULL) {
-    log_trace("sk_X509_new_null fail with code=%d", ERR_get_error());
+    log_error("sk_X509_new_null fail with code=%d", ERR_get_error());
     return NULL;
   }
 
@@ -526,6 +555,88 @@ static STACK_OF(X509) * get_certificate_stack(struct buffer_list *certs) {
   return cert_stack;
 }
 
+void free_x509_store_cert(void *cert, int flags) {
+  if (cert != NULL) {
+    if (flags == CRYPTO_CERTIFICATE_VALID) {
+      X509_free((X509*) cert);
+    } else if (flags == CRYPTO_CERTIFICATE_CRL) {
+      X509_CRL_free((X509_CRL*) cert);
+    }
+  }
+}
+
+void free_x509_store(X509_STORE *store, struct ptr_list *x509_store_list) {
+  if (store != NULL) {
+    X509_STORE_free(store);
+  }
+
+  free_ptr_list(x509_store_list, free_x509_store_cert);
+}
+
+static X509_STORE * get_certificate_store(struct buffer_list *store, struct ptr_list **x509_store_list) {
+  *x509_store_list = NULL;
+
+  /* Initialize the ptr list to store the pointers to converted ceritificates
+      and crls. The reason is X509_STORE_free doesn't free the stored cert pointers.
+  */
+  if ((*x509_store_list = init_ptr_list()) == NULL) {
+    log_error("init_ptr_list fail");
+    return NULL;
+  }
+
+  X509_STORE *x509_store = X509_STORE_new();
+
+  if (x509_store == NULL) {
+    log_error("X509_STORE_new fail with code=%d", ERR_get_error());
+    free_x509_store(x509_store, *x509_store_list);
+    return NULL;
+  }
+
+  struct buffer_list *el = NULL;
+  dl_list_for_each(el, &store->list, struct buffer_list, list) {
+    enum CRYPTO_CERTIFICATE_TYPE type = (enum CRYPTO_CERTIFICATE_TYPE)el->flags;
+    void *ptr = NULL;
+    if (type == CRYPTO_CERTIFICATE_VALID) {
+      X509 *x509 = crypto_cert2context(el->buf, el->length);
+      if (x509 == NULL) {
+        log_error("crypto_cert2context fail");
+        free_x509_store(x509_store, *x509_store_list);
+        return NULL;
+      }
+
+      if (!X509_STORE_add_cert(x509_store, x509)) {
+        log_error("X509_STORE_add_cert fail with code=%d", ERR_get_error());
+        free_x509_store(x509_store, *x509_store_list);
+        return NULL;
+      }
+
+      ptr = (void *)x509;
+    } else if (type == CRYPTO_CERTIFICATE_CRL) {
+      X509_CRL *x509_crl = derbuf_to_crl(el->buf, el->length);
+      if (x509_crl == NULL) {
+        log_error("derbuf_to_crl fail");
+        free_x509_store(x509_store, *x509_store_list);
+        return NULL;
+      }
+
+      if (!X509_STORE_add_crl(x509_store, x509_crl)) {
+        log_error("X509_STORE_add_crl fail with code=%d", ERR_get_error());
+        free_x509_store(x509_store, *x509_store_list);
+        return NULL;
+      }
+
+      ptr = (void *)x509_crl;
+    }
+    if (push_ptr_list(*x509_store_list, ptr, el->flags) < 0) {
+      log_error("push_ptr_list fail");
+      free_x509_store(x509_store, *x509_store_list);
+      return NULL;
+    }
+  }
+
+  return x509_store;
+}
+
 static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
                                 uint8_t *cert, size_t cert_length,
                                 EVP_PKEY *pkey, struct buffer_list *certs,
@@ -533,9 +644,13 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
   unsigned int flags = CMS_BINARY;
 
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
+  if (mem_data == NULL) {
+    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    return -1;
+  }
 
   if (BIO_write(mem_data, data, data_length) < 0) {
-    log_trace("BIO_write fail with code=%d", ERR_get_error());
+    log_error("BIO_write fail with code=%d", ERR_get_error());
     BIO_free(mem_data);
     return -1;
   }
@@ -561,35 +676,34 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
       CMS_sign(signcert, pkey, cert_stack, mem_data, flags);
 
   if (content == NULL) {
-    log_trace("CMS_sign fail with code=%d", ERR_get_error());
-    X509_free(signcert);
-    sk_X509_pop_free(cert_stack, X509_free);
-    BIO_free(mem_data);
-    return -1;
+    log_error("CMS_sign fail with code=%d", ERR_get_error());
+    goto sign_withkey_cms_fail;
   }
 
   if (!CMS_final(content, mem_data, NULL, flags)) {
-    log_trace("CMS_final fail with code=%d", ERR_get_error());
-    X509_free(signcert);
-    sk_X509_pop_free(cert_stack, X509_free);
-    BIO_free(mem_data);
-    return -1;
+    log_error("CMS_final fail with code=%d", ERR_get_error());
+    goto sign_withkey_cms_fail;
   }
 
   /* Get the DER format of the CMS structure */
   ssize_t length = cms_to_derbuf(content, cms);
   if (length < 0) {
     log_error("cms_to_derbuf fail");
-    X509_free(signcert);
-    sk_X509_pop_free(cert_stack, X509_free);
-    BIO_free(mem_data);
-    return -1;
+    goto sign_withkey_cms_fail;
   }
 
   X509_free(signcert);
   sk_X509_pop_free(cert_stack, X509_free);
   BIO_free(mem_data);
+  CMS_ContentInfo_free(content);
   return length;
+
+sign_withkey_cms_fail:
+  X509_free(signcert);
+  sk_X509_pop_free(cert_stack, X509_free);
+  BIO_free(mem_data);
+  CMS_ContentInfo_free(content);
+  return -1;
 }
 
 ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
@@ -682,9 +796,6 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
 
 ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
                           struct buffer_list *certs, struct buffer_list *store, uint8_t **data) {
-  (void)certs;
-  (void)store;
-  (void)data;
   if (cms == NULL) {
     log_error("cms param is NULL");
     return -1;
@@ -701,5 +812,52 @@ ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
     return -1;
   }
 
+  STACK_OF(X509) *cert_stack = NULL;
+  if (certs != NULL) {
+    if ((cert_stack = get_certificate_stack(certs)) == NULL) {
+      log_error("get_certificate_stack fail");
+      CMS_ContentInfo_free(content);
+      return -1;
+    }
+  }
+
+  struct ptr_list *x509_store_list = NULL;
+  X509_STORE *cert_store = get_certificate_store(store, &x509_store_list);
+
+  if (cert_store == NULL) {
+    log_error("get_certificate_store fail");
+    sk_X509_pop_free(cert_stack, X509_free);
+    CMS_ContentInfo_free(content);
+    return -1;
+  }
+
+  BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
+  if (mem_data == NULL) {
+    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    goto crypto_verify_cms_fail;
+  }
+
+  if (!CMS_verify(content, cert_stack, cert_store,NULL, mem_data, 0)) {
+    log_error("CMS_verify fail with code=%d", ERR_get_error());
+    goto crypto_verify_cms_fail;
+  }
+
+  ssize_t length = bio_to_ptr(mem_data, data);
+  if (length < 0) {
+    log_error("bio_to_ptr fail");
+    goto crypto_verify_cms_fail;
+  }
+
+  BIO_free(mem_data);
+  sk_X509_pop_free(cert_stack, X509_free);
+  CMS_ContentInfo_free(content);
+  free_x509_store(cert_store, x509_store_list);
+  return length;
+
+crypto_verify_cms_fail:
+  BIO_free(mem_data);
+  sk_X509_pop_free(cert_stack, X509_free);
+  CMS_ContentInfo_free(content);
+  free_x509_store(cert_store, x509_store_list);
   return -1;
 }
