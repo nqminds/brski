@@ -821,14 +821,17 @@ ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
     }
   }
 
+  X509_STORE *cert_store = NULL;
   struct ptr_list *x509_store_list = NULL;
-  X509_STORE *cert_store = get_certificate_store(store, &x509_store_list);
+  if (store != NULL) {
+    cert_store = get_certificate_store(store, &x509_store_list);
 
-  if (cert_store == NULL) {
-    log_error("get_certificate_store fail");
-    sk_X509_pop_free(cert_stack, X509_free);
-    CMS_ContentInfo_free(content);
-    return -1;
+    if (cert_store == NULL) {
+      log_error("get_certificate_store fail");
+      sk_X509_pop_free(cert_stack, X509_free);
+      CMS_ContentInfo_free(content);
+      return -1;
+    }
   }
 
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
@@ -838,7 +841,7 @@ ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
   }
 
   if (!CMS_verify(content, cert_stack, cert_store,NULL, mem_data, 0)) {
-    log_error("CMS_verify fail with code=%d", ERR_get_error());
+    log_error("CMS_verify fail with code=%s", ERR_reason_error_string(ERR_get_error()));
     goto crypto_verify_cms_fail;
   }
 
