@@ -348,15 +348,47 @@ static void test_crypto_sign_rsacms(void **state) {
 }
 */
 
+struct buffer_list *create_cert_list(void) {
+  struct buffer_list *certs = init_buffer_list();
+  struct crypto_cert_meta meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 123456789,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+  uint8_t *key = NULL;
+  ssize_t key_length = crypto_generate_eckey(&key);
+  assert_non_null(key);
+  meta.issuer = init_keyvalue_list();
+  meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
+                     sys_strdup("cert_list_issuer.info"));
+
+  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.subject, sys_strdup("CN"),
+                     sys_strdup("cert_list_subject.info"));
+
+  uint8_t *cert = NULL;
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
+  assert_non_null(cert);
+
+  push_buffer_list(certs, cert, cert_length, 0);
+
+  sys_free(key);
+  return certs;
+}
+
 static void test_crypto_verify_cms(void **state) {
   (void)state;
+
+  struct buffer_list *certs = create_cert_list();
 
   char *data = "This is a message in cms";
   ssize_t data_length = strlen(data);
   uint8_t *cms = NULL;
   uint8_t *key = NULL;
   uint8_t *cert = NULL;
-  struct buffer_list *certs = init_buffer_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
@@ -379,7 +411,7 @@ static void test_crypto_verify_cms(void **state) {
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
   // push_buffer_list(certs, cert, cert_length, 0);
 
-  ssize_t cms_length = crypto_sign_eccms((uint8_t*)data, data_length, cert, cert_length, key, key_length, NULL, &cms);
+  ssize_t cms_length = crypto_sign_eccms((uint8_t*)data, data_length, cert, cert_length, key, key_length, certs, &cms);
   assert_non_null(cms);
 
   uint8_t *extracted_data = NULL;
