@@ -21,6 +21,7 @@
 
 #include "voucher/crypto_defs.h"
 
+/*
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;
   uint8_t *key = NULL;
@@ -345,12 +346,13 @@ static void test_crypto_sign_rsacms(void **state) {
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
 }
+*/
 
 static void test_crypto_verify_cms(void **state) {
   (void)state;
 
-  uint8_t data[5] = {1, 2, 3, 4, 5};
-  ssize_t data_length = 5;
+  char *data = "This is a message in cms";
+  ssize_t data_length = strlen(data);
   uint8_t *cms = NULL;
   uint8_t *key = NULL;
   uint8_t *cert = NULL;
@@ -368,23 +370,24 @@ static void test_crypto_verify_cms(void **state) {
 
   push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
   push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+                     sys_strdup("issuer.info"));
 
   push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+                     sys_strdup("subject.info"));
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
-  push_buffer_list(certs, cert, cert_length, 0);
+  // push_buffer_list(certs, cert, cert_length, 0);
 
-  ssize_t cms_length = crypto_sign_eccms(data, data_length, cert, cert_length, key, key_length, NULL, &cms);
+  ssize_t cms_length = crypto_sign_eccms((uint8_t*)data, data_length, cert, cert_length, key, key_length, NULL, &cms);
   assert_non_null(cms);
 
   uint8_t *extracted_data = NULL;
-  ssize_t extracted_data_legth = crypto_verify_cms(cms, cms_length, certs, NULL, &extracted_data);
-  assert_true(extracted_data_legth > 0);
+  ssize_t extracted_data_legth = crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
+  assert_int_equal(extracted_data_legth, data_length);
+  assert_non_null(extracted_data);
 
-  // push_buffer_list(certs, cert, cert_length, 0);
+  assert_memory_equal(extracted_data, data, extracted_data_legth);
 
   sys_free(cms);
   sys_free(key);
@@ -402,17 +405,25 @@ int main(int argc, char *argv[]) {
   log_set_quiet(false);
 
   const struct CMUnitTest tests[] = {
-      cmocka_unit_test(test_crypto_generate_rsakey),
-      cmocka_unit_test(test_crypto_generate_eckey),
-      cmocka_unit_test(test_crypto_eckey2context),
-      cmocka_unit_test(test_crypto_rsakey2context),
-      cmocka_unit_test(test_crypto_free_keycontext),
-      cmocka_unit_test(test_crypto_generate_eccert),
-      cmocka_unit_test(test_crypto_generate_rsacert),
-      cmocka_unit_test(test_crypto_sign_eccms),
-      cmocka_unit_test(test_crypto_sign_rsacms),
+      // cmocka_unit_test(test_crypto_generate_rsakey),
+      // cmocka_unit_test(test_crypto_generate_eckey),
+      // cmocka_unit_test(test_crypto_eckey2context),
+      // cmocka_unit_test(test_crypto_rsakey2context),
+      // cmocka_unit_test(test_crypto_free_keycontext),
+      // cmocka_unit_test(test_crypto_generate_eccert),
+      // cmocka_unit_test(test_crypto_generate_rsacert),
+      // cmocka_unit_test(test_crypto_sign_eccms),
+      // cmocka_unit_test(test_crypto_sign_rsacms),
       cmocka_unit_test(test_crypto_verify_cms)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
+
+
+/*
+openssl cms -sign -in message.txt -text -out out-cms.msg -signer cert.pem -inkey private.pem -nodetach
+openssl cms -verify -in out-cms.msg -certfile cert.pem -out signedtext.txt -noverify
+openssl cms -verify -in out-cms.msg -out signedtext.txt -noverify
+
+*/

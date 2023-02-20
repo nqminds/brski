@@ -637,12 +637,25 @@ static X509_STORE * get_certificate_store(struct buffer_list *store, struct ptr_
   return x509_store;
 }
 
+void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
+  BIO *out = BIO_new_file(filename, "w");
+  if (out == NULL) {
+    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    return;
+  }
+
+  if (!SMIME_write_CMS(out, cms, NULL, CMS_TEXT)) {
+    log_error("SMIME_write_CMS fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    BIO_free(out);
+  }
+
+  BIO_free(out);
+}
+
 static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
                                 uint8_t *cert, size_t cert_length,
                                 EVP_PKEY *pkey, struct buffer_list *certs,
                                 uint8_t **cms) {
-  unsigned int flags = CMS_BINARY;
-
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
   if (mem_data == NULL) {
     log_error("BIO_new_ex fail with code=%d", ERR_get_error());
@@ -672,16 +685,14 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
     }
   }
 
+  unsigned int flags = CMS_BINARY;
+  flags &= ~CMS_DETACHED;
+  
   CMS_ContentInfo *content =
       CMS_sign(signcert, pkey, cert_stack, mem_data, flags);
 
   if (content == NULL) {
-    log_error("CMS_sign fail with code=%d", ERR_get_error());
-    goto sign_withkey_cms_fail;
-  }
-
-  if (!CMS_final(content, mem_data, NULL, flags)) {
-    log_error("CMS_final fail with code=%d", ERR_get_error());
+    log_error("CMS_sign fail with code=%s", ERR_reason_error_string(ERR_get_error()));
     goto sign_withkey_cms_fail;
   }
 
@@ -840,7 +851,9 @@ ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
     goto crypto_verify_cms_fail;
   }
 
-  if (!CMS_verify(content, cert_stack, cert_store,NULL, mem_data, 0)) {
+  unsigned int flags = (cert_store == NULL) ? CMS_NO_SIGNER_CERT_VERIFY : 0;
+
+  if (!CMS_verify(content, cert_stack, cert_store, NULL, mem_data, flags)) {
     log_error("CMS_verify fail with code=%s", ERR_reason_error_string(ERR_get_error()));
     goto crypto_verify_cms_fail;
   }
