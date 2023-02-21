@@ -21,7 +21,6 @@
 
 #include "voucher/crypto_defs.h"
 
-/*
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;
   uint8_t *key = NULL;
@@ -346,7 +345,6 @@ static void test_crypto_sign_rsacms(void **state) {
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
 }
-*/
 
 struct buffer_list *create_cert_list(void) {
   struct buffer_list *certs = init_buffer_list();
@@ -437,15 +435,15 @@ int main(int argc, char *argv[]) {
   log_set_quiet(false);
 
   const struct CMUnitTest tests[] = {
-      // cmocka_unit_test(test_crypto_generate_rsakey),
-      // cmocka_unit_test(test_crypto_generate_eckey),
-      // cmocka_unit_test(test_crypto_eckey2context),
-      // cmocka_unit_test(test_crypto_rsakey2context),
-      // cmocka_unit_test(test_crypto_free_keycontext),
-      // cmocka_unit_test(test_crypto_generate_eccert),
-      // cmocka_unit_test(test_crypto_generate_rsacert),
-      // cmocka_unit_test(test_crypto_sign_eccms),
-      // cmocka_unit_test(test_crypto_sign_rsacms),
+      cmocka_unit_test(test_crypto_generate_rsakey),
+      cmocka_unit_test(test_crypto_generate_eckey),
+      cmocka_unit_test(test_crypto_eckey2context),
+      cmocka_unit_test(test_crypto_rsakey2context),
+      cmocka_unit_test(test_crypto_free_keycontext),
+      cmocka_unit_test(test_crypto_generate_eccert),
+      cmocka_unit_test(test_crypto_generate_rsacert),
+      cmocka_unit_test(test_crypto_sign_eccms),
+      cmocka_unit_test(test_crypto_sign_rsacms),
       cmocka_unit_test(test_crypto_verify_cms)
   };
 
