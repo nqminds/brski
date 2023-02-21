@@ -399,8 +399,7 @@ static void test_crypto_verify_cms(void **state) {
   meta.subject = init_keyvalue_list();
 
   push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuer.info"));
+  push_keyvalue_list(meta.issuer, sys_strdup("CN"), sys_strdup("issuer.info"));
 
   push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
@@ -409,11 +408,14 @@ static void test_crypto_verify_cms(void **state) {
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
   // push_buffer_list(certs, cert, cert_length, 0);
 
-  ssize_t cms_length = crypto_sign_eccms((uint8_t*)data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  ssize_t cms_length =
+      crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key,
+                        key_length, certs, &cms);
   assert_non_null(cms);
 
   uint8_t *extracted_data = NULL;
-  ssize_t extracted_data_legth = crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
+  ssize_t extracted_data_legth =
+      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 
@@ -444,16 +446,15 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_crypto_generate_rsacert),
       cmocka_unit_test(test_crypto_sign_eccms),
       cmocka_unit_test(test_crypto_sign_rsacms),
-      cmocka_unit_test(test_crypto_verify_cms)
-  };
+      cmocka_unit_test(test_crypto_verify_cms)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
 
-
 /*
-openssl cms -sign -in message.txt -text -out out-cms.msg -signer cert.pem -inkey private.pem -nodetach
-openssl cms -verify -in out-cms.msg -certfile cert.pem -out signedtext.txt -noverify
-openssl cms -verify -in out-cms.msg -out signedtext.txt -noverify
+openssl cms -sign -in message.txt -text -out out-cms.msg -signer cert.pem -inkey
+private.pem -nodetach openssl cms -verify -in out-cms.msg -certfile cert.pem
+-out signedtext.txt -noverify openssl cms -verify -in out-cms.msg -out
+signedtext.txt -noverify
 
 */

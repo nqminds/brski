@@ -22,8 +22,8 @@
 #include <openssl/safestack.h>
 #include <openssl/sha.h>
 #include <openssl/x509.h>
-#include <openssl/x509v3.h>
 #include <openssl/x509_vfy.h>
+#include <openssl/x509v3.h>
 #include <sys/types.h>
 #ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
@@ -99,7 +99,6 @@ static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
     return -1;
   }
 
-
   ssize_t length = bio_to_ptr(mem, cms);
   if (length < 0) {
     log_error("bio_to_ptr fail");
@@ -122,7 +121,7 @@ static X509_CRL *derbuf_to_crl(const uint8_t *crl, size_t length) {
   return crl_cert;
 }
 
-static CMS_ContentInfo* derbuf_to_cms(uint8_t *cms, ssize_t cms_length) {
+static CMS_ContentInfo *derbuf_to_cms(uint8_t *cms, ssize_t cms_length) {
   CMS_ContentInfo *content = NULL;
   const unsigned char *pp = (unsigned char *)cms;
   if (d2i_CMS_ContentInfo(&content, &pp, cms_length) == NULL) {
@@ -558,9 +557,9 @@ static STACK_OF(X509) * get_certificate_stack(struct buffer_list *certs) {
 void free_x509_store_cert(void *cert, int flags) {
   if (cert != NULL) {
     if (flags == CRYPTO_CERTIFICATE_VALID) {
-      X509_free((X509*) cert);
+      X509_free((X509 *)cert);
     } else if (flags == CRYPTO_CERTIFICATE_CRL) {
-      X509_CRL_free((X509_CRL*) cert);
+      X509_CRL_free((X509_CRL *)cert);
     }
   }
 }
@@ -573,11 +572,13 @@ void free_x509_store(X509_STORE *store, struct ptr_list *x509_store_list) {
   free_ptr_list(x509_store_list, free_x509_store_cert);
 }
 
-static X509_STORE * get_certificate_store(struct buffer_list *store, struct ptr_list **x509_store_list) {
+static X509_STORE *get_certificate_store(struct buffer_list *store,
+                                         struct ptr_list **x509_store_list) {
   *x509_store_list = NULL;
 
   /* Initialize the ptr list to store the pointers to converted ceritificates
-      and crls. The reason is X509_STORE_free doesn't free the stored cert pointers.
+      and crls. The reason is X509_STORE_free doesn't free the stored cert
+     pointers.
   */
   if ((*x509_store_list = init_ptr_list()) == NULL) {
     log_error("init_ptr_list fail");
@@ -645,7 +646,8 @@ void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
   }
 
   if (!SMIME_write_CMS(out, cms, NULL, CMS_TEXT)) {
-    log_error("SMIME_write_CMS fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    log_error("SMIME_write_CMS fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
     BIO_free(out);
   }
 
@@ -687,12 +689,13 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
 
   unsigned int flags = CMS_BINARY;
   flags &= ~CMS_DETACHED;
-  
+
   CMS_ContentInfo *content =
       CMS_sign(signcert, pkey, cert_stack, mem_data, flags);
 
   if (content == NULL) {
-    log_error("CMS_sign fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    log_error("CMS_sign fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
     goto sign_withkey_cms_fail;
   }
 
@@ -806,7 +809,8 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
 }
 
 ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
-                          struct buffer_list *certs, struct buffer_list *store, uint8_t **data) {
+                          struct buffer_list *certs, struct buffer_list *store,
+                          uint8_t **data) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return -1;
@@ -854,7 +858,8 @@ ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
   unsigned int flags = (cert_store == NULL) ? CMS_NO_SIGNER_CERT_VERIFY : 0;
 
   if (!CMS_verify(content, cert_stack, cert_store, NULL, mem_data, flags)) {
-    log_error("CMS_verify fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    log_error("CMS_verify fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
     goto crypto_verify_cms_fail;
   }
 

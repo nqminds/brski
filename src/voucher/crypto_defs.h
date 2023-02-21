@@ -187,6 +187,7 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
  * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
-                          struct buffer_list *certs, struct buffer_list *store, uint8_t **data);
+                          struct buffer_list *certs, struct buffer_list *store,
+                          uint8_t **data);
 
 #endif

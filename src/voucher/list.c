@@ -184,8 +184,7 @@ void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb) {
     return;
   }
 
-  while ((el = dl_list_first(&ptr_list->list, struct ptr_list, list)) !=
-         NULL) {
+  while ((el = dl_list_first(&ptr_list->list, struct ptr_list, list)) != NULL) {
     free_ptr_list_el(el, cb);
   }
 

@@ -158,9 +158,9 @@ int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
                      int flags);
 
 struct ptr_list {
-  void *ptr;            /**< The pointer (points to heap memory) */
-  int flags;            /**< The generic pointer flags */
-  struct dl_list list;  /**< List definition */
+  void *ptr;           /**< The pointer (points to heap memory) */
+  int flags;           /**< The generic pointer flags */
+  struct dl_list list; /**< List definition */
 };
 
 typedef void (*ptr_free_fn)(void *ptr, int flag);
