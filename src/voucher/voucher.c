@@ -457,6 +457,28 @@ const bool* get_attr_bool_voucher(const struct Voucher *voucher,
   return &voucher->domain_cert_revocation_checks;
 }
 
+const struct tm * get_attr_time_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  switch (attr) {
+    case ATTR_CREATED_ON:
+      return &voucher->created_on;
+      break;
+    case ATTR_EXPIRES_ON:
+      return &voucher->expires_on;
+      break;
+    case ATTR_LAST_RENEWAL_DATE:
+      return &voucher->last_renewal_date;
+    default:
+      log_error("Wrong attribute name");
+      return NULL;
+  }
+}
+
 static char *serialize_attr_voucher(const struct Voucher *voucher,
                                     const enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;

@@ -131,7 +131,7 @@ static void test_set_attr_array_voucher(void **state) {
   free_voucher(voucher);
 }
 
-void test_compare_time(struct tm *tm1, struct tm *tm2) {
+void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
   assert_int_equal(tm1->tm_year, tm2->tm_year);
   assert_int_equal(tm1->tm_mon, tm2->tm_mon);
   assert_int_equal(tm1->tm_mday, tm2->tm_mday);
@@ -525,6 +525,48 @@ static void test_get_attr_bool_voucher(void **state) {
   assert_non_null(value);
   assert_true(*value);
 
+  assert_null(get_attr_bool_voucher(voucher, -1));
+  
+  free_voucher(voucher);
+}
+
+static void test_get_attr_time_voucher(void **state) {
+  (void)state;
+
+  struct tm tm = {.tm_year = 73,
+                  .tm_mon = 10,
+                  .tm_mday = 29,
+                  .tm_hour = 21,
+                  .tm_min = 33,
+                  .tm_sec = 9};
+  struct tm tm_zero = {.tm_year = 0,
+                       .tm_mon = 0,
+                       .tm_mday = 0,
+                       .tm_hour = 0,
+                       .tm_min = 0,
+                       .tm_sec = 0};
+
+  struct Voucher *voucher = init_voucher();
+  const struct tm* tm_value = get_attr_time_voucher(voucher, ATTR_CREATED_ON);
+  assert_non_null(tm_value);
+  test_compare_time(&tm_zero, tm_value);
+
+  tm_value = get_attr_time_voucher(voucher, ATTR_EXPIRES_ON);
+  assert_non_null(tm_value);
+  test_compare_time(&tm_zero, tm_value);
+
+  tm_value = get_attr_time_voucher(voucher, ATTR_LAST_RENEWAL_DATE);
+  assert_non_null(tm_value);
+  test_compare_time(&tm_zero, tm_value);
+
+  tm_value = get_attr_time_voucher(voucher, -1);
+  assert_null(tm_value);
+
+  set_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE, &tm);
+  tm_value = get_attr_time_voucher(voucher, ATTR_LAST_RENEWAL_DATE);
+  assert_non_null(tm_value);
+  test_compare_time(&tm, tm_value);
+
   free_voucher(voucher);
 }
 
@@ -545,7 +587,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_serialize_voucher),
       cmocka_unit_test(test_deserialize_voucher),
       cmocka_unit_test(test_clear_attr_voucher),
-      cmocka_unit_test(test_get_attr_bool_voucher)
+      cmocka_unit_test(test_get_attr_bool_voucher),
+      cmocka_unit_test(test_get_attr_time_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
