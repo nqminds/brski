@@ -17,7 +17,7 @@
 #include "list.h"
 #include "serialize.h"
 #include "voucher_defs.h"
-#include "voucher_impl.h"
+#include "voucher.h"
 
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
