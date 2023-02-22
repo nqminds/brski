@@ -442,6 +442,21 @@ int clear_attr_voucher(struct Voucher *voucher,
   return 0;
 }
 
+const bool* get_attr_bool_voucher(const struct Voucher *voucher,
+                          const enum VoucherAttributes attr) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  if (attr != ATTR_DOMAIN_CERT_REVOCATION_CHECKS) {
+    log_error("Wrong attribute name");
+    return NULL;
+  }
+
+  return &voucher->domain_cert_revocation_checks;
+}
+
 static char *serialize_attr_voucher(const struct Voucher *voucher,
                                     const enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;

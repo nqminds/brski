@@ -510,6 +510,24 @@ static void test_clear_attr_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_get_attr_bool_voucher(void **state) {
+  (void)state;
+
+  struct Voucher *voucher = init_voucher();
+  const bool* value = get_attr_bool_voucher(voucher,
+                          ATTR_DOMAIN_CERT_REVOCATION_CHECKS);
+  assert_non_null(value);
+  assert_false(*value);
+
+  set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, true);
+  value = get_attr_bool_voucher(voucher,
+                          ATTR_DOMAIN_CERT_REVOCATION_CHECKS);
+  assert_non_null(value);
+  assert_true(*value);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -526,7 +544,9 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_set_attr_voucher),
       cmocka_unit_test(test_serialize_voucher),
       cmocka_unit_test(test_deserialize_voucher),
-      cmocka_unit_test(test_clear_attr_voucher)};
+      cmocka_unit_test(test_clear_attr_voucher),
+      cmocka_unit_test(test_get_attr_bool_voucher)
+  };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

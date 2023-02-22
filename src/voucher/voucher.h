@@ -358,6 +358,16 @@ int clear_attr_voucher(struct Voucher *voucher,
                        const enum VoucherAttributes attr);
 
 /**
+ * @brief Gets the pointer to the value for a voucher bool attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The bool voucher attribute
+ * @return const bool* pointer to the bool value, NULL on failure
+ */
+const bool* get_attr_bool_voucher(const struct Voucher *voucher,
+                          const enum VoucherAttributes attr);
+
+/**
  * @brief Serializes a voucher to a string
  *
  * Caller is responsible for freeing the string

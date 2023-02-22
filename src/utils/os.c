@@ -27,10 +27,16 @@
 #include <time.h>
 #include <unistd.h>
 
-#include "log.h"
 #include "os.h"
 
 void *sys_zalloc(const size_t size) { return sys_calloc(size, 1); }
+
+void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size) {
+  if (size && nmemb > (~(size_t)0) / size) {
+    return NULL;
+  }
+  return sys_realloc(ptr, nmemb * size);
+}
 
 void *sys_memdup(const void *const src, const size_t len) {
   if (src == NULL) {

@@ -71,14 +71,6 @@ void *sys_memdup(const void *const src, const size_t len);
 #define sys_free(p) free(p)
 #endif
 
-static inline void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size) {
-  if (size && nmemb > (~(size_t)0) / size) {
-    return NULL;
-  }
-  return sys_realloc(ptr, nmemb * size);
-
-}
-
 #ifndef sys_memcpy
 #define sys_memcpy(d, s, n) memcpy(d, s, n)
 #endif
@@ -94,6 +86,17 @@ static inline void *sys_realloc_array(void *ptr, const size_t nmemb, const size_
 #ifndef sys_memcmp
 #define sys_memcmp(s1, s2, n) memcmp(s1, s2, n)
 #endif
+
+/**
+ * @brief Reallocates the given area of a memory array (uses realloc).
+ * 
+ * @param ptr Pointer to the memory area to be reallocated
+ * @param nmemb The size of each array element
+ * @param size Size of the array to reallocate
+ * @return void* the pointer to the beginning of newly allocated memory array,
+ * NULL on failure.
+ */
+void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size);
 
 /**
  * @brief Allocate duplicate of passed memory chunk
