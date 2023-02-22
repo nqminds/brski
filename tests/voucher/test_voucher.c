@@ -570,6 +570,44 @@ static void test_get_attr_time_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_get_attr_enum_voucher(void **state) {
+  (void)state;
+
+  struct Voucher *voucher = init_voucher();
+  const enum VoucherAssertions* enum_value = (const enum VoucherAssertions*)get_attr_enum_voucher(voucher, ATTR_ASSERTION);
+  assert_non_null(enum_value);
+  assert_int_equal(*enum_value, VOUCHER_ASSERTION_NONE);
+
+  enum_value = (const enum VoucherAssertions*)get_attr_enum_voucher(voucher, -1);
+  assert_null(enum_value);
+
+  set_attr_enum_voucher(voucher, ATTR_ASSERTION, VOUCHER_ASSERTION_LOGGED);
+  enum_value = (const enum VoucherAssertions*)get_attr_enum_voucher(voucher, ATTR_ASSERTION);
+  assert_non_null(enum_value);
+  assert_int_equal(*enum_value, VOUCHER_ASSERTION_LOGGED);
+
+  free_voucher(voucher);
+}
+
+static void test_get_attr_str_voucher(void **state) {
+  (void)state;
+
+  struct Voucher *voucher = init_voucher();
+  const char*const *value = get_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER);
+  assert_non_null(value);
+  assert_null(*value);
+
+  value = get_attr_str_voucher(voucher, -1);
+  assert_null(value);
+
+  set_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER, "test");
+  value = get_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER);
+  assert_non_null(value);
+  assert_string_equal(*value, "test");
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -588,7 +626,9 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_deserialize_voucher),
       cmocka_unit_test(test_clear_attr_voucher),
       cmocka_unit_test(test_get_attr_bool_voucher),
-      cmocka_unit_test(test_get_attr_time_voucher)
+      cmocka_unit_test(test_get_attr_time_voucher),
+      cmocka_unit_test(test_get_attr_enum_voucher),
+      cmocka_unit_test(test_get_attr_str_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

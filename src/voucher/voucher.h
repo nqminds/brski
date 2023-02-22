@@ -378,6 +378,26 @@ const struct tm * get_attr_time_voucher(struct Voucher *voucher,
                           const enum VoucherAttributes attr);
 
 /**
+ * @brief Gets the pointer to the value for a voucher enum attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The enum voucher attribute
+ * @return const int* pointer to the enum value, NULL on failure
+ */
+const int* get_attr_enum_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr);
+
+/**
+ * @brief Gets the pointer to the value for a voucher string attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The string voucher attribute name
+ * @return const char* const* pointer to the string value, NULL on failure
+ */
+const char* const* get_attr_str_voucher(struct Voucher *voucher,
+                         const enum VoucherAttributes attr);
+
+/**
  * @brief Serializes a voucher to a string
  *
  * Caller is responsible for freeing the string

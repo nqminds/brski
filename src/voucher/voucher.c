@@ -479,6 +479,36 @@ const struct tm * get_attr_time_voucher(struct Voucher *voucher,
   }
 }
 
+const int* get_attr_enum_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  if (attr != ATTR_ASSERTION) {
+    log_error("Wrong attribute name");
+    return NULL;
+  }
+
+  return (const int *)&voucher->assertion;
+}
+
+const char* const* get_attr_str_voucher(struct Voucher *voucher,
+                         const enum VoucherAttributes attr) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  if (attr != ATTR_SERIAL_NUMBER) {
+    log_error("Wrong attribute name");
+    return NULL;
+  }
+
+  return (const char* const*)&voucher->serial_number;
+}
+
 static char *serialize_attr_voucher(const struct Voucher *voucher,
                                     const enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
