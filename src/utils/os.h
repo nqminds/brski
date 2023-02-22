@@ -22,13 +22,6 @@
 
 #include "log.h"
 
-/* Common costant definitions */
-#define MAX_OS_PATH_LEN 4096
-#define MAX_WEB_PATH_LEN 2048
-#define MAX_RANDOM_UUID_LEN 37
-
-#define OS_HOST_NAME_MAX 64
-
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(s) (sizeof(s) / sizeof(s[0]))
 #endif
@@ -41,7 +34,7 @@
  * @param size Number of bytes to allocate
  * @return void* Pointer to allocated and zeroed memory or %NULL on failure
  */
-void *sys_zalloc(size_t size);
+void *sys_zalloc(const size_t size);
 
 /**
  * sys_memdup - Allocate duplicate of passed memory chunk
@@ -53,7 +46,7 @@ void *sys_zalloc(size_t size);
  * @param len Length of source buffer
  * @return void* %NULL if allocation failed, copy of src buffer otherwise
  */
-void *sys_memdup(const void *src, size_t len);
+void *sys_memdup(const void *const src, const size_t len);
 
 #ifndef sys_zalloc
 #define sys_zalloc(s) sys_zalloc(s)
@@ -78,14 +71,19 @@ void *sys_memdup(const void *src, size_t len);
 #define sys_free(p) free(p)
 #endif
 
-static inline void *sys_realloc_array(void *ptr, size_t nmemb, size_t size) {
-  if (size && nmemb > (~(size_t)0) / size)
+static inline void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size) {
+  if (size && nmemb > (~(size_t)0) / size) {
     return NULL;
+  }
   return sys_realloc(ptr, nmemb * size);
+
 }
 
 #ifndef sys_memcpy
 #define sys_memcpy(d, s, n) memcpy(d, s, n)
+#endif
+#ifndef sys_memccpy
+#define sys_memccpy(d, s, c, n) memccpy(d, s, c, n)
 #endif
 #ifndef sys_memmove
 #define sys_memmove(d, s, n) memmove(d, s, n)
@@ -107,7 +105,7 @@ static inline void *sys_realloc_array(void *ptr, size_t nmemb, size_t size) {
  * @param len Length of source buffer
  * @return void* %NULL if allocation failed, copy of src buffer otherwise
  */
-void *sys_memdup(const void *src, size_t len);
+void *sys_memdup(const void *const src, const size_t len);
 
 /**
  * @brief Returns a pointer to a new string which is a duplicate of the string s
@@ -117,7 +115,7 @@ void *sys_memdup(const void *src, size_t len);
  * @param length The length of the string not including the '\0' character
  * @return char* The dublicate string pointer, NULL on error
  */
-char *sys_strndup(const char *s, size_t length);
+char *sys_strndup(const char *const s, const size_t length);
 
 /**
  * @brief Returns a pointer to a new string which is a duplicate of the string s
@@ -125,7 +123,7 @@ char *sys_strndup(const char *s, size_t length);
  * @param s The input string
  * @return char* The dublicate string pointer, NULL on error
  */
-char *sys_strdup(const char *s);
+char *sys_strdup(const char *const s);
 
 /**
  * @brief Copy a string with size bound and NUL-termination
@@ -138,7 +136,7 @@ char *sys_strdup(const char *s);
  * @return size_t Total length of the target string (length of src) (not
  * including NUL-termination)
  */
-size_t sys_strlcpy(char *dest, const char *src, size_t siz);
+size_t sys_strlcpy(char *const dest, const char *const src, const size_t siz);
 
 /**
  * @brief Returns the size of string with a give max length
@@ -147,5 +145,5 @@ size_t sys_strlcpy(char *dest, const char *src, size_t siz);
  * @param max_len The string max length
  * @return size_t Total length of the string
  */
-size_t sys_strnlen_s(const char *str, const size_t max_len);
+size_t sys_strnlen_s(const char *const str, const size_t max_len);
 #endif /* OS_H */

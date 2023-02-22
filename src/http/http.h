@@ -20,6 +20,8 @@ extern "C" {
 #include "../utils/os.h"
 }
 
+#define MAX_WEB_PATH_LEN 2048
+
 #define HTTP_ERROR_REPLY "Router error"
 
 enum HTTP_METHOD {

@@ -30,11 +30,11 @@ extern "C" {
 
 int load_registrar_config(const char *filename, struct http_config *hconf) {
   try {
-    char *key = new char[INI_BUFFERSIZE];
+    char *key = new char[MAX_WEB_PATH_LEN];
 
-    ini_gets("registrar", "bindAddress", "0.0.0.0", key, INI_BUFFERSIZE,
+    ini_gets("registrar", "bindAddress", "0.0.0.0", key, MAX_WEB_PATH_LEN,
              filename);
-    sys_strlcpy(hconf->bindAddress, key, MAX_WEB_PATH_LEN);
+    strcpy(hconf->bindAddress, key);
     delete[] key;
 
     hconf->port = (unsigned int)ini_getl("registrar", "port", 0, filename);

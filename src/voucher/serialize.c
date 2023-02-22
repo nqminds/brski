@@ -79,8 +79,8 @@ char *serialize_keyvalue2json(const struct keyvalue_list *kv_list) {
 
     length += strlen(concat);
 
-    if ((json = sys_realloc(json, length)) == NULL) {
-      log_errno("sys_realloc");
+    if ((json = sys_realloc_array(json, sizeof(char), length)) == NULL) {
+      log_errno("sys_realloc_array");
       sys_free(concat);
       sys_free(json);
       return NULL;
@@ -94,8 +94,8 @@ char *serialize_keyvalue2json(const struct keyvalue_list *kv_list) {
 
   length++;
 
-  if ((json = sys_realloc(json, length)) == NULL) {
-    log_errno("sys_realloc");
+  if ((json = sys_realloc_array(json, sizeof(char), length)) == NULL) {
+    log_errno("sys_realloc_array");
     sys_free(json);
     return NULL;
   }

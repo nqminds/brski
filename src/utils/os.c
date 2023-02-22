@@ -30,9 +30,9 @@
 #include "log.h"
 #include "os.h"
 
-void *sys_zalloc(size_t size) { return sys_calloc(size, 1); }
+void *sys_zalloc(const size_t size) { return sys_calloc(size, 1); }
 
-void *sys_memdup(const void *src, size_t len) {
+void *sys_memdup(const void *const src, const size_t len) {
   if (src == NULL) {
     return NULL;
   }
@@ -46,7 +46,7 @@ void *sys_memdup(const void *src, size_t len) {
   return r;
 }
 
-char *sys_strndup(const char *s, size_t length) {
+char *sys_strndup(const char *const s, const size_t length) {
   char *dest = NULL;
 
   if (s != NULL) {
@@ -61,11 +61,11 @@ char *sys_strndup(const char *s, size_t length) {
   return dest;
 }
 
-char *sys_strdup(const char *s) { return sys_strndup(s, strlen(s)); }
+char *sys_strdup(const char *const s) { return sys_strndup(s, strlen(s)); }
 
-size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
+size_t sys_strlcpy(char *const dest, const char *const src, const size_t siz) {
   /* Copy string up to the maximum size of the dest buffer */
-  const char *char_after_NUL = memccpy(dest, src, '\0', siz);
+  const char *char_after_NUL = sys_memccpy(dest, src, '\0', siz);
 
   if (char_after_NUL != NULL) {
     return (size_t)(char_after_NUL - dest - 1);
@@ -77,7 +77,7 @@ size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
   }
 }
 
-size_t sys_strnlen_s(const char *str, const size_t max_len) {
+size_t sys_strnlen_s(const char *const str, const size_t max_len) {
   char *end = (char *)memchr(str, '\0', max_len);
 
   if (end == NULL)
