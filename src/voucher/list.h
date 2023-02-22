@@ -121,7 +121,8 @@ void free_keyvalue_list(struct keyvalue_list *kv_list);
  * @param[in] value The attribute value
  * @return int 0 on success, -1 on failure
  */
-int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value);
+int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
+                       char *const value);
 
 struct buffer_list {
   uint8_t *buf;        /**< The buffer (heap allocated) */
@@ -154,8 +155,8 @@ void free_buffer_list(struct buffer_list *buf_list);
  * @param[in] flags The buffer flags
  * @return int 0 on success, -1 on failure
  */
-int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
-                     int flags);
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *const buf,
+                     const size_t length, const int flags);
 
 struct ptr_list {
   void *ptr;           /**< The pointer (points to heap memory) */
@@ -163,7 +164,7 @@ struct ptr_list {
   struct dl_list list; /**< List definition */
 };
 
-typedef void (*ptr_free_fn)(void *ptr, int flag);
+typedef void (*ptr_free_fn)(void *ptr, const int flag);
 
 /**
  * @brief Initializes the ptr list
@@ -179,7 +180,7 @@ struct ptr_list *init_ptr_list(void);
  * @param[in] ptr_list The ptr list
  * @param[in] cb The user supplied callback functio to free the ptr element
  */
-void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb);
+void free_ptr_list(struct ptr_list *ptr_list, const ptr_free_fn cb);
 
 /**
  * @brief Pushes a pointer into the list and assigns the flags
@@ -189,6 +190,6 @@ void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb);
  * @param[in] flags The ptr flags
  * @return int 0 on success, -1 on failure
  */
-int push_ptr_list(struct ptr_list *ptr_list, void *ptr, int flags);
+int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags);
 
 #endif /* LIST_H */

@@ -23,7 +23,7 @@
 #define MAX_VOUCHER_JSON_TOKENS 32
 
 static bool check_size_str_equal(const char *src, const char *dst,
-                                 size_t dst_length) {
+                                 const size_t dst_length) {
   if (strncmp(src, dst, dst_length) == 0 && strlen(src) == dst_length) {
     return true;
   } else {
@@ -31,7 +31,8 @@ static bool check_size_str_equal(const char *src, const char *dst,
   }
 }
 
-static bool check_binary_array_nonempty(struct VoucherBinaryArray *value) {
+static bool
+check_binary_array_nonempty(const struct VoucherBinaryArray *value) {
   if (value == NULL) {
     return false;
   }
@@ -44,7 +45,7 @@ static bool check_binary_array_nonempty(struct VoucherBinaryArray *value) {
 }
 
 static int copy_binary_array(struct VoucherBinaryArray *dst,
-                             struct VoucherBinaryArray *src) {
+                             const struct VoucherBinaryArray *src) {
   dst->length = src->length;
   if ((dst->array = sys_memdup((uint8_t *)src->array, src->length)) == NULL) {
     log_errno("sys_memdup");
@@ -89,8 +90,8 @@ struct Voucher *init_voucher(void) {
   return voucher;
 }
 
-int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          bool value) {
+int set_attr_bool_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr, const bool value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -107,8 +108,9 @@ int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
 }
 
 static int set_attr_strbool_voucher(struct Voucher *voucher,
-                                    enum VoucherAttributes attr, char *value,
-                                    size_t value_length) {
+                                    const enum VoucherAttributes attr,
+                                    const char *value,
+                                    const size_t value_length) {
   int bool_value = serialize_str2bool(value, value_length);
   if (bool_value < 0) {
     log_error("serialize_str2bool fail");
@@ -123,8 +125,9 @@ static int set_attr_strbool_voucher(struct Voucher *voucher,
   return 0;
 }
 
-int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          struct tm *value) {
+int set_attr_time_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr,
+                          const struct tm *value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -148,8 +151,8 @@ int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
   return 0;
 }
 
-int set_attr_enum_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          int value) {
+int set_attr_enum_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr, const int value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -172,8 +175,8 @@ int set_attr_enum_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
 }
 
 static int set_attr_strenum_voucher(struct Voucher *voucher,
-                                    enum VoucherAttributes attr, char *value,
-                                    size_t length) {
+                                    const enum VoucherAttributes attr,
+                                    const char *value, const size_t length) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
   enum VoucherAssertions assertion = VOUCHER_ASSERTION_VERIFIED;
   while (assertion <= VOUCHER_ASSERTION_PROXIMITY) {
@@ -188,8 +191,8 @@ static int set_attr_strenum_voucher(struct Voucher *voucher,
 }
 
 static int set_attr_nstr_voucher(struct Voucher *voucher,
-                                 enum VoucherAttributes attr, char *value,
-                                 size_t length) {
+                                 const enum VoucherAttributes attr,
+                                 const char *value, const size_t length) {
 
   if (attr != ATTR_SERIAL_NUMBER) {
     log_error("Wrong attribute name");
@@ -209,8 +212,8 @@ static int set_attr_nstr_voucher(struct Voucher *voucher,
   return 0;
 }
 
-int set_attr_str_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                         char *value) {
+int set_attr_str_voucher(struct Voucher *voucher,
+                         const enum VoucherAttributes attr, const char *value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -230,8 +233,9 @@ int set_attr_str_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
                                sys_strnlen_s(value, MAX_SERIAL_NUMBER_SIZE));
 }
 
-int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                           struct VoucherBinaryArray *value) {
+int set_attr_array_voucher(struct Voucher *voucher,
+                           const enum VoucherAttributes attr,
+                           const struct VoucherBinaryArray *value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -281,8 +285,8 @@ set_attr_array_voucher_fail:
 }
 
 int set_attr_base64_voucher(struct Voucher *voucher,
-                            enum VoucherAttributes attr, char *value,
-                            size_t length) {
+                            const enum VoucherAttributes attr,
+                            const char *value, const size_t length) {
   struct VoucherBinaryArray binary_array;
 
   if ((binary_array.array = serialize_base64str2array(
@@ -299,7 +303,7 @@ int set_attr_base64_voucher(struct Voucher *voucher,
   return 0;
 }
 
-int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
+int set_attr_voucher(struct Voucher *voucher, const enum VoucherAttributes attr,
                      ...) {
   (void)voucher;
 
@@ -348,7 +352,7 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
   return res;
 }
 
-static bool is_attr_time_nonempty(struct tm *tm) {
+static bool is_attr_time_nonempty(const struct tm *tm) {
   if (!tm->tm_year && !tm->tm_yday && !tm->tm_mon && !tm->tm_wday &&
       !tm->tm_mday && !tm->tm_hour && !tm->tm_min && !tm->tm_sec) {
     return false;
@@ -357,8 +361,8 @@ static bool is_attr_time_nonempty(struct tm *tm) {
   return true;
 }
 
-static bool is_attr_voucher_nonempty(struct Voucher *voucher,
-                                     enum VoucherAttributes attr) {
+static bool is_attr_voucher_nonempty(const struct Voucher *voucher,
+                                     const enum VoucherAttributes attr) {
   switch (attr) {
     case ATTR_CREATED_ON:
       return is_attr_time_nonempty(&voucher->created_on);
@@ -388,7 +392,8 @@ static bool is_attr_voucher_nonempty(struct Voucher *voucher,
   }
 }
 
-int clear_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr) {
+int clear_attr_voucher(struct Voucher *voucher,
+                       const enum VoucherAttributes attr) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
@@ -437,8 +442,8 @@ int clear_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr) {
   return 0;
 }
 
-static char *serialize_attr_voucher(struct Voucher *voucher,
-                                    enum VoucherAttributes attr) {
+static char *serialize_attr_voucher(const struct Voucher *voucher,
+                                    const enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
   size_t out_len = 0;
 
@@ -480,7 +485,8 @@ static char *serialize_attr_voucher(struct Voucher *voucher,
   }
 }
 
-static struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
+static struct keyvalue_list *
+voucher_to_keyvalue(const struct Voucher *voucher) {
   struct keyvalue_list *kv_list = init_keyvalue_list();
 
   if (kv_list == NULL) {
@@ -520,7 +526,7 @@ static struct keyvalue_list *voucher_to_keyvalue(struct Voucher *voucher) {
   return kv_list;
 }
 
-static char *serialize_child_voucher(struct Voucher *voucher) {
+static char *serialize_child_voucher(const struct Voucher *voucher) {
   struct keyvalue_list *kv_list = voucher_to_keyvalue(voucher);
 
   if (kv_list == NULL) {
@@ -539,7 +545,7 @@ static char *serialize_child_voucher(struct Voucher *voucher) {
   return json;
 }
 
-char *serialize_voucher(struct Voucher *voucher) {
+char *serialize_voucher(const struct Voucher *voucher) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -581,8 +587,9 @@ char *serialize_voucher(struct Voucher *voucher) {
 }
 
 static int set_attr_strtime_voucher(struct Voucher *voucher,
-                                    enum VoucherAttributes attr, char *value,
-                                    size_t value_length) {
+                                    const enum VoucherAttributes attr,
+                                    const char *value,
+                                    const size_t value_length) {
   char buf[64];
   snprintf(buf, 64, "%.*s", (int)value_length, value);
 
@@ -600,9 +607,9 @@ static int set_attr_strtime_voucher(struct Voucher *voucher,
   return 0;
 }
 
-static int set_keyvalue_voucher(struct Voucher *voucher, char *key,
-                                size_t key_length, char *value,
-                                size_t value_length) {
+static int set_keyvalue_voucher(struct Voucher *voucher, const char *key,
+                                const size_t key_length, const char *value,
+                                const size_t value_length) {
   const char *attr_names[] = VOUCHER_ATTRIBUTE_NAMES;
   if (check_size_str_equal(attr_names[ATTR_CREATED_ON], key, key_length)) {
     if (set_attr_strtime_voucher(voucher, ATTR_CREATED_ON, value,
@@ -688,7 +695,7 @@ static int set_keyvalue_voucher(struct Voucher *voucher, char *key,
   return 0;
 }
 
-struct Voucher *deserialize_voucher(char *json) {
+struct Voucher *deserialize_voucher(const char *json) {
   if (json == NULL) {
     log_error("json param is NULL");
     return NULL;
@@ -730,8 +737,8 @@ struct Voucher *deserialize_voucher(char *json) {
             jsmntok_t *value_token = &tokens[value_idx];
             size_t key_length = key_token->end - key_token->start;
             size_t value_length = value_token->end - value_token->start;
-            char *key = json + key_token->start;
-            char *value = json + value_token->start;
+            const char *key = json + key_token->start;
+            const char *value = json + value_token->start;
             if (set_keyvalue_voucher(voucher, key, key_length, value,
                                      value_length) < 0) {
               log_trace("set_keyvalue_voucher fail");

@@ -57,7 +57,8 @@ void free_keyvalue_list(struct keyvalue_list *kv_list) {
   free_keyvalue_list_el(kv_list);
 }
 
-int push_keyvalue_list(struct keyvalue_list *kv_list, char *key, char *value) {
+int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
+                       char *const value) {
   if (kv_list == NULL) {
     log_error("kv_list param is empty");
     return -1;
@@ -126,8 +127,8 @@ void free_buffer_list(struct buffer_list *buf_list) {
   free_buffer_list_el(buf_list);
 }
 
-int push_buffer_list(struct buffer_list *buf_list, uint8_t *buf, size_t length,
-                     int flags) {
+int push_buffer_list(struct buffer_list *buf_list, uint8_t *const buf,
+                     const size_t length, const int flags) {
   if (buf_list == NULL) {
     log_error("buf_list param is empty");
     return -1;
@@ -167,7 +168,7 @@ struct ptr_list *init_ptr_list(void) {
   return ptr_list;
 }
 
-static void free_ptr_list_el(struct ptr_list *el, ptr_free_fn cb) {
+static void free_ptr_list_el(struct ptr_list *el, const ptr_free_fn cb) {
   if (el != NULL) {
     if (el->ptr != NULL && cb != NULL) {
       cb(el->ptr, el->flags);
@@ -177,7 +178,7 @@ static void free_ptr_list_el(struct ptr_list *el, ptr_free_fn cb) {
   }
 }
 
-void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb) {
+void free_ptr_list(struct ptr_list *ptr_list, const ptr_free_fn cb) {
   struct ptr_list *el;
 
   if (ptr_list == NULL) {
@@ -191,7 +192,7 @@ void free_ptr_list(struct ptr_list *ptr_list, ptr_free_fn cb) {
   free_ptr_list_el(ptr_list, cb);
 }
 
-int push_ptr_list(struct ptr_list *ptr_list, void *ptr, int flags) {
+int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags) {
   if (ptr_list == NULL) {
     log_error("ptr_list param is empty");
     return -1;

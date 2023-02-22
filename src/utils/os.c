@@ -77,7 +77,7 @@ size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
   }
 }
 
-size_t sys_strnlen_s(char *str, size_t max_len) {
+size_t sys_strnlen_s(const char *str, const size_t max_len) {
   char *end = (char *)memchr(str, '\0', max_len);
 
   if (end == NULL)

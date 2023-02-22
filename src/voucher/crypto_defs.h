@@ -63,7 +63,7 @@ enum CRYPTO_CERTIFICATE_TYPE {
  * @param key[out] The output key buffer
  * @return ssize_t the size of the key buffer, -1 on failure
  */
-ssize_t crypto_generate_rsakey(int bits, uint8_t **key);
+ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
 
 /**
  * @brief Generate a private EC key of the type prime256v1
@@ -85,7 +85,7 @@ ssize_t crypto_generate_eckey(uint8_t **key);
  * @param length[in] The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
-CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length);
+CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length);
 
 /**
  * @brief Maps a private RSA key to a key context
@@ -96,7 +96,7 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length);
  * @param length[in] The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
-CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, size_t length);
+CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length);
 
 /**
  * @brief Frees a private key context
@@ -117,8 +117,9 @@ void crypto_free_keycontext(CRYPTO_KEY ctx);
  * @param cert[out] The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
-ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
-                               size_t key_length, uint8_t **cert);
+ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
+                               const uint8_t *key, const size_t key_length,
+                               uint8_t **cert);
 
 /**
  * @brief Generate a certificate and sign with a RSA private key
@@ -132,8 +133,9 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
  * @param cert[out] The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
-ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
-                                size_t key_length, uint8_t **cert);
+ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
+                                const uint8_t *key, const size_t key_length,
+                                uint8_t **cert);
 
 /**
  * @brief Signs a buffer using CMS for an EC private key
@@ -150,9 +152,10 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
  * @param cms[out] The output cms buffer
  * @return ssize_t the size of the cms buffer, -1 on failure
  */
-ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
-                          size_t cert_length, uint8_t *key, size_t key_length,
-                          struct buffer_list *certs, uint8_t **cms);
+ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
+                          const uint8_t *cert, const size_t cert_length,
+                          const uint8_t *key, const size_t key_length,
+                          const struct buffer_list *certs, uint8_t **cms);
 
 /**
  * @brief Signs a buffer using CMS for an RSA private key
@@ -169,9 +172,10 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
  * @param cms[out] The output cms buffer
  * @return ssize_t the size of the cms buffer, -1 on failure
  */
-ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
-                           size_t cert_length, uint8_t *key, size_t key_length,
-                           struct buffer_list *certs, uint8_t **cms);
+ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs, uint8_t **cms);
 
 /**
  * @brief Verifies a CMS buffer and extract the data
@@ -186,8 +190,8 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
  * @param data[out] The output data buffer
  * @return ssize_t the size of the data buffer, -1 on failure
  */
-ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
-                          struct buffer_list *certs, struct buffer_list *store,
-                          uint8_t **data);
+ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
+                          const struct buffer_list *certs,
+                          const struct buffer_list *store, uint8_t **data);
 
 #endif

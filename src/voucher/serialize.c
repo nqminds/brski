@@ -18,7 +18,8 @@
 static const uint8_t base64_table[65] =
     "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
 
-char *concatenate_keyvalue(char *key, char *value, bool separator) {
+char *concatenate_keyvalue(const char *key, const char *value,
+                           const bool separator) {
   size_t key_size = strlen(key);
   size_t value_length = strlen(value);
 
@@ -44,7 +45,7 @@ char *concatenate_keyvalue(char *key, char *value, bool separator) {
   return concat;
 }
 
-char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
+char *serialize_keyvalue2json(const struct keyvalue_list *kv_list) {
   if (kv_list == NULL) {
     log_error("kv_list param is NULL");
     return NULL;
@@ -104,9 +105,9 @@ char *serialize_keyvalue2json(struct keyvalue_list *kv_list) {
   return json;
 }
 
-static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
+static uint8_t *base64_gen_encode(const uint8_t *src, const size_t len,
                                   size_t *out_len, const uint8_t *table,
-                                  int add_pad) {
+                                  const int add_pad) {
   uint8_t *out, *pos;
   const uint8_t *end, *in;
   size_t olen;
@@ -169,7 +170,7 @@ static uint8_t *base64_gen_encode(const uint8_t *src, size_t len,
   return out;
 }
 
-static uint8_t *base64_gen_decode(const uint8_t *src, size_t len,
+static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
                                   size_t *out_len, const uint8_t *table) {
   uint8_t dtable[256], *out, *pos, block[4], tmp;
   size_t i, count, olen;
@@ -249,17 +250,17 @@ static uint8_t *base64_gen_decode(const uint8_t *src, size_t len,
   return out;
 }
 
-uint8_t *serialize_array2base64str(const uint8_t *src, size_t len,
+uint8_t *serialize_array2base64str(const uint8_t *src, const size_t len,
                                    size_t *out_len) {
   return base64_gen_encode(src, len, out_len, base64_table, 1);
 }
 
-uint8_t *serialize_base64str2array(const uint8_t *src, size_t length,
+uint8_t *serialize_base64str2array(const uint8_t *src, const size_t length,
                                    size_t *out_length) {
   return base64_gen_decode(src, length, out_length, base64_table);
 }
 
-char *serialize_bool2str(bool value) {
+char *serialize_bool2str(const bool value) {
   char buf[6];
   if (value) {
     sprintf(buf, "true");
@@ -270,7 +271,7 @@ char *serialize_bool2str(bool value) {
   return sys_strdup(buf);
 }
 
-int serialize_str2bool(char *str, size_t length) {
+int serialize_str2bool(const char *str, const size_t length) {
   if (str == NULL) {
     log_error("str param is NULL");
     return -1;
@@ -309,7 +310,7 @@ int serialize_str2bool(char *str, size_t length) {
   }
 }
 
-char *serialize_time2str(struct tm *value) {
+char *serialize_time2str(const struct tm *value) {
   char buf[sizeof("9999-12-31T24:59:59Z") + 1];
 
   if (strftime(buf, sizeof(buf), "%Y-%m-%dT%H:%M:%SZ", value) == 0) {
@@ -320,7 +321,7 @@ char *serialize_time2str(struct tm *value) {
   return sys_strdup(buf);
 }
 
-int serialize_str2time(char *str, struct tm *tm) {
+int serialize_str2time(const char *str, const struct tm *tm) {
   if (str == NULL) {
     log_error("str param is NULL");
     return -1;
@@ -331,9 +332,9 @@ int serialize_str2time(char *str, struct tm *tm) {
     return -1;
   }
 
-  sys_memset(tm, 0, sizeof(struct tm));
+  sys_memset((void *)tm, 0, sizeof(struct tm));
 
-  if (strptime(str, "%Y-%m-%dT%H:%M:%SZ", tm) == NULL) {
+  if (strptime(str, "%Y-%m-%dT%H:%M:%SZ", (struct tm *)tm) == NULL) {
     log_error("strptime fail");
     return -1;
   }

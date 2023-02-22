@@ -30,7 +30,7 @@
  * @param[out] out_length The length of the encoded buffer
  * @return uint8_t * encoded buffer, NULL on failure
  */
-uint8_t *serialize_array2base64str(const uint8_t *src, size_t length,
+uint8_t *serialize_array2base64str(const uint8_t *src, const size_t length,
                                    size_t *out_len);
 
 /**
@@ -43,7 +43,7 @@ uint8_t *serialize_array2base64str(const uint8_t *src, size_t length,
  * @param[out] out_length The length of the decoded buffer
  * @return uint8_t * decoded buffer, NULL on failure
  */
-uint8_t *serialize_base64str2array(const uint8_t *src, size_t length,
+uint8_t *serialize_base64str2array(const uint8_t *src, const size_t length,
                                    size_t *out_length);
 
 /**
@@ -54,7 +54,7 @@ uint8_t *serialize_base64str2array(const uint8_t *src, size_t length,
  * @param[in] value The bool value
  * @return char * encoded bool, NULL on failure
  */
-char *serialize_bool2str(bool value);
+char *serialize_bool2str(const bool value);
 
 /**
  * @brief Encodes a string value to a bool
@@ -64,7 +64,7 @@ char *serialize_bool2str(bool value);
  * @param[in] length The string length
  * @return int 0=>false, 1=>true, -1 on failure
  */
-int serialize_str2bool(char *str, size_t length);
+int serialize_str2bool(const char *str, const size_t length);
 
 /**
  * @brief Encodes a time struct value to a string using
@@ -75,7 +75,7 @@ int serialize_str2bool(char *str, size_t length);
  * @param[in] value The time struct
  * @return char * encoded time, NULL on failure
  */
-char *serialize_time2str(struct tm *value);
+char *serialize_time2str(const struct tm *value);
 
 /**
  * @brief decodes a ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
@@ -85,7 +85,7 @@ char *serialize_time2str(struct tm *value);
  * @param[out] tm The output time struct value
  * @return 0 on success, -1 on failure
  */
-int serialize_str2time(char *str, struct tm *tm);
+int serialize_str2time(const char *str, const struct tm *tm);
 
 /**
  * @brief Adds "" to a string
@@ -107,5 +107,5 @@ char *serialize_escapestr(const char *str);
  * @param[in] kv_list The key/value list
  * @return char * encoded json, NULL on failure
  */
-char *serialize_keyvalue2json(struct keyvalue_list *kv_list);
+char *serialize_keyvalue2json(const struct keyvalue_list *kv_list);
 #endif

@@ -104,7 +104,7 @@ static void test_serialize_time2str(void **state) {
 static void test_serialize_str2time(void **state) {
   (void)state;
 
-  struct tm tm;
+  const struct tm tm = {};
   char *str = "1973-11-29T21:33:09Z";
 
   assert_int_equal(serialize_str2time(str, &tm), 0);

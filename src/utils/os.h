@@ -147,5 +147,5 @@ size_t sys_strlcpy(char *dest, const char *src, size_t siz);
  * @param max_len The string max length
  * @return size_t Total length of the string
  */
-size_t sys_strnlen_s(char *str, size_t max_len);
+size_t sys_strnlen_s(const char *str, const size_t max_len);
 #endif /* OS_H */

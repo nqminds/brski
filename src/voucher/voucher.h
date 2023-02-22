@@ -287,8 +287,8 @@ void free_voucher(struct Voucher *voucher);
  * @param[in] value The bool attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          bool value);
+int set_attr_bool_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr, const bool value);
 
 /**
  * @brief Sets the value for a voucher time attribute
@@ -298,8 +298,9 @@ int set_attr_bool_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @param[in] value The time attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          struct tm *value);
+int set_attr_time_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr,
+                          const struct tm *value);
 
 /**
  * @brief Sets the value for a voucher enum attribute
@@ -309,8 +310,8 @@ int set_attr_time_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @param[in] value The enum attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_enum_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                          int value);
+int set_attr_enum_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr, const int value);
 
 /**
  * @brief Sets the value for a voucher string attribute
@@ -320,8 +321,8 @@ int set_attr_enum_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @param[in] value The string attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_str_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                         char *value);
+int set_attr_str_voucher(struct Voucher *voucher,
+                         const enum VoucherAttributes attr, const char *value);
 
 /**
  * @brief Sets the value for a voucher array attribute
@@ -331,8 +332,9 @@ int set_attr_str_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @param[in] value The array attribute value
  * @return 0 on success, -1 on failure
  */
-int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
-                           struct VoucherBinaryArray *value);
+int set_attr_array_voucher(struct Voucher *voucher,
+                           const enum VoucherAttributes attr,
+                           const struct VoucherBinaryArray *value);
 
 /**
  * @brief Sets the value for a voucher attribute
@@ -342,7 +344,8 @@ int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
  * @param[in] __VA_ARGS__ The list of attribute values
  * @return 0 on success, -1 on failure
  */
-int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
+int set_attr_voucher(struct Voucher *voucher, const enum VoucherAttributes attr,
+                     ...);
 
 /**
  * @brief Clears a voucher attribute
@@ -351,7 +354,8 @@ int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
  * @param[in] attr The attribute name
  * @return 0 on success, -1 on failure
  */
-int clear_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr);
+int clear_attr_voucher(struct Voucher *voucher,
+                       const enum VoucherAttributes attr);
 
 /**
  * @brief Serializes a voucher to a string
@@ -361,7 +365,7 @@ int clear_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr);
  * @param[in] voucher The allocated voucher structure
  * @return char* serialized voucher, NULL on failure
  */
-char *serialize_voucher(struct Voucher *voucher);
+char *serialize_voucher(const struct Voucher *voucher);
 
 /**
  * @brief Deserializes a json string to a voucher
@@ -371,5 +375,5 @@ char *serialize_voucher(struct Voucher *voucher);
  * @param[in] json The json string
  * @return struct Voucher * voucher, NULL on failure
  */
-struct Voucher *deserialize_voucher(char *json);
+struct Voucher *deserialize_voucher(const char *json);
 #endif

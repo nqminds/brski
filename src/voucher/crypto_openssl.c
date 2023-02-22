@@ -64,11 +64,11 @@ static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
   return (ssize_t)length;
 }
 
-static ssize_t bio_to_ptr(BIO *mem, uint8_t **data) {
+static ssize_t bio_to_ptr(const BIO *mem, uint8_t **data) {
   *data = NULL;
 
   BUF_MEM *ptr = NULL;
-  BIO_get_mem_ptr(mem, &ptr);
+  BIO_get_mem_ptr((BIO *)mem, &ptr);
   ssize_t length = ptr->length;
 
   if (length) {
@@ -83,7 +83,7 @@ static ssize_t bio_to_ptr(BIO *mem, uint8_t **data) {
   return length;
 }
 
-static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
+static ssize_t cms_to_derbuf(const CMS_ContentInfo *content, uint8_t **cms) {
   *cms = NULL;
 
   BIO *mem = BIO_new_ex(NULL, BIO_s_mem());
@@ -93,7 +93,7 @@ static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
     return -1;
   }
 
-  if (!i2d_CMS_bio(mem, content)) {
+  if (!i2d_CMS_bio(mem, (CMS_ContentInfo *)content)) {
     log_error("i2d_CMS_bio fail with code=%d", ERR_get_error());
     BIO_free(mem);
     return -1;
@@ -110,7 +110,7 @@ static ssize_t cms_to_derbuf(CMS_ContentInfo *content, uint8_t **cms) {
   return length;
 }
 
-static X509_CRL *derbuf_to_crl(const uint8_t *crl, size_t length) {
+static X509_CRL *derbuf_to_crl(const uint8_t *crl, const size_t length) {
   X509_CRL *crl_cert = NULL;
   const unsigned char *pp = (unsigned char *)crl;
   if (d2i_X509_CRL(&crl_cert, &pp, length) == NULL) {
@@ -121,7 +121,8 @@ static X509_CRL *derbuf_to_crl(const uint8_t *crl, size_t length) {
   return crl_cert;
 }
 
-static CMS_ContentInfo *derbuf_to_cms(uint8_t *cms, ssize_t cms_length) {
+static CMS_ContentInfo *derbuf_to_cms(const uint8_t *cms,
+                                      const ssize_t cms_length) {
   CMS_ContentInfo *content = NULL;
   const unsigned char *pp = (unsigned char *)cms;
   if (d2i_CMS_ContentInfo(&content, &pp, cms_length) == NULL) {
@@ -132,7 +133,7 @@ static CMS_ContentInfo *derbuf_to_cms(uint8_t *cms, ssize_t cms_length) {
   return content;
 }
 
-ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
+ssize_t crypto_generate_rsakey(const int bits, uint8_t **key) {
   EVP_PKEY_CTX *ctx;
   EVP_PKEY *pkey = NULL;
 
@@ -251,7 +252,7 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
   return length;
 }
 
-CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length) {
+CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length) {
   EVP_PKEY *pkey = NULL;
   if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, &key, (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
@@ -262,7 +263,7 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, size_t length) {
   return ctx;
 }
 
-CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, size_t length) {
+CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length) {
   EVP_PKEY *pkey = NULL;
   if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, &key, (long)length)) == NULL) {
     log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
@@ -273,7 +274,7 @@ CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, size_t length) {
   return ctx;
 }
 
-CRYPTO_CERT crypto_cert2context(const uint8_t *cert, size_t length) {
+CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   X509 *pcert = NULL;
   const unsigned char *pp = (unsigned char *)cert;
   if (d2i_X509(&pcert, &pp, length) == NULL) {
@@ -290,7 +291,8 @@ void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY_free(pkey);
 }
 
-static int set_certificate_serialnumber(X509 *x509, uint64_t serial_number) {
+static int set_certificate_serialnumber(X509 *x509,
+                                        const uint64_t serial_number) {
   ASN1_INTEGER *sn = ASN1_INTEGER_new();
 
   if (sn == NULL) {
@@ -347,7 +349,8 @@ static X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
   return name;
 }
 
-static int set_certificate_meta(X509 *x509, struct crypto_cert_meta *meta) {
+static int set_certificate_meta(X509 *x509,
+                                const struct crypto_cert_meta *meta) {
   if (set_certificate_serialnumber(x509, meta->serial_number) < 0) {
     log_error("set_certificate_serialnumber fail");
     return -1;
@@ -399,14 +402,14 @@ static int set_certificate_meta(X509 *x509, struct crypto_cert_meta *meta) {
   return 0;
 }
 
-static int sign_sha256_certificate(X509 *x509, EVP_PKEY *pkey) {
-  if (!X509_set_pubkey(x509, pkey)) {
+static int sign_sha256_certificate(X509 *x509, const EVP_PKEY *pkey) {
+  if (!X509_set_pubkey(x509, (EVP_PKEY *)pkey)) {
     log_error("X509_set_pubkey fail with code=%d", ERR_get_error());
     return -1;
   }
 
   /* sign the certificate with the key. */
-  if (!X509_sign(x509, pkey, EVP_sha256())) {
+  if (!X509_sign(x509, (EVP_PKEY *)pkey, EVP_sha256())) {
     log_error("X509_sign fail with code=%d", ERR_get_error());
     return -1;
   }
@@ -414,7 +417,7 @@ static int sign_sha256_certificate(X509 *x509, EVP_PKEY *pkey) {
   return 0;
 }
 
-static ssize_t unsigned_cert_to_derbuf(X509 *x509, EVP_PKEY *pkey,
+static ssize_t unsigned_cert_to_derbuf(X509 *x509, const EVP_PKEY *pkey,
                                        uint8_t **cert) {
   if (sign_sha256_certificate(x509, pkey) < 0) {
     log_error("sign_sha256_certificate fail");
@@ -430,8 +433,9 @@ static ssize_t unsigned_cert_to_derbuf(X509 *x509, EVP_PKEY *pkey,
   return length;
 }
 
-ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
-                               size_t key_length, uint8_t **cert) {
+ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
+                               const uint8_t *key, const size_t key_length,
+                               uint8_t **cert) {
   *cert = NULL;
 
   if (meta == NULL) {
@@ -482,8 +486,9 @@ ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
   return length;
 }
 
-ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
-                                size_t key_length, uint8_t **cert) {
+ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
+                                const uint8_t *key, const size_t key_length,
+                                uint8_t **cert) {
   *cert = NULL;
 
   if (meta == NULL) {
@@ -532,7 +537,7 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
   return length;
 }
 
-static STACK_OF(X509) * get_certificate_stack(struct buffer_list *certs) {
+static STACK_OF(X509) * get_certificate_stack(const struct buffer_list *certs) {
   STACK_OF(X509) *cert_stack = sk_X509_new_null();
 
   if (cert_stack == NULL) {
@@ -554,7 +559,7 @@ static STACK_OF(X509) * get_certificate_stack(struct buffer_list *certs) {
   return cert_stack;
 }
 
-void free_x509_store_cert(void *cert, int flags) {
+void free_x509_store_cert(void *cert, const int flags) {
   if (cert != NULL) {
     if (flags == CRYPTO_CERTIFICATE_VALID) {
       X509_free((X509 *)cert);
@@ -572,7 +577,7 @@ void free_x509_store(X509_STORE *store, struct ptr_list *x509_store_list) {
   free_ptr_list(x509_store_list, free_x509_store_cert);
 }
 
-static X509_STORE *get_certificate_store(struct buffer_list *store,
+static X509_STORE *get_certificate_store(const struct buffer_list *store,
                                          struct ptr_list **x509_store_list) {
   *x509_store_list = NULL;
 
@@ -654,9 +659,10 @@ void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
   BIO_free(out);
 }
 
-static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
-                                uint8_t *cert, size_t cert_length,
-                                EVP_PKEY *pkey, struct buffer_list *certs,
+static ssize_t sign_withkey_cms(const uint8_t *data, const size_t data_length,
+                                const uint8_t *cert, const size_t cert_length,
+                                const EVP_PKEY *pkey,
+                                const struct buffer_list *certs,
                                 uint8_t **cms) {
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
   if (mem_data == NULL) {
@@ -691,7 +697,7 @@ static ssize_t sign_withkey_cms(uint8_t *data, size_t data_length,
   flags &= ~CMS_DETACHED;
 
   CMS_ContentInfo *content =
-      CMS_sign(signcert, pkey, cert_stack, mem_data, flags);
+      CMS_sign(signcert, (EVP_PKEY *)pkey, cert_stack, mem_data, flags);
 
   if (content == NULL) {
     log_error("CMS_sign fail with code=%s",
@@ -720,9 +726,10 @@ sign_withkey_cms_fail:
   return -1;
 }
 
-ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
-                          size_t cert_length, uint8_t *key, size_t key_length,
-                          struct buffer_list *certs, uint8_t **cms) {
+ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
+                          const uint8_t *cert, const size_t cert_length,
+                          const uint8_t *key, const size_t key_length,
+                          const struct buffer_list *certs, uint8_t **cms) {
   if (data == NULL) {
     log_error("data param is NULL");
     return -1;
@@ -764,9 +771,10 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
   return length;
 }
 
-ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
-                           size_t cert_length, uint8_t *key, size_t key_length,
-                           struct buffer_list *certs, uint8_t **cms) {
+ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs, uint8_t **cms) {
   if (data == NULL) {
     log_error("data param is NULL");
     return -1;
@@ -808,9 +816,9 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
   return length;
 }
 
-ssize_t crypto_verify_cms(uint8_t *cms, size_t cms_length,
-                          struct buffer_list *certs, struct buffer_list *store,
-                          uint8_t **data) {
+ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
+                          const struct buffer_list *certs,
+                          const struct buffer_list *store, uint8_t **data) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return -1;
