@@ -109,7 +109,7 @@ static void test_set_attr_array_voucher(void **state) {
                    -1);
 
   uint8_t array2[] = {1, 2, 3, 4};
-  struct VoucherBinaryArray arr2 = {.array = array2, .length = 0};
+  struct VoucherBinaryArray arr2 = {.array = NULL, .length = 0};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr2),
                    -1);
@@ -431,6 +431,85 @@ static void test_deserialize_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_clear_attr_voucher(void **state) {
+  (void)state;
+
+  struct tm tm = {.tm_year = 73,
+                  .tm_mon = 10,
+                  .tm_mday = 29,
+                  .tm_hour = 21,
+                  .tm_min = 33,
+                  .tm_sec = 9};
+  struct tm tm_zero = {.tm_year = 0,
+                       .tm_mon = 0,
+                       .tm_mday = 0,
+                       .tm_hour = 0,
+                       .tm_min = 0,
+                       .tm_sec = 0};
+
+  enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
+  char *str_value = "12345";
+  uint8_t array[] = {1, 2, 3, 4, 5};
+  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  bool bool_value = true;
+
+  struct Voucher *voucher = init_voucher();
+
+  set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_CREATED_ON), 0);
+  test_compare_time(&tm_zero, &voucher->created_on);
+
+  set_attr_voucher(voucher, ATTR_EXPIRES_ON, &tm);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_EXPIRES_ON), 0);
+  test_compare_time(&tm_zero, &voucher->expires_on);
+
+  set_attr_voucher(voucher, ATTR_ASSERTION, enum_value);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_ASSERTION), 0);
+  assert_int_equal(voucher->assertion, VOUCHER_ASSERTION_NONE);
+
+  set_attr_voucher(voucher, ATTR_SERIAL_NUMBER, str_value);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_SERIAL_NUMBER), 0);
+  assert_null(voucher->serial_number);
+
+  set_attr_voucher(voucher, ATTR_IDEVID_ISSUER, &array_value);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_IDEVID_ISSUER), 0);
+  assert_int_equal(voucher->idevid_issuer.length, 0);
+  assert_null(voucher->idevid_issuer.array);
+
+  set_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &array_value);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT), 0);
+  assert_int_equal(voucher->pinned_domain_cert.length, 0);
+  assert_null(voucher->pinned_domain_cert.array);
+
+  set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, bool_value);
+  assert_int_equal(
+      clear_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS), 0);
+  assert_false(voucher->domain_cert_revocation_checks);
+
+  set_attr_voucher(voucher, ATTR_NONCE, &array_value);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_NONCE), 0);
+  assert_int_equal(voucher->nonce.length, 0);
+  assert_null(voucher->nonce.array);
+
+  set_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE, &tm);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE), 0);
+  test_compare_time(&tm_zero, &voucher->last_renewal_date);
+
+  set_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, &array_value);
+  assert_int_equal(
+      clear_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST), 0);
+  assert_int_equal(voucher->prior_signed_voucher_request.length, 0);
+  assert_null(voucher->prior_signed_voucher_request.array);
+
+  set_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, &array_value);
+  assert_int_equal(clear_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT),
+                   0);
+  assert_int_equal(voucher->proximity_registrar_cert.length, 0);
+  assert_null(voucher->proximity_registrar_cert.array);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -446,7 +525,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_set_attr_array_voucher),
       cmocka_unit_test(test_set_attr_voucher),
       cmocka_unit_test(test_serialize_voucher),
-      cmocka_unit_test(test_deserialize_voucher)};
+      cmocka_unit_test(test_deserialize_voucher),
+      cmocka_unit_test(test_clear_attr_voucher)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -36,7 +36,7 @@ static bool check_binary_array_nonempty(struct VoucherBinaryArray *value) {
     return false;
   }
 
-  if (value->array == NULL || !value->length) {
+  if (value->array == NULL && !value->length) {
     return false;
   }
 
@@ -58,6 +58,7 @@ static void free_binary_array(struct VoucherBinaryArray *bin_array) {
   if (bin_array != NULL) {
     if (bin_array->array != NULL) {
       sys_free(bin_array->array);
+      bin_array->array = NULL;
     }
     bin_array->length = 0;
   }
@@ -67,6 +68,7 @@ void free_voucher(struct Voucher *voucher) {
   if (voucher != NULL) {
     if (voucher->serial_number != NULL) {
       sys_free(voucher->serial_number);
+      voucher->serial_number = NULL;
     }
 
     free_binary_array(&voucher->idevid_issuer);
@@ -384,6 +386,55 @@ static bool is_attr_voucher_nonempty(struct Voucher *voucher,
     default:
       return false;
   }
+}
+
+int clear_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return -1;
+  }
+
+  switch (attr) {
+    case ATTR_CREATED_ON:
+      sys_memset(&voucher->created_on, 0, sizeof(voucher->created_on));
+      break;
+    case ATTR_EXPIRES_ON:
+      sys_memset(&voucher->expires_on, 0, sizeof(voucher->expires_on));
+      break;
+    case ATTR_LAST_RENEWAL_DATE:
+      sys_memset(&voucher->last_renewal_date, 0,
+                 sizeof(voucher->last_renewal_date));
+      break;
+    case ATTR_ASSERTION:
+      voucher->assertion = VOUCHER_ASSERTION_NONE;
+      break;
+    case ATTR_SERIAL_NUMBER:
+      if (voucher->serial_number != NULL) {
+        sys_free(voucher->serial_number);
+        voucher->serial_number = NULL;
+      }
+      break;
+    case ATTR_IDEVID_ISSUER:
+      free_binary_array(&voucher->idevid_issuer);
+      break;
+    case ATTR_PINNED_DOMAIN_CERT:
+      free_binary_array(&voucher->pinned_domain_cert);
+      break;
+    case ATTR_NONCE:
+      free_binary_array(&voucher->nonce);
+      break;
+    case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
+      free_binary_array(&voucher->prior_signed_voucher_request);
+      break;
+    case ATTR_PROXIMITY_REGISTRAR_CERT:
+      free_binary_array(&voucher->proximity_registrar_cert);
+      break;
+    case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
+      voucher->domain_cert_revocation_checks = false;
+      break;
+  }
+
+  return 0;
 }
 
 static char *serialize_attr_voucher(struct Voucher *voucher,

@@ -345,6 +345,15 @@ int set_attr_array_voucher(struct Voucher *voucher, enum VoucherAttributes attr,
 int set_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr, ...);
 
 /**
+ * @brief Clears a voucher attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The attribute name
+ * @return 0 on success, -1 on failure
+ */
+int clear_attr_voucher(struct Voucher *voucher, enum VoucherAttributes attr);
+
+/**
  * @brief Serializes a voucher to a string
  *
  * Caller is responsible for freeing the string
