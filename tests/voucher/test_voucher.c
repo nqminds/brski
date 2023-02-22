@@ -25,6 +25,20 @@
   "abcdabcdabcdabcdabcdabcdabcdabcd"                                           \
   "abcdabcdabcdabcdabcdabcdabcdabcd"
 
+void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
+  assert_int_equal(tm1->tm_year, tm2->tm_year);
+  assert_int_equal(tm1->tm_mon, tm2->tm_mon);
+  assert_int_equal(tm1->tm_mday, tm2->tm_mday);
+  assert_int_equal(tm1->tm_hour, tm2->tm_hour);
+  assert_int_equal(tm1->tm_min, tm2->tm_min);
+  assert_int_equal(tm1->tm_sec, tm2->tm_sec);
+}
+
+void test_compare_array(const struct VoucherBinaryArray *src, const struct VoucherBinaryArray *dst) {
+  assert_int_equal(src->length, dst->length);
+  assert_memory_equal(src->array, dst->array, src->length);
+}
+
 static void test_init_voucher(void **state) {
   (void)state;
 
@@ -118,26 +132,16 @@ static void test_set_attr_array_voucher(void **state) {
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr3),
                    0);
-  assert_memory_equal(voucher->idevid_issuer.array, arr3.array, arr3.length);
+  test_compare_array(&arr3, &voucher->idevid_issuer);
 
   assert_int_equal(
       set_attr_array_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &arr3), 0);
-  assert_memory_equal(voucher->pinned_domain_cert.array, arr3.array,
-                      arr3.length);
+  test_compare_array(&arr3, &voucher->pinned_domain_cert);
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_NONCE, &arr3), 0);
-  assert_memory_equal(voucher->nonce.array, arr3.array, arr3.length);
+  test_compare_array(&arr3, &voucher->nonce);
 
   free_voucher(voucher);
-}
-
-void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
-  assert_int_equal(tm1->tm_year, tm2->tm_year);
-  assert_int_equal(tm1->tm_mon, tm2->tm_mon);
-  assert_int_equal(tm1->tm_mday, tm2->tm_mday);
-  assert_int_equal(tm1->tm_hour, tm2->tm_hour);
-  assert_int_equal(tm1->tm_min, tm2->tm_min);
-  assert_int_equal(tm1->tm_sec, tm2->tm_sec);
 }
 
 static void test_set_attr_voucher(void **state) {
@@ -171,15 +175,11 @@ static void test_set_attr_voucher(void **state) {
 
   assert_int_equal(set_attr_voucher(voucher, ATTR_IDEVID_ISSUER, &array_value),
                    0);
-  assert_int_equal(voucher->idevid_issuer.length, array_value.length);
-  assert_memory_equal(voucher->idevid_issuer.array, array_value.array,
-                      array_value.length);
+  test_compare_array(&array_value, &voucher->idevid_issuer);
 
   assert_int_equal(
       set_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &array_value), 0);
-  assert_int_equal(voucher->pinned_domain_cert.length, array_value.length);
-  assert_memory_equal(voucher->pinned_domain_cert.array, array_value.array,
-                      array_value.length);
+  test_compare_array(&array_value, &voucher->pinned_domain_cert);
 
   assert_int_equal(
       set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, bool_value),
@@ -187,9 +187,7 @@ static void test_set_attr_voucher(void **state) {
   assert_int_equal(voucher->domain_cert_revocation_checks, bool_value);
 
   assert_int_equal(set_attr_voucher(voucher, ATTR_NONCE, &array_value), 0);
-  assert_int_equal(voucher->nonce.length, array_value.length);
-  assert_memory_equal(voucher->nonce.array, array_value.array,
-                      array_value.length);
+  test_compare_array(&array_value, &voucher->nonce);
 
   assert_int_equal(set_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE, &tm), 0);
   test_compare_time(&tm, &voucher->last_renewal_date);
@@ -197,18 +195,12 @@ static void test_set_attr_voucher(void **state) {
   assert_int_equal(set_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
                                     &array_value),
                    0);
-  assert_int_equal(voucher->prior_signed_voucher_request.length,
-                   array_value.length);
-  assert_memory_equal(voucher->prior_signed_voucher_request.array,
-                      array_value.array, array_value.length);
+  test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
 
   assert_int_equal(
       set_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, &array_value),
       0);
-  assert_int_equal(voucher->proximity_registrar_cert.length,
-                   array_value.length);
-  assert_memory_equal(voucher->proximity_registrar_cert.array,
-                      array_value.array, array_value.length);
+  test_compare_array(&array_value, &voucher->proximity_registrar_cert);
 
   free_voucher(voucher);
 }
@@ -289,7 +281,7 @@ static void test_deserialize_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-
+  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
   uint8_t array[] = {1, 2, 3, 4, 5};
   struct VoucherBinaryArray array_value = {.array = array, .length = 5};
 
@@ -314,18 +306,13 @@ static void test_deserialize_voucher(void **state) {
 
   assert_int_equal(voucher->assertion, VOUCHER_ASSERTION_NONE);
   assert_null(voucher->serial_number);
-  assert_null(voucher->idevid_issuer.array);
-  assert_int_equal(voucher->idevid_issuer.length, 0);
-  assert_null(voucher->pinned_domain_cert.array);
-  assert_int_equal(voucher->pinned_domain_cert.length, 0);
+  test_compare_array(&array_zero, &voucher->idevid_issuer);
+  test_compare_array(&array_zero, &voucher->pinned_domain_cert);
   assert_false(voucher->domain_cert_revocation_checks);
-  assert_null(voucher->nonce.array);
-  assert_int_equal(voucher->nonce.length, 0);
+  test_compare_array(&array_zero, &voucher->nonce);
   test_compare_time(&tm_null, &voucher->last_renewal_date);
-  assert_null(voucher->prior_signed_voucher_request.array);
-  assert_int_equal(voucher->prior_signed_voucher_request.length, 0);
-  assert_null(voucher->proximity_registrar_cert.array);
-  assert_int_equal(voucher->proximity_registrar_cert.length, 0);
+  test_compare_array(&array_zero, &voucher->prior_signed_voucher_request);
+  test_compare_array(&array_zero, &voucher->proximity_registrar_cert);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"created-on\":\"1973-11-29T21:33:09Z\"}}";
@@ -359,17 +346,13 @@ static void test_deserialize_voucher(void **state) {
   json = "{\"ietf-voucher:voucher\":{\"idevid-issuer\":\"AQIDBAU=\"}}";
   voucher = deserialize_voucher(json);
   assert_non_null(voucher);
-  assert_int_equal(voucher->idevid_issuer.length, array_value.length);
-  assert_memory_equal(voucher->idevid_issuer.array, array_value.array,
-                      array_value.length);
+  test_compare_array(&array_value, &voucher->idevid_issuer);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"pinned-domain-cert\":\"AQIDBAU=\"}}";
   voucher = deserialize_voucher(json);
   assert_non_null(voucher);
-  assert_int_equal(voucher->pinned_domain_cert.length, array_value.length);
-  assert_memory_equal(voucher->pinned_domain_cert.array, array_value.array,
-                      array_value.length);
+  test_compare_array(&array_value, &voucher->pinned_domain_cert);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true}}";
@@ -381,9 +364,7 @@ static void test_deserialize_voucher(void **state) {
   json = "{\"ietf-voucher:voucher\":{\"nonce\":\"AQIDBAU=\"}}";
   voucher = deserialize_voucher(json);
   assert_non_null(voucher);
-  assert_int_equal(voucher->nonce.length, array_value.length);
-  assert_memory_equal(voucher->nonce.array, array_value.array,
-                      array_value.length);
+  test_compare_array(&array_value, &voucher->nonce);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"last-renewal-date\":\"1973-11-29T21:33:"
@@ -397,20 +378,14 @@ static void test_deserialize_voucher(void **state) {
          "\"AQIDBAU=\"}}";
   voucher = deserialize_voucher(json);
   assert_non_null(voucher);
-  assert_int_equal(voucher->prior_signed_voucher_request.length,
-                   array_value.length);
-  assert_memory_equal(voucher->prior_signed_voucher_request.array,
-                      array_value.array, array_value.length);
+  test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
   free_voucher(voucher);
 
   json =
       "{\"ietf-voucher:voucher\":{\"proximity-registrar-cert\":\"AQIDBAU=\"}}";
   voucher = deserialize_voucher(json);
   assert_non_null(voucher);
-  assert_int_equal(voucher->proximity_registrar_cert.length,
-                   array_value.length);
-  assert_memory_equal(voucher->proximity_registrar_cert.array,
-                      array_value.array, array_value.length);
+  test_compare_array(&array_value, &voucher->proximity_registrar_cert);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-c\":true}}";
@@ -423,10 +398,7 @@ static void test_deserialize_voucher(void **state) {
   voucher = deserialize_voucher(json);
   assert_non_null(voucher);
   assert_true(voucher->domain_cert_revocation_checks);
-  assert_int_equal(voucher->prior_signed_voucher_request.length,
-                   array_value.length);
-  assert_memory_equal(voucher->prior_signed_voucher_request.array,
-                      array_value.array, array_value.length);
+  test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
   test_compare_time(&tm, &voucher->last_renewal_date);
   free_voucher(voucher);
 }
@@ -451,6 +423,7 @@ static void test_clear_attr_voucher(void **state) {
   char *str_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
   struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -473,13 +446,11 @@ static void test_clear_attr_voucher(void **state) {
 
   set_attr_voucher(voucher, ATTR_IDEVID_ISSUER, &array_value);
   assert_int_equal(clear_attr_voucher(voucher, ATTR_IDEVID_ISSUER), 0);
-  assert_int_equal(voucher->idevid_issuer.length, 0);
-  assert_null(voucher->idevid_issuer.array);
+  test_compare_array(&array_zero, &voucher->idevid_issuer);
 
   set_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &array_value);
   assert_int_equal(clear_attr_voucher(voucher, ATTR_PINNED_DOMAIN_CERT), 0);
-  assert_int_equal(voucher->pinned_domain_cert.length, 0);
-  assert_null(voucher->pinned_domain_cert.array);
+  test_compare_array(&array_zero, &voucher->pinned_domain_cert);
 
   set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, bool_value);
   assert_int_equal(
@@ -488,8 +459,7 @@ static void test_clear_attr_voucher(void **state) {
 
   set_attr_voucher(voucher, ATTR_NONCE, &array_value);
   assert_int_equal(clear_attr_voucher(voucher, ATTR_NONCE), 0);
-  assert_int_equal(voucher->nonce.length, 0);
-  assert_null(voucher->nonce.array);
+  test_compare_array(&array_zero, &voucher->nonce);
 
   set_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE, &tm);
   assert_int_equal(clear_attr_voucher(voucher, ATTR_LAST_RENEWAL_DATE), 0);
@@ -498,14 +468,12 @@ static void test_clear_attr_voucher(void **state) {
   set_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, &array_value);
   assert_int_equal(
       clear_attr_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST), 0);
-  assert_int_equal(voucher->prior_signed_voucher_request.length, 0);
-  assert_null(voucher->prior_signed_voucher_request.array);
+  test_compare_array(&array_zero, &voucher->prior_signed_voucher_request);
 
   set_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, &array_value);
   assert_int_equal(clear_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT),
                    0);
-  assert_int_equal(voucher->proximity_registrar_cert.length, 0);
-  assert_null(voucher->proximity_registrar_cert.array);
+  test_compare_array(&array_zero, &voucher->proximity_registrar_cert);
 
   free_voucher(voucher);
 }
@@ -608,6 +576,65 @@ static void test_get_attr_str_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_get_attr_array_voucher(void **state) {
+  (void)state;
+
+  uint8_t array[] = {1, 2, 3, 4, 5};
+  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+
+  struct Voucher *voucher = init_voucher();
+  const struct VoucherBinaryArray *value = get_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER);
+  assert_non_null(value);
+  test_compare_array(&array_zero, value);
+
+  value = get_attr_array_voucher(voucher, -1);
+  assert_null(value);
+
+  value = get_attr_array_voucher(voucher, ATTR_PINNED_DOMAIN_CERT);
+  assert_non_null(value);
+  test_compare_array(&array_zero, value);
+
+  value = get_attr_array_voucher(voucher, ATTR_NONCE);
+  assert_non_null(value);
+  test_compare_array(&array_zero, value);
+
+  value = get_attr_array_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST);
+  assert_non_null(value);
+  test_compare_array(&array_zero, value);
+
+  value = get_attr_array_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT);
+  assert_non_null(value);
+  test_compare_array(&array_zero, value);
+
+  set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &array_value);
+  value = get_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER);
+  assert_non_null(value);
+  test_compare_array(&array_value, value);
+
+  set_attr_array_voucher(voucher, ATTR_PINNED_DOMAIN_CERT, &array_value);
+  value = get_attr_array_voucher(voucher, ATTR_PINNED_DOMAIN_CERT);
+  assert_non_null(value);
+  test_compare_array(&array_value, value);
+
+  set_attr_array_voucher(voucher, ATTR_NONCE, &array_value);
+  value = get_attr_array_voucher(voucher, ATTR_NONCE);
+  assert_non_null(value);
+  test_compare_array(&array_value, value);
+
+  set_attr_array_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, &array_value);
+  value = get_attr_array_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST);
+  assert_non_null(value);
+  test_compare_array(&array_value, value);
+
+  set_attr_array_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, &array_value);
+  value = get_attr_array_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT);
+  assert_non_null(value);
+  test_compare_array(&array_value, value);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -628,7 +655,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_get_attr_bool_voucher),
       cmocka_unit_test(test_get_attr_time_voucher),
       cmocka_unit_test(test_get_attr_enum_voucher),
-      cmocka_unit_test(test_get_attr_str_voucher)
+      cmocka_unit_test(test_get_attr_str_voucher),
+      cmocka_unit_test(test_get_attr_array_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

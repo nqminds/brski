@@ -398,6 +398,16 @@ const char* const* get_attr_str_voucher(struct Voucher *voucher,
                          const enum VoucherAttributes attr);
 
 /**
+ * @brief Gets the pointer to the value for a voucher array attribute
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The array voucher attribute name
+ * @return const struct VoucherBinaryArray* pointer to the array value, NULL on failure
+ */
+const struct VoucherBinaryArray* get_attr_array_voucher(struct Voucher *voucher,
+                           const enum VoucherAttributes attr);
+
+/**
  * @brief Serializes a voucher to a string
  *
  * Caller is responsible for freeing the string

@@ -509,6 +509,30 @@ const char* const* get_attr_str_voucher(struct Voucher *voucher,
   return (const char* const*)&voucher->serial_number;
 }
 
+const struct VoucherBinaryArray* get_attr_array_voucher(struct Voucher *voucher,
+                           const enum VoucherAttributes attr) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  switch (attr) {
+    case ATTR_IDEVID_ISSUER:
+      return &voucher->idevid_issuer;
+    case ATTR_PINNED_DOMAIN_CERT:
+      return &voucher->pinned_domain_cert;
+    case ATTR_NONCE:
+      return &voucher->nonce;
+    case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
+      return &voucher->prior_signed_voucher_request;
+    case ATTR_PROXIMITY_REGISTRAR_CERT:
+      return &voucher->proximity_registrar_cert;
+    default:
+      log_error("Wrong attribute name");
+      return NULL;
+  }
+}
+
 static char *serialize_attr_voucher(const struct Voucher *voucher,
                                     const enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
