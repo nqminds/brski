@@ -17,6 +17,7 @@
 
 #include "utils/log.h"
 #include "utils/os.h"
+#include "voucher/voucher_impl.h"
 #include "voucher/voucher.h"
 
 #define SERIALNAME_LONG                                                        \
