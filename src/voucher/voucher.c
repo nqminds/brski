@@ -771,7 +771,6 @@ static int set_keyvalue_voucher(struct Voucher *voucher, const char *key,
   } else if (check_size_str_equal(
                  attr_names[ATTR_DOMAIN_CERT_REVOCATION_CHECKS], key,
                  key_length)) {
-    log_trace("HHHHHHH %.*s", key_length, key);
     if (set_attr_strbool_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS,
                                  value, value_length) < 0) {
       log_error("set_attr_strbool_voucher fail");
@@ -906,6 +905,7 @@ char *sign_eccms_voucher(struct Voucher *voucher,
 
   char *serialized = serialize_voucher(voucher);
 
+  log_trace("%s", serialized);
   if (serialized == NULL) {
     log_error("serialize_voucher fail");
     return NULL;
@@ -1009,6 +1009,7 @@ struct Voucher * verify_cms_voucher(const char *cms,
 
   sys_free(out);
 
+  log_trace("%.*s", data_length, data);
   struct Voucher *voucher = deserialize_voucher(data, data_length);
   if (voucher == NULL) {
     log_error("deserialize_voucher fail");

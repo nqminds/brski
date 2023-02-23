@@ -382,7 +382,7 @@ static void test_crypto_verify_cms(void **state) {
 
   struct buffer_list *certs = create_cert_list();
 
-  char *data = "This is a message in cms";
+  char *data = "{\"ietf-voucher:voucher\":{\"created-on\":\"1973-11-29T21:33:09Z\",\"domain-cert-revocation-checks\":false}}";
   ssize_t data_length = strlen(data);
   uint8_t *cms = NULL;
   uint8_t *key = NULL;
@@ -402,11 +402,12 @@ static void test_crypto_verify_cms(void **state) {
   push_keyvalue_list(meta.issuer, sys_strdup("CN"), sys_strdup("issuer.info"));
 
   push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subject.info"));
+  push_keyvalue_list(meta.subject, sys_strdup("serialNumber"),
+                     sys_strdup("1234567890"));
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
-  // push_buffer_list(certs, cert, cert_length, 0);
+  /* To add when finished creating the certificate signing */
+  /* push_buffer_list(certs, cert, cert_length, 0); */
 
   ssize_t cms_length =
       crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key,

@@ -28,6 +28,7 @@
   "abcdabcdabcdabcdabcdabcdabcdabcd"                                           \
   "abcdabcdabcdabcdabcdabcdabcdabcd"
 
+
 void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
   assert_int_equal(tm1->tm_year, tm2->tm_year);
   assert_int_equal(tm1->tm_mon, tm2->tm_mon);
@@ -760,11 +761,11 @@ static void test_verify_cms_voucher(void **state) {
 
   push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
   push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+                     sys_strdup("issuer.info"));
 
   push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+                     sys_strdup("subject.info"));
 
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
@@ -777,11 +778,12 @@ static void test_verify_cms_voucher(void **state) {
 
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  char *cms = sign_eccms_voucher(voucher, &cert, &key, certs);
+  char *cms = sign_eccms_voucher(voucher, &cert, &key, /*certs*/NULL);
   assert_non_null(cms);
 
   struct Voucher *decoded_voucher = verify_cms_voucher(cms, NULL, NULL);
   assert_non_null(decoded_voucher);
+  test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
   sys_free(cms);
   free_binary_array(&key);
