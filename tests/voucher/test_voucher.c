@@ -17,8 +17,8 @@
 
 #include "utils/log.h"
 #include "utils/os.h"
-#include "voucher/voucher_defs.h"
 #include "voucher/voucher.h"
+#include "voucher/voucher_defs.h"
 
 #define SERIALNAME_LONG                                                        \
   "abcdabcdabcdabcdabcdabcdabcdabcd"                                           \
@@ -35,7 +35,8 @@ void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
   assert_int_equal(tm1->tm_sec, tm2->tm_sec);
 }
 
-void test_compare_array(const struct VoucherBinaryArray *src, const struct VoucherBinaryArray *dst) {
+void test_compare_array(const struct VoucherBinaryArray *src,
+                        const struct VoucherBinaryArray *dst) {
   assert_int_equal(src->length, dst->length);
   assert_memory_equal(src->array, dst->array, src->length);
 }
@@ -483,19 +484,18 @@ static void test_get_attr_bool_voucher(void **state) {
   (void)state;
 
   struct Voucher *voucher = init_voucher();
-  const bool* value = get_attr_bool_voucher(voucher,
-                          ATTR_DOMAIN_CERT_REVOCATION_CHECKS);
+  const bool *value =
+      get_attr_bool_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS);
   assert_non_null(value);
   assert_false(*value);
 
   set_attr_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS, true);
-  value = get_attr_bool_voucher(voucher,
-                          ATTR_DOMAIN_CERT_REVOCATION_CHECKS);
+  value = get_attr_bool_voucher(voucher, ATTR_DOMAIN_CERT_REVOCATION_CHECKS);
   assert_non_null(value);
   assert_true(*value);
 
   assert_null(get_attr_bool_voucher(voucher, -1));
-  
+
   free_voucher(voucher);
 }
 
@@ -516,7 +516,7 @@ static void test_get_attr_time_voucher(void **state) {
                        .tm_sec = 0};
 
   struct Voucher *voucher = init_voucher();
-  const struct tm* tm_value = get_attr_time_voucher(voucher, ATTR_CREATED_ON);
+  const struct tm *tm_value = get_attr_time_voucher(voucher, ATTR_CREATED_ON);
   assert_non_null(tm_value);
   test_compare_time(&tm_zero, tm_value);
 
@@ -543,15 +543,19 @@ static void test_get_attr_enum_voucher(void **state) {
   (void)state;
 
   struct Voucher *voucher = init_voucher();
-  const enum VoucherAssertions* enum_value = (const enum VoucherAssertions*)get_attr_enum_voucher(voucher, ATTR_ASSERTION);
+  const enum VoucherAssertions *enum_value =
+      (const enum VoucherAssertions *)get_attr_enum_voucher(voucher,
+                                                            ATTR_ASSERTION);
   assert_non_null(enum_value);
   assert_int_equal(*enum_value, VOUCHER_ASSERTION_NONE);
 
-  enum_value = (const enum VoucherAssertions*)get_attr_enum_voucher(voucher, -1);
+  enum_value =
+      (const enum VoucherAssertions *)get_attr_enum_voucher(voucher, -1);
   assert_null(enum_value);
 
   set_attr_enum_voucher(voucher, ATTR_ASSERTION, VOUCHER_ASSERTION_LOGGED);
-  enum_value = (const enum VoucherAssertions*)get_attr_enum_voucher(voucher, ATTR_ASSERTION);
+  enum_value = (const enum VoucherAssertions *)get_attr_enum_voucher(
+      voucher, ATTR_ASSERTION);
   assert_non_null(enum_value);
   assert_int_equal(*enum_value, VOUCHER_ASSERTION_LOGGED);
 
@@ -562,7 +566,7 @@ static void test_get_attr_str_voucher(void **state) {
   (void)state;
 
   struct Voucher *voucher = init_voucher();
-  const char*const *value = get_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER);
+  const char *const *value = get_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER);
   assert_non_null(value);
   assert_null(*value);
 
@@ -585,7 +589,8 @@ static void test_get_attr_array_voucher(void **state) {
   struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
 
   struct Voucher *voucher = init_voucher();
-  const struct VoucherBinaryArray *value = get_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER);
+  const struct VoucherBinaryArray *value =
+      get_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER);
   assert_non_null(value);
   test_compare_array(&array_zero, value);
 
@@ -623,7 +628,8 @@ static void test_get_attr_array_voucher(void **state) {
   assert_non_null(value);
   test_compare_array(&array_value, value);
 
-  set_attr_array_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST, &array_value);
+  set_attr_array_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
+                         &array_value);
   value = get_attr_array_voucher(voucher, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST);
   assert_non_null(value);
   test_compare_array(&array_value, value);
@@ -657,8 +663,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_get_attr_time_voucher),
       cmocka_unit_test(test_get_attr_enum_voucher),
       cmocka_unit_test(test_get_attr_str_voucher),
-      cmocka_unit_test(test_get_attr_array_voucher)
-  };
+      cmocka_unit_test(test_get_attr_array_voucher)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

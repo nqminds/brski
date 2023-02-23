@@ -89,7 +89,7 @@ void *sys_memdup(const void *const src, const size_t len);
 
 /**
  * @brief Reallocates the given area of a memory array (uses realloc).
- * 
+ *
  * @param ptr Pointer to the memory area to be reallocated
  * @param nmemb The size of each array element
  * @param size Size of the array to reallocate

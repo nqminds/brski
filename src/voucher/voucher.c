@@ -16,8 +16,8 @@
 #include "crypto_defs.h"
 #include "list.h"
 #include "serialize.h"
-#include "voucher_defs.h"
 #include "voucher.h"
+#include "voucher_defs.h"
 
 #define MAX_ATTRIBUTE_SIZE 64
 #define MAX_SERIAL_NUMBER_SIZE 128
@@ -443,8 +443,8 @@ int clear_attr_voucher(struct Voucher *voucher,
   return 0;
 }
 
-const bool* get_attr_bool_voucher(const struct Voucher *voucher,
-                          const enum VoucherAttributes attr) {
+const bool *get_attr_bool_voucher(const struct Voucher *voucher,
+                                  const enum VoucherAttributes attr) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -458,8 +458,8 @@ const bool* get_attr_bool_voucher(const struct Voucher *voucher,
   return &voucher->domain_cert_revocation_checks;
 }
 
-const struct tm * get_attr_time_voucher(struct Voucher *voucher,
-                          const enum VoucherAttributes attr) {
+const struct tm *get_attr_time_voucher(struct Voucher *voucher,
+                                       const enum VoucherAttributes attr) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -480,8 +480,8 @@ const struct tm * get_attr_time_voucher(struct Voucher *voucher,
   }
 }
 
-const int* get_attr_enum_voucher(struct Voucher *voucher,
-                          const enum VoucherAttributes attr) {
+const int *get_attr_enum_voucher(struct Voucher *voucher,
+                                 const enum VoucherAttributes attr) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -495,8 +495,8 @@ const int* get_attr_enum_voucher(struct Voucher *voucher,
   return (const int *)&voucher->assertion;
 }
 
-const char* const* get_attr_str_voucher(struct Voucher *voucher,
-                         const enum VoucherAttributes attr) {
+const char *const *get_attr_str_voucher(struct Voucher *voucher,
+                                        const enum VoucherAttributes attr) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -507,11 +507,12 @@ const char* const* get_attr_str_voucher(struct Voucher *voucher,
     return NULL;
   }
 
-  return (const char* const*)&voucher->serial_number;
+  return (const char *const *)&voucher->serial_number;
 }
 
-const struct VoucherBinaryArray* get_attr_array_voucher(struct Voucher *voucher,
-                           const enum VoucherAttributes attr) {
+const struct VoucherBinaryArray *
+get_attr_array_voucher(struct Voucher *voucher,
+                       const enum VoucherAttributes attr) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;

@@ -56,7 +56,7 @@ enum VoucherAttributes {
    * node is primarily for human consumption and auditing.  Future
    * work MAY create verification requirements based on this
    * node.
-  */
+   */
   ATTR_CREATED_ON = 0,
 
   /**
@@ -70,7 +70,7 @@ enum VoucherAttributes {
    *
    * The expires-on value MUST NOT exceed the expiration date
    * of any of the listed 'pinned-domain-cert' certificates.
-  */
+   */
   ATTR_EXPIRES_ON,
 
   /**
@@ -79,7 +79,7 @@ enum VoucherAttributes {
    * to support more detailed policy checks.  Pledges MUST
    * ensure that the assertion provided is acceptable, per
    * local policy, before processing the voucher.
-  */
+   */
   ATTR_ASSERTION,
 
   /**
@@ -87,7 +87,7 @@ enum VoucherAttributes {
    * voucher, a pledge MUST ensure that its serial-number
    * matches this value.  If no match occurs, then the
    * pledge MUST NOT process this voucher.
-  */
+   */
   ATTR_SERIAL_NUMBER,
 
   /**
@@ -104,7 +104,7 @@ enum VoucherAttributes {
    * When issuing a voucher, the MASA MUST ensure that this field
    * is populated for serial-numbers that are not otherwise unique
    * within the scope of the MASA.
-  */
+   */
   ATTR_IDEVID_ISSUER,
 
   /**
@@ -119,7 +119,7 @@ enum VoucherAttributes {
    * somewhere in its chain of certificates.  This certificate
    * MAY be an end-entity certificate, including a self-signed
    * entity.
-  */
+   */
   ATTR_PINNED_DOMAIN_CERT,
 
   /**
@@ -128,7 +128,7 @@ enum VoucherAttributes {
    * pinned domain certificate.  If this field is not set, then
    * normal PKIX behavior applies to validation of the domain
    * certificate.
-  */
+   */
   ATTR_DOMAIN_CERT_REVOCATION_CHECKS,
 
   /**
@@ -142,7 +142,7 @@ enum VoucherAttributes {
    * and sent to a bootstrap server in an earlier bootstrapping
    * message.  If the values do not match, then the pledge MUST
    * NOT process this voucher.
-  */
+   */
   ATTR_NONCE,
 
   /**
@@ -154,7 +154,7 @@ enum VoucherAttributes {
    * may alter a voucher's validity period.  For instance, a
    * vendor may associate validity periods with support contracts,
    * which may be terminated or extended over time.
-  */
+   */
   ATTR_LAST_RENEWAL_DATE,
 
   /**
@@ -179,7 +179,7 @@ enum VoucherAttributes {
    * prior-signed-voucher-request information when
    * signing a voucher for imprinting so as to minimize
    * the final voucher size.
-  */
+   */
   ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
 
   /**
@@ -193,7 +193,7 @@ enum VoucherAttributes {
    * certificate; see RFC 8446) presented by the registrar
    * to the pledge.  This MUST be populated in a pledge's
    * voucher-re
-  */
+   */
   ATTR_PROXIMITY_REGISTRAR_CERT
 };
 
@@ -339,8 +339,8 @@ int clear_attr_voucher(struct Voucher *voucher,
  * @param[in] attr The bool voucher attribute
  * @return const bool* pointer to the bool value, NULL on failure
  */
-const bool* get_attr_bool_voucher(const struct Voucher *voucher,
-                          const enum VoucherAttributes attr);
+const bool *get_attr_bool_voucher(const struct Voucher *voucher,
+                                  const enum VoucherAttributes attr);
 
 /**
  * @brief Gets the pointer to the value for a voucher time attribute
@@ -349,8 +349,8 @@ const bool* get_attr_bool_voucher(const struct Voucher *voucher,
  * @param[in] attr The time voucher attribute
  * @return const struct tm * pointer to the time value, NULL on failure
  */
-const struct tm * get_attr_time_voucher(struct Voucher *voucher,
-                          const enum VoucherAttributes attr);
+const struct tm *get_attr_time_voucher(struct Voucher *voucher,
+                                       const enum VoucherAttributes attr);
 
 /**
  * @brief Gets the pointer to the value for a voucher enum attribute
@@ -359,8 +359,8 @@ const struct tm * get_attr_time_voucher(struct Voucher *voucher,
  * @param[in] attr The enum voucher attribute
  * @return const int* pointer to the enum value, NULL on failure
  */
-const int* get_attr_enum_voucher(struct Voucher *voucher,
-                          const enum VoucherAttributes attr);
+const int *get_attr_enum_voucher(struct Voucher *voucher,
+                                 const enum VoucherAttributes attr);
 
 /**
  * @brief Gets the pointer to the value for a voucher string attribute
@@ -369,18 +369,20 @@ const int* get_attr_enum_voucher(struct Voucher *voucher,
  * @param[in] attr The string voucher attribute name
  * @return const char* const* pointer to the string value, NULL on failure
  */
-const char* const* get_attr_str_voucher(struct Voucher *voucher,
-                         const enum VoucherAttributes attr);
+const char *const *get_attr_str_voucher(struct Voucher *voucher,
+                                        const enum VoucherAttributes attr);
 
 /**
  * @brief Gets the pointer to the value for a voucher array attribute
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] attr The array voucher attribute name
- * @return const struct VoucherBinaryArray* pointer to the array value, NULL on failure
+ * @return const struct VoucherBinaryArray* pointer to the array value, NULL on
+ * failure
  */
-const struct VoucherBinaryArray* get_attr_array_voucher(struct Voucher *voucher,
-                           const enum VoucherAttributes attr);
+const struct VoucherBinaryArray *
+get_attr_array_voucher(struct Voucher *voucher,
+                       const enum VoucherAttributes attr);
 
 /**
  * @brief Serializes a voucher to a string
