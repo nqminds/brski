@@ -250,9 +250,21 @@ static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
   return out;
 }
 
-uint8_t *serialize_array2base64str(const uint8_t *src, const size_t len,
-                                   size_t *out_len) {
-  return base64_gen_encode(src, len, out_len, base64_table, 1);
+ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
+                                   uint8_t **base64_out) {
+  size_t out_len;
+
+  *base64_out = NULL;
+
+  uint8_t *encoded = base64_gen_encode(src, len, &out_len, base64_table, 1);
+  if (encoded == NULL) {
+    log_error("base64_gen_encode fail");
+    return -1;
+  }
+
+  *base64_out = encoded;
+
+  return (ssize_t)out_len;
 }
 
 uint8_t *serialize_base64str2array(const uint8_t *src, const size_t length,

@@ -404,4 +404,43 @@ char *serialize_voucher(const struct Voucher *voucher);
  */
 struct Voucher *deserialize_voucher(const char *json);
 
+/**
+ * @brief Signs a voucher using CMS for an EC private key
+ * and output to PEM (base64)
+ *
+ * Caller is responsible for freeing output PEM string
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] cert The certificate buffer for signing (DER format)
+ * @param[in] cert_length The certificate buffer length
+ * @param[in] key The EC private key buffer of the certificate (DER format)
+ * @param[in] key_length The length of the private key buffer
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @return char* the signed cms structure in PEM format, NULL on failure
+ */
+char* sign_eccms_voucher(struct Voucher *voucher,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs);
+
+
+/**
+ * @brief Signs a voucher using CMS for an RSA private key
+ * and output to PEM (base64)
+ *
+ * Caller is responsible for freeing output PEM string
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] cert The certificate buffer for signing (DER format)
+ * @param[in] cert_length The certificate buffer length
+ * @param[in] key The RSA private key buffer of the certificate (DER format)
+ * @param[in] key_length The length of the private key buffer
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @return char* the signed cms structure in PEM format, NULL on failure
+ */
+char* sign_rsacms_voucher(struct Voucher *voucher,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs);
+
 #endif

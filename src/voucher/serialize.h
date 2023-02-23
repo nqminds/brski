@@ -27,11 +27,11 @@
  *
  * @param[in] src The array to encode
  * @param[in] length The length of the array to encode
- * @param[out] out_length The length of the encoded buffer
- * @return uint8_t * encoded buffer, NULL on failure
+ * @param[out] base64_out The encoded buffer in base64
+ * @return ssize_t the size of the encoded buffer, -1 on failure
  */
-uint8_t *serialize_array2base64str(const uint8_t *src, const size_t length,
-                                   size_t *out_len);
+ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
+                                   uint8_t **base64_out);
 
 /**
  * @brief Decodes a base64 encoded array

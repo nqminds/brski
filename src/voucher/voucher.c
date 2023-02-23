@@ -534,43 +534,64 @@ get_attr_array_voucher(struct Voucher *voucher,
       return NULL;
   }
 }
+char *escape_serialize_time(const struct tm *time) {
+  char *serialized = serialize_time2str(time);
+  if (serialized == NULL) {
+    log_error("serialize_time2str fail");
+    return NULL;
+  }
+
+  char *escaped = serialize_escapestr(serialized);
+  if ((escaped = serialize_escapestr(serialized)) == NULL) {
+    log_error("serialize_escapestr fail");
+    sys_free(serialized);
+    return NULL;
+  }
+  sys_free(serialized);
+  return escaped;
+}
+
+char *escape_serialize_array(const struct VoucherBinaryArray *arr) {
+  uint8_t *base64_out = NULL;
+  if (serialize_array2base64str(arr->array, arr->length, &base64_out) < 0) {
+    log_error("serialize_array2base64str fail");
+    return NULL;
+  }
+  char *escaped = serialize_escapestr((const char *)base64_out);
+  if (escaped == NULL) {
+    log_error("serialize_escapestr fail");
+    sys_free(base64_out);
+    return NULL;
+  }
+  sys_free(base64_out);
+  return escaped;
+}
 
 static char *serialize_attr_voucher(const struct Voucher *voucher,
                                     const enum VoucherAttributes attr) {
   const char *assertion_names[] = VOUCHER_ASSERTION_NAMES;
-  size_t out_len = 0;
 
   switch (attr) {
     case ATTR_CREATED_ON:
-      return serialize_escapestr(serialize_time2str(&voucher->created_on));
+      return escape_serialize_time(&voucher->created_on);
     case ATTR_EXPIRES_ON:
-      return serialize_escapestr(serialize_time2str(&voucher->expires_on));
+      return escape_serialize_time(&voucher->expires_on);
     case ATTR_LAST_RENEWAL_DATE:
-      return serialize_escapestr(
-          serialize_time2str(&voucher->last_renewal_date));
+      return escape_serialize_time(&voucher->last_renewal_date);
     case ATTR_ASSERTION:
       return serialize_escapestr(assertion_names[voucher->assertion]);
     case ATTR_SERIAL_NUMBER:
       return serialize_escapestr(voucher->serial_number);
     case ATTR_IDEVID_ISSUER:
-      return serialize_escapestr((const char *)serialize_array2base64str(
-          voucher->idevid_issuer.array, voucher->idevid_issuer.length,
-          &out_len));
+      return escape_serialize_array(&voucher->idevid_issuer);
     case ATTR_PINNED_DOMAIN_CERT:
-      return serialize_escapestr((const char *)serialize_array2base64str(
-          voucher->pinned_domain_cert.array, voucher->pinned_domain_cert.length,
-          &out_len));
+      return escape_serialize_array(&voucher->pinned_domain_cert);
     case ATTR_NONCE:
-      return serialize_escapestr((const char *)serialize_array2base64str(
-          voucher->nonce.array, voucher->nonce.length, &out_len));
+      return escape_serialize_array(&voucher->nonce);
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      return serialize_escapestr((const char *)serialize_array2base64str(
-          voucher->prior_signed_voucher_request.array,
-          voucher->prior_signed_voucher_request.length, &out_len));
+      return escape_serialize_array(&voucher->prior_signed_voucher_request);
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      return serialize_escapestr((const char *)serialize_array2base64str(
-          voucher->proximity_registrar_cert.array,
-          voucher->proximity_registrar_cert.length, &out_len));
+      return escape_serialize_array(&voucher->proximity_registrar_cert);
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
       return serialize_bool2str(voucher->domain_cert_revocation_checks);
     default:
@@ -860,4 +881,99 @@ struct Voucher *deserialize_voucher(const char *json) {
 deserialize_voucher_fail:
   free_voucher(voucher);
   return NULL;
+}
+
+char* sign_eccms_voucher(struct Voucher *voucher,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  if (key == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  char *serialized = serialize_voucher(voucher);
+
+  if (serialized == NULL) {
+    log_error("serialize_voucher fail");
+    return NULL;
+  }
+
+  uint8_t *cms = NULL;
+  ssize_t cms_length = crypto_sign_eccms((uint8_t *)serialized, strlen(serialized), cert, cert_length, key, key_length, certs, &cms);
+
+  if (cms_length < 0) {
+    log_error("crypto_sign_eccms fail");
+    sys_free(serialized);
+    return NULL;
+  }
+  sys_free(serialized);
+
+  uint8_t *base64_out = NULL;
+  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
+    log_error("serialize_array2base64str fail");
+    sys_free(cms);
+    return NULL;
+  }
+
+  sys_free(cms);
+  return (char *)base64_out;
+}
+
+
+char* sign_rsacms_voucher(struct Voucher *voucher,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs) {
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  if (key == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  char *serialized = serialize_voucher(voucher);
+
+  if (serialized == NULL) {
+    log_error("serialize_voucher fail");
+    return NULL;
+  }
+
+  uint8_t *cms = NULL;
+  ssize_t cms_length = crypto_sign_rsacms((uint8_t *)serialized, strlen(serialized), cert, cert_length, key, key_length, certs, &cms);
+
+  if (cms_length < 0) {
+    log_error("crypto_sign_eccms fail");
+    sys_free(serialized);
+    return NULL;
+  }
+  sys_free(serialized);
+
+  uint8_t *base64_out = NULL;
+  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
+    log_error("serialize_array2base64str fail");
+    sys_free(cms);
+    return NULL;
+  }
+
+  sys_free(cms);
+  return (char *)base64_out;
 }

@@ -59,8 +59,8 @@ enum CRYPTO_CERTIFICATE_TYPE {
  *
  * Caller is responsible for freeing the key buffer
  *
- * @param bits[in] Number of key bits for RSA
- * @param key[out] The output key buffer
+ * @param[in] bits Number of key bits for RSA
+ * @param[out] key The output key buffer
  * @return ssize_t the size of the key buffer, -1 on failure
  */
 ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
@@ -71,7 +71,7 @@ ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
  *
  * Caller is responsible for freeing the key buffer
  *
- * @param key[out] The output key buffer
+ * @param[out] key The output key buffer
  * @return ssize_t the size of the key buffer, -1 on failure
  */
 ssize_t crypto_generate_eckey(uint8_t **key);
@@ -81,8 +81,8 @@ ssize_t crypto_generate_eckey(uint8_t **key);
  *
  * Caller is responsible for freeing the key context
  *
- * @param key[in] The input key buffer
- * @param length[in] The key buffer length
+ * @param[in] key The input key buffer
+ * @param[in] length The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
 CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length);
@@ -92,8 +92,8 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length);
  *
  * Caller is responsible for freeing the key context
  *
- * @param key[in] The input key buffer
- * @param length[in] The key buffer length
+ * @param[in] key The input key buffer
+ * @param[in] length The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
 CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length);
@@ -101,7 +101,7 @@ CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length);
 /**
  * @brief Frees a private key context
  *
- * @param ctx[in] The key context
+ * @param[in] ctx The key context
  */
 void crypto_free_keycontext(CRYPTO_KEY ctx);
 
@@ -111,10 +111,10 @@ void crypto_free_keycontext(CRYPTO_KEY ctx);
  *
  * Caller is responsible for freeing the cert buffer
  *
- * @param meta[in] The certificate metadata
- * @param key[in] The EC private key buffer
- * @param key_length[in] The private key buffer length
- * @param cert[out] The output certificate buffer
+ * @param[in] meta The certificate metadata
+ * @param[in] key The EC private key buffer
+ * @param[in] key_length The private key buffer length
+ * @param[out] cert The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
@@ -127,10 +127,10 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
  *
  * Caller is responsible for freeing the cert buffer
  *
- * @param meta[in] The certificate metadata
- * @param key[in] The RSA private key buffer
- * @param key_length[in] The private key buffer length
- * @param cert[out] The output certificate buffer
+ * @param[in] meta The certificate metadata
+ * @param[in] key The RSA private key buffer
+ * @param[in] key_length The private key buffer length
+ * @param[out] cert The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
@@ -142,14 +142,14 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
  *
  * Caller is responsible for freeing the cms buffer
  *
- * @param data[in] The data buffer to be signed
- * @param data_length[in] The data buffer length
- * @param cert[in] The certificate buffer for signing
- * @param cert_length[in] The certificate buffer length
- * @param key[in] The EC private key buffer of the certificate
- * @param key_length[in] The length of the private key buffer
- * @param certs[in] The list of additional certificate buffers
- * @param cms[out] The output cms buffer
+ * @param[in] data The data buffer to be signed
+ * @param[in] data_length The data buffer length
+ * @param[in] cert The certificate buffer for signing
+ * @param[in] cert_length The certificate buffer length
+ * @param[in] key The EC private key buffer of the certificate
+ * @param[in] key_length The length of the private key buffer
+ * @param[in] certs The list of additional certificate buffers
+ * @param[out] cms The output cms buffer
  * @return ssize_t the size of the cms buffer, -1 on failure
  */
 ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
@@ -162,14 +162,14 @@ ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
  *
  * Caller is responsible for freeing the cms buffer
  *
- * @param data[in] The data buffer to be signed
- * @param data_length[in] The data buffer length
- * @param cert[in] The certificate buffer for signing
- * @param cert_length[in] The certificate buffer length
- * @param key[in] The RSA private key buffer of the certificate
- * @param key_length[in] The length of the private key buffer
- * @param certs[in] The list of additional certificate buffers
- * @param cms[out] The output cms buffer
+ * @param[in] data The data buffer to be signed
+ * @param[in] data_length The data buffer length
+ * @param[in] cert The certificate buffer for signing
+ * @param[in] cert_length The certificate buffer length
+ * @param[in] key The RSA private key buffer of the certificate
+ * @param[in] key_length The length of the private key buffer
+ * @param[in] certs The list of additional certificate buffers
+ * @param[out] cms The output cms buffer
  * @return ssize_t the size of the cms buffer, -1 on failure
  */
 ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
@@ -183,11 +183,11 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
  *
  * Caller is responsible for freeing the data buffer
  *
- * @param cms[in] The cms buffer to be verified
- * @param cms_length[in] The cms buffer length
- * @param certs[in] The list of additional certificate buffers
- * @param store[in] The list of trusted certificate for store
- * @param data[out] The output data buffer
+ * @param[in] cms The cms buffer to be verified
+ * @param[in] cms_length The cms buffer length
+ * @param[in] certs The list of additional certificate buffers
+ * @param[in] store The list of trusted certificate for store
+ * @param[out] data The output data buffer
  * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
