@@ -402,14 +402,15 @@ get_attr_array_voucher(struct Voucher *voucher,
 char *serialize_voucher(const struct Voucher *voucher);
 
 /**
- * @brief Deserializes a json string to a voucher
+ * @brief Deserializes a json buffer to a voucher
  *
  * Caller is responsible for freeing the voucher struct
  *
- * @param[in] json The json string
+ * @param[in] json The json buffer
+ * @param[in] length The json buffer length
  * @return struct Voucher * voucher, NULL on failure
  */
-struct Voucher *deserialize_voucher(const char *json);
+struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 
 /**
  * @brief Signs a voucher using CMS for an EC private key
@@ -446,5 +447,19 @@ char *sign_rsacms_voucher(struct Voucher *voucher,
                           const struct VoucherBinaryArray *cert,
                           const struct VoucherBinaryArray *key,
                           const struct buffer_list *certs);
+
+/**
+ * @brief Verifies a CMS buffer and extract the voucher structure
+ *
+ * Caller is responsible for freeing the output voucher
+ *
+ * @param[in] cms The cms buffer string in PEM(base64) format
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[in] store The list of trusted certificate for store (DER format)
+ * @return struct Voucher * the verified voucher, NULL on failure
+ */
+struct Voucher * verify_cms_voucher(const char *cms,
+                          const struct buffer_list *certs,
+                          const struct buffer_list *store);
 
 #endif

@@ -27,11 +27,11 @@
  *
  * @param[in] src The array to encode
  * @param[in] length The length of the array to encode
- * @param[out] base64_out The encoded buffer in base64
+ * @param[out] out The encoded buffer in base64
  * @return ssize_t the size of the encoded buffer, -1 on failure
  */
-ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
-                                  uint8_t **base64_out);
+ssize_t serialize_array2base64str(const uint8_t *src, const size_t length,
+                                  uint8_t **out);
 
 /**
  * @brief Decodes a base64 encoded array
@@ -40,11 +40,11 @@ ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
  *
  * @param[in] src The base64 encoded array
  * @param[in] length The length of the base64 encoded array
- * @param[out] out_length The length of the decoded buffer
- * @return uint8_t * decoded buffer, NULL on failure
+ * @param[out] out The decoded buffer
+ * @return ssize_t the size of the decoded buffer, -1 on failure
  */
-uint8_t *serialize_base64str2array(const uint8_t *src, const size_t length,
-                                   size_t *out_length);
+ssize_t serialize_base64str2array(const uint8_t *src, const size_t length,
+                                   uint8_t **out);
 
 /**
  * @brief Encodes a bool value to a string

@@ -290,19 +290,19 @@ static void test_deserialize_voucher(void **state) {
   struct VoucherBinaryArray array_value = {.array = array, .length = 5};
 
   char *json = "{\"ietf-voucher:voucher\":";
-  struct Voucher *voucher = deserialize_voucher(json);
+  struct Voucher *voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_null(voucher);
 
   json = "{\"ietf-voucher:voucher\":}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_null(voucher);
 
   json = "{\"-voucher:voucher\":{}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_null(voucher);
 
   json = "{\"ietf-voucher:voucher\":{}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   assert_non_null(voucher);
   test_compare_time(&tm_null, &voucher->created_on);
@@ -320,86 +320,86 @@ static void test_deserialize_voucher(void **state) {
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"created-on\":\"1973-11-29T21:33:09Z\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_time(&tm, &voucher->created_on);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"expires-on\":\"1973-11-29T21:33:09Z\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_time(&tm, &voucher->expires_on);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"assertion\":\"logged\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   assert_int_equal(voucher->assertion, VOUCHER_ASSERTION_LOGGED);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"assertion\":\"logg\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_null(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"serial-number\":\"12345\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   assert_string_equal(voucher->serial_number, "12345");
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"idevid-issuer\":\"AQIDBAU=\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_array(&array_value, &voucher->idevid_issuer);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"pinned-domain-cert\":\"AQIDBAU=\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_array(&array_value, &voucher->pinned_domain_cert);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   assert_true(voucher->domain_cert_revocation_checks);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"nonce\":\"AQIDBAU=\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_array(&array_value, &voucher->nonce);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"last-renewal-date\":\"1973-11-29T21:33:"
          "09Z\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_time(&tm, &voucher->last_renewal_date);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"prior-signed-voucher-request\":"
          "\"AQIDBAU=\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
   free_voucher(voucher);
 
   json =
       "{\"ietf-voucher:voucher\":{\"proximity-registrar-cert\":\"AQIDBAU=\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   test_compare_array(&array_value, &voucher->proximity_registrar_cert);
   free_voucher(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-c\":true}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_null(voucher);
 
   json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true,"
          "\"prior-signed-voucher-request\":\"AQIDBAU=\", "
          "\"last-renewal-date\":\"1973-11-29T21:33:09Z\"}}";
-  voucher = deserialize_voucher(json);
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
   assert_non_null(voucher);
   assert_true(voucher->domain_cert_revocation_checks);
   test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
@@ -646,6 +646,7 @@ static void test_get_attr_array_voucher(void **state) {
 
 static void test_sign_cms_voucher(void **state) {
   (void)state;
+
   struct tm tm = {.tm_year = 73,
                   .tm_mon = 10,
                   .tm_mday = 29,
@@ -730,6 +731,69 @@ static void test_sign_cms_voucher(void **state) {
   free_voucher(voucher);
 }
 
+static void test_verify_cms_voucher(void **state) {
+  (void)state;
+
+  struct tm tm = {.tm_year = 73,
+                  .tm_mon = 10,
+                  .tm_mday = 29,
+                  .tm_hour = 21,
+                  .tm_min = 33,
+                  .tm_sec = 9};
+  struct VoucherBinaryArray cert = {}, key = {};
+
+  struct Voucher *voucher = init_voucher();
+
+  set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
+
+  struct buffer_list *certs = init_buffer_list();
+  struct crypto_cert_meta meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+
+  key.length = crypto_generate_eckey(&key.array);
+  assert_non_null(key.array);
+  meta.issuer = init_keyvalue_list();
+  meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
+                     sys_strdup("issuertest.info"));
+
+  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjecttest.info"));
+
+  cert.length =
+      crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
+
+  uint8_t *key_in_list = NULL;
+  ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
+  uint8_t *cert_in_list = NULL;
+  ssize_t cert_in_list_length = crypto_generate_eccert(
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
+
+  push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
+
+  char *cms = sign_eccms_voucher(voucher, &cert, &key, certs);
+  assert_non_null(cms);
+
+  struct Voucher *decoded_voucher = verify_cms_voucher(cms, NULL, NULL);
+  assert_non_null(decoded_voucher);
+
+  sys_free(cms);
+  free_binary_array(&key);
+  free_binary_array(&cert);
+  free_buffer_list(certs);
+
+  free_keyvalue_list(meta.issuer);
+  free_keyvalue_list(meta.subject);
+
+  free_voucher(voucher);
+}
+
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -753,6 +817,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_get_attr_str_voucher),
       cmocka_unit_test(test_get_attr_array_voucher),
       cmocka_unit_test(test_sign_cms_voucher),
+      cmocka_unit_test(test_verify_cms_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

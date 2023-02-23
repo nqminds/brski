@@ -38,11 +38,12 @@ static void test_serialize_array2base64str(void **state) {
 static void test_serialize_base64str2array(void **state) {
   (void)state;
   char *str = STR_TO_BASE64;
-  size_t out_len;
-  char *out = (char *)serialize_base64str2array((const uint8_t *)str,
-                                                strlen(str), &out_len);
+  uint8_t *out = NULL;
+  ssize_t out_len = serialize_base64str2array((const uint8_t *)str,
+                                                strlen(str), &out);
+  assert_true(out_len > 0);
   assert_non_null(out);
-  assert_string_equal(out, STR_FROM_BASE64);
+  assert_string_equal((char*)out, STR_FROM_BASE64);
 }
 
 static void test_serialize_bool2str(void **state) {

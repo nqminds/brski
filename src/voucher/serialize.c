@@ -250,26 +250,34 @@ static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
   return out;
 }
 
-ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
-                                  uint8_t **base64_out) {
+ssize_t serialize_array2base64str(const uint8_t *src, const size_t length,
+                                  uint8_t **out) {
   size_t out_len;
 
-  *base64_out = NULL;
+  *out = NULL;
 
-  uint8_t *encoded = base64_gen_encode(src, len, &out_len, base64_table, 1);
+  uint8_t *encoded = base64_gen_encode(src, length, &out_len, base64_table, 1);
   if (encoded == NULL) {
     log_error("base64_gen_encode fail");
     return -1;
   }
-
-  *base64_out = encoded;
-
+  *out = encoded;
   return (ssize_t)out_len;
 }
 
-uint8_t *serialize_base64str2array(const uint8_t *src, const size_t length,
-                                   size_t *out_length) {
-  return base64_gen_decode(src, length, out_length, base64_table);
+ssize_t serialize_base64str2array(const uint8_t *src, const size_t length,
+                                   uint8_t **out) {
+  size_t out_len;
+
+  *out = NULL;
+
+  uint8_t *decoded = base64_gen_decode(src, length, &out_len, base64_table);
+  if (decoded == NULL) {
+    log_error("base64_gen_decode fail");
+    return -1;
+  }
+  *out = decoded;
+  return out_len;
 }
 
 char *serialize_bool2str(const bool value) {
