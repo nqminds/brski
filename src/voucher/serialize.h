@@ -31,7 +31,7 @@
  * @return ssize_t the size of the encoded buffer, -1 on failure
  */
 ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
-                                   uint8_t **base64_out);
+                                  uint8_t **base64_out);
 
 /**
  * @brief Decodes a base64 encoded array

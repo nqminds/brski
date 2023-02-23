@@ -255,6 +255,13 @@ struct Voucher *init_voucher(void);
 void free_voucher(struct Voucher *voucher);
 
 /**
+ * @brief Frees a binary array content
+ *
+ * @param[in] voucher The binary array
+ */
+void free_binary_array(struct VoucherBinaryArray *bin_array);
+
+/**
  * @brief Sets the value for a voucher bool attribute
  *
  * @param[in] voucher The allocated voucher structure
@@ -411,18 +418,16 @@ struct Voucher *deserialize_voucher(const char *json);
  * Caller is responsible for freeing output PEM string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer for signing (DER format)
- * @param[in] cert_length The certificate buffer length
- * @param[in] key The EC private key buffer of the certificate (DER format)
- * @param[in] key_length The length of the private key buffer
+ * @param[in] cert The certificate buffer for signing (array in DER format)
+ * @param[in] key The EC private key buffer of the certificate (array DER
+ * format)
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
-char* sign_eccms_voucher(struct Voucher *voucher,
-                           const uint8_t *cert, const size_t cert_length,
-                           const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs);
-
+char *sign_eccms_voucher(struct Voucher *voucher,
+                         const struct VoucherBinaryArray *cert,
+                         const struct VoucherBinaryArray *key,
+                         const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS for an RSA private key
@@ -431,16 +436,15 @@ char* sign_eccms_voucher(struct Voucher *voucher,
  * Caller is responsible for freeing output PEM string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer for signing (DER format)
- * @param[in] cert_length The certificate buffer length
- * @param[in] key The RSA private key buffer of the certificate (DER format)
- * @param[in] key_length The length of the private key buffer
+ * @param[in] cert The certificate buffer for signing (array in DER format)
+ * @param[in] key The RSA private key buffer of the certificate (array in DER
+ * format)
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
-char* sign_rsacms_voucher(struct Voucher *voucher,
-                           const uint8_t *cert, const size_t cert_length,
-                           const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs);
+char *sign_rsacms_voucher(struct Voucher *voucher,
+                          const struct VoucherBinaryArray *cert,
+                          const struct VoucherBinaryArray *key,
+                          const struct buffer_list *certs);
 
 #endif

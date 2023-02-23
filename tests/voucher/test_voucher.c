@@ -18,9 +18,9 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
+#include "voucher/crypto_defs.h"
 #include "voucher/voucher.h"
 #include "voucher/voucher_defs.h"
-#include "voucher/crypto_defs.h"
 
 #define SERIALNAME_LONG                                                        \
   "abcdabcdabcdabcdabcdabcdabcdabcd"                                           \
@@ -652,13 +652,12 @@ static void test_sign_cms_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
+  struct VoucherBinaryArray cert = {}, key = {};
 
   struct Voucher *voucher = init_voucher();
 
   set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
 
-  uint8_t *key = NULL;
-  uint8_t *cert = NULL;
   struct buffer_list *certs = init_buffer_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
@@ -666,8 +665,8 @@ static void test_sign_cms_voucher(void **state) {
                                   .issuer = NULL,
                                   .subject = NULL};
 
-  ssize_t key_length = crypto_generate_eckey(&key);
-  assert_non_null(key);
+  key.length = crypto_generate_eckey(&key.array);
+  assert_non_null(key.array);
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
@@ -679,7 +678,8 @@ static void test_sign_cms_voucher(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
                      sys_strdup("subjecttest.info"));
 
-  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
+  cert.length =
+      crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
 
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
@@ -689,37 +689,39 @@ static void test_sign_cms_voucher(void **state) {
 
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  char *serialized = sign_eccms_voucher(voucher, cert, cert_length, key, key_length, certs);
+  char *serialized = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(serialized);
   sys_free(serialized);
 
-  serialized = sign_rsacms_voucher(voucher, cert, cert_length, key, key_length, certs);
+  serialized = sign_rsacms_voucher(voucher, &cert, &key, certs);
   assert_null(serialized);
 
-  sys_free(key);
-  sys_free(cert);
+  free_binary_array(&key);
+  free_binary_array(&cert);
   free_buffer_list(certs);
 
-  key_length = crypto_generate_rsakey(2048, &key);
-  assert_non_null(key);
+  key.length = crypto_generate_rsakey(2048, &key.array);
+  assert_non_null(key.array);
 
-  cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+  cert.length =
+      crypto_generate_rsacert(&meta, key.array, key.length, &cert.array);
 
   key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
-  cert_in_list_length = crypto_generate_rsacert(&meta, key_in_list, key_in_list_length, &cert_in_list);
+  cert_in_list_length = crypto_generate_rsacert(
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
 
   certs = init_buffer_list();
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  serialized = sign_rsacms_voucher(voucher, cert, cert_length, key, key_length, certs);
+  serialized = sign_rsacms_voucher(voucher, &cert, &key, certs);
   assert_non_null(serialized);
   sys_free(serialized);
 
-  serialized = sign_eccms_voucher(voucher, cert, cert_length, key, key_length, certs);
+  serialized = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_null(serialized);
 
-  sys_free(key);
-  sys_free(cert);
+  free_binary_array(&key);
+  free_binary_array(&cert);
   free_buffer_list(certs);
 
   free_keyvalue_list(meta.issuer);

@@ -251,7 +251,7 @@ static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
 }
 
 ssize_t serialize_array2base64str(const uint8_t *src, const size_t len,
-                                   uint8_t **base64_out) {
+                                  uint8_t **base64_out) {
   size_t out_len;
 
   *base64_out = NULL;

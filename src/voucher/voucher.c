@@ -56,7 +56,7 @@ static int copy_binary_array(struct VoucherBinaryArray *dst,
   return 0;
 }
 
-static void free_binary_array(struct VoucherBinaryArray *bin_array) {
+void free_binary_array(struct VoucherBinaryArray *bin_array) {
   if (bin_array != NULL) {
     if (bin_array->array != NULL) {
       sys_free(bin_array->array);
@@ -883,10 +883,10 @@ deserialize_voucher_fail:
   return NULL;
 }
 
-char* sign_eccms_voucher(struct Voucher *voucher,
-                           const uint8_t *cert, const size_t cert_length,
-                           const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs) {
+char *sign_eccms_voucher(struct Voucher *voucher,
+                         const struct VoucherBinaryArray *cert,
+                         const struct VoucherBinaryArray *key,
+                         const struct buffer_list *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -910,7 +910,9 @@ char* sign_eccms_voucher(struct Voucher *voucher,
   }
 
   uint8_t *cms = NULL;
-  ssize_t cms_length = crypto_sign_eccms((uint8_t *)serialized, strlen(serialized), cert, cert_length, key, key_length, certs, &cms);
+  ssize_t cms_length =
+      crypto_sign_eccms((uint8_t *)serialized, strlen(serialized), cert->array,
+                        cert->length, key->array, key->length, certs, &cms);
 
   if (cms_length < 0) {
     log_error("crypto_sign_eccms fail");
@@ -930,11 +932,10 @@ char* sign_eccms_voucher(struct Voucher *voucher,
   return (char *)base64_out;
 }
 
-
-char* sign_rsacms_voucher(struct Voucher *voucher,
-                           const uint8_t *cert, const size_t cert_length,
-                           const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs) {
+char *sign_rsacms_voucher(struct Voucher *voucher,
+                          const struct VoucherBinaryArray *cert,
+                          const struct VoucherBinaryArray *key,
+                          const struct buffer_list *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -958,7 +959,9 @@ char* sign_rsacms_voucher(struct Voucher *voucher,
   }
 
   uint8_t *cms = NULL;
-  ssize_t cms_length = crypto_sign_rsacms((uint8_t *)serialized, strlen(serialized), cert, cert_length, key, key_length, certs, &cms);
+  ssize_t cms_length =
+      crypto_sign_rsacms((uint8_t *)serialized, strlen(serialized), cert->array,
+                         cert->length, key->array, key->length, certs, &cms);
 
   if (cms_length < 0) {
     log_error("crypto_sign_eccms fail");
