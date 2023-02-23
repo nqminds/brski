@@ -351,6 +351,11 @@ static X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
 
 static int set_certificate_meta(X509 *x509,
                                 const struct crypto_cert_meta *meta) {
+  if (X509_set_version(x509, X509_VERSION_3) != 1) {
+    log_error("X509_set_version fail with code=%d", ERR_get_error());
+    return -1;
+  }
+
   if (set_certificate_serialnumber(x509, meta->serial_number) < 0) {
     log_error("set_certificate_serialnumber fail");
     return -1;
