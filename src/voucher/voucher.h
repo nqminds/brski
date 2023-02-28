@@ -399,7 +399,7 @@ get_attr_array_voucher(struct Voucher *voucher,
  * @param[in] voucher The allocated voucher structure
  * @return char* serialized voucher, NULL on failure
  */
-char *serialize_voucher(const struct Voucher *voucher);
+__must_free char *serialize_voucher(const struct Voucher *voucher);
 
 /**
  * @brief Deserializes a json buffer to a voucher
@@ -425,7 +425,7 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
-char *sign_eccms_voucher(struct Voucher *voucher,
+__must_free char *sign_eccms_voucher(struct Voucher *voucher,
                          const struct VoucherBinaryArray *cert,
                          const struct VoucherBinaryArray *key,
                          const struct buffer_list *certs);
@@ -443,7 +443,7 @@ char *sign_eccms_voucher(struct Voucher *voucher,
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
-char *sign_rsacms_voucher(struct Voucher *voucher,
+__must_free char *sign_rsacms_voucher(struct Voucher *voucher,
                           const struct VoucherBinaryArray *cert,
                           const struct VoucherBinaryArray *key,
                           const struct buffer_list *certs);
