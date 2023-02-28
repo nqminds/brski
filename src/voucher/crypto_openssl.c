@@ -699,8 +699,7 @@ static ssize_t sign_withkey_cms(const uint8_t *data, const size_t data_length,
   unsigned int flags = CMS_BINARY;
   flags &= ~CMS_DETACHED;
 
-  CMS_ContentInfo *content =
-      CMS_sign(signcert, (EVP_PKEY *)pkey, cert_stack, mem_data, flags);
+  CMS_ContentInfo *content = CMS_sign(signcert, (EVP_PKEY *)pkey, cert_stack, mem_data, flags);
 
   if (content == NULL) {
     log_error("CMS_sign fail with code=%s",

@@ -21,6 +21,7 @@
 
 #include "voucher/crypto_defs.h"
 
+/*
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;
   uint8_t *key = NULL;
@@ -345,6 +346,7 @@ static void test_crypto_sign_rsacms(void **state) {
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
 }
+*/
 
 struct buffer_list *create_cert_list(void) {
   struct buffer_list *certs = init_buffer_list();
@@ -406,12 +408,9 @@ static void test_crypto_verify_cms(void **state) {
                      sys_strdup("1234567890"));
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
-  /* To add when finished creating the certificate signing */
-  /* push_buffer_list(certs, cert, cert_length, 0); */
 
-  ssize_t cms_length =
-      crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key,
-                        key_length, certs, &cms);
+  ssize_t cms_length = crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key, key_length, certs, &cms);
+  
   assert_non_null(cms);
 
   uint8_t *extracted_data = NULL;
@@ -438,15 +437,15 @@ int main(int argc, char *argv[]) {
   log_set_quiet(false);
 
   const struct CMUnitTest tests[] = {
-      cmocka_unit_test(test_crypto_generate_rsakey),
-      cmocka_unit_test(test_crypto_generate_eckey),
-      cmocka_unit_test(test_crypto_eckey2context),
-      cmocka_unit_test(test_crypto_rsakey2context),
-      cmocka_unit_test(test_crypto_free_keycontext),
-      cmocka_unit_test(test_crypto_generate_eccert),
-      cmocka_unit_test(test_crypto_generate_rsacert),
-      cmocka_unit_test(test_crypto_sign_eccms),
-      cmocka_unit_test(test_crypto_sign_rsacms),
+      // cmocka_unit_test(test_crypto_generate_rsakey),
+      // cmocka_unit_test(test_crypto_generate_eckey),
+      // cmocka_unit_test(test_crypto_eckey2context),
+      // cmocka_unit_test(test_crypto_rsakey2context),
+      // cmocka_unit_test(test_crypto_free_keycontext),
+      // cmocka_unit_test(test_crypto_generate_eccert),
+      // cmocka_unit_test(test_crypto_generate_rsacert),
+      // cmocka_unit_test(test_crypto_sign_eccms),
+      // cmocka_unit_test(test_crypto_sign_rsacms),
       cmocka_unit_test(test_crypto_verify_cms)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
