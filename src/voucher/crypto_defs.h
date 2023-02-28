@@ -106,7 +106,7 @@ CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length);
 void crypto_free_keycontext(CRYPTO_KEY ctx);
 
 /**
- * @brief Generate a certificate and sign with a EC private key
+ * @brief Generate a certificate and signs with a EC private key
  * using sha256
  *
  * Caller is responsible for freeing the cert buffer
@@ -122,7 +122,7 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                uint8_t **cert);
 
 /**
- * @brief Generate a certificate and sign with a RSA private key
+ * @brief Generate a certificate and signs with a RSA private key
  * using sha256
  *
  * Caller is responsible for freeing the cert buffer

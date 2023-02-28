@@ -454,11 +454,9 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
   }
 
   if (cert == NULL) {
-    log_error("cert aparam is NULL");
+    log_error("cert param is NULL");
     return -1;
   }
-
-  *cert = NULL;
 
   X509 *x509 = X509_new();
 
