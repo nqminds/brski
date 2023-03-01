@@ -732,6 +732,37 @@ static void test_sign_cms_voucher(void **state) {
   free_voucher(voucher);
 }
 
+struct buffer_list *create_cert_list(void) {
+  struct buffer_list *certs = init_buffer_list();
+  struct crypto_cert_meta meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 123456789,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+  uint8_t *key = NULL;
+  ssize_t key_length = crypto_generate_eckey(&key);
+  assert_non_null(key);
+  meta.issuer = init_keyvalue_list();
+  meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
+                     sys_strdup("cert_list_issuer.info"));
+
+  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(meta.subject, sys_strdup("CN"),
+                     sys_strdup("cert_list_subject.info"));
+
+  uint8_t *cert = NULL;
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
+  assert_non_null(cert);
+
+  push_buffer_list(certs, cert, cert_length, 0);
+
+  sys_free(key);
+  return certs;
+}
+
 static void test_verify_cms_voucher(void **state) {
   (void)state;
 
@@ -747,7 +778,7 @@ static void test_verify_cms_voucher(void **state) {
 
   set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
 
-  struct buffer_list *certs = init_buffer_list();
+  struct buffer_list *certs = create_cert_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
@@ -770,15 +801,7 @@ static void test_verify_cms_voucher(void **state) {
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
 
-  uint8_t *key_in_list = NULL;
-  ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
-  uint8_t *cert_in_list = NULL;
-  ssize_t cert_in_list_length = crypto_generate_eccert(
-      &meta, key_in_list, key_in_list_length, &cert_in_list);
-
-  push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
-
-  char *cms = sign_eccms_voucher(voucher, &cert, &key, /*certs*/NULL);
+  char *cms = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(cms);
 
   struct Voucher *decoded_voucher = verify_cms_voucher(cms, NULL, NULL);
