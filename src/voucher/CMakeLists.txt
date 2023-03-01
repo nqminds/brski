@@ -16,3 +16,6 @@ elseif (USE_VOUCHER_WOLFSSL)
 else ()
     target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE list serialize os)
 endif ()
+
+add_library(voucher_request voucher_request.c)
+target_link_libraries(voucher_request PRIVATE serialize voucher os)

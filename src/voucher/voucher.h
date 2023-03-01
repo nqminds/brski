@@ -238,6 +238,16 @@ struct VoucherBinaryArray {
   size_t length;
 };
 
+/**
+ * @brief Compare two binary arrays
+ *
+ * @param[in] src The source binary array
+ * @param[in] dst The destination binary array
+ * @return int 1 if array equal, 0 otherwise, -1 on failure
+ */
+int compare_binary_array(const struct VoucherBinaryArray *src,
+                             const struct VoucherBinaryArray *dst);
+
 struct Voucher;
 
 /**
@@ -338,6 +348,16 @@ int set_attr_voucher(struct Voucher *voucher, const enum VoucherAttributes attr,
  */
 int clear_attr_voucher(struct Voucher *voucher,
                        const enum VoucherAttributes attr);
+
+/**
+ * @brief Checks if a voucher attribute is non empty
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] attr The attribute name
+ * @return true if non empty, false otherwise
+ */
+bool is_attr_voucher_nonempty(const struct Voucher *voucher,
+                                     const enum VoucherAttributes attr);
 
 /**
  * @brief Gets the pointer to the value for a voucher bool attribute

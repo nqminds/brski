@@ -56,6 +56,29 @@ static int copy_binary_array(struct VoucherBinaryArray *dst,
   return 0;
 }
 
+int compare_binary_array(const struct VoucherBinaryArray *src,
+                             const struct VoucherBinaryArray *dst) {
+  if (src == NULL) {
+    log_error("src param is NULL");
+    return -1;
+  }
+
+  if (dst == NULL) {
+    log_error("dst param is NULL");
+    return -1;
+  }
+
+  if (dst->length != src->length) {
+    return 0;
+  }
+
+  if (sys_memcmp(dst->array, src->array, src->length) != 0) {
+    return 0;
+  };
+
+  return 1;
+}
+
 void free_binary_array(struct VoucherBinaryArray *bin_array) {
   if (bin_array != NULL) {
     if (bin_array->array != NULL) {
@@ -364,7 +387,7 @@ static bool is_attr_time_nonempty(const struct tm *tm) {
   return true;
 }
 
-static bool is_attr_voucher_nonempty(const struct Voucher *voucher,
+bool is_attr_voucher_nonempty(const struct Voucher *voucher,
                                      const enum VoucherAttributes attr) {
   switch (attr) {
     case ATTR_CREATED_ON:
