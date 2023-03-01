@@ -808,15 +808,25 @@ static void test_verify_cms_voucher(void **state) {
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
+  free_voucher(decoded_voucher);
   sys_free(cms);
+
+  cms = sign_cms_voucher(voucher, &cert, &key, certs);
+  assert_non_null(cms);
+
+  decoded_voucher = verify_cms_voucher(cms, NULL, NULL);
+  assert_non_null(decoded_voucher);
+  test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
+
+  free_voucher(decoded_voucher);
+  sys_free(cms);
+
   free_binary_array(&key);
   free_binary_array(&cert);
   free_buffer_list(certs);
 
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
-
-  free_voucher(voucher);
 }
 
 int main(int argc, char *argv[]) {
