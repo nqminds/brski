@@ -449,6 +449,24 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
                           const struct buffer_list *certs);
 
 /**
+ * @brief Signs a voucher using CMS for a private key (detected automatically)
+ * and output to PEM (base64)
+ *
+ * Caller is responsible for freeing output PEM string
+ *
+ * @param[in] voucher The allocated voucher structure
+ * @param[in] cert The certificate buffer for signing (array in DER format)
+ * @param[in] key The private key buffer of the certificate (array in DER
+ * format)
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @return char* the signed cms structure in PEM format, NULL on failure
+ */
+__must_free char *sign_cms_voucher(struct Voucher *voucher,
+                          const struct VoucherBinaryArray *cert,
+                          const struct VoucherBinaryArray *key,
+                          const struct buffer_list *certs);
+
+/**
  * @brief Verifies a CMS buffer and extract the voucher structure
  *
  * Caller is responsible for freeing the output voucher

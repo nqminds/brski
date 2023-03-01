@@ -274,6 +274,17 @@ CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length) {
   return ctx;
 }
 
+CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length) {
+  EVP_PKEY *pkey = NULL;
+  if ((pkey = d2i_AutoPrivateKey(NULL, &key, (long)length)) == NULL) {
+    log_error("d2i_AutoPrivateKey fail with code=%d", ERR_get_error());
+    return NULL;
+  }
+
+  CRYPTO_KEY ctx = (CRYPTO_KEY)pkey;
+  return ctx;
+}
+
 CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   X509 *pcert = NULL;
   const unsigned char *pp = (unsigned char *)cert;
@@ -801,7 +812,52 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
 
   EVP_PKEY *pkey = (EVP_PKEY *)crypto_rsakey2context(key, key_length);
   if (pkey == NULL) {
-    log_error("crypto_eckey2context fail");
+    log_error("crypto_rsakey2context fail");
+    return -1;
+  }
+
+  ssize_t length =
+      sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
+
+  if (length < 0) {
+    log_error("sign_withkey_eccms fail");
+    EVP_PKEY_free(pkey);
+    return -1;
+  }
+
+  EVP_PKEY_free(pkey);
+  return length;
+}
+
+ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
+                           const uint8_t *cert, const size_t cert_length,
+                           const uint8_t *key, const size_t key_length,
+                           const struct buffer_list *certs, uint8_t **cms) {
+  if (data == NULL) {
+    log_error("data param is NULL");
+    return -1;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (key == NULL) {
+    log_error("key param is NULL");
+    return -1;
+  }
+
+  if (cms == NULL) {
+    log_error("cms param is NULL");
+    return -1;
+  }
+
+  *cms = NULL;
+
+  EVP_PKEY *pkey = (EVP_PKEY *)crypto_key2context(key, key_length);
+  if (pkey == NULL) {
+    log_error("crypto_key2context fail");
     return -1;
   }
 

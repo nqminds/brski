@@ -983,6 +983,55 @@ char *sign_rsacms_voucher(struct Voucher *voucher,
   return (char *)base64_out;
 }
 
+__must_free char *sign_cms_voucher(struct Voucher *voucher,
+                          const struct VoucherBinaryArray *cert,
+                          const struct VoucherBinaryArray *key,
+                          const struct buffer_list *certs){
+  if (voucher == NULL) {
+    log_error("voucher param is NULL");
+    return NULL;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  if (key == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  char *serialized = serialize_voucher(voucher);
+
+  if (serialized == NULL) {
+    log_error("serialize_voucher fail");
+    return NULL;
+  }
+
+  uint8_t *cms = NULL;
+  ssize_t cms_length =
+      crypto_sign_cms((uint8_t *)serialized, strlen(serialized), cert->array,
+                         cert->length, key->array, key->length, certs, &cms);
+
+  if (cms_length < 0) {
+    log_error("crypto_sign_eccms fail");
+    sys_free(serialized);
+    return NULL;
+  }
+  sys_free(serialized);
+
+  uint8_t *base64_out = NULL;
+  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
+    log_error("serialize_array2base64str fail");
+    sys_free(cms);
+    return NULL;
+  }
+
+  sys_free(cms);
+  return (char *)base64_out;
+}
+
 struct Voucher * verify_cms_voucher(const char *cms,
                           const struct buffer_list *certs,
                           const struct buffer_list *store) {

@@ -99,6 +99,18 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length);
 CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length);
 
 /**
+ * @brief Maps a private key to a key context
+ * The function tries to detect the key type automatically
+ *
+ * Caller is responsible for freeing the key context
+ *
+ * @param[in] key The input key buffer
+ * @param[in] length The key buffer length
+ * @return CRYPTO_KEY key context, NULL on failure
+ */
+CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length);
+
+/**
  * @brief Frees a private key context
  *
  * @param[in] ctx The key context
@@ -153,6 +165,27 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
  * @return ssize_t the size of the cms buffer, -1 on failure
  */
 ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
+                          const uint8_t *cert, const size_t cert_length,
+                          const uint8_t *key, const size_t key_length,
+                          const struct buffer_list *certs, uint8_t **cms);
+
+/**
+ * @brief Signs a buffer using CMS for a private key.
+ * The private key type is detected automatically.
+ *
+ * Caller is responsible for freeing the cms buffer
+ *
+ * @param[in] data The data buffer to be signed
+ * @param[in] data_length The data buffer length
+ * @param[in] cert The certificate buffer for signing
+ * @param[in] cert_length The certificate buffer length
+ * @param[in] key The EC private key buffer of the certificate
+ * @param[in] key_length The length of the private key buffer
+ * @param[in] certs The list of additional certificate buffers
+ * @param[out] cms The output cms buffer
+ * @return ssize_t the size of the cms buffer, -1 on failure
+ */
+ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
                           const uint8_t *cert, const size_t cert_length,
                           const uint8_t *key, const size_t key_length,
                           const struct buffer_list *certs, uint8_t **cms);
