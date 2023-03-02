@@ -390,20 +390,20 @@ static void test_crypto_sign_cms(void **state) {
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_cms(data, data_length, cert, cert_length, NULL, 0,
-                              NULL, &cms);
+  length = crypto_sign_cms(data, data_length, cert, cert_length, NULL, 0, NULL,
+                           &cms);
   assert_true(length < 0);
   assert_null(cms);
 
   length = crypto_sign_cms(data, data_length, cert, cert_length, key,
-                              key_length, NULL, &cms);
+                           key_length, NULL, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
 
   cms = NULL;
   length = crypto_sign_cms(data, data_length, cert, cert_length, key,
-                              key_length, certs, &cms);
+                           key_length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
@@ -416,7 +416,7 @@ static void test_crypto_sign_cms(void **state) {
   cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
   length = crypto_sign_cms(data, data_length, cert, cert_length, key,
-                              key_length, certs, &cms);
+                           key_length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
@@ -464,7 +464,8 @@ static void test_crypto_verify_cms(void **state) {
 
   struct buffer_list *certs = create_cert_list();
 
-  char *data = "{\"ietf-voucher:voucher\":{\"created-on\":\"1973-11-29T21:33:09Z\",\"domain-cert-revocation-checks\":false}}";
+  char *data = "{\"ietf-voucher:voucher\":{\"created-on\":\"1973-11-29T21:33:"
+               "09Z\",\"domain-cert-revocation-checks\":false}}";
   ssize_t data_length = strlen(data);
   uint8_t *cms = NULL;
   uint8_t *key = NULL;
@@ -489,8 +490,10 @@ static void test_crypto_verify_cms(void **state) {
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
-  ssize_t cms_length = crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key, key_length, certs, &cms);
-  
+  ssize_t cms_length =
+      crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key,
+                        key_length, certs, &cms);
+
   assert_non_null(cms);
 
   uint8_t *extracted_data = NULL;
@@ -504,12 +507,14 @@ static void test_crypto_verify_cms(void **state) {
   sys_free(cms);
   sys_free(extracted_data);
 
-  cms_length = crypto_sign_cms((uint8_t *)data, data_length, cert, cert_length, key, key_length, certs, &cms);
-  
+  cms_length = crypto_sign_cms((uint8_t *)data, data_length, cert, cert_length,
+                               key, key_length, certs, &cms);
+
   assert_non_null(cms);
 
   extracted_data = NULL;
-  extracted_data_legth = crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
+  extracted_data_legth =
+      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 

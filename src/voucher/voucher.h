@@ -246,7 +246,7 @@ struct VoucherBinaryArray {
  * @return int 1 if array equal, 0 otherwise, -1 on failure
  */
 int compare_binary_array(const struct VoucherBinaryArray *src,
-                             const struct VoucherBinaryArray *dst);
+                         const struct VoucherBinaryArray *dst);
 
 struct Voucher;
 
@@ -357,7 +357,7 @@ int clear_attr_voucher(struct Voucher *voucher,
  * @return true if non empty, false otherwise
  */
 bool is_attr_voucher_nonempty(const struct Voucher *voucher,
-                                     const enum VoucherAttributes attr);
+                              const enum VoucherAttributes attr);
 
 /**
  * @brief Gets the pointer to the value for a voucher bool attribute
@@ -446,9 +446,9 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
 __must_free char *sign_eccms_voucher(struct Voucher *voucher,
-                         const struct VoucherBinaryArray *cert,
-                         const struct VoucherBinaryArray *key,
-                         const struct buffer_list *certs);
+                                     const struct VoucherBinaryArray *cert,
+                                     const struct VoucherBinaryArray *key,
+                                     const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS for an RSA private key
@@ -464,9 +464,9 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
 __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
-                          const struct VoucherBinaryArray *cert,
-                          const struct VoucherBinaryArray *key,
-                          const struct buffer_list *certs);
+                                      const struct VoucherBinaryArray *cert,
+                                      const struct VoucherBinaryArray *key,
+                                      const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS for a private key (detected automatically)
@@ -482,9 +482,9 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
 __must_free char *sign_cms_voucher(struct Voucher *voucher,
-                          const struct VoucherBinaryArray *cert,
-                          const struct VoucherBinaryArray *key,
-                          const struct buffer_list *certs);
+                                   const struct VoucherBinaryArray *cert,
+                                   const struct VoucherBinaryArray *key,
+                                   const struct buffer_list *certs);
 
 /**
  * @brief Verifies a CMS buffer and extract the voucher structure
@@ -496,8 +496,8 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
  * @param[in] store The list of trusted certificate for store (DER format)
  * @return struct Voucher * the verified voucher, NULL on failure
  */
-struct Voucher * verify_cms_voucher(const char *cms,
-                          const struct buffer_list *certs,
-                          const struct buffer_list *store);
+struct Voucher *verify_cms_voucher(const char *cms,
+                                   const struct buffer_list *certs,
+                                   const struct buffer_list *store);
 
 #endif

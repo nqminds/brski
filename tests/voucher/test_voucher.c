@@ -28,7 +28,6 @@
   "abcdabcdabcdabcdabcdabcdabcdabcd"                                           \
   "abcdabcdabcdabcdabcdabcdabcdabcd"
 
-
 void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
   assert_int_equal(tm1->tm_year, tm2->tm_year);
   assert_int_equal(tm1->tm_mon, tm2->tm_mon);
@@ -791,8 +790,7 @@ static void test_verify_cms_voucher(void **state) {
   meta.subject = init_keyvalue_list();
 
   push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuer.info"));
+  push_keyvalue_list(meta.issuer, sys_strdup("CN"), sys_strdup("issuer.info"));
 
   push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
@@ -852,8 +850,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_get_attr_str_voucher),
       cmocka_unit_test(test_get_attr_array_voucher),
       cmocka_unit_test(test_sign_cms_voucher),
-      cmocka_unit_test(test_verify_cms_voucher)
-  };
+      cmocka_unit_test(test_verify_cms_voucher)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

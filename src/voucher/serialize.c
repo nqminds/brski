@@ -266,7 +266,7 @@ ssize_t serialize_array2base64str(const uint8_t *src, const size_t length,
 }
 
 ssize_t serialize_base64str2array(const uint8_t *src, const size_t length,
-                                   uint8_t **out) {
+                                  uint8_t **out) {
   size_t out_len;
 
   *out = NULL;

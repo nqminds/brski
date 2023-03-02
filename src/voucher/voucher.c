@@ -57,7 +57,7 @@ static int copy_binary_array(struct VoucherBinaryArray *dst,
 }
 
 int compare_binary_array(const struct VoucherBinaryArray *src,
-                             const struct VoucherBinaryArray *dst) {
+                         const struct VoucherBinaryArray *dst) {
   if (src == NULL) {
     log_error("src param is NULL");
     return -1;
@@ -313,8 +313,8 @@ int set_attr_base64_voucher(struct Voucher *voucher,
                             const char *value, const size_t length) {
   struct VoucherBinaryArray binary_array;
   ssize_t out_length;
-  if ((out_length = serialize_base64str2array(
-           (const uint8_t *)value, length, &binary_array.array)) < 0) {
+  if ((out_length = serialize_base64str2array((const uint8_t *)value, length,
+                                              &binary_array.array)) < 0) {
     log_error("serialize_base64str2array fail");
     return -1;
   }
@@ -388,7 +388,7 @@ static bool is_attr_time_nonempty(const struct tm *tm) {
 }
 
 bool is_attr_voucher_nonempty(const struct Voucher *voucher,
-                                     const enum VoucherAttributes attr) {
+                              const enum VoucherAttributes attr) {
   switch (attr) {
     case ATTR_CREATED_ON:
       return is_attr_time_nonempty(&voucher->created_on);
@@ -844,8 +844,8 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
 
   jsmn_init(&parser);
 
-  int count =
-      jsmn_parse(&parser, (char *)json, length, tokens, MAX_VOUCHER_JSON_TOKENS);
+  int count = jsmn_parse(&parser, (char *)json, length, tokens,
+                         MAX_VOUCHER_JSON_TOKENS);
   if (count < 0) {
     log_error("failed to parse json: %d", count);
     return NULL;
@@ -861,7 +861,8 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
   for (int idx = 1; idx < count; idx++) {
     int length = tokens[idx].end - tokens[idx].start;
     /* Find the voucher root key */
-    if (strncmp(VOUCHER_ROOT_NAME, (char *)(json + tokens[idx].start), length) == 0) {
+    if (strncmp(VOUCHER_ROOT_NAME, (char *)(json + tokens[idx].start),
+                length) == 0) {
       voucher = init_voucher();
 
       idx++;
@@ -1007,9 +1008,9 @@ char *sign_rsacms_voucher(struct Voucher *voucher,
 }
 
 __must_free char *sign_cms_voucher(struct Voucher *voucher,
-                          const struct VoucherBinaryArray *cert,
-                          const struct VoucherBinaryArray *key,
-                          const struct buffer_list *certs){
+                                   const struct VoucherBinaryArray *cert,
+                                   const struct VoucherBinaryArray *key,
+                                   const struct buffer_list *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -1035,7 +1036,7 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
   uint8_t *cms = NULL;
   ssize_t cms_length =
       crypto_sign_cms((uint8_t *)serialized, strlen(serialized), cert->array,
-                         cert->length, key->array, key->length, certs, &cms);
+                      cert->length, key->array, key->length, certs, &cms);
 
   if (cms_length < 0) {
     log_error("crypto_sign_eccms fail");
@@ -1055,16 +1056,17 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
   return (char *)base64_out;
 }
 
-struct Voucher * verify_cms_voucher(const char *cms,
-                          const struct buffer_list *certs,
-                          const struct buffer_list *store) {
+struct Voucher *verify_cms_voucher(const char *cms,
+                                   const struct buffer_list *certs,
+                                   const struct buffer_list *store) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return NULL;
   }
 
   uint8_t *out = NULL;
-  ssize_t out_length = serialize_base64str2array((uint8_t *)cms, strlen(cms), &out);
+  ssize_t out_length =
+      serialize_base64str2array((uint8_t *)cms, strlen(cms), &out);
   if (out_length < 0) {
     log_error("serialize_base64str2array fail");
     return NULL;
@@ -1091,5 +1093,5 @@ struct Voucher * verify_cms_voucher(const char *cms,
 
   sys_free(data);
 
-  return voucher; 
+  return voucher;
 }

@@ -710,7 +710,8 @@ static ssize_t sign_withkey_cms(const uint8_t *data, const size_t data_length,
   unsigned int flags = CMS_BINARY;
   flags &= ~CMS_DETACHED;
 
-  CMS_ContentInfo *content = CMS_sign(signcert, (EVP_PKEY *)pkey, cert_stack, mem_data, flags);
+  CMS_ContentInfo *content =
+      CMS_sign(signcert, (EVP_PKEY *)pkey, cert_stack, mem_data, flags);
 
   if (content == NULL) {
     log_error("CMS_sign fail with code=%s",
@@ -830,9 +831,9 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
 }
 
 ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
-                           const uint8_t *cert, const size_t cert_length,
-                           const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs, uint8_t **cms) {
+                        const uint8_t *cert, const size_t cert_length,
+                        const uint8_t *key, const size_t key_length,
+                        const struct buffer_list *certs, uint8_t **cms) {
   if (data == NULL) {
     log_error("data param is NULL");
     return -1;

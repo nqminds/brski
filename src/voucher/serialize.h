@@ -44,7 +44,7 @@ ssize_t serialize_array2base64str(const uint8_t *src, const size_t length,
  * @return ssize_t the size of the decoded buffer, -1 on failure
  */
 ssize_t serialize_base64str2array(const uint8_t *src, const size_t length,
-                                   uint8_t **out);
+                                  uint8_t **out);
 
 /**
  * @brief Encodes a bool value to a string
