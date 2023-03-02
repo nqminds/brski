@@ -57,7 +57,8 @@ __must_free char *sign_pledge_voucher_request(
  * @param[in] cert The certificate buffer for signing (array in DER format)
  * @param[in] key The private key buffer of the certificate (array in DER
  * format)
- * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[in] pledge_certs The list of additional certificate buffers (DER format) to verify the pledge voucher
+ * @param[in] pledge_store The list of trusted certificate for store (DER format) to verify the pledge voucher
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
 __must_free char *sign_voucher_request(
@@ -65,6 +66,7 @@ __must_free char *sign_voucher_request(
     const char *serial_number, const struct VoucherBinaryArray *idevid_issuer,
     const struct VoucherBinaryArray *registrar_cert,
     const struct VoucherBinaryArray *cert, const struct VoucherBinaryArray *key,
-    const struct buffer_list *certs);
+    const struct buffer_list *pledge_certs,
+    const struct buffer_list *pledge_store);
 
 #endif

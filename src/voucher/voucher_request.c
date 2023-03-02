@@ -98,7 +98,8 @@ __must_free char *sign_voucher_request(
     const char *serial_number, const struct VoucherBinaryArray *idevid_issuer,
     const struct VoucherBinaryArray *registrar_cert,
     const struct VoucherBinaryArray *cert, const struct VoucherBinaryArray *key,
-    const struct buffer_list *certs) {
+    const struct buffer_list *pledge_certs,
+    const struct buffer_list *pledge_store) {
 
   if (serial_number == NULL) {
     log_error("serial_number param in NULL");
@@ -110,16 +111,14 @@ __must_free char *sign_voucher_request(
     return NULL;
   }
 
-  /* TO DO: Need to specify if the additional params of certs and store is non
-   * NULL */
   struct Voucher *pledge_voucher =
-      verify_cms_voucher(pledge_voucher_request, NULL, NULL);
+      verify_cms_voucher(pledge_voucher_request, pledge_certs, pledge_store);
   if (pledge_voucher == NULL) {
     log_error("verify_cms_voucher fail");
     return NULL;
   }
 
-  /* check if the serial number in the pledge vboucher is the same to idevid
+  /* check if the serial number in the pledge voucher is the same to idevid
    * cert serial number */
   const char *const *pledge_serial_number =
       get_attr_str_voucher(pledge_voucher, ATTR_SERIAL_NUMBER);
@@ -231,7 +230,8 @@ __must_free char *sign_voucher_request(
   }
   free_binary_array(&prior_signed_voucher_request);
 
-  char *cms = sign_cms_voucher(voucher_request, cert, key, certs);
+  /* Do not append any certificate list to the voucher request cms structure */
+  char *cms = sign_cms_voucher(voucher_request, cert, key, NULL);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_voucher_request_fail;
