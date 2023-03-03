@@ -129,6 +129,40 @@ static void test_sign_pledge_voucher_request(void **state) {
   free_keyvalue_list(meta.subject);
 }
 
+char *wcreate_pledge_voucher_request(struct VoucherBinaryArray *nonce, struct VoucherBinaryArray *registrar_cert) {
+  (void)nonce;
+  char *serial_number = "AA:BB:CC:DD:EE:FF";
+  struct Voucher *voucher = init_voucher();
+
+  struct tm created_on = {.tm_year = 73,
+                  .tm_mon = 10,
+                  .tm_mday = 29,
+                  .tm_hour = 21,
+                  .tm_min = 33,
+                  .tm_sec = 9
+  };
+
+  set_attr_voucher(voucher, ATTR_CREATED_ON, &created_on);
+  set_attr_voucher(voucher, ATTR_ASSERTION, VOUCHER_ASSERTION_VERIFIED);
+  set_attr_voucher(voucher, ATTR_PROXIMITY_REGISTRAR_CERT, registrar_cert);
+  set_attr_voucher(voucher, ATTR_SERIAL_NUMBER, serial_number);
+
+  struct crypto_cert_meta meta = create_cert_meta();
+  struct VoucherBinaryArray key = {};
+  struct VoucherBinaryArray cert = {};
+  key.length = (size_t)crypto_generate_eckey(&key.array);
+  cert.length = (size_t)crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
+
+  char *cms = sign_cms_voucher(voucher, &cert, &key, NULL);
+
+  free_binary_array(&key);
+  free_binary_array(&cert);
+  free_keyvalue_list(meta.issuer);
+  free_keyvalue_list(meta.subject);
+  free_voucher(voucher);
+  return cms;
+}
+
 static void test_sign_voucher_request(void **state) {
   (void)state;
 
@@ -165,16 +199,23 @@ static void test_sign_voucher_request(void **state) {
   
   sys_free(cms);
 
+  /* Test with the wrong serial number */
   char *wserial_number = "AA:BB:CC:DD:EE:EE";
   cms = sign_voucher_request(pledge_voucher_request, &created_on, wserial_number, &idevid_issuer, &registrar_cert, &cert, &key, NULL, NULL);
   assert_null(cms);
 
+  /* Test with the wrong registrar certificate */
   struct VoucherBinaryArray wregistrar_key = {};
   struct VoucherBinaryArray wregistrar_cert = {};
   wregistrar_key.length = (size_t)crypto_generate_eckey(&wregistrar_key.array);
   wregistrar_cert.length = (size_t)crypto_generate_eccert(&registrar_meta, wregistrar_key.array, wregistrar_key.length, &wregistrar_cert.array);
 
   cms = sign_voucher_request(pledge_voucher_request, &created_on, serial_number, &idevid_issuer, &wregistrar_cert, &cert, &key, NULL, NULL);
+  assert_null(cms);
+
+  sys_free(pledge_voucher_request);
+  pledge_voucher_request = wcreate_pledge_voucher_request(NULL, &registrar_cert);
+  cms = sign_voucher_request(pledge_voucher_request, &created_on, serial_number, &idevid_issuer, &registrar_cert, &cert, &key, NULL, NULL);
   assert_null(cms);
 
   sys_free(pledge_voucher_request);

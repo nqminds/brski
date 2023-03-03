@@ -333,7 +333,18 @@ int set_attr_array_voucher(struct Voucher *voucher,
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] attr The array voucher attribute name
- * @param[in] __VA_ARGS__ The list of attribute values
+ * @param[in] __VA_ARGS__ The list of attribute values:
+ *  ATTR_CREATED_ON => struct tm *
+ *  ATTR_EXPIRES_ON => struct tm *
+ *  ATTR_LAST_RENEWAL_DATE => struct tm *
+ *  ATTR_ASSERTION => enum VoucherAssertions
+ *  ATTR_SERIAL_NUMBER => char *
+ *  ATTR_IDEVID_ISSUER => struct VoucherBinaryArray *
+ *  ATTR_PINNED_DOMAIN_CERT => struct VoucherBinaryArray *
+ *  ATTR_NONCE => struct VoucherBinaryArray *
+ *  ATTR_PRIOR_SIGNED_VOUCHER_REQUEST => struct VoucherBinaryArray *
+ *  ATTR_PROXIMITY_REGISTRAR_CERT => struct VoucherBinaryArray *
+ *  ATTR_DOMAIN_CERT_REVOCATION_CHECKS => bool
  * @return 0 on success, -1 on failure
  */
 int set_attr_voucher(struct Voucher *voucher, const enum VoucherAttributes attr,
