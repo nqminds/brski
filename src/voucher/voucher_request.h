@@ -63,7 +63,7 @@ __must_free char *sign_pledge_voucher_request(
  * format) to verify the pledge voucher
  * @param[in] pledge_store The list of trusted certificate for store (DER
  * format) to verify the pledge voucher
- * @param[in] registrar_certs The list of regisrtrar certificates (DER format)
+ * @param[in] registrar_certs The list of registrar certificates (DER format)
  * to append to cms
  * @return char* the signed cms structure in PEM format, NULL on failure
  */

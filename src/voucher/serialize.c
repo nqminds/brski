@@ -79,14 +79,16 @@ char *serialize_keyvalue2json(const struct keyvalue_list *kv_list) {
 
     length += strlen(concat);
 
-    if ((json = sys_realloc_array(json, sizeof(char), length)) == NULL) {
+    char *tmp = NULL;
+    if ((tmp = sys_realloc_array(json, sizeof(char), length)) == NULL) {
       log_errno("sys_realloc_array");
       sys_free(concat);
       sys_free(json);
       return NULL;
     }
 
-    strcat(json, concat);
+    strcat(tmp, concat);
+    json = tmp;
 
     sys_free(concat);
     idx++;
@@ -94,15 +96,16 @@ char *serialize_keyvalue2json(const struct keyvalue_list *kv_list) {
 
   length++;
 
-  if ((json = sys_realloc_array(json, sizeof(char), length)) == NULL) {
+  char *tmp = NULL;
+  if ((tmp = sys_realloc_array(json, sizeof(char), length)) == NULL) {
     log_errno("sys_realloc_array");
     sys_free(json);
     return NULL;
   }
 
-  strcat(json, "}");
+  strcat(tmp, "}");
 
-  return json;
+  return tmp;
 }
 
 static uint8_t *base64_gen_encode(const uint8_t *src, const size_t len,
