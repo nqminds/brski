@@ -78,4 +78,6 @@ sign_voucher_request(const char *pledge_voucher_request,
                      const struct buffer_list *pledge_store,
                      const struct buffer_list *registrar_certs);
 
+__must_free char *sign_masa_pledge_voucher(void);
+__must_free char *verify_masa_pledge_voucher(void);
 #endif
