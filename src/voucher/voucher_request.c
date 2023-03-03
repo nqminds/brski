@@ -115,8 +115,8 @@ sign_voucher_request(const char *pledge_voucher_request,
     return NULL;
   }
 
-  struct Voucher *pledge_voucher =
-      verify_cms_voucher(pledge_voucher_request, pledge_certs, pledge_store, NULL);
+  struct Voucher *pledge_voucher = verify_cms_voucher(
+      pledge_voucher_request, pledge_certs, pledge_store, NULL);
   if (pledge_voucher == NULL) {
     log_error("verify_cms_voucher fail");
     return NULL;

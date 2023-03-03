@@ -875,7 +875,8 @@ ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
   return length;
 }
 
-static int exatract_cms_certs(CMS_ContentInfo *cms, struct buffer_list** out_certs) {
+static int exatract_cms_certs(CMS_ContentInfo *cms,
+                              struct buffer_list **out_certs) {
   STACK_OF(X509) *signers = CMS_get0_signers(cms);
   int length = sk_X509_num(signers);
 
