@@ -19,8 +19,9 @@
 char *sign_pledge_voucher_request(
     const struct tm *created_on, const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *proximity_registrar_cert,
-    const char *serial_number, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct buffer_list *certs) {
+    const char *serial_number, const struct VoucherBinaryArray *sign_cert,
+    const struct VoucherBinaryArray *sign_key,
+    const struct buffer_list *pledge_certs) {
   struct Voucher *voucher = init_voucher();
   if (voucher == NULL) {
     log_error("init_voucher fail");
@@ -82,7 +83,7 @@ char *sign_pledge_voucher_request(
     return NULL;
   }
 
-  char *cms = sign_cms_voucher(voucher, cert, key, certs);
+  char *cms = sign_cms_voucher(voucher, sign_cert, sign_key, pledge_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     free_voucher(voucher);
@@ -93,13 +94,16 @@ char *sign_pledge_voucher_request(
   return cms;
 }
 
-__must_free char *sign_voucher_request(
-    const char *pledge_voucher_request, const struct tm *created_on,
-    const char *serial_number, const struct VoucherBinaryArray *idevid_issuer,
-    const struct VoucherBinaryArray *registrar_cert,
-    const struct VoucherBinaryArray *cert, const struct VoucherBinaryArray *key,
-    const struct buffer_list *pledge_certs,
-    const struct buffer_list *pledge_store) {
+__must_free char *
+sign_voucher_request(const char *pledge_voucher_request,
+                     const struct tm *created_on, const char *serial_number,
+                     const struct VoucherBinaryArray *idevid_issuer,
+                     const struct VoucherBinaryArray *registrar_cert,
+                     const struct VoucherBinaryArray *sign_cert,
+                     const struct VoucherBinaryArray *sign_key,
+                     const struct buffer_list *pledge_certs,
+                     const struct buffer_list *pledge_store,
+                     const struct buffer_list *registrar_certs) {
 
   if (serial_number == NULL) {
     log_error("serial_number param in NULL");
@@ -231,7 +235,8 @@ __must_free char *sign_voucher_request(
   free_binary_array(&prior_signed_voucher_request);
 
   /* Do not append any certificate list to the voucher request cms structure */
-  char *cms = sign_cms_voucher(voucher_request, cert, key, NULL);
+  char *cms =
+      sign_cms_voucher(voucher_request, sign_cert, sign_key, registrar_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_voucher_request_fail;

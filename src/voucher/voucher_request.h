@@ -29,17 +29,19 @@
  * "certificate_list" sequence presented by the registrar to the pledge (array
  * in DER format)
  * @param[in] serial_number The serial number string of the pledge
- * @param[in] cert The certificate buffer for signing (array in DER format)
- * @param[in] key The private key buffer of the certificate (array in DER
+ * @param[in] sign_cert The certificate buffer for signing (array in DER format)
+ * @param[in] sign_key The private key buffer of the certificate (array in DER
  * format)
- * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[in] pledge_certs The list of pledge additional certificate buffers
+ * (DER format)
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
 __must_free char *sign_pledge_voucher_request(
     const struct tm *created_on, const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *proximity_registrar_cert,
-    const char *serial_number, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct buffer_list *certs);
+    const char *serial_number, const struct VoucherBinaryArray *sign_cert,
+    const struct VoucherBinaryArray *sign_key,
+    const struct buffer_list *pledge_certs);
 
 /**
  * @brief Signs a voucher request using CMS for a private key (type detected
@@ -57,16 +59,23 @@ __must_free char *sign_pledge_voucher_request(
  * @param[in] cert The certificate buffer for signing (array in DER format)
  * @param[in] key The private key buffer of the certificate (array in DER
  * format)
- * @param[in] pledge_certs The list of additional certificate buffers (DER format) to verify the pledge voucher
- * @param[in] pledge_store The list of trusted certificate for store (DER format) to verify the pledge voucher
+ * @param[in] pledge_certs The list of additional certificate buffers (DER
+ * format) to verify the pledge voucher
+ * @param[in] pledge_store The list of trusted certificate for store (DER
+ * format) to verify the pledge voucher
+ * @param[in] registrar_certs The list of regisrtrar certificates (DER format)
+ * to append to cms
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
-__must_free char *sign_voucher_request(
-    const char *pledge_voucher_request, const struct tm *created_on,
-    const char *serial_number, const struct VoucherBinaryArray *idevid_issuer,
-    const struct VoucherBinaryArray *registrar_cert,
-    const struct VoucherBinaryArray *cert, const struct VoucherBinaryArray *key,
-    const struct buffer_list *pledge_certs,
-    const struct buffer_list *pledge_store);
+__must_free char *
+sign_voucher_request(const char *pledge_voucher_request,
+                     const struct tm *created_on, const char *serial_number,
+                     const struct VoucherBinaryArray *idevid_issuer,
+                     const struct VoucherBinaryArray *registrar_cert,
+                     const struct VoucherBinaryArray *sign_cert,
+                     const struct VoucherBinaryArray *sign_key,
+                     const struct buffer_list *pledge_certs,
+                     const struct buffer_list *pledge_store,
+                     const struct buffer_list *registrar_certs);
 
 #endif
