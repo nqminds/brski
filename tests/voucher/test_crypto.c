@@ -498,7 +498,7 @@ static void test_crypto_verify_cms(void **state) {
 
   uint8_t *extracted_data = NULL;
   ssize_t extracted_data_legth =
-      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
+      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data, NULL);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 
@@ -514,7 +514,7 @@ static void test_crypto_verify_cms(void **state) {
 
   extracted_data = NULL;
   extracted_data_legth =
-      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data);
+      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data, NULL);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 

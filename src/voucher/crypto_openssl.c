@@ -875,9 +875,46 @@ ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
   return length;
 }
 
+static int exatract_cms_certs(CMS_ContentInfo *cms, struct buffer_list** out_certs) {
+  STACK_OF(X509) *signers = CMS_get0_signers(cms);
+  int length = sk_X509_num(signers);
+
+  if (signers == NULL || !length) {
+    return 0;
+  }
+
+  *out_certs = init_buffer_list();
+  if (*out_certs == NULL) {
+    log_error("init_buffer_list fail");
+    return -1;
+  }
+
+  for (int idx = 0; idx < length; idx++) {
+    const X509 *signer = sk_X509_value(signers, idx);
+    uint8_t *cert = NULL;
+    ssize_t cert_length = cert_to_derbuf(signer, &cert);
+    if (cert_length < 0) {
+      log_error("cert_to_derbuf fail");
+      free_buffer_list(*out_certs);
+      *out_certs = NULL;
+      return -1;
+    }
+    if (push_buffer_list(*out_certs, cert, cert_length, 0) < 0) {
+      log_error("push_buffer_list fail");
+      sys_free(cert);
+      free_buffer_list(*out_certs);
+      *out_certs = NULL;
+      return -1;
+    }
+  }
+
+  return 0;
+}
+
 ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
                           const struct buffer_list *certs,
-                          const struct buffer_list *store, uint8_t **data) {
+                          const struct buffer_list *store, uint8_t **data,
+                          struct buffer_list **out_certs) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return -1;
@@ -934,6 +971,15 @@ ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
   if (length < 0) {
     log_error("bio_to_ptr fail");
     goto crypto_verify_cms_fail;
+  }
+
+  /* Extract the list of certs from the CMS */
+  if (out_certs != NULL) {
+    *out_certs = NULL;
+    if (exatract_cms_certs(content, out_certs) < 0) {
+      log_error("exatract_cms_certs fail");
+      goto crypto_verify_cms_fail;
+    }
   }
 
   BIO_free(mem_data);

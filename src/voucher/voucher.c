@@ -1058,7 +1058,8 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
 
 struct Voucher *verify_cms_voucher(const char *cms,
                                    const struct buffer_list *certs,
-                                   const struct buffer_list *store) {
+                                   const struct buffer_list *store,
+                                   struct buffer_list **out_certs) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return NULL;
@@ -1073,7 +1074,7 @@ struct Voucher *verify_cms_voucher(const char *cms,
   }
 
   uint8_t *data = NULL;
-  ssize_t data_length = crypto_verify_cms(out, out_length, certs, store, &data);
+  ssize_t data_length = crypto_verify_cms(out, out_length, certs, store, &data, out_certs);
 
   if (data_length < 0) {
     log_error("crypto_verify_cms fail");

@@ -802,7 +802,7 @@ static void test_verify_cms_voucher(void **state) {
   char *cms = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(cms);
 
-  struct Voucher *decoded_voucher = verify_cms_voucher(cms, NULL, NULL);
+  struct Voucher *decoded_voucher = verify_cms_voucher(cms, NULL, NULL, NULL);
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
@@ -812,7 +812,7 @@ static void test_verify_cms_voucher(void **state) {
   cms = sign_cms_voucher(voucher, &cert, &key, certs);
   assert_non_null(cms);
 
-  decoded_voucher = verify_cms_voucher(cms, NULL, NULL);
+  decoded_voucher = verify_cms_voucher(cms, NULL, NULL, NULL);
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 

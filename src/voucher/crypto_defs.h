@@ -214,17 +214,19 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
  * @brief Verifies a CMS buffer and extract the data
  * buffer
  *
- * Caller is responsible for freeing the data buffer
+ * Caller is responsible for freeing the data buffer and output certs buffer
  *
  * @param[in] cms The cms buffer to be verified
  * @param[in] cms_length The cms buffer length
  * @param[in] certs The list of additional certificate buffers
  * @param[in] store The list of trusted certificate for store
  * @param[out] data The output data buffer
+ * @param[out] out_certs The list of certs from the cms structure if non NULL
  * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
                           const struct buffer_list *certs,
-                          const struct buffer_list *store, uint8_t **data);
+                          const struct buffer_list *store, uint8_t **data,
+                          struct buffer_list **out_certs);
 
 #endif
