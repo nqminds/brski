@@ -512,14 +512,22 @@ static void test_crypto_verify_cms(void **state) {
 
   assert_non_null(cms);
 
+  struct buffer_list *out_certs = NULL;
   extracted_data = NULL;
   extracted_data_legth =
-      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data, NULL);
+      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data, &out_certs);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 
   assert_memory_equal(extracted_data, data, extracted_data_legth);
 
+  assert_non_null(out_certs);
+  assert_int_equal(dl_list_len(&out_certs->list), 1);
+  assert_int_equal(certs->length, out_certs->length);
+  assert_memory_equal(certs->buf,  out_certs->buf, out_certs->length);
+
+  free_buffer_list(out_certs);
+  
   sys_free(cms);
   sys_free(extracted_data);
   sys_free(key);
