@@ -15,6 +15,7 @@
 #include "../utils/os.h"
 #include "serialize.h"
 #include "voucher.h"
+#include "voucher_request.h"
 
 char *sign_pledge_voucher_request(
     const struct tm *created_on, const struct VoucherBinaryArray *nonce,
@@ -95,14 +96,14 @@ char *sign_pledge_voucher_request(
 }
 
 __must_free char *
-sign_voucher_request(const char *pledge_voucher_request,
+sign_voucher_request(const char *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
                      const struct VoucherBinaryArray *idevid_issuer,
                      const struct VoucherBinaryArray *registrar_cert,
                      const struct VoucherBinaryArray *sign_cert,
                      const struct VoucherBinaryArray *sign_key,
-                     const struct buffer_list *pledge_certs,
-                     const struct buffer_list *pledge_store,
+                     const struct buffer_list *pledge_verify_certs,
+                     const struct buffer_list *pledge_verify_store,
                      const struct buffer_list *registrar_certs) {
 
   if (serial_number == NULL) {
@@ -115,9 +116,9 @@ sign_voucher_request(const char *pledge_voucher_request,
     return NULL;
   }
 
-  struct Voucher *pledge_voucher = verify_cms_voucher(
-      pledge_voucher_request, pledge_certs, pledge_store, NULL);
-  if (pledge_voucher == NULL) {
+  struct Voucher *pledge_voucher_request = verify_cms_voucher(
+      pledge_voucher_request_cms, pledge_verify_certs, pledge_verify_store, NULL);
+  if (pledge_voucher_request == NULL) {
     log_error("verify_cms_voucher fail");
     return NULL;
   }
@@ -125,37 +126,37 @@ sign_voucher_request(const char *pledge_voucher_request,
   /* check if the serial number in the pledge voucher is the same to idevid
    * cert serial number */
   const char *const *pledge_serial_number =
-      get_attr_str_voucher(pledge_voucher, ATTR_SERIAL_NUMBER);
+      get_attr_str_voucher(pledge_voucher_request, ATTR_SERIAL_NUMBER);
   if (pledge_serial_number == NULL) {
     log_error("get_attr_str_voucher fail");
-    free_voucher(pledge_voucher);
+    free_voucher(pledge_voucher_request);
     return NULL;
   }
 
   if (strcmp(*pledge_serial_number, serial_number) != 0) {
     log_error("wrong pledge voucher serial-number");
-    free_voucher(pledge_voucher);
+    free_voucher(pledge_voucher_request);
     return NULL;
   }
 
   /* check if the proximity registrar certificat is the same as the registrar
    * certificate */
   const struct VoucherBinaryArray *proximity_registrar_cert =
-      get_attr_array_voucher(pledge_voucher, ATTR_PROXIMITY_REGISTRAR_CERT);
+      get_attr_array_voucher(pledge_voucher_request, ATTR_PROXIMITY_REGISTRAR_CERT);
 
   if (compare_binary_array(proximity_registrar_cert, registrar_cert) < 1) {
     log_error("proximity cert != registrar cert");
-    free_voucher(pledge_voucher);
+    free_voucher(pledge_voucher_request);
     return NULL;
   }
 
   /* check if the pledge voucher assertion is proximity */
   const int *pledge_assertion =
-      get_attr_enum_voucher(pledge_voucher, ATTR_ASSERTION);
+      get_attr_enum_voucher(pledge_voucher_request, ATTR_ASSERTION);
   if ((enum VoucherAssertions) * pledge_assertion !=
       VOUCHER_ASSERTION_PROXIMITY) {
     log_error("wrong pledge voucher assertion");
-    free_voucher(pledge_voucher);
+    free_voucher(pledge_voucher_request);
     return NULL;
   }
 
@@ -175,9 +176,9 @@ sign_voucher_request(const char *pledge_voucher_request,
 
   /* This value, if present, is copied from the pledge voucher-request. The
    * registrar voucher-request MAY omit the nonce as per Section 3.1. */
-  if (is_attr_voucher_nonempty(pledge_voucher, ATTR_NONCE)) {
+  if (is_attr_voucher_nonempty(pledge_voucher_request, ATTR_NONCE)) {
     const struct VoucherBinaryArray *nonce =
-        get_attr_array_voucher(pledge_voucher, ATTR_NONCE);
+        get_attr_array_voucher(pledge_voucher_request, ATTR_NONCE);
     if (nonce == NULL) {
       log_error("get_attr_array_voucher fail");
       goto sign_voucher_request_fail;
@@ -215,7 +216,7 @@ sign_voucher_request(const char *pledge_voucher_request,
 
   struct VoucherBinaryArray prior_signed_voucher_request;
   ssize_t length = serialize_base64str2array(
-      (const uint8_t *)pledge_voucher_request, strlen(pledge_voucher_request),
+      (const uint8_t *)pledge_voucher_request_cms, strlen(pledge_voucher_request_cms),
       &prior_signed_voucher_request.array);
   if (length < 0) {
     log_error("serialize_base64str2array fail");
@@ -242,12 +243,53 @@ sign_voucher_request(const char *pledge_voucher_request,
     goto sign_voucher_request_fail;
   }
 
-  free_voucher(pledge_voucher);
+  free_voucher(pledge_voucher_request);
   free_voucher(voucher_request);
   return cms;
 
 sign_voucher_request_fail:
-  free_voucher(pledge_voucher);
+  free_voucher(pledge_voucher_request);
+  free_voucher(voucher_request);
+  return NULL;
+}
+
+char *sign_masa_pledge_voucher(const char *voucher_request_cms,
+                                           const struct tm *expires_on,
+                                           const struct VoucherBinaryArray *sign_cert,
+                                           const struct VoucherBinaryArray *sign_key,
+                                           const struct buffer_list *registrar_verify_certs,
+                                           const struct buffer_list *registrar_verify_store,
+                                           const struct buffer_list *pledge_verify_certs,
+                                           const struct buffer_list *pledge_verify_store,
+                                           const voucher_req_fn cb) {
+  if (expires_on == NULL) {
+    log_error("expires_on param in NULL");
+    return NULL;
+  }
+
+  if (cb == NULL) {
+    log_error("cb param in NULL");
+    return NULL;
+  }
+
+  struct buffer_list *registrar_certs = NULL;
+  struct Voucher *voucher_request = verify_cms_voucher(
+      voucher_request_cms, registrar_verify_certs, registrar_verify_store, &registrar_certs);
+  if (voucher_request == NULL) {
+    log_error("verify_cms_voucher fail");
+    return NULL;
+  }
+
+  const char *const *voucher_serial_number =
+      get_attr_str_voucher(voucher_request, ATTR_SERIAL_NUMBER);
+  if (voucher_serial_number == NULL) {
+    log_error("get_attr_str_voucher fail");
+    goto sign_masa_pledge_voucher_fail;
+  }
+
+sign_masa_pledge_voucher_fail:
+
+  free_buffer_list(registrar_certs);
   free_voucher(voucher_request);
   return NULL;
 }
