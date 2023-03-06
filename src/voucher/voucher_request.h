@@ -59,8 +59,8 @@ __must_free char *sign_pledge_voucher_request(
  * @param[in] sign_cert The certificate buffer for signing (array in DER format)
  * @param[in] sign_key The private key buffer of the certificate (array in DER
  * format)
- * @param[in] pledge_verify_certs The list of additional certificate buffers (DER
- * format) to verify the pledge voucher from the pledge
+ * @param[in] pledge_verify_certs The list of additional certificate buffers
+ * (DER format) to verify the pledge voucher from the pledge
  * @param[in] pledge_verify_store The list of trusted certificate for store (DER
  * format) to verify the pledge voucher from the pledge
  * @param[in] registrar_certs The list of registrar certificates (DER format)
@@ -87,16 +87,17 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
  * @param[in] serial_number The serial number string from the idevid certificate
  * @param[in] registrar_certs The list of registrar certificates (DER format)
  * appended to the voucher request cms
- * @param[out] voucher_req_fn The output pinned domain certificate (array in DER format) for the pledge
+ * @param[out] voucher_req_fn The output pinned domain certificate (array in DER
+ * format) for the pledge
  * @return 0 on success, -1 on failure
  */
 typedef int (*voucher_req_fn)(const char *serial_number,
-                               const struct buffer_list *registrar_certs,
-                               struct VoucherBinaryArray **pinned_domain_cert);
+                              const struct buffer_list *registrar_certs,
+                              struct VoucherBinaryArray **pinned_domain_cert);
 
 /**
- * @brief Signs a voucher request for the pledge using CMS for a private key (type detected
- * automatically) and output to PEM (base64)
+ * @brief Signs a voucher request for the pledge using CMS for a private key
+ * (type detected automatically) and output to PEM (base64)
  *
  * Caller is responsible for freeing output PEM string
  *
@@ -106,26 +107,26 @@ typedef int (*voucher_req_fn)(const char *serial_number,
  * @param[in] sign_cert The certificate buffer for signing (array in DER format)
  * @param[in] sign_key The private key buffer of the certificate (array in DER
  * format)
- * @param[in] registrar_verify_certs The list of additional certificate buffers (DER
- * format) to verify the voucher request from registrar
- * @param[in] registrar_verify_store The list of trusted certificate for store (DER
- * format) to verify the voucher request from registrar
- * @param[in] pledge_verify_certs The list of additional certificate buffers (DER
- * format) to verify the pledge voucher from the pledge
+ * @param[in] registrar_verify_certs The list of additional certificate buffers
+ * (DER format) to verify the voucher request from registrar
+ * @param[in] registrar_verify_store The list of trusted certificate for store
+ * (DER format) to verify the voucher request from registrar
+ * @param[in] pledge_verify_certs The list of additional certificate buffers
+ * (DER format) to verify the pledge voucher from the pledge
  * @param[in] pledge_verify_store The list of trusted certificate for store (DER
  * format) to verify the pledge voucher from the pledge
- * @param[in] voucher_req_fn The callback function to output pinned domain certificate (array in DER format)
+ * @param[in] voucher_req_fn The callback function to output pinned domain
+ * certificate (array in DER format)
  * @return char* the signed cms structure in PEM format, NULL on failure
  */
-__must_free char *sign_masa_pledge_voucher(const char *voucher_request_cms,
-                                           const struct tm *expires_on,
-                                           const struct VoucherBinaryArray *sign_cert,
-                                           const struct VoucherBinaryArray *sign_key,
-                                           const struct buffer_list *registrar_verify_certs,
-                                           const struct buffer_list *registrar_verify_store,
-                                           const struct buffer_list *pledge_verify_certs,
-                                           const struct buffer_list *pledge_verify_store,
-                                           const voucher_req_fn cb);
+__must_free char *sign_masa_pledge_voucher(
+    const char *voucher_request_cms, const struct tm *expires_on,
+    const struct VoucherBinaryArray *sign_cert,
+    const struct VoucherBinaryArray *sign_key,
+    const struct buffer_list *registrar_verify_certs,
+    const struct buffer_list *registrar_verify_store,
+    const struct buffer_list *pledge_verify_certs,
+    const struct buffer_list *pledge_verify_store, const voucher_req_fn cb);
 
 __must_free char *verify_masa_pledge_voucher(void);
 #endif
