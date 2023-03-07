@@ -25,7 +25,7 @@
 #include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
 #include <sys/types.h>
-#ifndef OPENSSL_NO_ENGINE)
+#ifndef OPENSSL_NO_ENGINE
 #include <openssl/engine.h>
 #endif
 
@@ -963,8 +963,7 @@ ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
   unsigned int flags = (cert_store == NULL) ? CMS_NO_SIGNER_CERT_VERIFY : 0;
 
   if (!CMS_verify(content, cert_stack, cert_store, NULL, mem_data, flags)) {
-    log_error("CMS_verify fail with code=%lu",
-              ERR_get_error());
+    log_error("CMS_verify fail with code=%lu", ERR_get_error());
     goto crypto_verify_cms_fail;
   }
 

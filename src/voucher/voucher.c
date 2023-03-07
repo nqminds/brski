@@ -1085,7 +1085,6 @@ struct Voucher *verify_cms_voucher(const char *cms,
 
   sys_free(out);
 
-  log_trace("%.*s", data_length, data);
   struct Voucher *voucher = deserialize_voucher(data, data_length);
   if (voucher == NULL) {
     log_error("deserialize_voucher fail");
