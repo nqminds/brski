@@ -25,7 +25,7 @@
 #include <openssl/x509_vfy.h>
 #include <openssl/x509v3.h>
 #include <sys/types.h>
-#ifndef OPENSSL_NO_ENGINE
+#ifndef OPENSSL_NO_ENGINE)
 #include <openssl/engine.h>
 #endif
 
@@ -39,7 +39,7 @@ static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
 
   int length = i2d_PrivateKey(pkey, key);
   if (length < 0) {
-    log_error("i2d_PrivateKey fail with code=%d", ERR_get_error());
+    log_error("i2d_PrivateKey fail with code=%lu", ERR_get_error());
     return -1;
   }
 
@@ -57,7 +57,7 @@ static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
 
   int length = i2d_X509(x509, cert);
   if (length < 0) {
-    log_error("i2d_X509 fail with code=%d", ERR_get_error());
+    log_error("i2d_X509 fail with code=%lu", ERR_get_error());
     return -1;
   }
 
@@ -89,12 +89,12 @@ static ssize_t cms_to_derbuf(const CMS_ContentInfo *content, uint8_t **cms) {
   BIO *mem = BIO_new_ex(NULL, BIO_s_mem());
 
   if (mem == NULL) {
-    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
     return -1;
   }
 
   if (!i2d_CMS_bio(mem, (CMS_ContentInfo *)content)) {
-    log_error("i2d_CMS_bio fail with code=%d", ERR_get_error());
+    log_error("i2d_CMS_bio fail with code=%lu", ERR_get_error());
     BIO_free(mem);
     return -1;
   }
@@ -114,7 +114,7 @@ static X509_CRL *derbuf_to_crl(const uint8_t *crl, const size_t length) {
   X509_CRL *crl_cert = NULL;
   const unsigned char *pp = (unsigned char *)crl;
   if (d2i_X509_CRL(&crl_cert, &pp, length) == NULL) {
-    log_error("d2i_X509_CRL fail with code=%d", ERR_get_error());
+    log_error("d2i_X509_CRL fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -126,7 +126,7 @@ static CMS_ContentInfo *derbuf_to_cms(const uint8_t *cms,
   CMS_ContentInfo *content = NULL;
   const unsigned char *pp = (unsigned char *)cms;
   if (d2i_CMS_ContentInfo(&content, &pp, cms_length) == NULL) {
-    log_error("d2i_CMS_ContentInfo fail with code=%d", ERR_get_error());
+    log_error("d2i_CMS_ContentInfo fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -145,25 +145,25 @@ ssize_t crypto_generate_rsakey(const int bits, uint8_t **key) {
   *key = NULL;
 
   if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL)) == NULL) {
-    log_error("EVP_PKEY_CTX_new_id fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_CTX_new_id fail with code=%lu", ERR_get_error());
     return -1;
   }
 
   if (!EVP_PKEY_keygen_init(ctx)) {
-    log_error("EVP_PKEY_keygen_init fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_keygen_init fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
 
   if (!EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, bits)) {
-    log_error("EVP_PKEY_CTX_set_rsa_keygen_bits fail with code=%d",
+    log_error("EVP_PKEY_CTX_set_rsa_keygen_bits fail with code=%lu",
               ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
 
   if (!EVP_PKEY_keygen(ctx, &pkey)) {
-    log_error("EVP_PKEY_keygen fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_keygen fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
@@ -193,25 +193,25 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
 
   *key = NULL;
   if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_EC, NULL)) == NULL) {
-    log_error("EVP_PKEY_CTX_new_id fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_CTX_new_id fail with code=%lu", ERR_get_error());
     return -1;
   }
 
   if (!EVP_PKEY_paramgen_init(ctx)) {
-    log_error("EVP_PKEY_paramgen_init fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_paramgen_init fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
 
   if (!EVP_PKEY_CTX_set_ec_paramgen_curve_nid(ctx, NID_X9_62_prime256v1)) {
-    log_error("EVP_PKEY_CTX_set_ec_paramgen_curve_nid fail with code=%d",
+    log_error("EVP_PKEY_CTX_set_ec_paramgen_curve_nid fail with code=%lu",
               ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
 
   if (!EVP_PKEY_paramgen(ctx, &params)) {
-    log_error("EVP_PKEY_paramgen fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_paramgen fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
@@ -219,7 +219,7 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
   EVP_PKEY_CTX_free(ctx);
 
   if ((ctx = EVP_PKEY_CTX_new(params, NULL)) == NULL) {
-    log_error("EVP_PKEY_CTX_new fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_CTX_new fail with code=%lu", ERR_get_error());
     EVP_PKEY_free(params);
     return -1;
   }
@@ -227,13 +227,13 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
   EVP_PKEY_free(params);
 
   if (!EVP_PKEY_keygen_init(ctx)) {
-    log_error("EVP_PKEY_keygen_init fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_keygen_init fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
 
   if (!EVP_PKEY_keygen(ctx, &pkey)) {
-    log_error("EVP_PKEY_keygen fail with code=%d", ERR_get_error());
+    log_error("EVP_PKEY_keygen fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     return -1;
   }
@@ -255,7 +255,7 @@ ssize_t crypto_generate_eckey(uint8_t **key) {
 CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length) {
   EVP_PKEY *pkey = NULL;
   if ((pkey = d2i_PrivateKey(EVP_PKEY_EC, NULL, &key, (long)length)) == NULL) {
-    log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
+    log_error("d2i_PrivateKey fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -266,7 +266,7 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length) {
 CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length) {
   EVP_PKEY *pkey = NULL;
   if ((pkey = d2i_PrivateKey(EVP_PKEY_RSA, NULL, &key, (long)length)) == NULL) {
-    log_error("d2i_PrivateKey fail with code=%d", ERR_get_error());
+    log_error("d2i_PrivateKey fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -277,7 +277,7 @@ CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length) {
 CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length) {
   EVP_PKEY *pkey = NULL;
   if ((pkey = d2i_AutoPrivateKey(NULL, &key, (long)length)) == NULL) {
-    log_error("d2i_AutoPrivateKey fail with code=%d", ERR_get_error());
+    log_error("d2i_AutoPrivateKey fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -289,7 +289,7 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   X509 *pcert = NULL;
   const unsigned char *pp = (unsigned char *)cert;
   if (d2i_X509(&pcert, &pp, length) == NULL) {
-    log_error("d2i_X509 fail with code=%d", ERR_get_error());
+    log_error("d2i_X509 fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -351,7 +351,7 @@ static X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
 
     if (!X509_NAME_add_entry_by_txt(name, el->key, MBSTRING_ASC,
                                     (unsigned char *)el->value, -1, -1, 0)) {
-      log_error("X509_NAME_add_entry_by_txt code=%d", ERR_get_error());
+      log_error("X509_NAME_add_entry_by_txt code=%lu", ERR_get_error());
       X509_NAME_free(name);
       return NULL;
     }
@@ -363,7 +363,7 @@ static X509_NAME *add_x509name_keyvalues(struct keyvalue_list *pairs) {
 static int set_certificate_meta(X509 *x509,
                                 const struct crypto_cert_meta *meta) {
   if (X509_set_version(x509, X509_VERSION_3) != 1) {
-    log_error("X509_set_version fail with code=%d", ERR_get_error());
+    log_error("X509_set_version fail with code=%lu", ERR_get_error());
     return -1;
   }
 
@@ -420,13 +420,13 @@ static int set_certificate_meta(X509 *x509,
 
 static int sign_sha256_certificate(X509 *x509, const EVP_PKEY *pkey) {
   if (!X509_set_pubkey(x509, (EVP_PKEY *)pkey)) {
-    log_error("X509_set_pubkey fail with code=%d", ERR_get_error());
+    log_error("X509_set_pubkey fail with code=%lu", ERR_get_error());
     return -1;
   }
 
   /* sign the certificate with the key. */
   if (!X509_sign(x509, (EVP_PKEY *)pkey, EVP_sha256())) {
-    log_error("X509_sign fail with code=%d", ERR_get_error());
+    log_error("X509_sign fail with code=%lu", ERR_get_error());
     return -1;
   }
 
@@ -555,7 +555,7 @@ static STACK_OF(X509) * get_certificate_stack(const struct buffer_list *certs) {
   STACK_OF(X509) *cert_stack = sk_X509_new_null();
 
   if (cert_stack == NULL) {
-    log_error("sk_X509_new_null fail with code=%d", ERR_get_error());
+    log_error("sk_X509_new_null fail with code=%lu", ERR_get_error());
     return NULL;
   }
 
@@ -607,7 +607,7 @@ static X509_STORE *get_certificate_store(const struct buffer_list *store,
   X509_STORE *x509_store = X509_STORE_new();
 
   if (x509_store == NULL) {
-    log_error("X509_STORE_new fail with code=%d", ERR_get_error());
+    log_error("X509_STORE_new fail with code=%lu", ERR_get_error());
     free_x509_store(x509_store, *x509_store_list);
     return NULL;
   }
@@ -625,7 +625,7 @@ static X509_STORE *get_certificate_store(const struct buffer_list *store,
       }
 
       if (!X509_STORE_add_cert(x509_store, x509)) {
-        log_error("X509_STORE_add_cert fail with code=%d", ERR_get_error());
+        log_error("X509_STORE_add_cert fail with code=%lu", ERR_get_error());
         free_x509_store(x509_store, *x509_store_list);
         return NULL;
       }
@@ -640,7 +640,7 @@ static X509_STORE *get_certificate_store(const struct buffer_list *store,
       }
 
       if (!X509_STORE_add_crl(x509_store, x509_crl)) {
-        log_error("X509_STORE_add_crl fail with code=%d", ERR_get_error());
+        log_error("X509_STORE_add_crl fail with code=%lu", ERR_get_error());
         free_x509_store(x509_store, *x509_store_list);
         return NULL;
       }
@@ -660,7 +660,7 @@ static X509_STORE *get_certificate_store(const struct buffer_list *store,
 void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
   BIO *out = BIO_new_file(filename, "w");
   if (out == NULL) {
-    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
     return;
   }
 
@@ -680,12 +680,12 @@ static ssize_t sign_withkey_cms(const uint8_t *data, const size_t data_length,
                                 uint8_t **cms) {
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
   if (mem_data == NULL) {
-    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
     return -1;
   }
 
   if (BIO_write(mem_data, data, data_length) < 0) {
-    log_error("BIO_write fail with code=%d", ERR_get_error());
+    log_error("BIO_write fail with code=%lu", ERR_get_error());
     BIO_free(mem_data);
     return -1;
   }
@@ -956,15 +956,15 @@ ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
 
   BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
   if (mem_data == NULL) {
-    log_error("BIO_new_ex fail with code=%d", ERR_get_error());
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
     goto crypto_verify_cms_fail;
   }
 
   unsigned int flags = (cert_store == NULL) ? CMS_NO_SIGNER_CERT_VERIFY : 0;
 
   if (!CMS_verify(content, cert_stack, cert_store, NULL, mem_data, flags)) {
-    log_error("CMS_verify fail with code=%s",
-              ERR_reason_error_string(ERR_get_error()));
+    log_error("CMS_verify fail with code=%lu",
+              ERR_get_error());
     goto crypto_verify_cms_fail;
   }
 
