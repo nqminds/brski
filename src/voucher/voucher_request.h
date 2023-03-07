@@ -98,7 +98,7 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
  */
 typedef int (*voucher_req_fn)(const char *serial_number,
                               const struct buffer_list *additional_registrar_certs,
-                              struct VoucherBinaryArray **pinned_domain_cert);
+                              struct VoucherBinaryArray *pinned_domain_cert);
 
 /**
  * @brief Signs a voucher request for the pledge using CMS for a private key

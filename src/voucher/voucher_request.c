@@ -285,6 +285,8 @@ char *sign_masa_pledge_voucher(const char *voucher_request_cms,
     log_error("verify_cms_voucher fail");
     return NULL;
   }
+  struct Voucher *pledge_voucher_request = NULL;
+  struct Voucher *masa_pledge_voucher = NULL;
 
   /* Extract the serial number from the voucher request to compare with the
    * pledge's serial number */
@@ -334,7 +336,7 @@ char *sign_masa_pledge_voucher(const char *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  struct Voucher *pledge_voucher_request =
+  pledge_voucher_request =
       verify_cms_voucher(pledge_voucher_request_cms, pledge_verify_certs,
                          pledge_verify_store, NULL);
   if (pledge_voucher_request == NULL) {
@@ -359,15 +361,18 @@ char *sign_masa_pledge_voucher(const char *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  if (strcmp((const char *)voucher_serial_number,
-             (const char *)pledge_voucher_serial_number) != 0) {
+  if (strcmp((const char *)*voucher_serial_number,
+             (const char *)*pledge_voucher_serial_number) != 0) {
     log_error(
         "pledge voucher serial number differs from voucher requests serial "
         "number");
     goto sign_masa_pledge_voucher_fail;
   }
 
-  struct Voucher *masa_pledge_voucher = init_voucher();
+  if ((masa_pledge_voucher = init_voucher()) == NULL) {
+    log_error("init_voucher fail");
+    goto sign_masa_pledge_voucher_fail;
+  }
 
   /* The nonce from the pledge if available. */
   if (nonce != NULL) {
@@ -385,20 +390,23 @@ char *sign_masa_pledge_voucher(const char *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  struct VoucherBinaryArray *pinned_domain_cert = NULL;
+  /* Allocates a pinned domain certificate for a pledge */
+  struct VoucherBinaryArray pinned_domain_cert = {0};
   if (cb((const char *)pledge_voucher_serial_number, registrar_certs,
          &pinned_domain_cert) < 0) {
-    log_error("Failure to retrieve pinned domain certificate");
+    log_error("Failure to allocate pinned domain certificate");
     goto sign_masa_pledge_voucher_fail;
   }
 
   /* A certificate; see Section 5.5.2. This figure is illustrative; for an
    * example, see Appendix C.2 where an end-entity certificate is used. */
   if (set_attr_voucher(masa_pledge_voucher, ATTR_PINNED_DOMAIN_CERT,
-                       pinned_domain_cert) < 0) {
+                       &pinned_domain_cert) < 0) {
     log_error("set_attr_voucher fail");
+    free_binary_array(&pinned_domain_cert);
     goto sign_masa_pledge_voucher_fail;
   }
+  free_binary_array(&pinned_domain_cert);
 
   /* The serial-number as provided in the voucher-request. Also see
    * Section 5.5.5. */
