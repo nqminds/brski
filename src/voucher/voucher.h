@@ -239,6 +239,16 @@ struct VoucherBinaryArray {
 };
 
 /**
+ * @brief Copies a binary arrays to a destination
+ *
+ * @param[in] dst The destination binary array
+ * @param[in] src The source binary array
+ * @return int 0 on success, -1 on failure
+ */
+int copy_binary_array(struct VoucherBinaryArray *const dst,
+                      const struct VoucherBinaryArray *src);
+
+/**
  * @brief Compare two binary arrays
  *
  * @param[in] src The source binary array

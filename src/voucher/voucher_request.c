@@ -257,16 +257,16 @@ sign_voucher_request_fail:
   return NULL;
 }
 
-char *sign_masa_pledge_voucher(const char *voucher_request_cms,
-                               const struct tm *expires_on,
-                               const voucher_req_fn cb,
-                               const struct VoucherBinaryArray *masa_sign_cert,
-                               const struct VoucherBinaryArray *masa_sign_key,
-                               const struct buffer_list *registrar_verify_certs,
-                               const struct buffer_list *registrar_verify_store,
-                               const struct buffer_list *pledge_verify_certs,
-                               const struct buffer_list *pledge_verify_store,
-                               const struct buffer_list *additional_masa_certs) {
+char *
+sign_masa_pledge_voucher(const char *voucher_request_cms,
+                         const struct tm *expires_on, const voucher_req_fn cb,
+                         const struct VoucherBinaryArray *masa_sign_cert,
+                         const struct VoucherBinaryArray *masa_sign_key,
+                         const struct buffer_list *registrar_verify_certs,
+                         const struct buffer_list *registrar_verify_store,
+                         const struct buffer_list *pledge_verify_certs,
+                         const struct buffer_list *pledge_verify_store,
+                         const struct buffer_list *additional_masa_certs) {
   if (expires_on == NULL) {
     log_error("expires_on param in NULL");
     return NULL;
@@ -447,7 +447,8 @@ char *sign_masa_pledge_voucher(const char *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  char *cms = sign_cms_voucher(masa_pledge_voucher, masa_sign_cert, masa_sign_key, additional_masa_certs);
+  char *cms = sign_cms_voucher(masa_pledge_voucher, masa_sign_cert,
+                               masa_sign_key, additional_masa_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_masa_pledge_voucher_fail;
@@ -465,4 +466,120 @@ sign_masa_pledge_voucher_fail:
   free_voucher(pledge_voucher_request);
   free_voucher(masa_pledge_voucher);
   return NULL;
+}
+
+int verify_masa_pledge_voucher(
+    const char *masa_pledge_voucher_cms, const char *serial_number,
+    const struct VoucherBinaryArray *nonce,
+    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct buffer_list *pledge_verify_certs,
+    const struct buffer_list *pledge_verify_store,
+    struct buffer_list **pledge_out_certs,
+    struct VoucherBinaryArray *const pinned_domain_cert) {
+
+  if (serial_number == NULL) {
+    log_error("serial_number param is NULL");
+    return -1;
+  }
+
+  *pledge_out_certs = NULL;
+
+  /* The pledge MUST verify the voucher signature using the
+   * manufacturer-installed trust anchor(s) associated with the manufacturer's
+   * MASA (this is likely included in the pledge's firmware). Management of the
+   * manufacturer-installed trust anchor(s) is out of scope of this document;
+   * this protocol does not update this trust anchor(s). */
+  struct Voucher *masa_pledge_voucher =
+      verify_cms_voucher(masa_pledge_voucher_cms, pledge_verify_certs,
+                         pledge_verify_store, pledge_out_certs);
+  if (masa_pledge_voucher == NULL) {
+    log_error("verify_cms_voucher fail");
+    return -1;
+  }
+
+  /* The pledge MUST verify that the serial-number field of the signed voucher
+   * matches the pledge's own serial-number. */
+  const char *const *voucher_serial_number = NULL;
+  if (is_attr_voucher_nonempty(masa_pledge_voucher, ATTR_SERIAL_NUMBER)) {
+    voucher_serial_number =
+        get_attr_str_voucher(masa_pledge_voucher, ATTR_SERIAL_NUMBER);
+    if (voucher_serial_number == NULL) {
+      log_error("get_attr_str_voucher fail");
+      goto verify_masa_pledge_voucher_fail;
+    }
+
+    if (strcmp(serial_number, *voucher_serial_number) != 0) {
+      log_error("pledge voucher serial number differs from masa pledge voucher "
+                "serial number");
+      goto verify_masa_pledge_voucher_fail;
+    }
+  } else {
+    log_error("serial-number is missing");
+    goto verify_masa_pledge_voucher_fail;
+  }
+
+  /* The pledge MUST verify the nonce information in the voucher. If present,
+   * the nonce in the voucher must match the nonce the pledge submitted to the
+   * registrar; vouchers with no nonce can also be accepted (according to local
+   * policy; see Section 7.2). */
+  if (nonce != NULL) {
+    if (is_attr_voucher_nonempty(masa_pledge_voucher, ATTR_NONCE)) {
+      const struct VoucherBinaryArray *masa_nonce =
+          get_attr_array_voucher(masa_pledge_voucher, ATTR_NONCE);
+      if (masa_nonce == NULL) {
+        log_error("get_attr_array_voucher fail");
+        goto verify_masa_pledge_voucher_fail;
+      }
+
+      if (compare_binary_array(nonce, masa_nonce) < 1) {
+        log_error("nonce not equal");
+        goto verify_masa_pledge_voucher_fail;
+      }
+    } else {
+      log_error("nonce is missing");
+      goto verify_masa_pledge_voucher_fail;
+    }
+  }
+
+  /* The pledge MUST be prepared to parse and fail gracefully from a voucher
+   * response that does not contain a pinned-domain-cert field. Such a thing
+   * indicates a failure to enroll in this domain, and the pledge MUST attempt
+   * joining with other available Join Proxies. */
+  if (is_attr_voucher_nonempty(masa_pledge_voucher, ATTR_PINNED_DOMAIN_CERT)) {
+    const struct VoucherBinaryArray *masa_pinned_domain_cert =
+        get_attr_array_voucher(masa_pledge_voucher, ATTR_PINNED_DOMAIN_CERT);
+    if (masa_pinned_domain_cert == NULL) {
+      log_error("get_attr_array_voucher fail");
+      goto verify_masa_pledge_voucher_fail;
+    }
+
+    /* The pledge then evaluates the TLS server certificate chain that it
+     * received when the TLS connection was formed using this trust anchor. It
+     * is possible that the public key in the pinned-domain-cert directly
+     * matches the public key in the end-entity certificate provided by the TLS
+     * server. If a registrar's credentials cannot be verified using the
+     * pinned-domain-cert trust anchor from the voucher, then the TLS connection
+     * is discarded, and the pledge abandons attempts to bootstrap with this
+     * discovered registrar.*/
+    /* Here verify the registrar_tsl_cert */
+    /* begin */
+    (void)registrar_tls_cert;
+    /* end */
+    if (copy_binary_array(pinned_domain_cert, masa_pinned_domain_cert) < 0) {
+      log_error("copy_binary_array fail");
+      goto verify_masa_pledge_voucher_fail;
+    }
+  } else {
+    log_error("pinned domain certificate is missing");
+    goto verify_masa_pledge_voucher_fail;
+  }
+
+  free_buffer_list(*pledge_out_certs);
+  free_voucher(masa_pledge_voucher);
+  return 0;
+
+verify_masa_pledge_voucher_fail:
+  free_buffer_list(*pledge_out_certs);
+  free_voucher(masa_pledge_voucher);
+  return -1;
 }

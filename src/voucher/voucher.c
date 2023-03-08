@@ -45,13 +45,23 @@ check_binary_array_nonempty(const struct VoucherBinaryArray *value) {
   return true;
 }
 
-static int copy_binary_array(struct VoucherBinaryArray *dst,
-                             const struct VoucherBinaryArray *src) {
-  dst->length = src->length;
+int copy_binary_array(struct VoucherBinaryArray *const dst,
+                      const struct VoucherBinaryArray *src) {
+  if (dst == NULL) {
+    log_error("dst param is NULL");
+    return -1;
+  }
+
+  if (src == NULL) {
+    log_error("src param is NULL");
+    return -1;
+  }
+  dst->length = 0;
   if ((dst->array = sys_memdup((uint8_t *)src->array, src->length)) == NULL) {
     log_errno("sys_memdup");
     return -1;
   }
+  dst->length = src->length;
 
   return 0;
 }
