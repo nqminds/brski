@@ -138,7 +138,7 @@ static void test_sign_pledge_voucher_request(void **state) {
 }
 
 char *
-wcreate_pledge_voucher_request(char *serial_number,
+faulty_create_pledge_voucher_request(char *serial_number,
                                struct VoucherBinaryArray *registrar_tls_cert) {
   struct Voucher *voucher_request = init_voucher();
 
@@ -244,7 +244,7 @@ static void test_sign_voucher_request(void **state) {
 
   sys_free(pledge_voucher_request_cms);
   pledge_voucher_request_cms =
-      wcreate_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &registrar_tls_cert);
+      faulty_create_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &registrar_tls_cert);
   cms = sign_voucher_request(pledge_voucher_request_cms, &created_on, "AA:BB:CC:DD:EE:FF",
                              &idevid_issuer, &registrar_tls_cert,
                              &registrar_sign_cert, &registrar_sign_key, NULL,
@@ -283,7 +283,7 @@ int voucher_req_fun(const char *serial_number,
 }
 
 char *
-wcreate_voucher_request(char *serial_number, struct VoucherBinaryArray *nonce, struct VoucherBinaryArray *prior_signed_voucher_request) {
+faulty_create_voucher_request(char *serial_number, struct VoucherBinaryArray *nonce, struct VoucherBinaryArray *prior_signed_voucher_request) {
   (void)nonce;
   struct Voucher *voucher_request = init_voucher();
 
@@ -392,7 +392,8 @@ static void test_sign_masa_pledge_voucher(void **state) {
   sys_free(cms);
   sys_free(voucher_request_cms);
 
-  voucher_request_cms = wcreate_voucher_request("AA:BB:CC:DD:EE:FF", &nonce, NULL);
+  /* Missing prior signed voucher request */
+  voucher_request_cms = faulty_create_voucher_request("AA:BB:CC:DD:EE:FF", &nonce, NULL);
   assert_non_null(voucher_request_cms);
 
   cms = sign_masa_pledge_voucher(
@@ -413,7 +414,8 @@ static void test_sign_masa_pledge_voucher(void **state) {
       (const uint8_t *)pledge_voucher_request_cms,
       strlen(pledge_voucher_request_cms), &prior_signed_voucher_request.array);
 
-  voucher_request_cms = wcreate_voucher_request(NULL, &nonce, &prior_signed_voucher_request);
+  /* Missing serial number */
+  voucher_request_cms = faulty_create_voucher_request(NULL, &nonce, &prior_signed_voucher_request);
   assert_non_null(voucher_request_cms);
   cms = sign_masa_pledge_voucher(
     voucher_request_cms, &expires_on,
@@ -428,7 +430,8 @@ static void test_sign_masa_pledge_voucher(void **state) {
   assert_null(cms);
   sys_free(voucher_request_cms);
 
-  voucher_request_cms = wcreate_voucher_request("AA:BB:CC:DD:EE:EE", &nonce, &prior_signed_voucher_request);
+  /* Wrong serial number */
+  voucher_request_cms = faulty_create_voucher_request("AA:BB:CC:DD:EE:EE", &nonce, &prior_signed_voucher_request);
   assert_non_null(voucher_request_cms);
   cms = sign_masa_pledge_voucher(
     voucher_request_cms, &expires_on,
