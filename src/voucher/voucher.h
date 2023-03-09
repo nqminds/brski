@@ -457,14 +457,13 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
  * @brief Signs a voucher using CMS for an EC private key
  * and output to PEM (base64)
  *
- * Caller is responsible for freeing output PEM string
+ * Caller is responsible for freeing the output string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer for signing (array in DER format)
- * @param[in] key The EC private key buffer of the certificate (array DER
- * format)
+ * @param[in] cert The certificate buffer (DER format) for signing
+ * @param[in] key The EC private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format)
- * @return char* the signed cms structure in PEM format, NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on failure
  */
 __must_free char *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *cert,
@@ -478,11 +477,10 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
  * Caller is responsible for freeing output PEM string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer for signing (array in DER format)
- * @param[in] key The RSA private key buffer of the certificate (array in DER
- * format)
+ * @param[in] cert The certificate buffer (DER format) for signing
+ * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format)
- * @return char* the signed cms structure in PEM format, NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on failure
  */
 __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *cert,
@@ -493,14 +491,13 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
  * @brief Signs a voucher using CMS for a private key (detected automatically)
  * and output to PEM (base64)
  *
- * Caller is responsible for freeing output PEM string
+ * Caller is responsible for freeing the output string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer for signing (array in DER format)
- * @param[in] key The private key buffer of the certificate (array in DER
- * format)
+ * @param[in] cert The certificate buffer (DER format) for signing
+ * @param[in] key The private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format)
- * @return char* the signed cms structure in PEM format, NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on failure
  */
 __must_free char *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
