@@ -680,13 +680,13 @@ static void test_sign_cms_voucher(void **state) {
                      sys_strdup("subjecttest.info"));
 
   cert.length =
-      crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
+      crypto_generate_eccert(&meta, key.array, key.length, true, &cert.array);
 
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_eccert(
-      &meta, key_in_list, key_in_list_length, &cert_in_list);
+      &meta, key_in_list, key_in_list_length, true, &cert_in_list);
 
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
@@ -705,11 +705,11 @@ static void test_sign_cms_voucher(void **state) {
   assert_non_null(key.array);
 
   cert.length =
-      crypto_generate_rsacert(&meta, key.array, key.length, &cert.array);
+      crypto_generate_rsacert(&meta, key.array, key.length, true, &cert.array);
 
   key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
   cert_in_list_length = crypto_generate_rsacert(
-      &meta, key_in_list, key_in_list_length, &cert_in_list);
+      &meta, key_in_list, key_in_list_length, true, &cert_in_list);
 
   certs = init_buffer_list();
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
@@ -753,7 +753,7 @@ struct buffer_list *create_cert_list(void) {
                      sys_strdup("cert_list_subject.info"));
 
   uint8_t *cert = NULL;
-  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, true, &cert);
   assert_non_null(cert);
 
   push_buffer_list(certs, cert, cert_length, 0);
@@ -797,7 +797,7 @@ static void test_verify_cms_voucher(void **state) {
                      sys_strdup("subject.info"));
 
   cert.length =
-      crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
+      crypto_generate_eccert(&meta, key.array, key.length, true, &cert.array);
 
   char *cms = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(cms);

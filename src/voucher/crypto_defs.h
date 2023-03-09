@@ -124,13 +124,15 @@ void crypto_free_keycontext(CRYPTO_KEY ctx);
  * Caller is responsible for freeing the cert buffer
  *
  * @param[in] meta The certificate metadata
- * @param[in] key The EC private key buffer
+ * @param[in] key The EC private/public key buffer
  * @param[in] key_length The private key buffer length
+ * @param[in] self_sign If true self signs the certificate
  * @param[out] cert The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                const uint8_t *key, const size_t key_length,
+                               bool self_sign,
                                uint8_t **cert);
 
 /**
@@ -140,13 +142,15 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
  * Caller is responsible for freeing the cert buffer
  *
  * @param[in] meta The certificate metadata
- * @param[in] key The RSA private key buffer
+ * @param[in] key The RSA private/public key buffer
  * @param[in] key_length The private key buffer length
+ * @param[in] self_sign If true self signs the certificate
  * @param[out] cert The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
                                 const uint8_t *key, const size_t key_length,
+                                bool self_sign,
                                 uint8_t **cert);
 
 /**

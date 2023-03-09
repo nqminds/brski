@@ -419,38 +419,23 @@ static int set_certificate_meta(X509 *x509,
 }
 
 static int sign_sha256_certificate(X509 *x509, const EVP_PKEY *pkey) {
-  if (!X509_set_pubkey(x509, (EVP_PKEY *)pkey)) {
-    log_error("X509_set_pubkey fail with code=%lu", ERR_get_error());
-    return -1;
-  }
-
   /* self sign the certificate with the key. */
   if (!X509_sign(x509, (EVP_PKEY *)pkey, EVP_sha256())) {
     log_error("X509_sign fail with code=%lu", ERR_get_error());
     return -1;
   }
 
+  if (X509_verify(x509, (EVP_PKEY *)pkey) < 1) {
+    log_error("signaure verification fail");
+    return -1;
+  }
+
   return 0;
-}
-
-static ssize_t unsigned_cert_to_derbuf(X509 *x509, const EVP_PKEY *pkey,
-                                       uint8_t **cert) {
-  if (sign_sha256_certificate(x509, pkey) < 0) {
-    log_error("sign_sha256_certificate fail");
-    return -1;
-  }
-
-  ssize_t length = cert_to_derbuf(x509, cert);
-  if (length < 0) {
-    log_error("cert_to_derbuf fail");
-    return -1;
-  }
-
-  return length;
 }
 
 ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                const uint8_t *key, const size_t key_length,
+                               bool self_sign,
                                uint8_t **cert) {
   *cert = NULL;
 
@@ -489,9 +474,23 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
     return -1;
   }
 
-  ssize_t length = unsigned_cert_to_derbuf(x509, pkey, cert);
+  if (!X509_set_pubkey(x509, (EVP_PKEY *)pkey)) {
+    log_error("X509_set_pubkey fail with code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  if(self_sign) {
+    if (sign_sha256_certificate(x509, pkey) < 0) {
+      log_error("sign_sha256_certificate fail");
+      EVP_PKEY_free(pkey);
+      X509_free(x509);
+      return -1;
+    }
+  }
+
+  ssize_t length = cert_to_derbuf(x509, cert);
   if (length < 0) {
-    log_error("unsigned_cert_to_derbuf fail");
+    log_error("cert_to_derbuf fail");
   }
 
   EVP_PKEY_free(pkey);
@@ -502,6 +501,7 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
 
 ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
                                 const uint8_t *key, const size_t key_length,
+                                bool self_sign,
                                 uint8_t **cert) {
   *cert = NULL;
 
@@ -540,9 +540,23 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
     return -1;
   }
 
-  ssize_t length = unsigned_cert_to_derbuf(x509, pkey, cert);
+  if (!X509_set_pubkey(x509, (EVP_PKEY *)pkey)) {
+    log_error("X509_set_pubkey fail with code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  if(self_sign) {
+    if (sign_sha256_certificate(x509, pkey) < 0) {
+      log_error("sign_sha256_certificate fail");
+      EVP_PKEY_free(pkey);
+      X509_free(x509);
+      return -1;
+    }
+  }
+
+  ssize_t length = cert_to_derbuf(x509, cert);
   if (length < 0) {
-    log_error("unsigned_cert_to_derbuf fail");
+    log_error("cert_to_derbuf fail");
   }
 
   EVP_PKEY_free(pkey);
@@ -754,6 +768,11 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const stru
   }
 
   int ret = (out_cert_stack != NULL) ? 0 : -1;
+
+  if (sk_X509_num(out_cert_stack) < 1) {
+    log_error("cert stack is empty");
+    ret = -1;
+  }
 
   free_x509_store(cert_store, x509_store_list);
   sk_X509_pop_free(cert_stack, X509_free);
