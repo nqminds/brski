@@ -118,7 +118,7 @@ CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length);
 void crypto_free_keycontext(CRYPTO_KEY ctx);
 
 /**
- * @brief Generate a certificate and signs with a EC private key
+ * @brief Generate a certificate and self sign with a EC private key
  * using sha256
  *
  * Caller is responsible for freeing the cert buffer
@@ -134,7 +134,7 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                uint8_t **cert);
 
 /**
- * @brief Generate a certificate and signs with a RSA private key
+ * @brief Generate a certificate and self sign with a RSA private key
  * using sha256
  *
  * Caller is responsible for freeing the cert buffer
@@ -153,6 +153,8 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
  * @brief Signs a certificate with a private key.
  * The private key type is detected automatically. The signature is sha256.
  *
+ * Caller is responsible for freeing the output certificate
+ * 
  * @param[in] key The private key buffer (DER format)
  * @param[in] key_length The private key buffer
  * @param[in] cert_length The certificate buffer length

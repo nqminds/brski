@@ -424,7 +424,7 @@ static int sign_sha256_certificate(X509 *x509, const EVP_PKEY *pkey) {
     return -1;
   }
 
-  /* sign the certificate with the key. */
+  /* self sign the certificate with the key. */
   if (!X509_sign(x509, (EVP_PKEY *)pkey, EVP_sha256())) {
     log_error("X509_sign fail with code=%lu", ERR_get_error());
     return -1;
@@ -549,6 +549,58 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
   X509_free(x509);
 
   return length;
+}
+
+ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length, const size_t cert_length, uint8_t **cert) {
+  if (key == NULL) {
+    log_error("key param is NULL");
+    return -1;
+  }
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (*cert == NULL) {
+    log_error("cert buffer is NULL");
+    return -1;
+  }
+
+  EVP_PKEY *pkey = (EVP_PKEY *)crypto_key2context(key, key_length);
+  if (pkey == NULL) {
+    log_error("crypto_key2context fail");
+    return -1;
+  }
+
+  X509 *x509 = crypto_cert2context(*cert, cert_length);
+  if (x509 == NULL) {
+    log_error("crypto_cert2context fail");
+    EVP_PKEY_free(pkey);
+    return -1;
+  }
+
+  if (!X509_sign(x509, (EVP_PKEY *)pkey, EVP_sha256())) {
+    log_error("X509_sign fail with code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  uint8_t *out_cert = NULL;
+  ssize_t out_cert_length = cert_to_derbuf(x509, &out_cert);
+  if (out_cert_length < 0) {
+    log_error("cert_to_derbuf fail");
+    X509_free(x509);
+    EVP_PKEY_free(pkey);
+    return -1;
+  }
+
+  /* Assign the new signed certificate */
+  sys_free(*cert);
+  *cert = out_cert;
+
+  X509_free(x509);
+  EVP_PKEY_free(pkey);
+  return out_cert_length;
 }
 
 static STACK_OF(X509) * get_certificate_stack(const struct buffer_list *certs) {
