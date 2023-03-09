@@ -346,6 +346,117 @@ static void test_crypto_sign_rsacms(void **state) {
   free_keyvalue_list(meta.subject);
 }
 
+static void test_crypto_sign_cert(void **state) {
+  (void)state;
+
+  uint8_t *key = NULL;
+  ssize_t key_length = crypto_generate_eckey(&key);
+
+  struct crypto_cert_meta cert_meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+
+  uint8_t *cert_key = NULL;
+  ssize_t cert_key_length = crypto_generate_eckey(&cert_key);
+  cert_meta.issuer = init_keyvalue_list();
+  cert_meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(cert_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(cert_meta.issuer, sys_strdup("CN"),
+                     sys_strdup("issuertest.info"));
+
+  push_keyvalue_list(cert_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(cert_meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjecttest.info"));
+
+  uint8_t *cert = NULL;
+  ssize_t cert_length = crypto_generate_eccert(&cert_meta, cert_key, cert_key_length, &cert);
+
+  ssize_t signed_cert_length = crypto_sign_cert(key, key_length, cert_length, &cert);
+  assert_true(signed_cert_length > 0);
+  assert_non_null(cert);
+
+  sys_free(key);
+  sys_free(cert);
+  free_keyvalue_list(cert_meta.issuer);
+  free_keyvalue_list(cert_meta.subject);
+}
+
+static void test_crypto_verify_cert(void **state) {
+  (void)state;
+  uint8_t *sign_key = NULL;
+  ssize_t sign_key_length = crypto_generate_eckey(&sign_key);
+
+  struct crypto_cert_meta sign_meta = {.serial_number = 1234,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+
+  sign_meta.issuer = init_keyvalue_list();
+  sign_meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(sign_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(sign_meta.issuer, sys_strdup("CN"),
+                     sys_strdup("certsign.info"));
+
+  push_keyvalue_list(sign_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(sign_meta.subject, sys_strdup("CN"),
+                     sys_strdup("certsign.info"));
+
+  uint8_t *sign_cert = NULL;
+  ssize_t sign_cert_length = crypto_generate_eccert(&sign_meta, sign_key, sign_key_length, &sign_cert);
+
+  struct crypto_cert_meta cert_meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL};
+
+  uint8_t *cert_key = NULL;
+  ssize_t cert_key_length = crypto_generate_eckey(&cert_key);
+  cert_meta.issuer = init_keyvalue_list();
+  cert_meta.subject = init_keyvalue_list();
+
+  push_keyvalue_list(cert_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(cert_meta.issuer, sys_strdup("CN"),
+                     sys_strdup("issuertest.info"));
+
+  push_keyvalue_list(cert_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(cert_meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjecttest.info"));
+
+  uint8_t *cert = NULL;
+  ssize_t cert_length = crypto_generate_eccert(&cert_meta, cert_key, cert_key_length, &cert);
+  ssize_t signed_cert_length = crypto_sign_cert(sign_key, sign_key_length, cert_length, &cert);
+
+  struct buffer_list *certs = init_buffer_list();
+  push_buffer_list(certs, sign_cert, sign_cert_length, 0);
+
+  int verified = crypto_verify_cert(cert, signed_cert_length, certs, NULL);
+  assert_int_equal(verified, 0);
+
+  sys_free(sign_key);
+  sys_free(cert);
+
+  sign_key_length = crypto_generate_eckey(&sign_key);
+  cert_length = crypto_generate_eccert(&cert_meta, cert_key, cert_key_length, &cert);
+  signed_cert_length = crypto_sign_cert(sign_key, sign_key_length, cert_length, &cert);
+  
+  verified = crypto_verify_cert(cert, signed_cert_length, certs, NULL);
+  assert_int_equal(verified, -1);
+
+  free_buffer_list(certs);
+  sys_free(sign_key);
+  sys_free(cert);
+  free_keyvalue_list(sign_meta.issuer);
+  free_keyvalue_list(sign_meta.subject);
+  free_keyvalue_list(cert_meta.issuer);
+  free_keyvalue_list(cert_meta.subject);
+}
+
 static void test_crypto_sign_cms(void **state) {
   (void)state;
   uint8_t data[5] = {1, 2, 3, 4, 5};
@@ -554,6 +665,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_crypto_generate_rsacert),
       cmocka_unit_test(test_crypto_sign_eccms),
       cmocka_unit_test(test_crypto_sign_rsacms),
+      cmocka_unit_test(test_crypto_sign_cert),
+      cmocka_unit_test(test_crypto_verify_cert),
       cmocka_unit_test(test_crypto_sign_cms),
       cmocka_unit_test(test_crypto_verify_cms)};
 

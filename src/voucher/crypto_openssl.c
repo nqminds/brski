@@ -710,6 +710,58 @@ static X509_STORE *get_certificate_store(const struct buffer_list *store,
   return x509_store;
 }
 
+int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const struct buffer_list *certs,
+                          const struct buffer_list *store) {
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (certs == NULL) {
+    log_error("certs param is NULL");
+    return -1;
+  }
+
+  X509 *x509 = crypto_cert2context(cert, cert_length);
+  if (x509 == NULL) {
+    log_error("crypto_cert2context fail");
+    return -1;
+  }
+
+  STACK_OF(X509) *cert_stack = NULL;
+  if ((cert_stack = get_certificate_stack(certs)) == NULL) {
+    log_error("get_certificate_stack fail");
+    X509_free(x509);
+    return -1;
+  }
+
+  X509_STORE *cert_store = NULL;
+  struct ptr_list *x509_store_list = NULL;
+  if (store != NULL) {
+    cert_store = get_certificate_store(store, &x509_store_list);
+
+    if (cert_store == NULL) {
+      log_error("get_certificate_store fail");
+      sk_X509_pop_free(cert_stack, X509_free);
+      X509_free(x509);
+      return -1;
+    }
+  }
+
+  STACK_OF(X509) *out_cert_stack = X509_build_chain(x509, cert_stack, cert_store, 0, NULL, NULL);
+  if (out_cert_stack == NULL) {
+    log_error("X509_build_chain fail");
+  }
+
+  int ret = (out_cert_stack != NULL) ? 0 : -1;
+
+  free_x509_store(cert_store, x509_store_list);
+  sk_X509_pop_free(cert_stack, X509_free);
+  sk_X509_pop_free(out_cert_stack, X509_free);
+  X509_free(x509);
+  return ret;
+}
+
 void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
   BIO *out = BIO_new_file(filename, "w");
   if (out == NULL) {

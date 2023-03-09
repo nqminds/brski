@@ -165,6 +165,17 @@ ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length,
                          const size_t cert_length, uint8_t **cert);
 
 /**
+ * @brief Verifies a certificate
+ *
+ * @param[in] cert The certificate buffer (DER format) to be verified
+ * @param[in] cert_length The certificate buffer length
+ * @param[in] certs The list of certificate buffers to verify the certificate 
+ * @param[in] store The list of trusted certificate store to verify the certificate
+ * @return int 1 if certificate is signed by the certs/store, 0 if it's not signed and -1 on failure
+ */
+int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const struct buffer_list *certs,
+                          const struct buffer_list *store);
+/**
  * @brief Signs a buffer using CMS for an EC private key
  *
  * Caller is responsible for freeing the cms buffer
