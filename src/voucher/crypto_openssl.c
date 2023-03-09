@@ -551,7 +551,8 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
   return length;
 }
 
-ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length, const size_t cert_length, uint8_t **cert) {
+ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length,
+                         const size_t cert_length, uint8_t **cert) {
   if (key == NULL) {
     log_error("key param is NULL");
     return -1;

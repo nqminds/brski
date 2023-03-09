@@ -463,7 +463,8 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
  * @param[in] cert The certificate buffer (DER format) for signing
  * @param[in] key The EC private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format)
- * @return char* the signed cms structure in base64 (PEM format), NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * failure
  */
 __must_free char *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *cert,
@@ -480,7 +481,8 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
  * @param[in] cert The certificate buffer (DER format) for signing
  * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format)
- * @return char* the signed cms structure in base64 (PEM format), NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * failure
  */
 __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *cert,
@@ -497,7 +499,8 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
  * @param[in] cert The certificate buffer (DER format) for signing
  * @param[in] key The private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format)
- * @return char* the signed cms structure in base64 (PEM format), NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * failure
  */
 __must_free char *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,

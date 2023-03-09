@@ -154,14 +154,15 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
  * The private key type is detected automatically. The signature is sha256.
  *
  * Caller is responsible for freeing the output certificate
- * 
+ *
  * @param[in] key The private key buffer (DER format)
  * @param[in] key_length The private key buffer
  * @param[in] cert_length The certificate buffer length
  * @param[out] cert The input and signed certificate buffer (DER format)
  * @return ssize_t the size of the signed certificate buffer, -1 on failure
  */
-ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length, const size_t cert_length, uint8_t **cert);
+ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length,
+                         const size_t cert_length, uint8_t **cert);
 
 /**
  * @brief Signs a buffer using CMS for an EC private key

@@ -35,7 +35,8 @@
  * in DER format)
  * @param[in] additional_pledge_certs The list of additional pledge certificate
  * (DER format) to append to cms
- * @return char* the signed cms structure in base64 (PEM format), NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * failure
  */
 __must_free char *
 sign_pledge_voucher_request(const struct tm *created_on,
@@ -58,7 +59,8 @@ sign_pledge_voucher_request(const struct tm *created_on,
  * @param[in] serial_number The serial number string from the idevid certificate
  * @param[in] idevid_issuer The idevid issuer from the idevid certificate
  * @param[in] registrar_tls_cert The first certificate in the TLS server
- * "certificate_list" sequence presented by the registrar to the pledge (DER format)
+ * "certificate_list" sequence presented by the registrar to the pledge (DER
+ * format)
  * @param[in] registrar_sign_cert The certificate buffer for signing (
  * DER format) the voucher request
  * @param[in] registrar_sign_key The private key buffer of the certificate
@@ -69,7 +71,8 @@ sign_pledge_voucher_request(const struct tm *created_on,
  * format) to verify the pledge voucher from the pledge
  * @param[in] additional_registrar_certs The list of additional registrar
  * certificates (DER format) to append to cms
- * @return char* the signed cms structure in base64 (PEM format), NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * failure
  */
 __must_free char *
 sign_voucher_request(const char *pledge_voucher_request_cms,
@@ -113,7 +116,8 @@ typedef int (*voucher_req_fn)(
  * certificate (DER format)
  * @param[in] masa_sign_cert The certificate buffer for signing (DER
  * format) the masa voucher
- * @param[in] masa_sign_key The private key buffer of the certificate (DER format)
+ * @param[in] masa_sign_key The private key buffer of the certificate (DER
+ * format)
  * @param[in] registrar_verify_certs The list of additional certificate buffers
  * (DER format) to verify the voucher request from registrar
  * @param[in] registrar_verify_store The list of trusted certificate for store
@@ -124,7 +128,8 @@ typedef int (*voucher_req_fn)(
  * format) to verify the pledge voucher from the pledge
  * @param[in] additional_masa_certs The list of additional masa
  * certificates (DER format) to append to cms
- * @return char* the signed cms structure in base64 (PEM format), NULL on failure
+ * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * failure
  */
 __must_free char *
 sign_masa_pledge_voucher(const char *voucher_request_cms,
@@ -156,7 +161,8 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
  * (DER format) to verify the masa pledge voucher
  * @param[out] pledge_out_certs The list of certs (or NULL) from the masa pledge
  * cms structure
- * @param[out] pinned_domain_cert The output pinned domain certificate (DER format)
+ * @param[out] pinned_domain_cert The output pinned domain certificate (DER
+ * format)
  * @return 0 on success, -1 on failure
  */
 int verify_masa_pledge_voucher(
