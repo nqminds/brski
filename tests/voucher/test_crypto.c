@@ -91,19 +91,19 @@ static void test_crypto_generate_eccert(void **state) {
   uint8_t *key = NULL;
   uint8_t *cert = NULL;
 
-  ssize_t length = crypto_generate_eccert(&meta, NULL, 0, false, &cert);
+  ssize_t length = crypto_generate_eccert(&meta, NULL, 0, &cert);
   assert_int_equal(length, -1);
 
   ssize_t key_length = crypto_generate_eckey(&key);
 
-  length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
   sys_free(key);
 
   key_length = crypto_generate_rsakey(2048, &key);
-  length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_true(length < 0);
   assert_null(cert);
   sys_free(key);
@@ -121,7 +121,7 @@ static void test_crypto_generate_eccert(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
                      sys_strdup("subjecttest.info"));
 
-  length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
@@ -142,19 +142,19 @@ static void test_crypto_generate_rsacert(void **state) {
   uint8_t *key = NULL;
   uint8_t *cert = NULL;
 
-  ssize_t length = crypto_generate_rsacert(&meta, NULL, 0, false, &cert);
+  ssize_t length = crypto_generate_rsacert(&meta, NULL, 0, &cert);
   assert_int_equal(length, -1);
 
   ssize_t key_length = crypto_generate_rsakey(2048, &key);
 
-  length = crypto_generate_rsacert(&meta, key, key_length, false, &cert);
+  length = crypto_generate_rsacert(&meta, key, key_length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
   sys_free(key);
 
   key_length = crypto_generate_eckey(&key);
-  length = crypto_generate_rsacert(&meta, key, key_length, false, &cert);
+  length = crypto_generate_rsacert(&meta, key, key_length, &cert);
   assert_true(length < 0);
   assert_null(cert);
   sys_free(key);
@@ -172,7 +172,7 @@ static void test_crypto_generate_rsacert(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
                      sys_strdup("subjecttest.info"));
 
-  length = crypto_generate_rsacert(&meta, key, key_length, false, &cert);
+  length = crypto_generate_rsacert(&meta, key, key_length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
@@ -209,13 +209,13 @@ static void test_crypto_sign_eccms(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
                      sys_strdup("subjecttest.info"));
 
-  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_eccert(
-      &meta, key_in_list, key_in_list_length, false, &cert_in_list);
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
 
   assert_int_equal(
       push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
@@ -249,7 +249,7 @@ static void test_crypto_sign_eccms(void **state) {
   cms = NULL;
   key_length = crypto_generate_rsakey(2048, &key);
   assert_non_null(key);
-  cert_length = crypto_generate_rsacert(&meta, key, key_length, false, &cert);
+  cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
 
   length = crypto_sign_eccms(data, data_length, cert, cert_length, key,
                              key_length, certs, &cms);
@@ -291,13 +291,13 @@ static void test_crypto_sign_rsacms(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
                      sys_strdup("subjecttest.info"));
 
-  ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, false, &cert);
+  ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
 
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_rsacert(
-      &meta, key_in_list, key_in_list_length, false, &cert_in_list);
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
 
   assert_int_equal(
       push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
@@ -331,7 +331,7 @@ static void test_crypto_sign_rsacms(void **state) {
   cms = NULL;
   key_length = crypto_generate_eckey(&key);
   assert_non_null(key);
-  cert_length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
   length = crypto_sign_rsacms(data, data_length, cert, cert_length, key,
                               key_length, certs, &cms);
@@ -369,7 +369,7 @@ static void test_crypto_sign_cert(void **state) {
                      sys_strdup("catest"));
 
   uint8_t *ca_cert = NULL;
-  ssize_t ca_cert_length = crypto_generate_eccert(&ca_meta, ca_key, ca_key_length, false, &ca_cert);
+  ssize_t ca_cert_length = crypto_generate_eccert(&ca_meta, ca_key, ca_key_length, &ca_cert);
   assert_true(ca_cert_length > 0);
   assert_non_null(ca_cert);
 
@@ -390,7 +390,7 @@ static void test_crypto_sign_cert(void **state) {
                      sys_strdup("subjectintermediate"));
 
   uint8_t *intermediate_cert = NULL;
-  ssize_t intermediate_cert_length = crypto_generate_eccert(&intermediate_meta, intermediate_key, intermediate_key_length, false, &intermediate_cert);
+  ssize_t intermediate_cert_length = crypto_generate_eccert(&intermediate_meta, intermediate_key, intermediate_key_length, &intermediate_cert);
   assert_true(intermediate_cert_length > 0);
   assert_non_null(intermediate_cert);
 
@@ -416,7 +416,7 @@ static void test_crypto_sign_cert(void **state) {
                      sys_strdup("subjectuntrusted"));
 
   uint8_t *untrusted_cert = NULL;
-  ssize_t untrusted_cert_length = crypto_generate_eccert(&untrusted_meta, untrusted_key, untrusted_key_length, false, &untrusted_cert);
+  ssize_t untrusted_cert_length = crypto_generate_eccert(&untrusted_meta, untrusted_key, untrusted_key_length, &untrusted_cert);
   assert_true(untrusted_cert_length > 0);
   assert_non_null(untrusted_cert);
 
@@ -466,7 +466,7 @@ static void test_crypto_verify_cert(void **state) {
                      sys_strdup("catest"));
 
   uint8_t *ca_cert = NULL;
-  ssize_t ca_cert_length = crypto_generate_eccert(&ca_meta, ca_key, ca_key_length, false, &ca_cert);
+  ssize_t ca_cert_length = crypto_generate_eccert(&ca_meta, ca_key, ca_key_length, &ca_cert);
   assert_true(ca_cert_length > 0);
   assert_non_null(ca_cert);
 
@@ -487,7 +487,7 @@ static void test_crypto_verify_cert(void **state) {
                      sys_strdup("subjectintermediate"));
 
   uint8_t *intermediate_cert = NULL;
-  ssize_t intermediate_cert_length = crypto_generate_eccert(&intermediate_meta, intermediate_key, intermediate_key_length, false, &intermediate_cert);
+  ssize_t intermediate_cert_length = crypto_generate_eccert(&intermediate_meta, intermediate_key, intermediate_key_length, &intermediate_cert);
   assert_true(intermediate_cert_length > 0);
   assert_non_null(intermediate_cert);
 
@@ -513,7 +513,7 @@ static void test_crypto_verify_cert(void **state) {
                      sys_strdup("subjectuntrusted"));
 
   uint8_t *untrusted_cert = NULL;
-  ssize_t untrusted_cert_length = crypto_generate_eccert(&untrusted_meta, untrusted_key, untrusted_key_length, false, &untrusted_cert);
+  ssize_t untrusted_cert_length = crypto_generate_eccert(&untrusted_meta, untrusted_key, untrusted_key_length, &untrusted_cert);
   assert_true(untrusted_cert_length > 0);
   assert_non_null(untrusted_cert);
 
@@ -538,9 +538,7 @@ static void test_crypto_verify_cert(void **state) {
   sys_free(untrusted_key);
   sys_free(untrusted_cert);
   sys_free(intermediate_key);
-  // sys_free(intermediate_cert);
   sys_free(ca_key);
-  // sys_free(ca_cert);
   free_keyvalue_list(untrusted_meta.issuer);
   free_keyvalue_list(untrusted_meta.subject);
   free_keyvalue_list(intermediate_meta.issuer);
@@ -576,13 +574,13 @@ static void test_crypto_sign_cms(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("CN"),
                      sys_strdup("subjecttest.info"));
 
-  ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, false, &cert);
+  ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
 
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_rsacert(
-      &meta, key_in_list, key_in_list_length, false, &cert_in_list);
+      &meta, key_in_list, key_in_list_length, &cert_in_list);
 
   assert_int_equal(
       push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
@@ -616,7 +614,7 @@ static void test_crypto_sign_cms(void **state) {
   cms = NULL;
   key_length = crypto_generate_eckey(&key);
   assert_non_null(key);
-  cert_length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
   length = crypto_sign_cms(data, data_length, cert, cert_length, key,
                            key_length, certs, &cms);
@@ -653,7 +651,7 @@ struct buffer_list *create_cert_list(void) {
                      sys_strdup("cert_list_subject.info"));
 
   uint8_t *cert = NULL;
-  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_non_null(cert);
 
   push_buffer_list(certs, cert, cert_length, 0);
@@ -691,7 +689,7 @@ static void test_crypto_verify_cms(void **state) {
   push_keyvalue_list(meta.subject, sys_strdup("serialNumber"),
                      sys_strdup("1234567890"));
 
-  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, false, &cert);
+  ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
   ssize_t cms_length =
       crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key,

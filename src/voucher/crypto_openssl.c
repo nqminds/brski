@@ -485,7 +485,6 @@ static int sign_sha256_certificate(X509 *x509, const EVP_PKEY *pkey) {
 
 ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                const uint8_t *key, const size_t key_length,
-                               bool csr,
                                uint8_t **cert) {
   *cert = NULL;
 
@@ -501,10 +500,6 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
 
   if (cert == NULL) {
     log_error("cert param is NULL");
-    return -1;
-  }
-
-  if (csr == true) {
     return -1;
   }
 
@@ -553,7 +548,6 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
 
 ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
                                 const uint8_t *key, const size_t key_length,
-                                bool csr,
                                 uint8_t **cert) {
   *cert = NULL;
 
@@ -569,10 +563,6 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
 
   if (cert == NULL) {
     log_error("cert aparam is NULL");
-    return -1;
-  }
-
-  if (csr == true) {
     return -1;
   }
 
