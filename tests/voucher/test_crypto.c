@@ -349,113 +349,204 @@ static void test_crypto_sign_rsacms(void **state) {
 static void test_crypto_sign_cert(void **state) {
   (void)state;
 
-  uint8_t *key = NULL;
-  ssize_t key_length = crypto_generate_eckey(&key);
+  uint8_t *ca_key = NULL;
+  ssize_t ca_key_length = crypto_generate_eckey(&ca_key);
 
-  struct crypto_cert_meta cert_meta = {.serial_number = 12345,
+  struct crypto_cert_meta ca_meta = {.serial_number = 1,
                                   .not_before = 0,
                                   .not_after = 1234567,
                                   .issuer = NULL,
-                                  .subject = NULL};
+                                  .subject = NULL,
+                                  .basic_constraints = "critical,CA:TRUE"};
 
-  uint8_t *cert_key = NULL;
-  ssize_t cert_key_length = crypto_generate_eckey(&cert_key);
-  cert_meta.issuer = init_keyvalue_list();
-  cert_meta.subject = init_keyvalue_list();
+  ca_meta.issuer = init_keyvalue_list();
+  ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"),
+                     sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"),
+                     sys_strdup("catest"));
 
-  push_keyvalue_list(cert_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(cert_meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  uint8_t *ca_cert = NULL;
+  ssize_t ca_cert_length = crypto_generate_eccert(&ca_meta, ca_key, ca_key_length, false, &ca_cert);
+  assert_true(ca_cert_length > 0);
+  assert_non_null(ca_cert);
 
-  push_keyvalue_list(cert_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(cert_meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  uint8_t *intermediate_key = NULL;
+  ssize_t intermediate_key_length = crypto_generate_eckey(&intermediate_key);
 
-  uint8_t *cert = NULL;
-  ssize_t cert_length = crypto_generate_eccert(&cert_meta, cert_key, cert_key_length, false, &cert);
+  struct crypto_cert_meta intermediate_meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL,
+                                  .basic_constraints = "CA:false"};
 
-  ssize_t signed_cert_length = crypto_sign_cert(key, key_length, cert_length, &cert);
-  assert_true(signed_cert_length > 0);
-  assert_non_null(cert);
+  intermediate_meta.issuer = init_keyvalue_list();
+  intermediate_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(intermediate_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(intermediate_meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjectintermediate"));
 
-  sys_free(key);
-  sys_free(cert);
-  free_keyvalue_list(cert_meta.issuer);
-  free_keyvalue_list(cert_meta.subject);
+  uint8_t *intermediate_cert = NULL;
+  ssize_t intermediate_cert_length = crypto_generate_eccert(&intermediate_meta, intermediate_key, intermediate_key_length, false, &intermediate_cert);
+  assert_true(intermediate_cert_length > 0);
+  assert_non_null(intermediate_cert);
+
+  ssize_t signed_intermediate_cert_length = crypto_sign_cert(ca_key, ca_key_length, ca_cert, ca_cert_length, intermediate_cert_length, &intermediate_cert);
+  assert_true(signed_intermediate_cert_length > 0);
+  assert_non_null(intermediate_cert);
+
+
+  uint8_t *untrusted_key = NULL;
+  ssize_t untrusted_key_length = crypto_generate_eckey(&untrusted_key);
+
+  struct crypto_cert_meta untrusted_meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL,
+                                  .basic_constraints = "CA:false"};
+
+  untrusted_meta.issuer = init_keyvalue_list();
+  untrusted_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(untrusted_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(untrusted_meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjectuntrusted"));
+
+  uint8_t *untrusted_cert = NULL;
+  ssize_t untrusted_cert_length = crypto_generate_eccert(&untrusted_meta, untrusted_key, untrusted_key_length, false, &untrusted_cert);
+  assert_true(untrusted_cert_length > 0);
+  assert_non_null(untrusted_cert);
+
+  ssize_t signed_untrusted_cert_length = crypto_sign_cert(intermediate_key, intermediate_key_length, intermediate_cert, signed_intermediate_cert_length, untrusted_cert_length, &untrusted_cert);
+  assert_true(signed_untrusted_cert_length > 0);
+  assert_non_null(untrusted_cert);
+
+  x509_to_tmpfile(ca_cert, ca_cert_length, "/tmp/ca.crt");
+  x509_to_tmpfile(intermediate_cert, signed_intermediate_cert_length, "/tmp/intermediate.crt");
+  x509_to_tmpfile(untrusted_cert, signed_untrusted_cert_length, "/tmp/untrusted.crt");
+
+  sys_free(untrusted_key);
+  sys_free(untrusted_cert);
+  sys_free(intermediate_key);
+  sys_free(intermediate_cert);
+  sys_free(ca_key);
+  sys_free(ca_cert);
+  free_keyvalue_list(untrusted_meta.issuer);
+  free_keyvalue_list(untrusted_meta.subject);
+  free_keyvalue_list(intermediate_meta.issuer);
+  free_keyvalue_list(intermediate_meta.subject);
+  free_keyvalue_list(ca_meta.issuer);
+  free_keyvalue_list(ca_meta.subject);
 }
 
 static void test_crypto_verify_cert(void **state) {
   (void)state;
-  uint8_t *sign_key = NULL;
-  ssize_t sign_key_length = crypto_generate_eckey(&sign_key);
 
-  struct crypto_cert_meta sign_meta = {.serial_number = 1234,
+
+  uint8_t *ca_key = NULL;
+  ssize_t ca_key_length = crypto_generate_eckey(&ca_key);
+
+  struct crypto_cert_meta ca_meta = {.serial_number = 1,
                                   .not_before = 0,
                                   .not_after = 1234567,
                                   .issuer = NULL,
-                                  .subject = NULL};
+                                  .subject = NULL,
+                                  .basic_constraints = "critical,CA:TRUE"};
 
-  sign_meta.issuer = init_keyvalue_list();
-  sign_meta.subject = init_keyvalue_list();
+  ca_meta.issuer = init_keyvalue_list();
+  ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"),
+                     sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"),
+                     sys_strdup("catest"));
 
-  push_keyvalue_list(sign_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(sign_meta.issuer, sys_strdup("CN"),
-                     sys_strdup("certsign.info"));
+  uint8_t *ca_cert = NULL;
+  ssize_t ca_cert_length = crypto_generate_eccert(&ca_meta, ca_key, ca_key_length, false, &ca_cert);
+  assert_true(ca_cert_length > 0);
+  assert_non_null(ca_cert);
 
-  push_keyvalue_list(sign_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(sign_meta.subject, sys_strdup("CN"),
-                     sys_strdup("certsign.info"));
+  uint8_t *intermediate_key = NULL;
+  ssize_t intermediate_key_length = crypto_generate_eckey(&intermediate_key);
 
-  uint8_t *sign_cert = NULL;
-  ssize_t sign_cert_length = crypto_generate_eccert(&sign_meta, sign_key, sign_key_length, false, &sign_cert);
-
-  struct crypto_cert_meta cert_meta = {.serial_number = 12345,
+  struct crypto_cert_meta intermediate_meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
                                   .issuer = NULL,
-                                  .subject = NULL};
+                                  .subject = NULL,
+                                  .basic_constraints = "CA:false"};
 
-  uint8_t *cert_key = NULL;
-  ssize_t cert_key_length = crypto_generate_eckey(&cert_key);
-  cert_meta.issuer = init_keyvalue_list();
-  cert_meta.subject = init_keyvalue_list();
+  intermediate_meta.issuer = init_keyvalue_list();
+  intermediate_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(intermediate_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(intermediate_meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjectintermediate"));
 
-  push_keyvalue_list(cert_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(cert_meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  uint8_t *intermediate_cert = NULL;
+  ssize_t intermediate_cert_length = crypto_generate_eccert(&intermediate_meta, intermediate_key, intermediate_key_length, false, &intermediate_cert);
+  assert_true(intermediate_cert_length > 0);
+  assert_non_null(intermediate_cert);
 
-  push_keyvalue_list(cert_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(cert_meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  ssize_t signed_intermediate_cert_length = crypto_sign_cert(ca_key, ca_key_length, ca_cert, ca_cert_length, intermediate_cert_length, &intermediate_cert);
+  assert_true(signed_intermediate_cert_length > 0);
+  assert_non_null(intermediate_cert);
 
-  uint8_t *cert = NULL;
-  ssize_t cert_length = crypto_generate_eccert(&cert_meta, cert_key, cert_key_length, false, &cert);
-  ssize_t signed_cert_length = crypto_sign_cert(sign_key, sign_key_length, cert_length, &cert);
 
-  struct buffer_list *certs = init_buffer_list();
-  push_buffer_list(certs, sign_cert, sign_cert_length, 0);
+  uint8_t *untrusted_key = NULL;
+  ssize_t untrusted_key_length = crypto_generate_eckey(&untrusted_key);
 
-  int verified = crypto_verify_cert(cert, signed_cert_length, certs, NULL);
+  struct crypto_cert_meta untrusted_meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL,
+                                  .basic_constraints = "CA:false"};
+
+  untrusted_meta.issuer = init_keyvalue_list();
+  untrusted_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(untrusted_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(untrusted_meta.subject, sys_strdup("CN"),
+                     sys_strdup("subjectuntrusted"));
+
+  uint8_t *untrusted_cert = NULL;
+  ssize_t untrusted_cert_length = crypto_generate_eccert(&untrusted_meta, untrusted_key, untrusted_key_length, false, &untrusted_cert);
+  assert_true(untrusted_cert_length > 0);
+  assert_non_null(untrusted_cert);
+
+  ssize_t signed_untrusted_cert_length = crypto_sign_cert(intermediate_key, intermediate_key_length, intermediate_cert, signed_intermediate_cert_length, untrusted_cert_length, &untrusted_cert);
+  assert_true(signed_untrusted_cert_length > 0);
+  assert_non_null(untrusted_cert);
+
+  struct buffer_list *ca_certs = init_buffer_list();
+  push_buffer_list(ca_certs, ca_cert, ca_cert_length, 0);
+
+  struct buffer_list *intermediate_certs = init_buffer_list();
+  push_buffer_list(intermediate_certs, intermediate_cert, signed_intermediate_cert_length, 0);
+
+  int verified = crypto_verify_cert(untrusted_cert, signed_untrusted_cert_length, intermediate_certs, ca_certs);
   assert_int_equal(verified, 0);
 
-  sys_free(sign_key);
-  sys_free(cert);
+  verified = crypto_verify_cert(untrusted_cert, signed_untrusted_cert_length, ca_certs, intermediate_certs);
+  assert_int_equal(verified, -1);
 
-  // sign_key_length = crypto_generate_eckey(&sign_key);
-  // cert_length = crypto_generate_eccert(&cert_meta, cert_key, cert_key_length, &cert);
-  // signed_cert_length = crypto_sign_cert(sign_key, sign_key_length, cert_length, &cert);
-  
-  // verified = crypto_verify_cert(cert, signed_cert_length, certs, NULL);
-  // assert_int_equal(verified, -1);
-
-  // sys_free(sign_key);
-  // sys_free(cert);
-  free_buffer_list(certs);
-  free_keyvalue_list(sign_meta.issuer);
-  free_keyvalue_list(sign_meta.subject);
-  free_keyvalue_list(cert_meta.issuer);
-  free_keyvalue_list(cert_meta.subject);
-
+  free_buffer_list(intermediate_certs);
+  free_buffer_list(ca_certs);
+  sys_free(untrusted_key);
+  sys_free(untrusted_cert);
+  sys_free(intermediate_key);
+  // sys_free(intermediate_cert);
+  sys_free(ca_key);
+  // sys_free(ca_cert);
+  free_keyvalue_list(untrusted_meta.issuer);
+  free_keyvalue_list(untrusted_meta.subject);
+  free_keyvalue_list(intermediate_meta.issuer);
+  free_keyvalue_list(intermediate_meta.subject);
+  free_keyvalue_list(ca_meta.issuer);
+  free_keyvalue_list(ca_meta.subject);
 }
 
 static void test_crypto_sign_cms(void **state) {

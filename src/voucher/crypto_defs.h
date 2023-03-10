@@ -43,6 +43,8 @@ struct crypto_cert_meta {
   */
   struct keyvalue_list *issuer;
   struct keyvalue_list *subject;
+
+  char *basic_constraints;
 };
 
 /* Types of certificate to be used in certificate store */
@@ -159,13 +161,16 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
  *
  * Caller is responsible for freeing the output certificate
  *
- * @param[in] key The private key buffer (DER format)
- * @param[in] key_length The private key buffer
+ * @param[in] sign_key The private signing key buffer (DER format) 
+ * @param[in] sign_key_length The private signing key buffer length
+ * @param[in] ca_cert The CA or intermediate certificate buffer (DER format) 
+ * @param[in] ca_cert_length The CA or intermediate certificate buffer length
  * @param[in] cert_length The certificate buffer length
  * @param[out] cert The input and signed certificate buffer (DER format)
  * @return ssize_t the size of the signed certificate buffer, -1 on failure
  */
-ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length,
+ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
+                         const uint8_t *ca_cert, const size_t ca_cert_length,
                          const size_t cert_length, uint8_t **cert);
 
 /**
@@ -259,4 +264,5 @@ ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
                           const struct buffer_list *store, uint8_t **data,
                           struct buffer_list **out_certs);
 
+void x509_to_tmpfile(const uint8_t *cert, const size_t length, const char *filename);
 #endif

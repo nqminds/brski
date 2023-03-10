@@ -34,6 +34,21 @@
 
 #include "crypto_defs.h"
 
+void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
+  BIO *out = BIO_new_file(filename, "w");
+  if (out == NULL) {
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+    return;
+  }
+
+  if (!SMIME_write_CMS(out, cms, NULL, CMS_TEXT)) {
+    log_error("SMIME_write_CMS fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
+  }
+
+  BIO_free(out);
+}
+
 static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
   *key = NULL;
 
@@ -297,6 +312,25 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   return ctx;
 }
 
+void x509_to_tmpfile(const uint8_t *cert, const size_t length, const char *filename) {
+  X509 *x509 = crypto_cert2context(cert, length);
+
+  BIO *out = BIO_new_file(filename, "w");
+  if (out == NULL) {
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+    X509_free(x509);
+    return;
+  }
+
+  if (!PEM_write_bio_X509(out, x509)) {
+    log_error("PEM_write_bio_X509 fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
+  }
+
+  BIO_free(out);
+  X509_free(x509);
+}
+
 void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY *pkey = (EVP_PKEY *)ctx;
   EVP_PKEY_free(pkey);
@@ -413,6 +447,22 @@ static int set_certificate_meta(X509 *x509,
     }
 
     X509_NAME_free(name);
+  }
+
+  if (meta->basic_constraints != NULL) {
+    X509_EXTENSION *ex = X509V3_EXT_conf_nid(NULL, NULL, NID_basic_constraints, meta->basic_constraints);
+    if (ex == NULL) {
+      log_error("X509V3_EXT_conf_nid fail");
+      return -1;
+    }
+
+    if (!X509_add_ext(x509, ex, -1)) {
+      log_error("X509_add_ext fail");
+      X509_EXTENSION_free(ex);
+      return -1;  
+    }
+
+    X509_EXTENSION_free(ex);
   }
 
   return 0;
@@ -569,9 +619,10 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
   return length;
 }
 
-ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length,
+ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
+                         const uint8_t *ca_cert, const size_t ca_cert_length,
                          const size_t cert_length, uint8_t **cert) {
-  if (key == NULL) {
+  if (sign_key == NULL) {
     log_error("key param is NULL");
     return -1;
   }
@@ -586,42 +637,65 @@ ssize_t crypto_sign_cert(const uint8_t *key, const size_t key_length,
     return -1;
   }
 
-  EVP_PKEY *pkey = (EVP_PKEY *)crypto_key2context(key, key_length);
-  if (pkey == NULL) {
+  EVP_PKEY *sign_pkey = (EVP_PKEY *)crypto_key2context(sign_key, sign_key_length);
+  if (sign_pkey == NULL) {
     log_error("crypto_key2context fail");
+    return -1;
+  }
+
+  X509 *x509_ca = crypto_cert2context(ca_cert, ca_cert_length);
+  if (x509_ca == NULL) {
+    log_error("crypto_cert2context fail");
+    EVP_PKEY_free(sign_pkey);
     return -1;
   }
 
   X509 *x509 = crypto_cert2context(*cert, cert_length);
   if (x509 == NULL) {
     log_error("crypto_cert2context fail");
-    EVP_PKEY_free(pkey);
+    X509_free(x509_ca);
+    EVP_PKEY_free(sign_pkey);
     return -1;
   }
 
-  if (!X509_sign(x509, (EVP_PKEY *)pkey, EVP_sha256())) {
-    log_error("X509_sign fail with code=%s", ERR_reason_error_string(ERR_get_error()));
-    X509_free(x509);
-    EVP_PKEY_free(pkey);
-    return -1;
+  X509_NAME *ca_subject = X509_get_subject_name(x509_ca);
+  if (ca_subject == NULL) {
+    log_error("X509_get_subject_name fail with code=%lu", ERR_get_error());
+    goto crypto_sign_cert_fail;
+  }
+
+  /* Set the issuer to the one from the CA/intermediate certificate */
+  if (!X509_set_issuer_name(x509, ca_subject)) {
+    log_error("X509_set_issuer_name fail with code=%lu", ERR_get_error());
+    goto crypto_sign_cert_fail;
+  }
+
+  if (sign_sha256_certificate(x509, (EVP_PKEY *)sign_pkey) < 0) {
+    log_error("sign_sha256_certificate fail");
+    goto crypto_sign_cert_fail;
   }
 
   uint8_t *out_cert = NULL;
   ssize_t out_cert_length = cert_to_derbuf(x509, &out_cert);
   if (out_cert_length < 0) {
     log_error("cert_to_derbuf fail");
-    X509_free(x509);
-    EVP_PKEY_free(pkey);
-    return -1;
+    goto crypto_sign_cert_fail;
   }
 
   /* Assign the new signed certificate */
   sys_free(*cert);
   *cert = out_cert;
 
+  X509_free(x509_ca);
   X509_free(x509);
-  EVP_PKEY_free(pkey);
+  EVP_PKEY_free(sign_pkey);
   return out_cert_length;
+
+crypto_sign_cert_fail:
+  X509_free(x509_ca);
+  X509_free(x509);
+  EVP_PKEY_free(sign_pkey);
+  return -1;
 }
 
 static STACK_OF(X509) * get_certificate_stack(const struct buffer_list *certs) {
@@ -785,22 +859,6 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const stru
   sk_X509_pop_free(out_cert_stack, X509_free);
   X509_free(x509);
   return ret;
-}
-
-void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
-  BIO *out = BIO_new_file(filename, "w");
-  if (out == NULL) {
-    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
-    return;
-  }
-
-  if (!SMIME_write_CMS(out, cms, NULL, CMS_TEXT)) {
-    log_error("SMIME_write_CMS fail with code=%s",
-              ERR_reason_error_string(ERR_get_error()));
-    BIO_free(out);
-  }
-
-  BIO_free(out);
 }
 
 static ssize_t sign_withkey_cms(const uint8_t *data, const size_t data_length,
