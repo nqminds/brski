@@ -474,6 +474,7 @@ int verify_masa_pledge_voucher(
     const char *masa_pledge_voucher_cms, const char *serial_number,
     const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct buffer_list *domain_store,
     const struct buffer_list *pledge_verify_certs,
     const struct buffer_list *pledge_verify_store,
     struct buffer_list **pledge_out_certs,
@@ -561,10 +562,26 @@ int verify_masa_pledge_voucher(
      * pinned-domain-cert trust anchor from the voucher, then the TLS connection
      * is discarded, and the pledge abandons attempts to bootstrap with this
      * discovered registrar.*/
-    /* Here verify the registrar_tsl_cert */
-    /* begin */
-    (void)registrar_tls_cert;
-    /* end */
+    struct VoucherBinaryArray cert_copy = {0};
+    if (copy_binary_array(&cert_copy, masa_pinned_domain_cert) < 0) {
+      log_error("copy_binary_array fail");
+      goto verify_masa_pledge_voucher_fail;
+    }
+
+    struct buffer_list *intermediate_certs = init_buffer_list();
+    if (push_buffer_list(intermediate_certs, cert_copy.array, cert_copy.length, 0) < 0) {
+      log_error("push_buffer_list fail");
+      free_buffer_list(intermediate_certs);
+      goto verify_masa_pledge_voucher_fail;
+    }
+
+    if (crypto_verify_cert(registrar_tls_cert->array, registrar_tls_cert->length, intermediate_certs, domain_store) < 0) {
+      log_error("crypto_verify_cert fail");
+      free_buffer_list(intermediate_certs);
+      goto verify_masa_pledge_voucher_fail;
+    }
+    free_buffer_list(intermediate_certs);
+
     if (copy_binary_array(pinned_domain_cert, masa_pinned_domain_cert) < 0) {
       log_error("copy_binary_array fail");
       goto verify_masa_pledge_voucher_fail;

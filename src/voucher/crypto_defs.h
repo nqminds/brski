@@ -176,7 +176,7 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
  * @param[in] cert_length The certificate buffer length
  * @param[in] certs The list of certificate buffers to verify the certificate 
  * @param[in] store The list of trusted certificate store to verify the certificate
- * @return int 1 if certificate is signed by the certs/store, 0 if it's not signed and -1 on failure
+ * @return int 0 if certificate is signed by the certs/store, -1 on failure
  */
 int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const struct buffer_list *certs,
                           const struct buffer_list *store);

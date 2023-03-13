@@ -28,6 +28,8 @@ static struct VoucherBinaryArray test_pinned_domain_key = {};
 static struct VoucherBinaryArray test_pinned_domain_cert = {};
 static struct VoucherBinaryArray test_ca_key = {};
 static struct VoucherBinaryArray test_ca_cert = {};
+static struct buffer_list *test_domain_store = NULL;
+static struct buffer_list *test_pinned_domain_certs = NULL;
 
 struct buffer_list *create_cert_list(void) {
   struct buffer_list *certs = init_buffer_list();
@@ -523,12 +525,32 @@ static void test_verify_masa_pledge_voucher(void **state) {
   (void)state;
   struct VoucherBinaryArray registrar_tls_key = {};
   struct VoucherBinaryArray registrar_tls_cert = {};
-  struct crypto_cert_meta registrar_tls_meta = create_cert_meta();
+  struct crypto_cert_meta registrar_tls_meta = {.serial_number = 12346,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL,
+                                  .basic_constraints = "CA:false"};
+  registrar_tls_meta.issuer = init_keyvalue_list();
+  registrar_tls_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("CN"),
+                     sys_strdup("registrar-tls-cert"));
+
   registrar_tls_key.length =
       (size_t)crypto_generate_eckey(&registrar_tls_key.array);
   registrar_tls_cert.length = (size_t)crypto_generate_eccert(
       &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
       &registrar_tls_cert.array);
+  
+  /* Sign the registrar TLS certificate with the pinned domain private key */
+  ssize_t signed_registrar_tls_cert_length = crypto_sign_cert(test_pinned_domain_key.array, test_pinned_domain_key.length, test_pinned_domain_cert.array, test_pinned_domain_cert.length, registrar_tls_cert.length, &registrar_tls_cert.array);
+  assert_true(signed_registrar_tls_cert_length > 0);
+  assert_non_null(registrar_tls_cert.array);
+  registrar_tls_cert.length = signed_registrar_tls_cert_length;
+
+  int verified = crypto_verify_cert(registrar_tls_cert.array, registrar_tls_cert.length, test_pinned_domain_certs, test_domain_store);
+  assert_int_equal(verified, 0);
 
   char *masa_pledge_voucher_cms = create_masa_pledge_voucher(&registrar_tls_cert);
   
@@ -537,10 +559,11 @@ static void test_verify_masa_pledge_voucher(void **state) {
   const struct VoucherBinaryArray nonce = {.array = nonce_array, .length = 5};
   struct VoucherBinaryArray pinned_domain_cert = {};
 
-  int verified = verify_masa_pledge_voucher(
+  verified = verify_masa_pledge_voucher(
     masa_pledge_voucher_cms, "AA:BB:CC:DD:EE:FF",
     &nonce,
     &registrar_tls_cert,
+    test_domain_store,
     NULL,
     NULL,
     NULL,
@@ -604,6 +627,15 @@ static int test_group_setup(void **state) {
   assert_non_null(test_pinned_domain_cert.array);
   test_pinned_domain_cert.length = signed_pinned_domain_cert_length;
 
+  test_domain_store = init_buffer_list();
+  push_buffer_list(test_domain_store, test_ca_cert.array, test_ca_cert.length, 0);
+  
+  int verified = crypto_verify_cert(test_pinned_domain_cert.array, test_pinned_domain_cert.length, test_domain_store, NULL);
+  assert_int_equal(verified, 0);
+  
+  test_pinned_domain_certs = init_buffer_list();
+  push_buffer_list(test_pinned_domain_certs, test_pinned_domain_cert.array, test_pinned_domain_cert.length, 0);
+
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);
   free_keyvalue_list(ca_meta.issuer);
@@ -616,9 +648,11 @@ static int test_group_teardown(void **state) {
   (void)state;
 
   free_binary_array(&test_pinned_domain_key);
-  free_binary_array(&test_pinned_domain_cert);
+//   free_binary_array(&test_pinned_domain_cert);
   free_binary_array(&test_ca_key);
-  free_binary_array(&test_ca_cert);
+  free_buffer_list(test_pinned_domain_certs);
+  free_buffer_list(test_domain_store);
+//   free_binary_array(&test_ca_cert);
   return 0;
 }
 
