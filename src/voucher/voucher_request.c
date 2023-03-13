@@ -260,6 +260,7 @@ sign_voucher_request_fail:
 char *
 sign_masa_pledge_voucher(const char *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
+                         const void *user_ctx,
                          const struct VoucherBinaryArray *masa_sign_cert,
                          const struct VoucherBinaryArray *masa_sign_key,
                          const struct buffer_list *registrar_verify_certs,
@@ -392,7 +393,8 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
 
   /* Allocates a pinned domain certificate for a pledge */
   struct VoucherBinaryArray pinned_domain_cert = {0};
-  if (cb((const char *)pledge_voucher_serial_number, registrar_certs,
+  if (cb((const char *)*pledge_voucher_serial_number, registrar_certs,
+         user_ctx,
          &pinned_domain_cert) < 0) {
     log_error("Failure to allocate pinned domain certificate");
     goto sign_masa_pledge_voucher_fail;
@@ -411,7 +413,7 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
   /* The serial-number as provided in the voucher-request. Also see
    * Section 5.5.5. */
   if (set_attr_voucher(masa_pledge_voucher, ATTR_SERIAL_NUMBER,
-                       pledge_voucher_serial_number) < 0) {
+                       *pledge_voucher_serial_number) < 0) {
     log_error("set_attr_voucher fail");
     goto sign_masa_pledge_voucher_fail;
   }
@@ -482,8 +484,6 @@ int verify_masa_pledge_voucher(
     return -1;
   }
 
-  *pledge_out_certs = NULL;
-
   /* The pledge MUST verify the voucher signature using the
    * manufacturer-installed trust anchor(s) associated with the manufacturer's
    * MASA (this is likely included in the pledge's firmware). Management of the
@@ -510,7 +510,7 @@ int verify_masa_pledge_voucher(
 
     if (strcmp(serial_number, *voucher_serial_number) != 0) {
       log_error("pledge voucher serial number differs from masa pledge voucher "
-                "serial number");
+                "serial number=%s", *voucher_serial_number);
       goto verify_masa_pledge_voucher_fail;
     }
   } else {
@@ -574,12 +574,10 @@ int verify_masa_pledge_voucher(
     goto verify_masa_pledge_voucher_fail;
   }
 
-  free_buffer_list(*pledge_out_certs);
   free_voucher(masa_pledge_voucher);
   return 0;
 
 verify_masa_pledge_voucher_fail:
-  free_buffer_list(*pledge_out_certs);
   free_voucher(masa_pledge_voucher);
   return -1;
 }

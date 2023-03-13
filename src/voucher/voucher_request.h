@@ -94,6 +94,7 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
  * @param[in] serial_number The serial number string from the idevid certificate
  * @param[in] additional_registrar_certs The list of additional registrar
  * certificates (DER format) appended to the voucher request cms
+ * @param[in] user_ctx The callback function user context
  * @param[out] voucher_req_fn The output pinned domain certificate (DER
  * format) for the pledge
  * @return 0 on success, -1 on failure
@@ -101,6 +102,7 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
 typedef int (*voucher_req_fn)(
     const char *serial_number,
     const struct buffer_list *additional_registrar_certs,
+    const void *user_ctx,
     struct VoucherBinaryArray *pinned_domain_cert);
 
 /**
@@ -114,6 +116,7 @@ typedef int (*voucher_req_fn)(
  * @param[in] expires_on Time when the new voucher will expire
  * @param[in] voucher_req_fn The callback function to output pinned domain
  * certificate (DER format)
+ * @param[in] user_ctx The callback function user context
  * @param[in] masa_sign_cert The certificate buffer for signing (DER
  * format) the masa voucher
  * @param[in] masa_sign_key The private key buffer of the certificate (DER
@@ -134,6 +137,7 @@ typedef int (*voucher_req_fn)(
 __must_free char *
 sign_masa_pledge_voucher(const char *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
+                         const void *user_ctx,
                          const struct VoucherBinaryArray *masa_sign_cert,
                          const struct VoucherBinaryArray *masa_sign_key,
                          const struct buffer_list *registrar_verify_certs,
