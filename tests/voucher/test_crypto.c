@@ -445,7 +445,6 @@ static void test_crypto_sign_cert(void **state) {
 static void test_crypto_verify_cert(void **state) {
   (void)state;
 
-
   uint8_t *ca_key = NULL;
   ssize_t ca_key_length = crypto_generate_eckey(&ca_key);
 

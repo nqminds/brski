@@ -26,6 +26,8 @@
 
 static struct VoucherBinaryArray test_pinned_domain_key = {};
 static struct VoucherBinaryArray test_pinned_domain_cert = {};
+static struct VoucherBinaryArray test_ca_key = {};
+static struct VoucherBinaryArray test_ca_cert = {};
 
 struct buffer_list *create_cert_list(void) {
   struct buffer_list *certs = init_buffer_list();
@@ -546,7 +548,7 @@ static void test_verify_masa_pledge_voucher(void **state) {
 
   assert_int_equal(verified, 0);
   assert_int_equal(compare_binary_array(&pinned_domain_cert, &test_pinned_domain_cert), 1);
-  
+
   sys_free(masa_pledge_voucher_cms);
   free_binary_array(&registrar_tls_key);
   free_binary_array(&registrar_tls_cert);
@@ -558,14 +560,54 @@ static void test_verify_masa_pledge_voucher(void **state) {
 static int test_group_setup(void **state) {
   (void)state;
 
-  struct crypto_cert_meta pinned_domain_meta = create_cert_meta();
+  /* Generate ROOT CA for MASA */
+  test_ca_key.length = crypto_generate_eckey(&test_ca_key.array);
+
+  struct crypto_cert_meta ca_meta = {.serial_number = 1,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL,
+                                  .basic_constraints = "critical,CA:TRUE"};
+
+  ca_meta.issuer = init_keyvalue_list();
+  ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"),
+                     sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"),
+                     sys_strdup("catest"));
+
+  test_ca_cert.length = crypto_generate_eccert(&ca_meta, test_ca_key.array, test_ca_key.length, &test_ca_cert.array);
+
+  /* Generate the test pinned domain certificate */ 
+  struct crypto_cert_meta pinned_domain_meta = {.serial_number = 12345,
+                                  .not_before = 0,
+                                  .not_after = 1234567,
+                                  .issuer = NULL,
+                                  .subject = NULL,
+                                  .basic_constraints = "CA:false"};
+  pinned_domain_meta.issuer = init_keyvalue_list();
+  pinned_domain_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("CN"),
+                     sys_strdup("pinned-domain-cert"));
+
   test_pinned_domain_key.length = (size_t)crypto_generate_eckey(&test_pinned_domain_key.array);
   test_pinned_domain_cert.length = (size_t)crypto_generate_eccert(
       &pinned_domain_meta, test_pinned_domain_key.array, test_pinned_domain_key.length,
       &test_pinned_domain_cert.array);
 
+  ssize_t signed_pinned_domain_cert_length = crypto_sign_cert(test_ca_key.array, test_ca_key.length, test_ca_cert.array, test_ca_cert.length, test_pinned_domain_cert.length, &test_pinned_domain_cert.array);
+  assert_true(signed_pinned_domain_cert_length > 0);
+  assert_non_null(test_pinned_domain_cert.array);
+  test_pinned_domain_cert.length = signed_pinned_domain_cert_length;
+
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);
+  free_keyvalue_list(ca_meta.issuer);
+  free_keyvalue_list(ca_meta.subject);
 
   return 0;
 }
@@ -575,7 +617,8 @@ static int test_group_teardown(void **state) {
 
   free_binary_array(&test_pinned_domain_key);
   free_binary_array(&test_pinned_domain_cert);
-
+  free_binary_array(&test_ca_key);
+  free_binary_array(&test_ca_cert);
   return 0;
 }
 
