@@ -32,12 +32,10 @@ struct VoucherBinaryArray {
 ```
 If `array == NULL` and `length == 0` the array is considered to be emtpy.
 
-### Voucher binary array API
-
-#### Copies a binary arrays to a destination
-
+### Copies a binary arrays to a destination
 ```c
-int copy_binary_array(struct VoucherBinaryArray *const dst, const struct VoucherBinaryArray *src);
+int copy_binary_array(struct VoucherBinaryArray *const dst,
+                      const struct VoucherBinaryArray *src);
 ```
 Parameters:
 * `dst` - The destination binary array and
@@ -45,12 +43,12 @@ Parameters:
 
 Return:
 
-`0` on success and `-1` on failure.
+`0` on success or `-1` on failure.
 
-#### Compare two binary arrays
-
+### Compare two binary arrays
 ```c
-int compare_binary_array(const struct VoucherBinaryArray *src, const struct VoucherBinaryArray *dst);
+int compare_binary_array(const struct VoucherBinaryArray *src,
+                         const struct VoucherBinaryArray *dst);
 ```
 Parameters:
 * `src` - The source binary array and
@@ -58,12 +56,11 @@ Parameters:
 
 Return:
 
-`1` if arrays are equal, `0` otherwise and `-1` on failure.
+`1` if arrays are equal, `0` otherwise or `-1` on failure.
 
-#### Frees a binary array content, i.e., frees the `array` element of the `struct VoucherBinaryArray`.
-
+### Frees a binary array content, i.e., frees the `array` element of the `struct VoucherBinaryArray`.
 ```c
-void free_binary_array(struct VoucherBinaryArray *bin_array);
+void free_binary_array(struct VoucherBinaryArray *array);
 ```
 Parameters:
 * `array` - The binary array
@@ -86,3 +83,358 @@ enum VoucherAttributes {
   ATTR_PROXIMITY_REGISTRAR_CERT
 };
 ```
+
+## Voucher creation/manipulation API
+
+### Initialises an empty voucher structure
+```c
+struct Voucher *init_voucher(void);
+```
+
+Return:
+
+Pointer to an allocated voucher or NULL on failure.
+
+### Frees an allocated voucher structure
+```c
+void free_voucher(struct Voucher *voucher);
+```
+
+Parameters:
+* `voucher` - The allocated voucher structure.
+
+### Sets the value for a voucher bool attribute
+```c
+int set_attr_bool_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr,
+                          const bool value);
+```
+
+Parameters:
+* `voucher` - The allocated voucher structure,
+* `attr` - The voucher attribute corresponding to the `bool` value and
+* `value` - The `bool` attribute value.
+
+Return:
+
+`0` on success or `-1` on failure.
+
+### Sets the value for a voucher time attribute
+```c
+int set_attr_time_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr,
+                          const struct tm *value);
+```
+Parameters:
+* `voucher` - The allocated voucher structure,
+* `attr` - The voucher attribute corresponding to the `struct tm` value and
+* `value` - The `struct tm` attribute value.
+
+Return:
+
+`0` on success or `-1` on failure.
+
+### Sets the value for a voucher enum attribute
+```c
+int set_attr_enum_voucher(struct Voucher *voucher,
+                          const enum VoucherAttributes attr,
+                          const int value);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure,
+* `attr` - The enum voucher attribute and
+* `value` - The enum attribute value.
+
+Return:
+
+`0` on success or `-1` on failure.
+
+The enum attribute API sets the value for the assertion attribute with one of the following values as described in [RFC8995](https://www.rfc-editor.org/rfc/rfc8995.html):
+```c
+enum VoucherAssertions {
+  VOUCHER_ASSERTION_NONE = 0,
+  VOUCHER_ASSERTION_VERIFIED = 1,
+  VOUCHER_ASSERTION_LOGGED = 2,
+  VOUCHER_ASSERTION_PROXIMITY = 3
+};
+```
+
+### Sets the value for a voucher string attribute
+```c
+int set_attr_str_voucher(struct Voucher *voucher,
+                         const enum VoucherAttributes attr,
+                         const char *value);
+```
+
+Parameters:
+* `voucher` - The allocated voucher structure,
+* `attr` - The string voucher attribute name and
+* `value` - The string attribute value.
+
+Return:
+
+`0` on success or `-1` on failure.
+
+ ### Sets the value for a voucher array attribute
+```c
+int set_attr_array_voucher(struct Voucher *voucher,
+                           const enum VoucherAttributes attr,
+                           const struct VoucherBinaryArray *value);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure,
+* `attr` - The array voucher attribute name and
+* `value` - The array attribute value.
+
+
+Return:
+
+`0` on success or `-1` on failure.
+
+
+### Sets the value for a voucher attribute
+```c
+int set_attr_voucher(struct Voucher *voucher,
+                     const enum VoucherAttributes attr,
+                     ...);
+```
+
+Parameters:
+
+* `voucher` - The allocated voucher structure,
+* `attr` - The array voucher attribute name and
+* `__VA_ARGS__` - The variable list of attribute values:
+    *  `ATTR_CREATED_ON` => `struct tm *`
+    *  `ATTR_EXPIRES_ON` => `struct tm *`
+    *  `ATTR_LAST_RENEWAL_DATE` => `struct tm *`
+    *  `ATTR_ASSERTION` => `enum VoucherAssertions`
+    *  `ATTR_SERIAL_NUMBER` => `char *`
+    *  `ATTR_IDEVID_ISSUER` => `struct VoucherBinaryArray *`
+    *  `ATTR_PINNED_DOMAIN_CERT` => `struct VoucherBinaryArray *`
+    *  `ATTR_NONCE` => `struct VoucherBinaryArray *`
+    *  `ATTR_PRIOR_SIGNED_VOUCHER_REQUEST` => `struct VoucherBinaryArray *`
+    *  `ATTR_PROXIMITY_REGISTRAR_CERT` => `struct VoucherBinaryArray *`
+    *  `ATTR_DOMAIN_CERT_REVOCATION_CHECKS` => `bool`
+
+Return:
+
+`0` on success or `-1` on failure.
+
+### Clears a voucher attribute
+```c
+int clear_attr_voucher(struct Voucher *voucher,
+                       const enum VoucherAttributes attr);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure and
+* `attr` - The attribute name
+
+Return:
+
+`0` on success or `-1` on failure.
+
+### Checks if a voucher attribute is non empty
+```c
+bool is_attr_voucher_nonempty(const struct Voucher *voucher,
+                              const enum VoucherAttributes attr);
+```
+
+* `voucher` - The allocated voucher structure and
+* `attr` - The attribute name.
+
+Return:
+
+`true` if non empty or `false` otherwise.
+
+### Gets the pointer to the value for a voucher bool attribute
+```c
+const bool *get_attr_bool_voucher(const struct Voucher *voucher,
+                                  const enum VoucherAttributes attr);
+```
+Parameters:
+* `voucher` - The allocated voucher structure and
+* `attr` - The bool voucher attribute.
+
+Return:
+
+Pointer to the `bool` value or `NULL` on failure.
+
+### Gets the pointer to the value for a voucher time attribute
+```c
+const struct tm *get_attr_time_voucher(struct Voucher *voucher,
+                                       const enum VoucherAttributes attr);
+```
+
+Parameters:
+
+* `voucher` - The allocated voucher structure and
+* `attr` - The time voucher attribute.
+
+Return:
+
+Pointer to the time value or `NULL` on failure.
+
+### Gets the pointer to the value for a voucher enum attribute
+```c
+const int *get_attr_enum_voucher(struct Voucher *voucher,
+                                 const enum VoucherAttributes attr);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure and
+* `attr` - The enum voucher attribute.
+
+Return:
+
+Pointer to the enum value or `NULL` on failure.
+
+### Gets the pointer to the value for a voucher string attribute
+```c
+const char *const *get_attr_str_voucher(struct Voucher *voucher,
+                                        const enum VoucherAttributes attr);
+```
+
+Parameters:
+
+* `voucher` - The allocated voucher structure and
+* `attr` - The string voucher attribute name.
+
+Return:
+
+Pointer to the string value or `NULL` on failure.
+
+Example:
+```c
+const char *const *serial_number = get_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER);
+if (strcmp(*serial_number, "12345")) {}
+```
+
+### Gets the pointer to the value for a voucher array attribute
+```c
+const struct VoucherBinaryArray * get_attr_array_voucher(struct Voucher *voucher,
+                                                         const enum VoucherAttributes attr);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure and
+* `attr` - The array voucher attribute name.
+
+Return:
+
+Pointer to the array value or `NULL` on failure.
+
+## Voucher serialization and deserialization API
+
+### Serializes a voucher to a string
+```c
+__must_free char *serialize_voucher(const struct Voucher *voucher);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure.
+
+Return:
+
+Serialized voucher to string or `NULL` on failure.
+
+Example:
+
+```c
+struct Voucher *voucher = init_voucher();
+
+set_attr_enum_voucher(voucher, ATTR_ASSERTION, VOUCHER_ASSERTION_PROXIMITY);
+
+char *serialized = serialize_voucher(voucher);
+
+/* ... */
+
+free(serialized);
+free_voucher(voucher);
+```
+
+### Deserializes a json string buffer to a voucher structure
+```c
+struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
+```
+
+Paramaters:
+
+* `json` - The json buffer and
+* `length` - The json buffer length.
+
+Return:
+
+Voucher structure or `NULL` on failure.
+
+Example:
+
+```c
+struct Voucher *voucher = deserialize_voucher(json, json_length);
+
+/* ... */
+
+free_voucher(voucher);
+```
+
+## Voucher CMS signing and verification API
+
+### Buffer linked list definition
+
+The `struct buffer_list` is a linked list that holds a pointer to a heap allocated buffer, the length and a generic flags integer.
+
+```c
+struct buffer_list {
+  uint8_t *buf;        /**< The buffer (heap allocated) */
+  size_t length;       /**< The buffer length (heap allocated) */
+  int flags;           /**< The generic buffer flags */
+  struct dl_list list; /**< List definition */
+};
+```
+
+Parameters:
+
+* `buf` - pointer to the heap allocated buffer,
+* `length` - the buffer length,
+* `flags` - the generic buffer flags and
+* `list` - the structure containg the previous and next element of the linked list.
+
+### Initializes the buffer list
+```c
+struct buffer_list *init_buffer_list(void);
+```
+
+Return:
+
+Initialised buffer list or `NULL` on failure.
+
+### Frees the buffer list and all of its elements
+```c
+void free_buffer_list(struct buffer_list *buf_list);
+```
+
+Parameters:
+
+* `buf_list` - The buffer list to free.
+
+### Pushes a heap allocated buffer into the list and assigns the flags
+```c
+int push_buffer_list(struct buffer_list *buf_list,
+                     uint8_t *const buf,
+                     const size_t length,
+                     const int flags);
+```
+
+Parameters:
+
+* `buf_list` - The buffer list structure,
+* `buf` - The buffer pointer to insert,
+* `length` - The buffer length and
+* `flags` - The buffer flags.
+
+Return:
+
+`0` on success or `-1` on failure.
+

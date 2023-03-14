@@ -72,7 +72,8 @@ static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
 
   int length = i2d_X509(x509, cert);
   if (length < 0) {
-    log_error("i2d_X509 fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    log_error("i2d_X509 fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
     return -1;
   }
 
@@ -312,7 +313,8 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   return ctx;
 }
 
-void x509_to_tmpfile(const uint8_t *cert, const size_t length, const char *filename) {
+void x509_to_tmpfile(const uint8_t *cert, const size_t length,
+                     const char *filename) {
   X509 *x509 = crypto_cert2context(cert, length);
 
   BIO *out = BIO_new_file(filename, "w");
@@ -450,7 +452,8 @@ static int set_certificate_meta(X509 *x509,
   }
 
   if (meta->basic_constraints != NULL) {
-    X509_EXTENSION *ex = X509V3_EXT_conf_nid(NULL, NULL, NID_basic_constraints, meta->basic_constraints);
+    X509_EXTENSION *ex = X509V3_EXT_conf_nid(NULL, NULL, NID_basic_constraints,
+                                             meta->basic_constraints);
     if (ex == NULL) {
       log_error("X509V3_EXT_conf_nid fail");
       return -1;
@@ -459,7 +462,7 @@ static int set_certificate_meta(X509 *x509,
     if (!X509_add_ext(x509, ex, -1)) {
       log_error("X509_add_ext fail");
       X509_EXTENSION_free(ex);
-      return -1;  
+      return -1;
     }
 
     X509_EXTENSION_free(ex);
@@ -627,7 +630,8 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
     return -1;
   }
 
-  EVP_PKEY *sign_pkey = (EVP_PKEY *)crypto_key2context(sign_key, sign_key_length);
+  EVP_PKEY *sign_pkey =
+      (EVP_PKEY *)crypto_key2context(sign_key, sign_key_length);
   if (sign_pkey == NULL) {
     log_error("crypto_key2context fail");
     return -1;
@@ -794,8 +798,9 @@ static X509_STORE *get_certificate_store(const struct buffer_list *store,
   return x509_store;
 }
 
-int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const struct buffer_list *certs,
-                          const struct buffer_list *store) {
+int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
+                       const struct buffer_list *certs,
+                       const struct buffer_list *store) {
   if (cert == NULL) {
     log_error("cert param is NULL");
     return -1;
@@ -832,7 +837,8 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const stru
     }
   }
 
-  STACK_OF(X509) *out_cert_stack = X509_build_chain(x509, cert_stack, cert_store, 0, NULL, NULL);
+  STACK_OF(X509) *out_cert_stack =
+      X509_build_chain(x509, cert_stack, cert_store, 0, NULL, NULL);
   if (out_cert_stack == NULL) {
     log_error("X509_build_chain fail");
   }

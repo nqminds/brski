@@ -4,7 +4,7 @@ The Bootstrapping Remote Secure Key Infrastructure (BRSKI) protocol provides a s
 
 For more information on the `BRSKI` protocol, please check the [RFC8995](https://www.rfc-editor.org/rfc/rfc8995.html).
 
-This repo provides a reference implementation for the `BRSKI` protocol in `C` language. 
+This repo provides a reference implementation for the `BRSKI` protocol in `C` language.
 
 ## Features
 1. Voucher artifact implementation as per [RFC8366](https://www.rfc-editor.org/info/rfc8366),
@@ -89,4 +89,4 @@ To run each test individually, the test binaries can be located in `./build/test
 ## Developer Documentation
 
 1. Voucher artifact library [API](./docs/voucher.md).
-2. `BRSKI` voucher request [API](./docs/brski.md). 
+2. `BRSKI` voucher request [API](./docs/brski.md).

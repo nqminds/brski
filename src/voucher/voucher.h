@@ -343,7 +343,7 @@ int set_attr_array_voucher(struct Voucher *voucher,
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] attr The array voucher attribute name
- * @param[in] __VA_ARGS__ The list of attribute values:
+ * @param[in] __VA_ARGS__ The variable list of attribute values:
  *  ATTR_CREATED_ON => struct tm *
  *  ATTR_EXPIRES_ON => struct tm *
  *  ATTR_LAST_RENEWAL_DATE => struct tm *
@@ -443,13 +443,13 @@ get_attr_array_voucher(struct Voucher *voucher,
 __must_free char *serialize_voucher(const struct Voucher *voucher);
 
 /**
- * @brief Deserializes a json buffer to a voucher
+ * @brief Deserializes a json string buffer to a voucher structure
  *
  * Caller is responsible for freeing the voucher struct
  *
- * @param[in] json The json buffer
- * @param[in] length The json buffer length
- * @return struct Voucher * voucher, NULL on failure
+ * @param[in] json The json string buffer
+ * @param[in] length The json string buffer length
+ * @return struct Voucher * voucher structure, NULL on failure
  */
 struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 

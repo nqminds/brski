@@ -329,7 +329,7 @@ int voucher_req_fun(const char *serial_number,
                     struct VoucherBinaryArray *pinned_domain_cert) {
   (void)serial_number;
   (void)additional_registrar_certs;
-  
+
   assert_string_equal(serial_number, (char *)user_ctx);
 
   copy_binary_array(pinned_domain_cert, &test_pinned_domain_cert);
@@ -390,12 +390,12 @@ static void test_sign_masa_pledge_voucher(void **state) {
   masa_sign_cert.length = (size_t)crypto_generate_eccert(
       &masa_sign_meta, masa_sign_key.array, masa_sign_key.length,
       &masa_sign_cert.array);
-  
+
   /* Pass in the user_ctx the serial number to compare with */
-  const void *user_ctx = (const void*) "AA:BB:CC:DD:EE:FF";
+  const void *user_ctx = (const void *)"AA:BB:CC:DD:EE:FF";
   char *cms = sign_masa_pledge_voucher(
-      voucher_request_cms, &expires_on, voucher_req_fun, user_ctx, &masa_sign_cert,
-      &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
+      voucher_request_cms, &expires_on, voucher_req_fun, user_ctx,
+      &masa_sign_cert, &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
 
   assert_non_null(cms);
 
@@ -455,7 +455,8 @@ static void test_sign_masa_pledge_voucher(void **state) {
   free_keyvalue_list(masa_sign_meta.subject);
 }
 
-static char * create_masa_pledge_voucher(struct VoucherBinaryArray *registrar_tls_cert) {
+static char *
+create_masa_pledge_voucher(struct VoucherBinaryArray *registrar_tls_cert) {
   uint8_t nonce_array[] = {1, 2, 3, 4, 5};
   struct VoucherBinaryArray nonce = {.array = nonce_array, .length = 5};
   char *pledge_voucher_request_cms = create_pledge_voucher_request(
@@ -501,8 +502,8 @@ static char * create_masa_pledge_voucher(struct VoucherBinaryArray *registrar_tl
 
   const void *user_ctx = (const void *)"AA:BB:CC:DD:EE:FF";
   char *cms = sign_masa_pledge_voucher(
-      voucher_request_cms, &expires_on, voucher_req_fun, user_ctx, &masa_sign_cert,
-      &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
+      voucher_request_cms, &expires_on, voucher_req_fun, user_ctx,
+      &masa_sign_cert, &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
 
   sys_free(voucher_request_cms);
 
@@ -526,14 +527,16 @@ static void test_verify_masa_pledge_voucher(void **state) {
   struct VoucherBinaryArray registrar_tls_key = {};
   struct VoucherBinaryArray registrar_tls_cert = {};
   struct crypto_cert_meta registrar_tls_meta = {.serial_number = 12346,
-                                  .not_before = 0,
-                                  .not_after = 1234567,
-                                  .issuer = NULL,
-                                  .subject = NULL,
-                                  .basic_constraints = "CA:false"};
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
   registrar_tls_meta.issuer = init_keyvalue_list();
   registrar_tls_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("C"),
+                     sys_strdup("IE"));
   push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("CN"),
                      sys_strdup("registrar-tls-cert"));
 
@@ -542,42 +545,42 @@ static void test_verify_masa_pledge_voucher(void **state) {
   registrar_tls_cert.length = (size_t)crypto_generate_eccert(
       &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
       &registrar_tls_cert.array);
-  
+
   /* Sign the registrar TLS certificate with the pinned domain private key */
-  ssize_t signed_registrar_tls_cert_length = crypto_sign_cert(test_pinned_domain_key.array, test_pinned_domain_key.length, test_pinned_domain_cert.array, test_pinned_domain_cert.length, registrar_tls_cert.length, &registrar_tls_cert.array);
+  ssize_t signed_registrar_tls_cert_length = crypto_sign_cert(
+      test_pinned_domain_key.array, test_pinned_domain_key.length,
+      test_pinned_domain_cert.array, test_pinned_domain_cert.length,
+      registrar_tls_cert.length, &registrar_tls_cert.array);
   assert_true(signed_registrar_tls_cert_length > 0);
   assert_non_null(registrar_tls_cert.array);
   registrar_tls_cert.length = signed_registrar_tls_cert_length;
 
-  int verified = crypto_verify_cert(registrar_tls_cert.array, registrar_tls_cert.length, test_pinned_domain_certs, test_domain_store);
+  int verified =
+      crypto_verify_cert(registrar_tls_cert.array, registrar_tls_cert.length,
+                         test_pinned_domain_certs, test_domain_store);
   assert_int_equal(verified, 0);
 
-  char *masa_pledge_voucher_cms = create_masa_pledge_voucher(&registrar_tls_cert);
-  
+  char *masa_pledge_voucher_cms =
+      create_masa_pledge_voucher(&registrar_tls_cert);
+
   assert_non_null(masa_pledge_voucher_cms);
   uint8_t nonce_array[] = {1, 2, 3, 4, 5};
   const struct VoucherBinaryArray nonce = {.array = nonce_array, .length = 5};
   struct VoucherBinaryArray pinned_domain_cert = {};
 
   verified = verify_masa_pledge_voucher(
-    masa_pledge_voucher_cms, "AA:BB:CC:DD:EE:FF",
-    &nonce,
-    &registrar_tls_cert,
-    test_domain_store,
-    NULL,
-    NULL,
-    NULL,
-    &pinned_domain_cert);
+      masa_pledge_voucher_cms, "AA:BB:CC:DD:EE:FF", &nonce, &registrar_tls_cert,
+      test_domain_store, NULL, NULL, NULL, &pinned_domain_cert);
 
   assert_int_equal(verified, 0);
-  assert_int_equal(compare_binary_array(&pinned_domain_cert, &test_pinned_domain_cert), 1);
+  assert_int_equal(
+      compare_binary_array(&pinned_domain_cert, &test_pinned_domain_cert), 1);
 
   sys_free(masa_pledge_voucher_cms);
   free_binary_array(&registrar_tls_key);
   free_binary_array(&registrar_tls_cert);
   free_keyvalue_list(registrar_tls_meta.issuer);
   free_keyvalue_list(registrar_tls_meta.subject);
-
 }
 
 static int test_group_setup(void **state) {
@@ -587,54 +590,63 @@ static int test_group_setup(void **state) {
   test_ca_key.length = crypto_generate_eckey(&test_ca_key.array);
 
   struct crypto_cert_meta ca_meta = {.serial_number = 1,
-                                  .not_before = 0,
-                                  .not_after = 1234567,
-                                  .issuer = NULL,
-                                  .subject = NULL,
-                                  .basic_constraints = "critical,CA:TRUE"};
+                                     .not_before = 0,
+                                     .not_after = 1234567,
+                                     .issuer = NULL,
+                                     .subject = NULL,
+                                     .basic_constraints = "critical,CA:TRUE"};
 
   ca_meta.issuer = init_keyvalue_list();
   ca_meta.subject = init_keyvalue_list();
   push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"),
-                     sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"), sys_strdup("catest"));
   push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"),
-                     sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"), sys_strdup("catest"));
 
-  test_ca_cert.length = crypto_generate_eccert(&ca_meta, test_ca_key.array, test_ca_key.length, &test_ca_cert.array);
+  test_ca_cert.length = crypto_generate_eccert(
+      &ca_meta, test_ca_key.array, test_ca_key.length, &test_ca_cert.array);
 
-  /* Generate the test pinned domain certificate */ 
+  /* Generate the test pinned domain certificate */
   struct crypto_cert_meta pinned_domain_meta = {.serial_number = 12345,
-                                  .not_before = 0,
-                                  .not_after = 1234567,
-                                  .issuer = NULL,
-                                  .subject = NULL,
-                                  .basic_constraints = "CA:false"};
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
   pinned_domain_meta.issuer = init_keyvalue_list();
   pinned_domain_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("C"), sys_strdup("IE"));
+  push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("C"),
+                     sys_strdup("IE"));
   push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("CN"),
                      sys_strdup("pinned-domain-cert"));
 
-  test_pinned_domain_key.length = (size_t)crypto_generate_eckey(&test_pinned_domain_key.array);
+  test_pinned_domain_key.length =
+      (size_t)crypto_generate_eckey(&test_pinned_domain_key.array);
   test_pinned_domain_cert.length = (size_t)crypto_generate_eccert(
-      &pinned_domain_meta, test_pinned_domain_key.array, test_pinned_domain_key.length,
-      &test_pinned_domain_cert.array);
+      &pinned_domain_meta, test_pinned_domain_key.array,
+      test_pinned_domain_key.length, &test_pinned_domain_cert.array);
 
-  ssize_t signed_pinned_domain_cert_length = crypto_sign_cert(test_ca_key.array, test_ca_key.length, test_ca_cert.array, test_ca_cert.length, test_pinned_domain_cert.length, &test_pinned_domain_cert.array);
+  ssize_t signed_pinned_domain_cert_length = crypto_sign_cert(
+      test_ca_key.array, test_ca_key.length, test_ca_cert.array,
+      test_ca_cert.length, test_pinned_domain_cert.length,
+      &test_pinned_domain_cert.array);
   assert_true(signed_pinned_domain_cert_length > 0);
   assert_non_null(test_pinned_domain_cert.array);
   test_pinned_domain_cert.length = signed_pinned_domain_cert_length;
 
   test_domain_store = init_buffer_list();
-  push_buffer_list(test_domain_store, test_ca_cert.array, test_ca_cert.length, 0);
-  
-  int verified = crypto_verify_cert(test_pinned_domain_cert.array, test_pinned_domain_cert.length, test_domain_store, NULL);
+  push_buffer_list(test_domain_store, test_ca_cert.array, test_ca_cert.length,
+                   0);
+
+  int verified = crypto_verify_cert(test_pinned_domain_cert.array,
+                                    test_pinned_domain_cert.length,
+                                    test_domain_store, NULL);
   assert_int_equal(verified, 0);
-  
+
   test_pinned_domain_certs = init_buffer_list();
-  push_buffer_list(test_pinned_domain_certs, test_pinned_domain_cert.array, test_pinned_domain_cert.length, 0);
+  push_buffer_list(test_pinned_domain_certs, test_pinned_domain_cert.array,
+                   test_pinned_domain_cert.length, 0);
 
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);
@@ -664,8 +676,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_sign_pledge_voucher_request),
       cmocka_unit_test(test_sign_voucher_request),
       cmocka_unit_test(test_sign_masa_pledge_voucher),
-      cmocka_unit_test(test_verify_masa_pledge_voucher)
-  };
+      cmocka_unit_test(test_verify_masa_pledge_voucher)};
 
   return cmocka_run_group_tests(tests, test_group_setup, test_group_teardown);
 }

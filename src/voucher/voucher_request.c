@@ -393,8 +393,7 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
 
   /* Allocates a pinned domain certificate for a pledge */
   struct VoucherBinaryArray pinned_domain_cert = {0};
-  if (cb((const char *)*pledge_voucher_serial_number, registrar_certs,
-         user_ctx,
+  if (cb((const char *)*pledge_voucher_serial_number, registrar_certs, user_ctx,
          &pinned_domain_cert) < 0) {
     log_error("Failure to allocate pinned domain certificate");
     goto sign_masa_pledge_voucher_fail;
@@ -511,7 +510,8 @@ int verify_masa_pledge_voucher(
 
     if (strcmp(serial_number, *voucher_serial_number) != 0) {
       log_error("pledge voucher serial number differs from masa pledge voucher "
-                "serial number=%s", *voucher_serial_number);
+                "serial number=%s",
+                *voucher_serial_number);
       goto verify_masa_pledge_voucher_fail;
     }
   } else {
@@ -569,13 +569,16 @@ int verify_masa_pledge_voucher(
     }
 
     struct buffer_list *intermediate_certs = init_buffer_list();
-    if (push_buffer_list(intermediate_certs, cert_copy.array, cert_copy.length, 0) < 0) {
+    if (push_buffer_list(intermediate_certs, cert_copy.array, cert_copy.length,
+                         0) < 0) {
       log_error("push_buffer_list fail");
       free_buffer_list(intermediate_certs);
       goto verify_masa_pledge_voucher_fail;
     }
 
-    if (crypto_verify_cert(registrar_tls_cert->array, registrar_tls_cert->length, intermediate_certs, domain_store) < 0) {
+    if (crypto_verify_cert(registrar_tls_cert->array,
+                           registrar_tls_cert->length, intermediate_certs,
+                           domain_store) < 0) {
       log_error("crypto_verify_cert fail");
       free_buffer_list(intermediate_certs);
       goto verify_masa_pledge_voucher_fail;

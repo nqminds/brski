@@ -133,7 +133,7 @@ struct buffer_list {
 
 /**
  * @brief Initializes the buffer list
- *
+ *Parameters
  * @return struct buffer_list * initialised buffer list, NULL on failure
  */
 struct buffer_list *init_buffer_list(void);
@@ -146,7 +146,7 @@ struct buffer_list *init_buffer_list(void);
 void free_buffer_list(struct buffer_list *buf_list);
 
 /**
- * @brief Pushes the buffer pointer into the list
+ * @brief Pushes a heap allocated buffer into the list
  * and assigns the flags
  *
  * @param[in] buf_list The buffer list

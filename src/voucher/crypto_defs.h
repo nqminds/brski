@@ -157,9 +157,9 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
  *
  * Caller is responsible for freeing the output certificate
  *
- * @param[in] sign_key The private signing key buffer (DER format) 
+ * @param[in] sign_key The private signing key buffer (DER format)
  * @param[in] sign_key_length The private signing key buffer length
- * @param[in] ca_cert The CA or intermediate certificate buffer (DER format) 
+ * @param[in] ca_cert The CA or intermediate certificate buffer (DER format)
  * @param[in] ca_cert_length The CA or intermediate certificate buffer length
  * @param[in] cert_length The certificate buffer length
  * @param[out] cert The input and signed certificate buffer (DER format)
@@ -174,12 +174,14 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
  *
  * @param[in] cert The certificate buffer (DER format) to be verified
  * @param[in] cert_length The certificate buffer length
- * @param[in] certs The list of certificate buffers to verify the certificate 
- * @param[in] store The list of trusted certificate store to verify the certificate
+ * @param[in] certs The list of certificate buffers to verify the certificate
+ * @param[in] store The list of trusted certificate store to verify the
+ * certificate
  * @return int 0 if certificate is signed by the certs/store, -1 on failure
  */
-int crypto_verify_cert(const uint8_t *cert, const size_t cert_length, const struct buffer_list *certs,
-                          const struct buffer_list *store);
+int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
+                       const struct buffer_list *certs,
+                       const struct buffer_list *store);
 /**
  * @brief Signs a buffer using CMS for an EC private key
  *
@@ -260,5 +262,6 @@ ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
                           const struct buffer_list *store, uint8_t **data,
                           struct buffer_list **out_certs);
 
-void x509_to_tmpfile(const uint8_t *cert, const size_t length, const char *filename);
+void x509_to_tmpfile(const uint8_t *cert, const size_t length,
+                     const char *filename);
 #endif

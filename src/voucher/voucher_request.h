@@ -101,8 +101,7 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
  */
 typedef int (*voucher_req_fn)(
     const char *serial_number,
-    const struct buffer_list *additional_registrar_certs,
-    const void *user_ctx,
+    const struct buffer_list *additional_registrar_certs, const void *user_ctx,
     struct VoucherBinaryArray *pinned_domain_cert);
 
 /**
@@ -159,7 +158,8 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
  * @param[in] registrar_tls_cert The first certificate in the TLS server
  * "certificate_list" sequence presented by the registrar to the pledge (array
  * in DER format)
- * @param[in] domain_store The list of trusted certificate for store (DER format) to verify the pinned domain certificate
+ * @param[in] domain_store The list of trusted certificate for store (DER
+ * format) to verify the pinned domain certificate
  * @param[in] pledge_verify_certs The list of additional certificate buffers
  * (DER format) to verify the masa pledge voucher
  * @param[in] pledge_verify_store The list of trusted certificate for store
