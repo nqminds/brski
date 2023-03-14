@@ -249,6 +249,13 @@ int copy_binary_array(struct VoucherBinaryArray *const dst,
                       const struct VoucherBinaryArray *src);
 
 /**
+ * @brief Frees a binary array content
+ *
+ * @param[in] array The binary array
+ */
+void free_binary_array(struct VoucherBinaryArray *array);
+
+/**
  * @brief Compare two binary arrays
  *
  * @param[in] src The source binary array
@@ -273,13 +280,6 @@ struct Voucher *init_voucher(void);
  * @param[in] voucher The allocated voucher structure
  */
 void free_voucher(struct Voucher *voucher);
-
-/**
- * @brief Frees a binary array content
- *
- * @param[in] voucher The binary array
- */
-void free_binary_array(struct VoucherBinaryArray *bin_array);
 
 /**
  * @brief Sets the value for a voucher bool attribute
