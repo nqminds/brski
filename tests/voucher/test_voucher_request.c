@@ -648,11 +648,9 @@ static int test_group_teardown(void **state) {
   (void)state;
 
   free_binary_array(&test_pinned_domain_key);
-//   free_binary_array(&test_pinned_domain_cert);
   free_binary_array(&test_ca_key);
   free_buffer_list(test_pinned_domain_certs);
   free_buffer_list(test_domain_store);
-//   free_binary_array(&test_ca_cert);
   return 0;
 }
 
