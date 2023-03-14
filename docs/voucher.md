@@ -438,3 +438,103 @@ Return:
 
 `0` on success or `-1` on failure.
 
+### Signs a voucher using CMS with an Elliptic Curve private key and output to PEM (base64)
+```c
+__must_free char *sign_eccms_voucher(struct Voucher *voucher,
+                                     const struct VoucherBinaryArray *cert,
+                                     const struct VoucherBinaryArray *key,
+                                     const struct buffer_list *certs);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure,
+* `cert` - The certificate buffer (`DER` format) correspoding to the private key,
+* `key` - The Elliptic Curve private key buffer (`DER` format) of the certificate and
+* `certs` - The `struct buffer_list` of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none).
+
+Return:
+
+The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
+
+### Signs a voucher using CMS with a RSA private key and output to PEM (base64)
+```c
+__must_free char *sign_rsacms_voucher(struct Voucher *voucher,
+                                      const struct VoucherBinaryArray *cert,
+                                      const struct VoucherBinaryArray *key,
+                                      const struct buffer_list *certs);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure,
+* `cert` - The certificate buffer (`DER` format) correspoding to the private key,
+* `key` - The RSA private key buffer (`DER` format) of the certificate and
+* `certs` - The `struct buffer_list` of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none)
+
+Return:
+
+The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
+
+### Signs a voucher using CMS with a private key (detected automatically) and output to PEM (base64)
+```c
+__must_free char *sign_cms_voucher(struct Voucher *voucher,
+                                   const struct VoucherBinaryArray *cert,
+                                   const struct VoucherBinaryArray *key,
+                                   const struct buffer_list *certs);
+```
+Parameters:
+
+* `voucher` - The allocated voucher structure,
+* `cert` - The certificate buffer (`DER` format) correspoding to the private key,
+* `key` - The private key buffer (`DER` format) of the certificate and
+* `certs` - The list of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none)
+
+Return:
+
+The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
+
+### Verifies a CMS buffer and extracts the voucher structure, and the list included certificates
+```c
+struct Voucher *verify_cms_voucher(const char *cms,
+                                   const struct buffer_list *certs,
+                                   const struct buffer_list *store,
+                                   struct buffer_list **out_certs);
+```
+
+Parameters:
+
+* `cms` - The CMS buffer string in PEM(base64) format,
+* `certs` - The list of additional certificate buffers (DER format),
+* `store` - The list of trusted certificate for store (DER format). The list's flags is encoded with the  following enum:
+    ```c
+    enum CRYPTO_CERTIFICATE_TYPE {
+      CRYPTO_CERTIFICATE_VALID = 0,
+      CRYPTO_CERTIFICATE_CRL,
+    };
+    ```
+    where `CRYPTO_CERTIFICATE_VALID` denotes a standard certificate buffer and `CRYPTO_CERTIFICATE_CRL` denotes a certificate rebocation type buffer, and
+* `out_certs` - The output list of certificates (NULL for empty) from the CMS structure.
+
+Return:
+
+The verified voucher structrure or  NULL on failure.
+
+Example:
+```c
+struct buffer_list *out_certs = NULL;
+struct Voucher *voucher = verify_cms_voucher(cms, certs, store, &out_certs);
+
+struct buffer_list *cert = NULL;
+
+dl_list_for_each(el, &out_certs->list, struct buffer_list, list) {
+  uint8_t cert_array = cert->buf;
+  uint8_t cert_length = cert->length;
+
+  /* ... */
+
+}
+
+/* ... */
+
+free_voucher(voucher);
+free_buffer_list(out_certs);
+```
