@@ -503,8 +503,8 @@ struct Voucher *verify_cms_voucher(const char *cms,
 Parameters:
 
 * `cms` - The CMS buffer string in PEM(base64) format,
-* `certs` - The list of additional certificate buffers (DER format),
-* `store` - The list of trusted certificate for store (DER format). The list's flags is encoded with the  following enum:
+* `certs` - The list of additional certificate buffers (`DER` format),
+* `store` - The list of trusted certificate for store (`DER` format). The list's flags is encoded with the  following enum:
     ```c
     enum CRYPTO_CERTIFICATE_TYPE {
       CRYPTO_CERTIFICATE_VALID = 0,

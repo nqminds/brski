@@ -18,24 +18,21 @@
 #include "voucher.h"
 
 /**
- * @brief Signs a pledge voucher request using CMS for a private key (type
+ * @brief Signs a pledge-voucher request using CMS with a private key (type
  * detected automatically) and output to base64 (PEM format)
  *
  * Caller is responsible for freeing the output
  *
  * @param[in] created_on Time when the pledge is created
  * @param[in] serial_number The serial number string of the pledge
- * @param[in] nonce Random/pseudo-random nonce
+ * @param[in] nonce Random/pseudo-random nonce (NULL for empty)
  * @param[in] registrar_tls_cert The first certificate in the TLS server
- * "certificate_list" sequence presented by the registrar to the pledge (array
- * in DER format)
- * @param[in] pledge_sign_cert The certificate buffer for signing (DER
- * format) the pledge voucher
- * @param[in] pledge_sign_key The private key buffer of the certificate (array
- * in DER format)
- * @param[in] additional_pledge_certs The list of additional pledge certificate
- * (DER format) to append to cms
- * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * "certificate_list" sequence presented by the registrar to the pledge (DER format)
+ * @param[in] pledge_sign_cert The certificate buffer (DER format) corresponding to the signing private key
+ * @param[in] pledge_sign_key The private key buffer (DER format) for signing the pledge-voucher request
+ * @param[in] additional_pledge_certs The list of additional pledge certificates
+ * (DER format) to append to CMS (NULL for empty)
+ * @return char* the signed pledge-voucher CMS structure in base64 (PEM format), NULL on
  * failure
  */
 __must_free char *
@@ -48,30 +45,28 @@ sign_pledge_voucher_request(const struct tm *created_on,
                             const struct buffer_list *additional_pledge_certs);
 
 /**
- * @brief Signs a voucher request using CMS for a private key (type detected
+ * @brief Signs a voucher request using CMS with a private key (type detected
  * automatically) and output to base64 (PEM format)
  *
  * Caller is responsible for freeing the output string
  *
- * @param[in] pledge_voucher_request_cms The signed pledge voucher request cms
+ * @param[in] pledge_voucher_request_cms The signed pledge-voucher request CMS
  * structure in base64 (PEM format)
  * @param[in] created_on Time when the voucher request is created
  * @param[in] serial_number The serial number string from the idevid certificate
  * @param[in] idevid_issuer The idevid issuer from the idevid certificate
  * @param[in] registrar_tls_cert The first certificate in the TLS server
- * "certificate_list" sequence presented by the registrar to the pledge (DER
- * format)
- * @param[in] registrar_sign_cert The certificate buffer for signing (
- * DER format) the voucher request
- * @param[in] registrar_sign_key The private key buffer of the certificate
- * (DER format)
- * @param[in] pledge_verify_certs The list of additional certificate buffers
- * (DER format) to verify the pledge voucher from the pledge
- * @param[in] pledge_verify_store The list of trusted certificate for store (DER
- * format) to verify the pledge voucher from the pledge
+ * "certificate_list" sequence presented by the registrar to the pledge (DER format)
+ * @param[in] registrar_sign_cert The certificate buffer (
+ * DER format) corresponding to the signing private key
+ * @param[in] registrar_sign_key The private key buffer (DER format) for signing the voucher request
+ * @param[in] pledge_verify_certs The list of intermediate certificate buffers
+ * (DER format) to verify the pledge-voucher request (NULL for empty)
+ * @param[in] pledge_verify_store The list of trusted certificate buffers (DER
+ * format) to verify the pledge-voucher request (NULL for empty)
  * @param[in] additional_registrar_certs The list of additional registrar
- * certificates (DER format) to append to cms
- * @return char* the signed cms structure in base64 (PEM format), NULL on
+ * certificate buffers (DER format) to append to CMS (NULL for empty)
+ * @return char* the signed CMS structure in base64 (PEM format), NULL on
  * failure
  */
 __must_free char *
