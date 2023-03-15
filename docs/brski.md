@@ -90,7 +90,7 @@ Parameters:
 * `registrar_sign_cert` - The certificate buffer (`DER` format) corresponding to the signing private key,
 * `registrar_sign_key` - The private key buffer (`DER` format) for signing the voucher request,
 * `pledge_verify_certs` - The list of intermediate certificate buffers (`DER` format) to verify the pledge-voucher request (`NULL` for empty),
-* `pledge_verify_store` - The list of trusted certificate buffers (`DER` format) to verify the pledge-voucher request (`NULL` for empty). The lists' flags are described in [verify_cms_voucher](./voucher.md#verifies-a-cms-buffer-and-extracts-the-voucher-structure-and-the-list-included-certificates) function and
+* `pledge_verify_store` - The list of trusted certificate buffers (`DER` format) to verify the pledge-voucher request (`NULL` for empty). The lists' flags are described in [verify_cms_voucher](./voucher.md#verify_cms_voucher) function and
 * `additional_registrar_certs` - The list of additional registrar certificate buffers (`DER` format) to append to CMS (`NULL` for empty).
 
 Return:
