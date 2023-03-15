@@ -460,9 +460,11 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
  * Caller is responsible for freeing the output string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer (DER format) correspoding to the private key
- * @param[in] key The EC private key buffer (DER format) of the certificate
- * @param[in] certs The list of additional certificate buffers (DER format) to be included in the CMS (NULL if none)
+ * @param[in] cert The certificate buffer (DER format) correspoding to the
+ * private key
+ * @param[in] key The Elliptic Curve private key buffer (DER format) of the certificate
+ * @param[in] certs The list of additional certificate buffers (DER format) to
+ * be included in the CMS (NULL if none)
  * @return char* the signed CMS structure in base64 (PEM format), NULL on
  * failure
  */
@@ -478,9 +480,11 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
  * Caller is responsible for freeing output PEM string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer (DER format) correspoding to the private key
+ * @param[in] cert The certificate buffer (DER format) correspoding to the
+ * private key
  * @param[in] key The RSA private key buffer (DER format) of the certificate
- * @param[in] certs The list of additional certificate buffers (DER format) to be included in the CMS (NULL if none)
+ * @param[in] certs The list of additional certificate buffers (DER format) to
+ * be included in the CMS (NULL if none)
  * @return char* the signed CMS structure in base64 (PEM format), NULL on
  * failure
  */
@@ -496,9 +500,11 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
  * Caller is responsible for freeing the output string
  *
  * @param[in] voucher The allocated voucher structure
- * @param[in] cert The certificate buffer (DER format) correspoding to the private key
+ * @param[in] cert The certificate buffer (DER format) correspoding to the
+ * private key
  * @param[in] key The private key buffer (DER format) of the certificate
- * @param[in] certs The list of additional certificate buffers (DER format) to be included in the CMS (NULL if none)
+ * @param[in] certs The list of additional certificate buffers (DER format) to
+ * be included in the CMS (NULL if none)
  * @return char* the signed CMS structure in base64 (PEM format), NULL on
  * failure
  */
@@ -508,14 +514,16 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
                                    const struct buffer_list *certs);
 
 /**
- * @brief Verifies a CMS buffer and extracts the voucher structure, and the list included certificates
+ * @brief Verifies a CMS buffer and extracts the voucher structure, and the list
+ * included certificates
  *
  * Caller is responsible for freeing the voucher and output certs buffer
  *
  * @param[in] cms The CMS buffer string in base64 (PEM format) format
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[in] store The list of trusted certificate for store (DER format)
- * @param[out] out_certs The output list of certs (NULL for empty) from the CMS structure
+ * @param[out] out_certs The output list of certs (NULL for empty) from the CMS
+ * structure
  * @return struct Voucher * the verified voucher, NULL on failure
  */
 struct Voucher *verify_cms_voucher(const char *cms,

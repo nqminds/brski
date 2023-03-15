@@ -68,7 +68,7 @@ enum CRYPTO_CERTIFICATE_TYPE {
 ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
 
 /**
- * @brief Generate a private EC key of the type prime256v1
+ * @brief Generate a private Elliptic Curve key of the type prime256v1
  * The generated key is binary (DER) raw format
  *
  * Caller is responsible for freeing the key buffer
@@ -79,7 +79,7 @@ ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
 ssize_t crypto_generate_eckey(uint8_t **key);
 
 /**
- * @brief Maps a private EC key to a key context
+ * @brief Maps a private Elliptic Curve key to a key context
  *
  * Caller is responsible for freeing the key context
  *
@@ -120,13 +120,13 @@ CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length);
 void crypto_free_keycontext(CRYPTO_KEY ctx);
 
 /**
- * @brief Generate a certificate and self sign with a EC private key
+ * @brief Generate a certificate and self sign with a Elliptic Curve private key
  * using sha256
  *
  * Caller is responsible for freeing the cert buffer
  *
  * @param[in] meta The certificate metadata
- * @param[in] key The EC private/public key buffer
+ * @param[in] key The Elliptic Curve private/public key buffer
  * @param[in] key_length The private key buffer length
  * @param[out] cert The output certificate buffer
  * @return ssize_t the size of the certificate buffer, -1 on failure
@@ -183,7 +183,7 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
                        const struct buffer_list *certs,
                        const struct buffer_list *store);
 /**
- * @brief Signs a buffer using CMS for an EC private key
+ * @brief Signs a buffer using CMS for an Elliptic Curve private key
  *
  * Caller is responsible for freeing the cms buffer
  *
@@ -191,7 +191,7 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
  * @param[in] data_length The data buffer length
  * @param[in] cert The certificate buffer for signing
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The EC private key buffer of the certificate
+ * @param[in] key The Elliptic Curve private key buffer of the certificate
  * @param[in] key_length The length of the private key buffer
  * @param[in] certs The list of additional certificate buffers
  * @param[out] cms The output cms buffer
@@ -212,7 +212,7 @@ ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
  * @param[in] data_length The data buffer length
  * @param[in] cert The certificate buffer for signing
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The EC private key buffer of the certificate
+ * @param[in] key The Elliptic Curve private key buffer of the certificate
  * @param[in] key_length The length of the private key buffer
  * @param[in] certs The list of additional certificate buffers
  * @param[out] cms The output cms buffer
