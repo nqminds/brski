@@ -39,12 +39,11 @@ Copies a binary arrays to a destination.
 int copy_binary_array(struct VoucherBinaryArray *const dst,
                       const struct VoucherBinaryArray *src);
 ```
-Parameters:
+**Parameters**:
 * `dst` - The destination binary array and
 * `src` - The source binary array.
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `compare_binary_array`
@@ -54,12 +53,11 @@ Compare two binary arrays.
 int compare_binary_array(const struct VoucherBinaryArray *src,
                          const struct VoucherBinaryArray *dst);
 ```
-Parameters:
+**Parameters**:
 * `src` - The source binary array and
 * `dst` - The destination binary array.
 
-Return:
-
+**Return**:
 `1` if arrays are equal, `0` otherwise or `-1` on failure.
 
 ### `free_binary_array`
@@ -67,7 +65,7 @@ Frees a binary array content, i.e., frees the `array` element of the `struct Vou
 ```c
 void free_binary_array(struct VoucherBinaryArray *array);
 ```
-Parameters:
+**Parameters**:
 * `array` - The binary array
 
 ## Voucher attributes
@@ -97,8 +95,7 @@ Initialises an empty voucher structure.
 struct Voucher *init_voucher(void);
 ```
 
-Return:
-
+**Return**:
 Pointer to an allocated voucher or NULL on failure.
 
 ### `free_voucher`
@@ -107,7 +104,7 @@ Frees an allocated voucher structure.
 void free_voucher(struct Voucher *voucher);
 ```
 
-Parameters:
+**Parameters**:
 * `voucher` - The allocated voucher structure.
 
 ### `set_attr_bool_voucher`
@@ -118,13 +115,12 @@ int set_attr_bool_voucher(struct Voucher *voucher,
                           const bool value);
 ```
 
-Parameters:
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The voucher attribute corresponding to the `bool` value and
 * `value` - The `bool` attribute value.
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `set_attr_time_voucher`
@@ -134,13 +130,12 @@ int set_attr_time_voucher(struct Voucher *voucher,
                           const enum VoucherAttributes attr,
                           const struct tm *value);
 ```
-Parameters:
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The voucher attribute corresponding to the `struct tm` value and
 * `value` - The `struct tm` attribute value.
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `set_attr_enum_voucher`
@@ -150,14 +145,12 @@ int set_attr_enum_voucher(struct Voucher *voucher,
                           const enum VoucherAttributes attr,
                           const int value);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The enum voucher attribute and
 * `value` - The enum attribute value.
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 The enum attribute API sets the value for the assertion attribute with one of the following values as described in [RFC8995](https://www.rfc-editor.org/rfc/rfc8995.html):
@@ -178,13 +171,12 @@ int set_attr_str_voucher(struct Voucher *voucher,
                          const char *value);
 ```
 
-Parameters:
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The string voucher attribute name and
 * `value` - The string attribute value.
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `set_attr_array_voucher`
@@ -194,15 +186,12 @@ int set_attr_array_voucher(struct Voucher *voucher,
                            const enum VoucherAttributes attr,
                            const struct VoucherBinaryArray *value);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The array voucher attribute name and
 * `value` - The array attribute value.
 
-
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 
@@ -214,8 +203,7 @@ int set_attr_voucher(struct Voucher *voucher,
                      ...);
 ```
 
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The array voucher attribute name and
 * `__VA_ARGS__` - The variable list of attribute values:
@@ -231,8 +219,7 @@ Parameters:
     *  `ATTR_PROXIMITY_REGISTRAR_CERT` => `struct VoucherBinaryArray *`
     *  `ATTR_DOMAIN_CERT_REVOCATION_CHECKS` => `bool`
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `clear_attr_voucher`
@@ -241,13 +228,11 @@ Clears a voucher attribute.
 int clear_attr_voucher(struct Voucher *voucher,
                        const enum VoucherAttributes attr);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The attribute name
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `is_attr_voucher_nonempty`
@@ -257,11 +242,11 @@ bool is_attr_voucher_nonempty(const struct Voucher *voucher,
                               const enum VoucherAttributes attr);
 ```
 
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The attribute name.
 
-Return:
-
+**Return**:
 `true` if non empty or `false` otherwise.
 
 ### `get_attr_bool_voucher`
@@ -270,12 +255,11 @@ Gets the pointer to the value for a voucher bool attribute.
 const bool *get_attr_bool_voucher(const struct Voucher *voucher,
                                   const enum VoucherAttributes attr);
 ```
-Parameters:
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The bool voucher attribute.
 
-Return:
-
+**Return**:
 Pointer to the `bool` value or `NULL` on failure.
 
 ### `get_attr_time_voucher`
@@ -285,13 +269,11 @@ const struct tm *get_attr_time_voucher(struct Voucher *voucher,
                                        const enum VoucherAttributes attr);
 ```
 
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The time voucher attribute.
 
-Return:
-
+**Return**:
 Pointer to the time value or `NULL` on failure.
 
 ### `get_attr_enum_voucher`
@@ -300,13 +282,11 @@ Gets the pointer to the value for a voucher enum attribute.
 const int *get_attr_enum_voucher(struct Voucher *voucher,
                                  const enum VoucherAttributes attr);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The enum voucher attribute.
 
-Return:
-
+**Return**:
 Pointer to the enum value or `NULL` on failure.
 
 ### `get_attr_str_voucher`
@@ -316,16 +296,14 @@ const char *const *get_attr_str_voucher(struct Voucher *voucher,
                                         const enum VoucherAttributes attr);
 ```
 
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The string voucher attribute name.
 
-Return:
-
+**Return**:
 Pointer to the string value or `NULL` on failure.
 
-Example:
+**Example**:
 ```c
 const char *const *serial_number = get_attr_str_voucher(voucher, ATTR_SERIAL_NUMBER);
 if (strcmp(*serial_number, "12345")) {}
@@ -337,13 +315,11 @@ Gets the pointer to the value for a voucher array attribute.
 const struct VoucherBinaryArray * get_attr_array_voucher(struct Voucher *voucher,
                                                          const enum VoucherAttributes attr);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The array voucher attribute name.
 
-Return:
-
+**Return**:
 Pointer to the array value or `NULL` on failure.
 
 ## Voucher serialization and deserialization API
@@ -353,16 +329,13 @@ Serializes a voucher to a string.
 ```c
 __must_free char *serialize_voucher(const struct Voucher *voucher);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure.
 
-Return:
-
+**Return**:
 Serialized voucher to string or `NULL` on failure.
 
-Example:
-
+**Example**:
 ```c
 struct Voucher *voucher = init_voucher();
 
@@ -382,17 +355,14 @@ Deserializes a json string buffer to a voucher structure.
 struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 ```
 
-Paramaters:
-
+**Paramaters**:
 * `json` - The json buffer and
 * `length` - The json buffer length.
 
-Return:
-
+**Return**:
 Voucher structure or `NULL` on failure.
 
-Example:
-
+**Example**:
 ```c
 struct Voucher *voucher = deserialize_voucher(json, json_length);
 
@@ -416,8 +386,7 @@ struct buffer_list {
 };
 ```
 
-Parameters:
-
+**Parameters**:
 * `buf` - pointer to the heap allocated buffer,
 * `length` - the buffer length,
 * `flags` - the generic buffer flags and
@@ -429,8 +398,7 @@ Initializes the buffer list.
 struct buffer_list *init_buffer_list(void);
 ```
 
-Return:
-
+**Return**:
 Initialised buffer list or `NULL` on failure.
 
 ### `free_buffer_list`
@@ -439,8 +407,7 @@ Frees the buffer list and all of its elements.
 void free_buffer_list(struct buffer_list *buf_list);
 ```
 
-Parameters:
-
+**Parameters**:
 * `buf_list` - The buffer list to free.
 
 ### `push_buffer_list`
@@ -452,15 +419,13 @@ int push_buffer_list(struct buffer_list *buf_list,
                      const int flags);
 ```
 
-Parameters:
-
+**Parameters**:
 * `buf_list` - The buffer list structure,
 * `buf` - The buffer pointer to insert,
 * `length` - The buffer length and
 * `flags` - The buffer flags.
 
-Return:
-
+**Return**:
 `0` on success or `-1` on failure.
 
 ### `sign_eccms_voucher`
@@ -471,15 +436,13 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *key,
                                      const struct buffer_list *certs);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `cert` - The certificate buffer (`DER` format) correspoding to the private key,
 * `key` - The Elliptic Curve private key buffer (`DER` format) of the certificate and
 * `certs` - The `struct buffer_list` of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none).
 
-Return:
-
+**Return**:
 The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
 
 ### `sign_rsacms_voucher`
@@ -490,15 +453,13 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *key,
                                       const struct buffer_list *certs);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `cert` - The certificate buffer (`DER` format) correspoding to the private key,
 * `key` - The RSA private key buffer (`DER` format) of the certificate and
 * `certs` - The `struct buffer_list` of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none)
 
-Return:
-
+**Return**:
 The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
 
 ### `sign_cms_voucher`
@@ -509,15 +470,13 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);
 ```
-Parameters:
-
+**Parameters**:
 * `voucher` - The allocated voucher structure,
 * `cert` - The certificate buffer (`DER` format) correspoding to the private key,
 * `key` - The private key buffer (`DER` format) of the certificate and
 * `certs` - The list of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none)
 
-Return:
-
+**Return**:
 The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
 
 ### `verify_cms_voucher`
@@ -529,8 +488,7 @@ struct Voucher *verify_cms_voucher(const char *cms,
                                    struct buffer_list **out_certs);
 ```
 
-Parameters:
-
+**Parameters**:
 * `cms` - The CMS buffer string in `base64` (`PEM` format) format,
 * `certs` - The list of additional certificate buffers (`DER` format),
 * `store` - The list of trusted certificate for store (`DER` format). The list's flags is encoded with the  following enum:
@@ -543,23 +501,19 @@ Parameters:
     where `CRYPTO_CERTIFICATE_VALID` denotes a standard certificate buffer and `CRYPTO_CERTIFICATE_CRL` denotes a certificate revocation type buffer, and
 * `out_certs` - The output list of certificates (`NULL` for empty) from the CMS structure.
 
-Return:
-
+**Return**:
 The verified voucher structrure or `NULL` on failure.
 
-Example:
+**Example**:
 ```c
 struct buffer_list *out_certs = NULL;
 struct Voucher *voucher = verify_cms_voucher(cms, certs, store, &out_certs);
-
 struct buffer_list *cert = NULL;
 
 dl_list_for_each(el, &out_certs->list, struct buffer_list, list) {
   uint8_t cert_array = cert->buf;
   uint8_t cert_length = cert->length;
-
   /* ... */
-
 }
 
 /* ... */

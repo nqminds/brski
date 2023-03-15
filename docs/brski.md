@@ -55,8 +55,7 @@ __must_free char * sign_pledge_voucher_request(const struct tm *created_on,
                             const struct VoucherBinaryArray *pledge_sign_key,
                             const struct buffer_list *additional_pledge_certs);
 ```
-Parameters:
-
+**Parameters**:
 * `created_on` - Time when the pledge is created,
 * `serial_number` - The serial number string of the pledge,
 * `nonce` - Random/pseudo-random nonce (`NULL` for empty),
@@ -65,8 +64,7 @@ Parameters:
 * `pledge_sign_key` - The private key buffer (`DER` format) for signing the pledge-voucher request and
 * `additional_pledge_certs` - The list of additional pledge certificates (`DER` format) to append to CMS (`NULL` for empty).
 
-Return:
-
+**Return**:
 The signed pledge-voucher CMS structure in `base64` (`PEM` format) or `NULL` on failure.
 
 ### `sign_voucher_request`
@@ -82,8 +80,7 @@ __must_free char * sign_voucher_request(const char *pledge_voucher_request_cms,
                      const struct buffer_list *pledge_verify_store,
                      const struct buffer_list *additional_registrar_certs);
 ```
-Parameters:
-
+**Parameters**:
 * `pledge_voucher_request_cms` - The signed pledge-voucher request CMS structure in `base64` (`PEM` format),
 * `created_on` - Time when the voucher request is created,
 * `serial_number` - The serial number string from the idevid certificate,
@@ -95,7 +92,5 @@ Parameters:
 * `pledge_verify_store` - The list of trusted certificate buffers (`DER` format) to verify the pledge-voucher request (`NULL` for empty). The lists' flags are described in [verify_cms_voucher](./voucher.md#verify_cms_voucher) function and
 * `additional_registrar_certs` - The list of additional registrar certificate buffers (`DER` format) to append to CMS (`NULL` for empty).
 
-Return:
- 
+**Return**: 
 The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
-
