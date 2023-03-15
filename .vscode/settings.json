@@ -67,6 +67,9 @@
         "thread": "cpp",
         "cinttypes": "cpp",
         "typeinfo": "cpp",
-        "variant": "cpp"
+        "variant": "cpp",
+        "os.h": "c",
+        "x509.h": "c",
+        "cms.h": "c"
     }
 }

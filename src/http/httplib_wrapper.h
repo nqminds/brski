@@ -23,8 +23,7 @@
  * @return int 0 on success, -1 on failure
  */
 int httplib_start(struct http_config *config,
-                  std::vector<struct RouteTuple> &routes,
-                  void *user_ctx,
+                  std::vector<struct RouteTuple> &routes, void *user_ctx,
                   void **srv_ctx);
 
 /**

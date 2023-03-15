@@ -13,7 +13,8 @@
 #include "http/http.h"
 
 /**
- * @brief The BRSKI configuration structures. Used for configuring the server/client/masa
+ * @brief The BRSKI configuration structures. Used for configuring the
+ * server/client/masa
  *
  */
 struct brski_config {

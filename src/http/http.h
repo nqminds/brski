@@ -5,19 +5,22 @@
  * @copyright
  * SPDX-FileCopyrightText: © 2023 Nquiringminds Ltd
  * SPDX-License-Identifier: MIT
- * @brief File containing the structures definition for the http(s) servers and clients.
+ * @brief File containing the structures definition for the http(s) servers and
+ * clients.
  */
 
 #ifndef HTTP_H
 #define HTTP_H
 
+#include <functional>
 #include <map>
 #include <string>
-#include <functional>
 
 extern "C" {
 #include "../utils/os.h"
 }
+
+#define MAX_WEB_PATH_LEN 2048
 
 #define HTTP_ERROR_REPLY "Router error"
 
@@ -38,8 +41,8 @@ typedef std::map<std::string, std::string> RequestHeader;
 typedef std::map<std::string, std::string> ResponseHeader;
 typedef std::function<int(RequestHeader &request_header,
                           ResponseHeader &response_header,
-                          std::string &response,
-                          void *user_ctx)> RouteHandle;
+                          std::string &response, void *user_ctx)>
+    RouteHandle;
 
 struct RouteTuple {
   std::string path;

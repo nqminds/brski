@@ -1,13 +1,13 @@
 #include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 #include <pthread.h>
+#include <string.h>
+#include <unistd.h>
 
 #include "registrar/registrar_server.h"
 
 extern "C" {
-#include "utils/os.h"
 #include "utils/log.h"
+#include "utils/os.h"
 }
 
 #include "config.h"
@@ -77,7 +77,7 @@ void log_cmdline_error(const char *format, ...) {
 }
 
 void process_options(int argc, char *argv[], uint8_t *verbosity,
-                         char **config_filename) {
+                     char **config_filename) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {

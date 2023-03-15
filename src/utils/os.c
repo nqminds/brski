@@ -8,57 +8,70 @@
  * @brief File containing the implementation of the os functionalities.
  */
 
-#include <string.h>
+#include <stdbool.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <ctype.h>
+#include <dirent.h>
 #include <errno.h>
+#include <fcntl.h>
 #include <libgen.h>
 #include <limits.h>
 #include <signal.h>
+#include <string.h>
 #include <sys/stat.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <time.h>
 #include <unistd.h>
-#include <stdbool.h>
-#include <ctype.h>
-#include <dirent.h>
-#include <fcntl.h>
 
-#include "log.h"
 #include "os.h"
 
-void *sys_zalloc(size_t size) { return sys_calloc(size, 1); }
+void *sys_zalloc(const size_t size) { return sys_calloc(size, 1); }
 
-char *sys_strdup(const char *s) {
+void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size) {
+  if (size && nmemb > (~(size_t)0) / size) {
+    return NULL;
+  }
+  return sys_realloc(ptr, nmemb * size);
+}
+
+void *sys_memdup(const void *const src, const size_t len) {
+  if (src == NULL) {
+    return NULL;
+  }
+
+  void *r = sys_malloc(len);
+
+  if (r != NULL) {
+    sys_memcpy(r, src, len);
+  }
+
+  return r;
+}
+
+char *sys_strndup(const char *const s, const size_t length) {
   char *dest = NULL;
-  size_t len = strlen(s) + 1;
 
   if (s != NULL) {
-    dest = (char *)sys_malloc(len);
+    dest = (char *)sys_zalloc(length + 1);
     if (dest == NULL) {
       return NULL;
     }
 
-    strcpy(dest, s);
+    strncpy(dest, s, length);
   }
 
   return dest;
 }
 
-void *sys_memdup(const void *src, size_t len) {
-  void *r = sys_malloc(len);
+char *sys_strdup(const char *const s) { return sys_strndup(s, strlen(s)); }
 
-  if (r && src)
-    sys_memcpy(r, src, len);
-  return r;
-}
-
-size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
+size_t sys_strlcpy(char *const dest, const char *const src, const size_t siz) {
   /* Copy string up to the maximum size of the dest buffer */
-  const char *char_after_NUL = memccpy(dest, src, '\0', siz);
+  const char *char_after_NUL = sys_memccpy(dest, src, '\0', siz);
 
   if (char_after_NUL != NULL) {
     return (size_t)(char_after_NUL - dest - 1);
@@ -68,4 +81,13 @@ size_t sys_strlcpy(char *dest, const char *src, size_t siz) {
     /* determine total src string length */
     return strlen(src);
   }
+}
+
+size_t sys_strnlen_s(const char *const str, const size_t max_len) {
+  char *end = (char *)memchr(str, '\0', max_len);
+
+  if (end == NULL)
+    return max_len;
+
+  return end - str;
 }

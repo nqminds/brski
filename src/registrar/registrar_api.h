@@ -22,8 +22,7 @@
  */
 int post_brski_requestvoucher(RequestHeader &request_header,
                               ResponseHeader &response_header,
-                              std::string &response,
-                              void *context);
+                              std::string &response, void *context);
 
 /**
  * @brief BRSKI voucher status handler
@@ -32,8 +31,7 @@ int post_brski_requestvoucher(RequestHeader &request_header,
  */
 int post_brski_voucher_status(RequestHeader &request_header,
                               ResponseHeader &response_header,
-                              std::string &response,
-                              void *context);
+                              std::string &response, void *context);
 
 /**
  * @brief BRSKI request audit log handler
@@ -41,9 +39,8 @@ int post_brski_voucher_status(RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int post_brski_requestauditlog(RequestHeader &request_header,
-                              ResponseHeader &response_header,
-                              std::string &response,
-                              void *context);
+                               ResponseHeader &response_header,
+                               std::string &response, void *context);
 
 /**
  * @brief BRSKI enroll status handler
@@ -51,9 +48,8 @@ int post_brski_requestauditlog(RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int post_brski_enrollstatus(RequestHeader &request_header,
-                              ResponseHeader &response_header,
-                              std::string &response,
-                              void *context);
+                            ResponseHeader &response_header,
+                            std::string &response, void *context);
 
 /**
  * @brief EST CA certs handler
@@ -61,8 +57,7 @@ int post_brski_enrollstatus(RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int get_est_cacerts(RequestHeader &request_header,
-                    ResponseHeader &response_header,
-                    std::string &response,
+                    ResponseHeader &response_header, std::string &response,
                     void *context);
 
 /**
@@ -72,8 +67,7 @@ int get_est_cacerts(RequestHeader &request_header,
  */
 int post_est_simpleenroll(RequestHeader &request_header,
                           ResponseHeader &response_header,
-                          std::string &response,
-                          void *context);
+                          std::string &response, void *context);
 
 /**
  * @brief EST simple reenroll handler
@@ -82,8 +76,7 @@ int post_est_simpleenroll(RequestHeader &request_header,
  */
 int post_est_simplereenroll(RequestHeader &request_header,
                             ResponseHeader &response_header,
-                            std::string &response,
-                            void *context);
+                            std::string &response, void *context);
 
 /**
  * @brief EST full cmc handler
@@ -91,8 +84,7 @@ int post_est_simplereenroll(RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int post_est_fullcmc(RequestHeader &request_header,
-                     ResponseHeader &response_header,
-                     std::string &response,
+                     ResponseHeader &response_header, std::string &response,
                      void *context);
 
 /**
@@ -102,8 +94,7 @@ int post_est_fullcmc(RequestHeader &request_header,
  */
 int post_est_serverkeygen(RequestHeader &request_header,
                           ResponseHeader &response_header,
-                          std::string &response,
-                          void *context);
+                          std::string &response, void *context);
 
 /**
  * @brief EST csr attrs handler
@@ -111,8 +102,7 @@ int post_est_serverkeygen(RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int get_est_csrattrs(RequestHeader &request_header,
-                     ResponseHeader &response_header,
-                     std::string &response,
+                     ResponseHeader &response_header, std::string &response,
                      void *context);
 
 #endif
