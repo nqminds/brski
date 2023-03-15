@@ -44,7 +44,8 @@ The API details the functions to allows implementing the below state description
 
 ## BRSKI Core API
 
-### Signs a pledge voucher request using CMS with a private key (type detected automatically) and output to base64 (PEM format)
+### `sign_pledge_voucher_request`
+Signs a pledge voucher request using CMS with a private key (type detected automatically) and output to `base64` (`PEM` format).
 ```c
 __must_free char * sign_pledge_voucher_request(const struct tm *created_on,
                             const char *serial_number,
@@ -68,7 +69,8 @@ Return:
 
 The signed pledge-voucher CMS structure in `base64` (`PEM` format) or `NULL` on failure.
 
-### Signs a voucher request using CMS with a private key (type detected automatically) and output to base64 (PEM format)
+### `sign_voucher_request`
+Signs a voucher request using CMS with a private key (type detected automatically) and output to `base64` (`PEM` format).
 ```c
 __must_free char * sign_voucher_request(const char *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
