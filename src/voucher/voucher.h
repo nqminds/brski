@@ -455,7 +455,7 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 
 /**
  * @brief Signs a voucher using CMS with an Elliptic Curve private key
- * and output to PEM (base64)
+ * and output to base64 (PEM format)
  *
  * Caller is responsible for freeing the output string
  *
@@ -473,7 +473,7 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
 
 /**
  * @brief Signs a voucher using CMS with a RSA private key
- * and output to PEM (base64)
+ * and output to base64 (PEM format)
  *
  * Caller is responsible for freeing output PEM string
  *
@@ -491,7 +491,7 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
- * and output to PEM (base64)
+ * and output to base64 (PEM format)
  *
  * Caller is responsible for freeing the output string
  *
@@ -512,7 +512,7 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
  *
  * Caller is responsible for freeing the voucher and output certs buffer
  *
- * @param[in] cms The CMS buffer string in PEM(base64) format
+ * @param[in] cms The CMS buffer string in base64 (PEM format) format
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[in] store The list of trusted certificate for store (DER format)
  * @param[out] out_certs The output list of certs (NULL for empty) from the CMS structure
