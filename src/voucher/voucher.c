@@ -89,13 +89,20 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
   return 1;
 }
 
-void free_binary_array_content(struct VoucherBinaryArray *bin_array) {
-  if (bin_array != NULL) {
-    if (bin_array->array != NULL) {
-      sys_free(bin_array->array);
-      bin_array->array = NULL;
+void free_binary_array_content(struct VoucherBinaryArray *arr) {
+  if (arr != NULL) {
+    if (arr->array != NULL) {
+      sys_free(arr->array);
+      arr->array = NULL;
     }
-    bin_array->length = 0;
+    arr->length = 0;
+  }
+}
+
+void free_binary_array(struct VoucherBinaryArray *arr) {
+  if (arr != NULL) {
+    free_binary_array_content(arr);
+    sys_free(arr);
   }
 }
 

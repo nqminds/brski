@@ -251,9 +251,16 @@ int copy_binary_array(struct VoucherBinaryArray *const dst,
 /**
  * @brief Frees a binary array content
  *
- * @param[in] array The binary array
+ * @param[in] arr The binary array
  */
-void free_binary_array_content(struct VoucherBinaryArray *array);
+void free_binary_array_content(struct VoucherBinaryArray *arr);
+
+/**
+ * @brief Frees a binary array structure and its content
+ *
+ * @param[in] arr The binary array
+ */
+void free_binary_array(struct VoucherBinaryArray *arr);
 
 /**
  * @brief Compare two binary arrays

@@ -430,12 +430,6 @@ static void test_crypto_sign_cert(void **state) {
   assert_true(signed_untrusted_cert_length > 0);
   assert_non_null(untrusted_cert);
 
-  x509_to_tmpfile(ca_cert, ca_cert_length, "/tmp/ca.crt");
-  x509_to_tmpfile(intermediate_cert, signed_intermediate_cert_length,
-                  "/tmp/intermediate.crt");
-  x509_to_tmpfile(untrusted_cert, signed_untrusted_cert_length,
-                  "/tmp/untrusted.crt");
-
   sys_free(untrusted_key);
   sys_free(untrusted_cert);
   sys_free(intermediate_key);

@@ -63,10 +63,18 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
 ### `free_binary_array_content`
 Frees a binary array content, i.e., frees the `array` element of the `struct VoucherBinaryArray`.
 ```c
-void free_binary_array_content(struct VoucherBinaryArray *array);
+void free_binary_array_content(struct VoucherBinaryArray *arr);
 ```
 **Parameters**:
-* `array` - The binary array
+* `arr` - The binary array
+
+### `free_binary_array`
+Frees a binary array structure and its content.
+```c
+void free_binary_array(struct VoucherBinaryArray *arr);
+```
+**Parameters**:
+* `arr` - The binary array
 
 ## Voucher attributes
 
