@@ -127,7 +127,6 @@ __must_free char *sign_masa_pledge_voucher(const char *voucher_request_cms,
                          const struct buffer_list *pledge_verify_store,
                          const struct buffer_list *additional_masa_certs);
 ```
-
 **Parameters**:
 * `voucher_request_cms` - The signed pledge voucher request cms structure in `base64` (`PEM` format),
 * `expires_on` - Time when the new voucher will expire,

@@ -103,7 +103,6 @@ Frees an allocated voucher structure.
 ```c
 void free_voucher(struct Voucher *voucher);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure.
 
@@ -114,7 +113,6 @@ int set_attr_bool_voucher(struct Voucher *voucher,
                           const enum VoucherAttributes attr,
                           const bool value);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The voucher attribute corresponding to the `bool` value and
@@ -170,7 +168,6 @@ int set_attr_str_voucher(struct Voucher *voucher,
                          const enum VoucherAttributes attr,
                          const char *value);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The string voucher attribute name and
@@ -202,7 +199,6 @@ int set_attr_voucher(struct Voucher *voucher,
                      const enum VoucherAttributes attr,
                      ...);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure,
 * `attr` - The array voucher attribute name and
@@ -241,7 +237,6 @@ Checks if a voucher attribute is non empty.
 bool is_attr_voucher_nonempty(const struct Voucher *voucher,
                               const enum VoucherAttributes attr);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The attribute name.
@@ -268,7 +263,6 @@ Gets the pointer to the value for a voucher time attribute.
 const struct tm *get_attr_time_voucher(struct Voucher *voucher,
                                        const enum VoucherAttributes attr);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The time voucher attribute.
@@ -295,7 +289,6 @@ Gets the pointer to the value for a voucher string attribute.
 const char *const *get_attr_str_voucher(struct Voucher *voucher,
                                         const enum VoucherAttributes attr);
 ```
-
 **Parameters**:
 * `voucher` - The allocated voucher structure and
 * `attr` - The string voucher attribute name.
@@ -354,7 +347,6 @@ Deserializes a json string buffer to a voucher structure.
 ```c
 struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 ```
-
 **Paramaters**:
 * `json` - The json buffer and
 * `length` - The json buffer length.
@@ -385,7 +377,6 @@ struct buffer_list {
   struct dl_list list; /**< List definition */
 };
 ```
-
 **Parameters**:
 * `buf` - pointer to the heap allocated buffer,
 * `length` - the buffer length,
@@ -406,7 +397,6 @@ Frees the buffer list and all of its elements.
 ```c
 void free_buffer_list(struct buffer_list *buf_list);
 ```
-
 **Parameters**:
 * `buf_list` - The buffer list to free.
 
@@ -418,7 +408,6 @@ int push_buffer_list(struct buffer_list *buf_list,
                      const size_t length,
                      const int flags);
 ```
-
 **Parameters**:
 * `buf_list` - The buffer list structure,
 * `buf` - The buffer pointer to insert,
@@ -487,7 +476,6 @@ struct Voucher *verify_cms_voucher(const char *cms,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);
 ```
-
 **Parameters**:
 * `cms` - The CMS buffer string in `base64` (`PEM` format) format,
 * `certs` - The list of additional certificate buffers (`DER` format),
