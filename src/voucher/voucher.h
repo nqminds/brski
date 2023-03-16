@@ -253,7 +253,7 @@ int copy_binary_array(struct VoucherBinaryArray *const dst,
  *
  * @param[in] array The binary array
  */
-void free_binary_array(struct VoucherBinaryArray *array);
+void free_binary_array_content(struct VoucherBinaryArray *array);
 
 /**
  * @brief Compare two binary arrays

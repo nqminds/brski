@@ -89,7 +89,7 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
   return 1;
 }
 
-void free_binary_array(struct VoucherBinaryArray *bin_array) {
+void free_binary_array_content(struct VoucherBinaryArray *bin_array) {
   if (bin_array != NULL) {
     if (bin_array->array != NULL) {
       sys_free(bin_array->array);
@@ -106,9 +106,9 @@ void free_voucher(struct Voucher *voucher) {
       voucher->serial_number = NULL;
     }
 
-    free_binary_array(&voucher->idevid_issuer);
-    free_binary_array(&voucher->pinned_domain_cert);
-    free_binary_array(&voucher->nonce);
+    free_binary_array_content(&voucher->idevid_issuer);
+    free_binary_array_content(&voucher->pinned_domain_cert);
+    free_binary_array_content(&voucher->nonce);
     sys_free(voucher);
   }
 }
@@ -456,19 +456,19 @@ int clear_attr_voucher(struct Voucher *voucher,
       }
       break;
     case ATTR_IDEVID_ISSUER:
-      free_binary_array(&voucher->idevid_issuer);
+      free_binary_array_content(&voucher->idevid_issuer);
       break;
     case ATTR_PINNED_DOMAIN_CERT:
-      free_binary_array(&voucher->pinned_domain_cert);
+      free_binary_array_content(&voucher->pinned_domain_cert);
       break;
     case ATTR_NONCE:
-      free_binary_array(&voucher->nonce);
+      free_binary_array_content(&voucher->nonce);
       break;
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      free_binary_array(&voucher->prior_signed_voucher_request);
+      free_binary_array_content(&voucher->prior_signed_voucher_request);
       break;
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      free_binary_array(&voucher->proximity_registrar_cert);
+      free_binary_array_content(&voucher->proximity_registrar_cert);
       break;
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
       voucher->domain_cert_revocation_checks = false;

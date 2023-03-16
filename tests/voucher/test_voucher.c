@@ -697,8 +697,8 @@ static void test_sign_cms_voucher(void **state) {
   serialized = sign_rsacms_voucher(voucher, &cert, &key, certs);
   assert_null(serialized);
 
-  free_binary_array(&key);
-  free_binary_array(&cert);
+  free_binary_array_content(&key);
+  free_binary_array_content(&cert);
   free_buffer_list(certs);
 
   key.length = crypto_generate_rsakey(2048, &key.array);
@@ -721,8 +721,8 @@ static void test_sign_cms_voucher(void **state) {
   serialized = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_null(serialized);
 
-  free_binary_array(&key);
-  free_binary_array(&cert);
+  free_binary_array_content(&key);
+  free_binary_array_content(&cert);
   free_buffer_list(certs);
 
   free_keyvalue_list(meta.issuer);
@@ -819,8 +819,8 @@ static void test_verify_cms_voucher(void **state) {
   free_voucher(decoded_voucher);
   sys_free(cms);
 
-  free_binary_array(&key);
-  free_binary_array(&cert);
+  free_binary_array_content(&key);
+  free_binary_array_content(&cert);
   free_buffer_list(certs);
 
   free_keyvalue_list(meta.issuer);

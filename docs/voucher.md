@@ -60,10 +60,10 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
 **Return**:
 `1` if arrays are equal, `0` otherwise or `-1` on failure.
 
-### `free_binary_array`
+### `free_binary_array_content`
 Frees a binary array content, i.e., frees the `array` element of the `struct VoucherBinaryArray`.
 ```c
-void free_binary_array(struct VoucherBinaryArray *array);
+void free_binary_array_content(struct VoucherBinaryArray *array);
 ```
 **Parameters**:
 * `array` - The binary array

@@ -235,10 +235,10 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
   if (set_attr_voucher(voucher_request, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
                        &prior_signed_voucher_request) < 0) {
     log_error("set_attr_array_voucher fail");
-    free_binary_array(&prior_signed_voucher_request);
+    free_binary_array_content(&prior_signed_voucher_request);
     goto sign_voucher_request_fail;
   }
-  free_binary_array(&prior_signed_voucher_request);
+  free_binary_array_content(&prior_signed_voucher_request);
 
   char *cms = sign_cms_voucher(voucher_request, registrar_sign_cert,
                                registrar_sign_key, additional_registrar_certs);
@@ -404,10 +404,10 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
   if (set_attr_voucher(masa_pledge_voucher, ATTR_PINNED_DOMAIN_CERT,
                        &pinned_domain_cert) < 0) {
     log_error("set_attr_voucher fail");
-    free_binary_array(&pinned_domain_cert);
+    free_binary_array_content(&pinned_domain_cert);
     goto sign_masa_pledge_voucher_fail;
   }
-  free_binary_array(&pinned_domain_cert);
+  free_binary_array_content(&pinned_domain_cert);
 
   /* The serial-number as provided in the voucher-request. Also see
    * Section 5.5.5. */

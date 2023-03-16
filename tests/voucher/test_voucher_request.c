@@ -111,8 +111,8 @@ create_pledge_voucher_request(char *serial_number,
                                           registrar_tls_cert, &pledge_sign_cert,
                                           &pledge_sign_key, certs);
 
-  free_binary_array(&pledge_sign_key);
-  free_binary_array(&pledge_sign_cert);
+  free_binary_array_content(&pledge_sign_key);
+  free_binary_array_content(&pledge_sign_cert);
   free_keyvalue_list(pledge_sign_meta.issuer);
   free_keyvalue_list(pledge_sign_meta.subject);
   free_buffer_list(certs);
@@ -143,8 +143,8 @@ static void test_sign_pledge_voucher_request(void **state) {
   assert_non_null(cms);
   sys_free(cms);
 
-  free_binary_array(&registrar_tls_key);
-  free_binary_array(&registrar_tls_cert);
+  free_binary_array_content(&registrar_tls_key);
+  free_binary_array_content(&registrar_tls_cert);
   free_keyvalue_list(registrar_tls_meta.issuer);
   free_keyvalue_list(registrar_tls_meta.subject);
 }
@@ -178,8 +178,8 @@ char *faulty_create_pledge_voucher_request(
   char *cms = sign_cms_voucher(voucher_request, &pledge_sign_cert,
                                &pledge_sign_key, NULL);
 
-  free_binary_array(&pledge_sign_key);
-  free_binary_array(&pledge_sign_cert);
+  free_binary_array_content(&pledge_sign_key);
+  free_binary_array_content(&pledge_sign_cert);
   free_keyvalue_list(pledge_sign_meta.issuer);
   free_keyvalue_list(pledge_sign_meta.subject);
   free_voucher(voucher_request);
@@ -263,15 +263,15 @@ static void test_sign_voucher_request(void **state) {
   assert_null(cms);
 
   sys_free(pledge_voucher_request_cms);
-  free_binary_array(&registrar_tls_key);
-  free_binary_array(&registrar_tls_cert);
+  free_binary_array_content(&registrar_tls_key);
+  free_binary_array_content(&registrar_tls_cert);
   free_keyvalue_list(registrar_tls_meta.issuer);
   free_keyvalue_list(registrar_tls_meta.subject);
-  free_binary_array(&wregistrar_tls_key);
-  free_binary_array(&wregistrar_tls_cert);
+  free_binary_array_content(&wregistrar_tls_key);
+  free_binary_array_content(&wregistrar_tls_cert);
 
-  free_binary_array(&registrar_sign_key);
-  free_binary_array(&registrar_sign_cert);
+  free_binary_array_content(&registrar_sign_key);
+  free_binary_array_content(&registrar_sign_cert);
   free_keyvalue_list(registrar_sign_meta.issuer);
   free_keyvalue_list(registrar_sign_meta.subject);
 }
@@ -315,8 +315,8 @@ char *faulty_create_voucher_request(
   char *cms = sign_cms_voucher(voucher_request, &registrar_sign_cert,
                                &registrar_sign_key, NULL);
 
-  free_binary_array(&registrar_sign_key);
-  free_binary_array(&registrar_sign_cert);
+  free_binary_array_content(&registrar_sign_key);
+  free_binary_array_content(&registrar_sign_cert);
   free_keyvalue_list(registrar_sign_meta.issuer);
   free_keyvalue_list(registrar_sign_meta.subject);
   free_voucher(voucher_request);
@@ -439,18 +439,18 @@ static void test_sign_masa_pledge_voucher(void **state) {
   sys_free(voucher_request_cms);
 
   sys_free(pledge_voucher_request_cms);
-  free_binary_array(&registrar_tls_key);
-  free_binary_array(&registrar_tls_cert);
+  free_binary_array_content(&registrar_tls_key);
+  free_binary_array_content(&registrar_tls_cert);
   free_keyvalue_list(registrar_tls_meta.issuer);
   free_keyvalue_list(registrar_tls_meta.subject);
 
-  free_binary_array(&registrar_sign_key);
-  free_binary_array(&registrar_sign_cert);
+  free_binary_array_content(&registrar_sign_key);
+  free_binary_array_content(&registrar_sign_cert);
   free_keyvalue_list(registrar_sign_meta.issuer);
   free_keyvalue_list(registrar_sign_meta.subject);
 
-  free_binary_array(&masa_sign_key);
-  free_binary_array(&masa_sign_cert);
+  free_binary_array_content(&masa_sign_key);
+  free_binary_array_content(&masa_sign_cert);
   free_keyvalue_list(masa_sign_meta.issuer);
   free_keyvalue_list(masa_sign_meta.subject);
 }
@@ -509,13 +509,13 @@ create_masa_pledge_voucher(struct VoucherBinaryArray *registrar_tls_cert) {
 
   sys_free(pledge_voucher_request_cms);
 
-  free_binary_array(&registrar_sign_key);
-  free_binary_array(&registrar_sign_cert);
+  free_binary_array_content(&registrar_sign_key);
+  free_binary_array_content(&registrar_sign_cert);
   free_keyvalue_list(registrar_sign_meta.issuer);
   free_keyvalue_list(registrar_sign_meta.subject);
 
-  free_binary_array(&masa_sign_key);
-  free_binary_array(&masa_sign_cert);
+  free_binary_array_content(&masa_sign_key);
+  free_binary_array_content(&masa_sign_cert);
   free_keyvalue_list(masa_sign_meta.issuer);
   free_keyvalue_list(masa_sign_meta.subject);
 
@@ -577,8 +577,8 @@ static void test_verify_masa_pledge_voucher(void **state) {
       compare_binary_array(&pinned_domain_cert, &test_pinned_domain_cert), 1);
 
   sys_free(masa_pledge_voucher_cms);
-  free_binary_array(&registrar_tls_key);
-  free_binary_array(&registrar_tls_cert);
+  free_binary_array_content(&registrar_tls_key);
+  free_binary_array_content(&registrar_tls_cert);
   free_keyvalue_list(registrar_tls_meta.issuer);
   free_keyvalue_list(registrar_tls_meta.subject);
 }
@@ -659,8 +659,8 @@ static int test_group_setup(void **state) {
 static int test_group_teardown(void **state) {
   (void)state;
 
-  free_binary_array(&test_pinned_domain_key);
-  free_binary_array(&test_ca_key);
+  free_binary_array_content(&test_pinned_domain_key);
+  free_binary_array_content(&test_ca_key);
   free_buffer_list(test_pinned_domain_certs);
   free_buffer_list(test_domain_store);
   return 0;
