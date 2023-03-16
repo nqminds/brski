@@ -460,9 +460,9 @@ __must_free struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *vouch
 The signed CMS structure in binary (`DER` format) or `NULL` on failure.
 
 ### `sign_cms_voucher`
-Signs a voucher using CMS with a private key (detected automatically) and output to `base64` (`PEM` format).
+Signs a voucher using CMS with a private key (detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free char *sign_cms_voucher(struct Voucher *voucher,
+__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);
@@ -474,18 +474,18 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
 * `certs` - The list of additional certificate buffers (`DER` format) to be included in the CMS (`NULL` if none)
 
 **Return**:
-The signed CMS structure in `base64` (`PEM` format) or `NULL` on failure.
+The signed CMS structure as binary array (`DER` format) or `NULL` on failure.
 
 ### `verify_cms_voucher`
-Verifies a CMS buffer and extracts the voucher structure, and the list included certificates.
+Verifies a CMS binary buffer and extracts the voucher structure, and the list of included certificates.
 ```c
-__must_free struct Voucher *verify_cms_voucher(const char *cms,
+__must_free struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);
 ```
 **Parameters**:
-* `cms` - The CMS buffer string in `base64` (`PEM` format) format,
+* `cms` - The CMS binary buffer string (`DER` format),
 * `certs` - The list of additional certificate buffers (`DER` format),
 * `store` - The list of trusted certificate for store (`DER` format). The list's flags is encoded with the  following enum:
     ```c

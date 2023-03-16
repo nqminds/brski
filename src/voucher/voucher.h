@@ -504,9 +504,9 @@ __must_free struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *vouch
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
- * and output to base64 (PEM format)
+ * and output to a binary array (DER format)
  *
- * Caller is responsible for freeing the output string
+ * Caller is responsible for freeing the output binary array
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] cert The certificate buffer (DER format) correspoding to the
@@ -514,28 +514,28 @@ __must_free struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *vouch
  * @param[in] key The private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return char* the signed CMS structure in base64 (PEM format), NULL on
+ * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
  * failure
  */
-__must_free char *sign_cms_voucher(struct Voucher *voucher,
+__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);
 
 /**
- * @brief Verifies a CMS buffer and extracts the voucher structure, and the list
+ * @brief Verifies a CMS binary buffer and extracts the voucher structure, and the list of
  * included certificates
  *
  * Caller is responsible for freeing the voucher and output certs buffer
  *
- * @param[in] cms The CMS buffer string in base64 (PEM format) format
+ * @param[in] cms The CMS binary buffer (DER format)
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[in] store The list of trusted certificate for store (DER format)
  * @param[out] out_certs The output list of certs (NULL for empty) from the CMS
  * structure
  * @return struct Voucher * the verified voucher, NULL on failure
  */
-__must_free struct Voucher *verify_cms_voucher(const char *cms,
+__must_free struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);

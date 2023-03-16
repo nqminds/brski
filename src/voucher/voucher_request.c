@@ -17,7 +17,7 @@
 #include "voucher.h"
 #include "voucher_request.h"
 
-char *
+struct VoucherBinaryArray *
 sign_pledge_voucher_request(const struct tm *created_on,
                             const char *serial_number,
                             const struct VoucherBinaryArray *nonce,
@@ -86,7 +86,7 @@ sign_pledge_voucher_request(const struct tm *created_on,
     return NULL;
   }
 
-  char *cms = sign_cms_voucher(voucher, pledge_sign_cert, pledge_sign_key,
+  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher, pledge_sign_cert, pledge_sign_key,
                                additional_pledge_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
@@ -98,8 +98,8 @@ sign_pledge_voucher_request(const struct tm *created_on,
   return cms;
 }
 
-__must_free char *
-sign_voucher_request(const char *pledge_voucher_request_cms,
+struct VoucherBinaryArray *
+sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
                      const struct VoucherBinaryArray *idevid_issuer,
                      const struct VoucherBinaryArray *registrar_tls_cert,
@@ -219,28 +219,16 @@ sign_voucher_request(const char *pledge_voucher_request_cms,
     goto sign_voucher_request_fail;
   }
 
-  struct VoucherBinaryArray prior_signed_voucher_request;
-  ssize_t length = serialize_base64str2array(
-      (const uint8_t *)pledge_voucher_request_cms,
-      strlen(pledge_voucher_request_cms), &prior_signed_voucher_request.array);
-  if (length < 0) {
-    log_error("serialize_base64str2array fail");
-    goto sign_voucher_request_fail;
-  }
-  prior_signed_voucher_request.length = length;
-
   /* The signed pledge voucher-request SHOULD be included in the registrar
    * voucher-request. The entire CMS-signed structure is to be included and
    * base64 encoded for transport in the JSON structure. */
   if (set_attr_voucher(voucher_request, ATTR_PRIOR_SIGNED_VOUCHER_REQUEST,
-                       &prior_signed_voucher_request) < 0) {
+                       pledge_voucher_request_cms) < 0) {
     log_error("set_attr_array_voucher fail");
-    free_binary_array_content(&prior_signed_voucher_request);
     goto sign_voucher_request_fail;
   }
-  free_binary_array_content(&prior_signed_voucher_request);
 
-  char *cms = sign_cms_voucher(voucher_request, registrar_sign_cert,
+  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher_request, registrar_sign_cert,
                                registrar_sign_key, additional_registrar_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
@@ -257,8 +245,8 @@ sign_voucher_request_fail:
   return NULL;
 }
 
-char *
-sign_masa_pledge_voucher(const char *voucher_request_cms,
+struct VoucherBinaryArray *
+sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,
                          const struct VoucherBinaryArray *masa_sign_cert,
@@ -329,23 +317,13 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  char *pledge_voucher_request_cms = NULL;
-  if (serialize_array2base64str(prior_signed_voucher_request->array,
-                                prior_signed_voucher_request->length,
-                                (uint8_t **)&pledge_voucher_request_cms) < 0) {
-    log_error("serialize_array2base64str fail");
-    goto sign_masa_pledge_voucher_fail;
-  }
-
   pledge_voucher_request =
-      verify_cms_voucher(pledge_voucher_request_cms, pledge_verify_certs,
+      verify_cms_voucher(prior_signed_voucher_request, pledge_verify_certs,
                          pledge_verify_store, NULL);
   if (pledge_voucher_request == NULL) {
     log_error("verify_cms_voucher fail");
-    sys_free(pledge_voucher_request_cms);
     goto sign_masa_pledge_voucher_fail;
   }
-  sys_free(pledge_voucher_request_cms);
 
   /* Extract the serial number from the pledge voucher and compare with the
    * serial number from the voucher request */
@@ -448,7 +426,7 @@ sign_masa_pledge_voucher(const char *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  char *cms = sign_cms_voucher(masa_pledge_voucher, masa_sign_cert,
+  struct VoucherBinaryArray *cms = sign_cms_voucher(masa_pledge_voucher, masa_sign_cert,
                                masa_sign_key, additional_masa_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
