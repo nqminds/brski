@@ -925,7 +925,7 @@ deserialize_voucher_fail:
   return NULL;
 }
 
-char *sign_eccms_voucher(struct Voucher *voucher,
+struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
                          const struct VoucherBinaryArray *cert,
                          const struct VoucherBinaryArray *key,
                          const struct buffer_list *certs) {
@@ -964,18 +964,19 @@ char *sign_eccms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  uint8_t *base64_out = NULL;
-  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
-    log_error("serialize_array2base64str fail");
+  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  if (out == NULL) {
+    log_errno("sys_malloc");
     sys_free(cms);
     return NULL;
   }
 
-  sys_free(cms);
-  return (char *)base64_out;
+  out->array = cms;
+  out->length = cms_length;
+  return out;
 }
 
-char *sign_rsacms_voucher(struct Voucher *voucher,
+struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
                           const struct VoucherBinaryArray *cert,
                           const struct VoucherBinaryArray *key,
                           const struct buffer_list *certs) {
@@ -1013,15 +1014,16 @@ char *sign_rsacms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  uint8_t *base64_out = NULL;
-  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
-    log_error("serialize_array2base64str fail");
+  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  if (out == NULL) {
+    log_errno("sys_malloc");
     sys_free(cms);
     return NULL;
   }
 
-  sys_free(cms);
-  return (char *)base64_out;
+  out->array = cms;
+  out->length = cms_length;
+  return out;
 }
 
 __must_free char *sign_cms_voucher(struct Voucher *voucher,

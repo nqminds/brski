@@ -690,12 +690,12 @@ static void test_sign_cms_voucher(void **state) {
 
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  char *serialized = sign_eccms_voucher(voucher, &cert, &key, certs);
-  assert_non_null(serialized);
-  sys_free(serialized);
+  struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  assert_non_null(signed_voucher);
+  free_binary_array(signed_voucher);
 
-  serialized = sign_rsacms_voucher(voucher, &cert, &key, certs);
-  assert_null(serialized);
+  signed_voucher = sign_rsacms_voucher(voucher, &cert, &key, certs);
+  assert_null(signed_voucher);
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
@@ -714,12 +714,12 @@ static void test_sign_cms_voucher(void **state) {
   certs = init_buffer_list();
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  serialized = sign_rsacms_voucher(voucher, &cert, &key, certs);
-  assert_non_null(serialized);
-  sys_free(serialized);
+  signed_voucher = sign_rsacms_voucher(voucher, &cert, &key, certs);
+  assert_non_null(signed_voucher);
+  free_binary_array(signed_voucher);
 
-  serialized = sign_eccms_voucher(voucher, &cert, &key, certs);
-  assert_null(serialized);
+  signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  assert_null(signed_voucher);
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
@@ -799,25 +799,25 @@ static void test_verify_cms_voucher(void **state) {
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
 
-  char *cms = sign_eccms_voucher(voucher, &cert, &key, certs);
-  assert_non_null(cms);
+  struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  assert_non_null(signed_voucher);
 
-  struct Voucher *decoded_voucher = verify_cms_voucher(cms, NULL, NULL, NULL);
+  struct Voucher *decoded_voucher = verify_cms_voucher(signed_voucher, NULL, NULL, NULL);
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
   free_voucher(decoded_voucher);
-  sys_free(cms);
+  free_binary_array(signed_voucher);
 
-  cms = sign_cms_voucher(voucher, &cert, &key, certs);
-  assert_non_null(cms);
+  signed_voucher = sign_cms_voucher(voucher, &cert, &key, certs);
+  assert_non_null(signed_voucher);
 
-  decoded_voucher = verify_cms_voucher(cms, NULL, NULL, NULL);
+  decoded_voucher = verify_cms_voucher(signed_voucher, NULL, NULL, NULL);
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
   free_voucher(decoded_voucher);
-  sys_free(cms);
+  free_binary_array(signed_voucher);
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
