@@ -251,9 +251,22 @@ int copy_binary_array(struct VoucherBinaryArray *const dst,
 /**
  * @brief Frees a binary array content
  *
- * @param[in] array The binary array
+ * @param[in] arr The binary array
  */
-void free_binary_array(struct VoucherBinaryArray *array);
+void free_binary_array_content(struct VoucherBinaryArray *arr);
+
+/**
+ * @brief Frees a binary array structure and its content
+ *
+ * @param[in] arr The binary array
+ */
+void free_binary_array(struct VoucherBinaryArray *arr);
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+#define __must_free_binary_array __attribute__((malloc(free_binary_array, 1))) __must_check
+#else
+#define __must_free_binary_array __must_check
+#endif /* __GNUC__ >= 11 */
 
 /**
  * @brief Compare two binary arrays
@@ -268,18 +281,26 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
 struct Voucher;
 
 /**
- * @brief Initialises an empty voucher structure
- *
- * @return struct Voucher* pointer to allocated voucher, NULL on failure
- */
-struct Voucher *init_voucher(void);
-
-/**
  * @brief Frees an allocated voucher structure
  *
  * @param[in] voucher The allocated voucher structure
  */
 void free_voucher(struct Voucher *voucher);
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+#define __must_free_voucher __attribute__((malloc(free_voucher, 1))) __must_check
+#else
+#define __must_free_voucher __must_check
+#endif /* __GNUC__ >= 11 */
+
+/**
+ * @brief Initialises an empty voucher structure
+ *
+ * Caller is responsible for freeing the voucher
+ * 
+ * @return struct Voucher* pointer to allocated voucher, NULL on failure
+ */
+__must_free_voucher struct Voucher *init_voucher(void);
 
 /**
  * @brief Sets the value for a voucher bool attribute
@@ -451,13 +472,13 @@ __must_free char *serialize_voucher(const struct Voucher *voucher);
  * @param[in] length The json string buffer length
  * @return struct Voucher * voucher structure, NULL on failure
  */
-struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
+__must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 
 /**
  * @brief Signs a voucher using CMS with an Elliptic Curve private key
- * and output to base64 (PEM format)
+ * and output to a binary buffer (DER format)
  *
- * Caller is responsible for freeing the output string
+ * Caller is responsible for freeing the output binary buffer
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] cert The certificate buffer (DER format) correspoding to the
@@ -465,19 +486,19 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
  * @param[in] key The Elliptic Curve private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return char* the signed CMS structure in base64 (PEM format), NULL on
+ * @return struct VoucherBinaryArray * the signed CMS structure in binary (DER format), NULL on
  * failure
  */
-__must_free char *sign_eccms_voucher(struct Voucher *voucher,
+__must_free_voucher struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *cert,
                                      const struct VoucherBinaryArray *key,
                                      const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS with a RSA private key
- * and output to base64 (PEM format)
+ * and output to binary buffer (DER format)
  *
- * Caller is responsible for freeing output PEM string
+ * Caller is responsible for freeing the output binary buffer
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] cert The certificate buffer (DER format) correspoding to the
@@ -485,19 +506,19 @@ __must_free char *sign_eccms_voucher(struct Voucher *voucher,
  * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return char* the signed CMS structure in base64 (PEM format), NULL on
+ * @return struct VoucherBinaryArray* the signed CMS structure in binary (DER format), NULL on
  * failure
  */
-__must_free char *sign_rsacms_voucher(struct Voucher *voucher,
+__must_free_voucher struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *cert,
                                       const struct VoucherBinaryArray *key,
                                       const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
- * and output to base64 (PEM format)
+ * and output to a binary array (DER format)
  *
- * Caller is responsible for freeing the output string
+ * Caller is responsible for freeing the output binary array
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] cert The certificate buffer (DER format) correspoding to the
@@ -505,28 +526,28 @@ __must_free char *sign_rsacms_voucher(struct Voucher *voucher,
  * @param[in] key The private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return char* the signed CMS structure in base64 (PEM format), NULL on
+ * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
  * failure
  */
-__must_free char *sign_cms_voucher(struct Voucher *voucher,
+__must_free_voucher struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);
 
 /**
- * @brief Verifies a CMS buffer and extracts the voucher structure, and the list
+ * @brief Verifies a CMS binary buffer and extracts the voucher structure, and the list of
  * included certificates
  *
  * Caller is responsible for freeing the voucher and output certs buffer
  *
- * @param[in] cms The CMS buffer string in base64 (PEM format) format
+ * @param[in] cms The CMS binary buffer (DER format)
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[in] store The list of trusted certificate for store (DER format)
  * @param[out] out_certs The output list of certs (NULL for empty) from the CMS
  * structure
  * @return struct Voucher * the verified voucher, NULL on failure
  */
-struct Voucher *verify_cms_voucher(const char *cms,
+__must_free_voucher struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);

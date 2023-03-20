@@ -89,13 +89,20 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
   return 1;
 }
 
-void free_binary_array(struct VoucherBinaryArray *bin_array) {
-  if (bin_array != NULL) {
-    if (bin_array->array != NULL) {
-      sys_free(bin_array->array);
-      bin_array->array = NULL;
+void free_binary_array_content(struct VoucherBinaryArray *arr) {
+  if (arr != NULL) {
+    if (arr->array != NULL) {
+      sys_free(arr->array);
+      arr->array = NULL;
     }
-    bin_array->length = 0;
+    arr->length = 0;
+  }
+}
+
+void free_binary_array(struct VoucherBinaryArray *arr) {
+  if (arr != NULL) {
+    free_binary_array_content(arr);
+    sys_free(arr);
   }
 }
 
@@ -106,9 +113,9 @@ void free_voucher(struct Voucher *voucher) {
       voucher->serial_number = NULL;
     }
 
-    free_binary_array(&voucher->idevid_issuer);
-    free_binary_array(&voucher->pinned_domain_cert);
-    free_binary_array(&voucher->nonce);
+    free_binary_array_content(&voucher->idevid_issuer);
+    free_binary_array_content(&voucher->pinned_domain_cert);
+    free_binary_array_content(&voucher->nonce);
     sys_free(voucher);
   }
 }
@@ -456,19 +463,19 @@ int clear_attr_voucher(struct Voucher *voucher,
       }
       break;
     case ATTR_IDEVID_ISSUER:
-      free_binary_array(&voucher->idevid_issuer);
+      free_binary_array_content(&voucher->idevid_issuer);
       break;
     case ATTR_PINNED_DOMAIN_CERT:
-      free_binary_array(&voucher->pinned_domain_cert);
+      free_binary_array_content(&voucher->pinned_domain_cert);
       break;
     case ATTR_NONCE:
-      free_binary_array(&voucher->nonce);
+      free_binary_array_content(&voucher->nonce);
       break;
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      free_binary_array(&voucher->prior_signed_voucher_request);
+      free_binary_array_content(&voucher->prior_signed_voucher_request);
       break;
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      free_binary_array(&voucher->proximity_registrar_cert);
+      free_binary_array_content(&voucher->proximity_registrar_cert);
       break;
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
       voucher->domain_cert_revocation_checks = false;
@@ -918,7 +925,7 @@ deserialize_voucher_fail:
   return NULL;
 }
 
-char *sign_eccms_voucher(struct Voucher *voucher,
+struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
                          const struct VoucherBinaryArray *cert,
                          const struct VoucherBinaryArray *key,
                          const struct buffer_list *certs) {
@@ -957,18 +964,19 @@ char *sign_eccms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  uint8_t *base64_out = NULL;
-  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
-    log_error("serialize_array2base64str fail");
+  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  if (out == NULL) {
+    log_errno("sys_malloc");
     sys_free(cms);
     return NULL;
   }
 
-  sys_free(cms);
-  return (char *)base64_out;
+  out->array = cms;
+  out->length = cms_length;
+  return out;
 }
 
-char *sign_rsacms_voucher(struct Voucher *voucher,
+struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
                           const struct VoucherBinaryArray *cert,
                           const struct VoucherBinaryArray *key,
                           const struct buffer_list *certs) {
@@ -1006,18 +1014,19 @@ char *sign_rsacms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  uint8_t *base64_out = NULL;
-  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
-    log_error("serialize_array2base64str fail");
+  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  if (out == NULL) {
+    log_errno("sys_malloc");
     sys_free(cms);
     return NULL;
   }
 
-  sys_free(cms);
-  return (char *)base64_out;
+  out->array = cms;
+  out->length = cms_length;
+  return out;
 }
 
-__must_free char *sign_cms_voucher(struct Voucher *voucher,
+__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs) {
@@ -1055,18 +1064,19 @@ __must_free char *sign_cms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  uint8_t *base64_out = NULL;
-  if (serialize_array2base64str(cms, cms_length, &base64_out) < 0) {
-    log_error("serialize_array2base64str fail");
+  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  if (out == NULL) {
+    log_errno("sys_malloc");
     sys_free(cms);
     return NULL;
   }
 
-  sys_free(cms);
-  return (char *)base64_out;
+  out->array = cms;
+  out->length = cms_length;
+  return out;
 }
 
-struct Voucher *verify_cms_voucher(const char *cms,
+struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs) {
@@ -1075,25 +1085,14 @@ struct Voucher *verify_cms_voucher(const char *cms,
     return NULL;
   }
 
-  uint8_t *out = NULL;
-  ssize_t out_length =
-      serialize_base64str2array((uint8_t *)cms, strlen(cms), &out);
-  if (out_length < 0) {
-    log_error("serialize_base64str2array fail");
-    return NULL;
-  }
-
   uint8_t *data = NULL;
   ssize_t data_length =
-      crypto_verify_cms(out, out_length, certs, store, &data, out_certs);
+      crypto_verify_cms(cms->array, cms->length, certs, store, &data, out_certs);
 
   if (data_length < 0) {
     log_error("crypto_verify_cms fail");
-    sys_free(out);
     return NULL;
   }
-
-  sys_free(out);
 
   struct Voucher *voucher = deserialize_voucher(data, data_length);
   if (voucher == NULL) {
