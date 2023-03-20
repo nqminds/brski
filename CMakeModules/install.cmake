@@ -4,6 +4,12 @@ install(
   RUNTIME
 )
 
+install(
+  TARGETS voucher
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/voucher
+)
+
 # usually /usr/local/lib/brksi
 # BRSKI_private_lib_dir is set in main CMakeLists.txt, as we need it to set RPATH before targets
 configure_file(
