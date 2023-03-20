@@ -14,7 +14,7 @@ add_cmocka_test(test_serialize
 
 add_cmocka_test(test_voucher_request
   SOURCES test_voucher_request.c
-  LINK_LIBRARIES voucher_request serialize log cmocka::cmocka
+  LINK_LIBRARIES voucher serialize log cmocka::cmocka
 )
 
 add_cmocka_test(test_voucher
@@ -22,5 +22,5 @@ add_cmocka_test(test_voucher
   LINK_LIBRARIES voucher log cmocka::cmocka
 )
 
-target_link_libraries(test_crypto PRIVATE voucher_crypto)
-target_link_libraries(test_voucher PRIVATE voucher_crypto)
+target_link_libraries(test_crypto PRIVATE voucher)
+target_link_libraries(test_voucher PRIVATE voucher)
