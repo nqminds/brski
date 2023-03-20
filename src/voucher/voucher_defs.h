@@ -7,8 +7,8 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the definition of the voucher structure.
  */
-#ifndef VOUCHER_IMPL_H
-#define VOUCHER_IMPL_H
+#ifndef VOUCHER_DEFS_H
+#define VOUCHER_DEFS_H
 
 #include <stdbool.h>
 #include <stdint.h>

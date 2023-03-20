@@ -13,7 +13,7 @@
 
 #include "../utils/os.h"
 
-#include "crypto_defs.h"
+#include "voucher_crypto.h"
 #include "list.h"
 #include "serialize.h"
 #include "voucher.h"

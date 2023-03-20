@@ -19,7 +19,7 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/crypto_defs.h"
+#include "voucher/voucher_crypto.h"
 
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;

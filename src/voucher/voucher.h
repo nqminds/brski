@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "crypto_defs.h"
+#include "voucher_crypto.h"
 
 /**
  *

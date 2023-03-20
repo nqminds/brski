@@ -14,7 +14,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "../utils/os.h"
 #include "voucher.h"
 
 /**

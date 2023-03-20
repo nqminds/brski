@@ -7,8 +7,8 @@
  * Nquiringminds Ltd SPDX-License-Identifier: MIT
  * @brief File containing the definition of the crypto types.
  */
-#ifndef CRYPTO_DEFS_H
-#define CRYPTO_DEFS_H
+#ifndef VOUCHER_CRYPTO_H
+#define VOUCHER_CRYPTO_H
 
 #include <stddef.h>
 #include <stdint.h>

@@ -18,7 +18,7 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/crypto_defs.h"
+#include "voucher/voucher_crypto.h"
 #include "voucher/voucher.h"
 #include "voucher/voucher_defs.h"
 

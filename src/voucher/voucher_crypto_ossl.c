@@ -32,7 +32,7 @@
 #include "../utils/log.h"
 #include "../utils/os.h"
 
-#include "crypto_defs.h"
+#include "voucher_crypto.h"
 
 void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
   BIO *out = BIO_new_file(filename, "w");
