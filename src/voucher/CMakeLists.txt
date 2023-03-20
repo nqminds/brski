@@ -21,8 +21,4 @@ else ()
     message(FATAL_ERROR "No crypto library option defined")
 endif ()
 
-set(VOUCHER_SRC_DIR "${PROJECT_SOURCE_DIR}/src/voucher")
-set_target_properties(voucher PROPERTIES PUBLIC_HEADER "src/voucher/list.h;\
-                                                        src/voucher/voucher_crypto.h;\
-                                                        src/voucher/voucher_request.h;\
-                                                        src/voucher/voucher.h")
+set_target_properties(voucher PROPERTIES PUBLIC_HEADER "src/voucher/list.h;src/voucher/voucher_crypto.h;src/voucher/voucher_request.h;src/voucher/voucher.h")
