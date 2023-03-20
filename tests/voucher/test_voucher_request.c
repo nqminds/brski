@@ -501,7 +501,6 @@ create_masa_pledge_voucher(struct VoucherBinaryArray *registrar_tls_cert) {
       &masa_sign_cert, &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
 
   free_binary_array(voucher_request_cms);
-
   free_binary_array(pledge_voucher_request_cms);
 
   free_binary_array_content(&registrar_sign_key);

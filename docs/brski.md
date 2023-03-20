@@ -47,7 +47,7 @@ The API details the functions to allows implementing the below state description
 ### `sign_pledge_voucher_request`
 Signs a pledge voucher request using CMS with a private key (type detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free struct VoucherBinaryArray * sign_pledge_voucher_request(const struct tm *created_on,
+__must_free_binary_array struct VoucherBinaryArray * sign_pledge_voucher_request(const struct tm *created_on,
                             const char *serial_number,
                             const struct VoucherBinaryArray *nonce,
                             const struct VoucherBinaryArray *registrar_tls_cert,
@@ -70,7 +70,7 @@ The signed pledge-voucher CMS structure as bianry array (`DER` format) or `NULL`
 ### `sign_voucher_request`
 Signs a voucher request using CMS with a private key (type detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free struct VoucherBinaryArray * sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
+__must_free_binary_array struct VoucherBinaryArray * sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
                      const struct VoucherBinaryArray *idevid_issuer,
                      const struct VoucherBinaryArray *registrar_tls_cert,
@@ -116,7 +116,7 @@ typedef int (*voucher_req_fn)(
 Signs a MASA voucher request using CMS with a private key (type detected automatically) and output as binary array (DER format).
 
 ```c
-__must_free struct VoucherBinaryArray *sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
+__must_free_binary_array struct VoucherBinaryArray *sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,
                          const struct VoucherBinaryArray *masa_sign_cert,

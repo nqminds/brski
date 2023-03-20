@@ -262,6 +262,12 @@ void free_binary_array_content(struct VoucherBinaryArray *arr);
  */
 void free_binary_array(struct VoucherBinaryArray *arr);
 
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+#define __must_free_binary_array __attribute__((malloc(free_binary_array, 1))) __must_check
+#else
+#define __must_free_binary_array __must_check
+#endif /* __GNUC__ >= 11 */
+
 /**
  * @brief Compare two binary arrays
  *
@@ -275,20 +281,26 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
 struct Voucher;
 
 /**
+ * @brief Frees an allocated voucher structure
+ *
+ * @param[in] voucher The allocated voucher structure
+ */
+void free_voucher(struct Voucher *voucher);
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+#define __must_free_voucher __attribute__((malloc(free_voucher, 1))) __must_check
+#else
+#define __must_free_voucher __must_check
+#endif /* __GNUC__ >= 11 */
+
+/**
  * @brief Initialises an empty voucher structure
  *
  * Caller is responsible for freeing the voucher
  * 
  * @return struct Voucher* pointer to allocated voucher, NULL on failure
  */
-__must_free struct Voucher *init_voucher(void);
-
-/**
- * @brief Frees an allocated voucher structure
- *
- * @param[in] voucher The allocated voucher structure
- */
-void free_voucher(struct Voucher *voucher);
+__must_free_voucher struct Voucher *init_voucher(void);
 
 /**
  * @brief Sets the value for a voucher bool attribute
@@ -460,7 +472,7 @@ __must_free char *serialize_voucher(const struct Voucher *voucher);
  * @param[in] length The json string buffer length
  * @return struct Voucher * voucher structure, NULL on failure
  */
-__must_free struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
+__must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
 
 /**
  * @brief Signs a voucher using CMS with an Elliptic Curve private key
@@ -477,7 +489,7 @@ __must_free struct Voucher *deserialize_voucher(const uint8_t *json, const size_
  * @return struct VoucherBinaryArray * the signed CMS structure in binary (DER format), NULL on
  * failure
  */
-__must_free struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
+__must_free_voucher struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *cert,
                                      const struct VoucherBinaryArray *key,
                                      const struct buffer_list *certs);
@@ -497,7 +509,7 @@ __must_free struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *vouche
  * @return struct VoucherBinaryArray* the signed CMS structure in binary (DER format), NULL on
  * failure
  */
-__must_free struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
+__must_free_voucher struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *cert,
                                       const struct VoucherBinaryArray *key,
                                       const struct buffer_list *certs);
@@ -517,7 +529,7 @@ __must_free struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *vouch
  * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
  * failure
  */
-__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
+__must_free_voucher struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);
@@ -535,7 +547,7 @@ __must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
  * structure
  * @return struct Voucher * the verified voucher, NULL on failure
  */
-__must_free struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
+__must_free_voucher struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);

@@ -38,7 +38,7 @@
  * @return struct VoucherBinaryArray* the signed pledge-voucher CMS structure as binary array (DER format),
  * NULL on failure
  */
-__must_free struct VoucherBinaryArray *
+__must_free_binary_array struct VoucherBinaryArray *
 sign_pledge_voucher_request(const struct tm *created_on,
                             const char *serial_number,
                             const struct VoucherBinaryArray *nonce,
@@ -74,7 +74,7 @@ sign_pledge_voucher_request(const struct tm *created_on,
  * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
  * failure
  */
-__must_free struct VoucherBinaryArray *
+__must_free_binary_array struct VoucherBinaryArray *
 sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
                      const struct VoucherBinaryArray *idevid_issuer,
@@ -134,7 +134,7 @@ typedef int (*voucher_req_fn)(
  * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
  * failure
  */
-__must_free struct VoucherBinaryArray *
+__must_free_binary_array struct VoucherBinaryArray *
 sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,

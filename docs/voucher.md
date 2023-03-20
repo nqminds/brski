@@ -100,7 +100,7 @@ enum VoucherAttributes {
 ### `init_voucher`
 Initialises an empty voucher structure.
 ```c
-__must_free struct Voucher *init_voucher(void);
+__must_free_voucher struct Voucher *init_voucher(void);
 ```
 
 **Return**:
@@ -428,7 +428,7 @@ int push_buffer_list(struct buffer_list *buf_list,
 ### `sign_eccms_voucher`
 Signs a voucher using CMS with an Elliptic Curve private key and output to a binary buffer (`DER` format).
 ```c
-__must_free struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
+__must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *cert,
                                      const struct VoucherBinaryArray *key,
                                      const struct buffer_list *certs);
@@ -445,7 +445,7 @@ The signed CMS structure in binary (`DER` format) or `NULL` on failure.
 ### `sign_rsacms_voucher`
 Signs a voucher using CMS with a RSA private key and output to a binary buffer (`DER` format).
 ```c
-__must_free struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
+__must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *cert,
                                       const struct VoucherBinaryArray *key,
                                       const struct buffer_list *certs);
@@ -462,7 +462,7 @@ The signed CMS structure in binary (`DER` format) or `NULL` on failure.
 ### `sign_cms_voucher`
 Signs a voucher using CMS with a private key (detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
+__must_free_binary_array struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);
@@ -479,7 +479,7 @@ The signed CMS structure as binary array (`DER` format) or `NULL` on failure.
 ### `verify_cms_voucher`
 Verifies a CMS binary buffer and extracts the voucher structure, and the list of included certificates.
 ```c
-__must_free struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
+__must_free_voucher struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);
