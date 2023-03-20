@@ -448,7 +448,7 @@ sign_masa_pledge_voucher_fail:
 }
 
 int verify_masa_pledge_voucher(
-    const char *masa_pledge_voucher_cms, const char *serial_number,
+    const struct VoucherBinaryArray *masa_pledge_voucher_cms, const char *serial_number,
     const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *registrar_tls_cert,
     const struct buffer_list *domain_store,

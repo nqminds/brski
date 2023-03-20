@@ -153,7 +153,7 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
  * Caller is reponsible for freeing the output certificate list
  *
  * @param[in] masa_pledge_voucher_cms The signed MASA pledge voucher CMS
- * structure in base64 (PEM format)
+ * structure as binarry (DER format)
  * @param[in] serial_number The serial number string from the idevid certificate
  * @param[in] nonce Random/pseudo-random nonce from the pledge voucher request
  * (NULL for empty)
@@ -173,7 +173,8 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
  * @return 0 on success, -1 on failure
  */
 int verify_masa_pledge_voucher(
-    const char *masa_pledge_voucher_cms, const char *serial_number,
+    const struct VoucherBinaryArray *masa_pledge_voucher_cms,
+    const char *serial_number,
     const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *registrar_tls_cert,
     const struct buffer_list *domain_store,

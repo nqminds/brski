@@ -116,7 +116,7 @@ typedef int (*voucher_req_fn)(
 Signs a MASA voucher request using CMS with a private key (type detected automatically) and output as binary array (DER format).
 
 ```c
-__must_free struct VoucherBinaryArray *sign_masa_pledge_voucher(const char *voucher_request_cms,
+__must_free struct VoucherBinaryArray *sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,
                          const struct VoucherBinaryArray *masa_sign_cert,
@@ -147,7 +147,7 @@ The signed CMS structure as binary array (`DER` format) or `NULL` on failure.
 Verifies a MASA pledge voucher and outputs a pinned domain certificate (`DER` format) and the CMS appended list of certificates.
 ```c
 int verify_masa_pledge_voucher(
-    const char *masa_pledge_voucher_cms, const char *serial_number,
+    const struct VoucherBinaryArray *masa_pledge_voucher_cms, const char *serial_number,
     const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *registrar_tls_cert,
     const struct buffer_list *domain_store,
@@ -158,7 +158,7 @@ int verify_masa_pledge_voucher(
 ```
 
 **Parameters**:
-* `masa_pledge_voucher_cms` - The signed MASA pledge voucher CMS structure in `base64` (`PEM` format),
+* `masa_pledge_voucher_cms` - The signed MASA pledge voucher CMS structure as binary array (`DER` format),
 * `serial_number` - The serial number string from the idevid certificate,
 * `nonce` - Random/pseudo-random nonce from the pledge voucher request (`NULL` for empty),
 * `registrar_tls_cert` - The first certificate in the TLS server "certificate_list" sequence presented by the registrar to the pledge (`DER` format),
