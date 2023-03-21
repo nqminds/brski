@@ -16,6 +16,45 @@
 
 #include "list.h"
 
+#define DL_LIST_HEAD_INIT(l)                                                   \
+  { &(l), &(l) }
+
+static void dl_list_init(struct dl_list *list) {
+  list->next = list;
+  list->prev = list;
+}
+
+static void dl_list_add(struct dl_list *list, struct dl_list *item) {
+  item->next = list->next;
+  item->prev = list;
+  list->next->prev = item;
+  list->next = item;
+}
+
+static void dl_list_add_tail(struct dl_list *list,
+                                    struct dl_list *item) {
+  dl_list_add(list->prev, item);
+}
+
+static void dl_list_del(struct dl_list *item) {
+  item->next->prev = item->prev;
+  item->prev->next = item->next;
+  item->next = NULL;
+  item->prev = NULL;
+}
+
+int dl_list_empty(const struct dl_list *list) {
+  return list->next == list;
+}
+
+unsigned int dl_list_len(const struct dl_list *list) {
+  struct dl_list *item;
+  int count = 0;
+  for (item = list->next; item != list; item = item->next)
+    count++;
+  return count;
+}
+
 struct keyvalue_list *init_keyvalue_list(void) {
   struct keyvalue_list *kv_list = NULL;
 
