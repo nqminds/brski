@@ -213,9 +213,12 @@ static void test_crypto_sign_eccms(void **state) {
 
   uint8_t *key_in_list = NULL;
   ssize_t key_in_list_length = crypto_generate_eckey(&key_in_list);
+
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_eccert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
+
+  sys_free(key_in_list);
 
   assert_int_equal(
       push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
@@ -242,6 +245,7 @@ static void test_crypto_sign_eccms(void **state) {
                              key_length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
+
   sys_free(cms);
   sys_free(key);
   sys_free(cert);
@@ -298,6 +302,8 @@ static void test_crypto_sign_rsacms(void **state) {
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_rsacert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
+
+  sys_free(key_in_list);
 
   assert_int_equal(
       push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
@@ -596,6 +602,8 @@ static void test_crypto_sign_cms(void **state) {
   assert_int_equal(
       push_buffer_list(certs, cert_in_list, cert_in_list_length, 0), 0);
 
+  sys_free(key_in_list);
+
   ssize_t length =
       crypto_sign_cms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
 
@@ -720,12 +728,13 @@ static void test_crypto_verify_cms(void **state) {
   assert_memory_equal(extracted_data, data, extracted_data_legth);
 
   sys_free(cms);
-  sys_free(extracted_data);
 
   cms_length = crypto_sign_cms((uint8_t *)data, data_length, cert, cert_length,
                                key, key_length, certs, &cms);
 
   assert_non_null(cms);
+
+  sys_free(extracted_data);
 
   struct buffer_list *out_certs = NULL;
   extracted_data = NULL;
@@ -772,7 +781,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_crypto_sign_cert),
       cmocka_unit_test(test_crypto_verify_cert),
       cmocka_unit_test(test_crypto_sign_cms),
-      cmocka_unit_test(test_crypto_verify_cms)};
+      cmocka_unit_test(test_crypto_verify_cms)
+  };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
