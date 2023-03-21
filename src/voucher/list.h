@@ -21,18 +21,14 @@
 struct dl_list {
   struct dl_list *next;
   struct dl_list *prev;
+  void *el;
 };
 
 int dl_list_empty(const struct dl_list *list);
 
 unsigned int dl_list_len(const struct dl_list *list);
 
-#ifndef offsetof
-#define offsetof(type, member) ((long)&((type *)0)->member)
-#endif
-
-#define dl_list_entry(item, type, member)                                      \
-  ((type *)((char *)item - offsetof(type, member)))
+#define dl_list_entry(item, type, member) ((type *)((void *)item->el))
 
 #define dl_list_first(list, type, member)                                      \
   (dl_list_empty((list)) ? NULL : dl_list_entry((list)->next, type, member))
@@ -45,27 +41,17 @@ unsigned int dl_list_len(const struct dl_list *list);
        &item->member != (list);                                                \
        item = dl_list_entry(item->member.next, type, member))
 
-/*
 #define dl_list_for_each_safe(item, n, list, type, member)                     \
   for (item = dl_list_entry((list)->next, type, member),                       \
       n = dl_list_entry(item->member.next, type, member);                      \
        &item->member != (list);                                                \
        item = n, n = dl_list_entry(n->member.next, type, member))
-*/
-
-/*
-#define dl_list_for_each_reverse(item, list, type, member)                     \
-  for (item = dl_list_entry((list)->prev, type, member);                       \
-       &item->member != (list);                                                \
-       item = dl_list_entry(item->member.prev, type, member))
-*/
 
 #define DEFINE_DL_LIST(name) struct dl_list name = {&(name), &(name)}
 
 struct keyvalue_list {
   char *key;           /**< The attribute name (heap allocated) */
   char *value;         /**< The attribute value (heap allocated) */
-  void *__unused;      /**< For address sanitization */
   struct dl_list list; /**< List definition */
 };
 
@@ -87,7 +73,7 @@ void free_keyvalue_list(struct keyvalue_list *kv_list);
  *
  * @return struct keyvalue_list * initialised key/value list, NULL on failure
  */
-struct keyvalue_list *init_keyvalue_list(void);
+__must_free_keyvalue_list struct keyvalue_list *init_keyvalue_list(void);
 
 /**
  * @brief Pushes the key/value/escape elements into the list
@@ -114,12 +100,18 @@ struct buffer_list {
  */
 void free_buffer_list(struct buffer_list *buf_list);
 
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
+#define __must_free_buffer_list __attribute__((malloc(free_buffer_list, 1))) __must_check
+#else
+#define __must_free_buffer_list __must_check
+#endif /* __GNUC__ >= 11 */
+
 /**
  * @brief Initializes the buffer list
  *Parameters
  * @return struct buffer_list * initialised buffer list, NULL on failure
  */
-struct buffer_list *init_buffer_list(void);
+__must_free_buffer_list struct buffer_list *init_buffer_list(void);
 
 /**
  * @brief Pushes a heap allocated buffer into the list
@@ -143,13 +135,6 @@ struct ptr_list {
 typedef void (*ptr_free_fn)(void *ptr, const int flag);
 
 /**
- * @brief Initializes the ptr list
- *
- * @return struct ptr_list * initialised ptr list, NULL on failure
- */
-struct ptr_list *init_ptr_list(void);
-
-/**
  * @brief Frees the ptr list and all of its elements
  * using a a user supplied callback function
  *
@@ -157,6 +142,19 @@ struct ptr_list *init_ptr_list(void);
  * @param[in] cb The user supplied callback functio to free the ptr element
  */
 void free_ptr_list(struct ptr_list *ptr_list, const ptr_free_fn cb);
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
+#define __must_free_ptr_list __attribute__((malloc(free_ptr_list, 1))) __must_check
+#else
+#define __must_free_ptr_list __must_check
+#endif /* __GNUC__ >= 11 */
+
+/**
+ * @brief Initializes the ptr list
+ *
+ * @return struct ptr_list * initialised ptr list, NULL on failure
+ */
+__must_free_ptr_list struct ptr_list *init_ptr_list(void);
 
 /**
  * @brief Pushes a pointer into the list and assigns the flags

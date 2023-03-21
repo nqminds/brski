@@ -16,24 +16,23 @@
 
 #include "list.h"
 
-#define DL_LIST_HEAD_INIT(l)                                                   \
-  { &(l), &(l) }
-
-static void dl_list_init(struct dl_list *list) {
+static void dl_list_init(struct dl_list *list, void *el) {
   list->next = list;
   list->prev = list;
+  list->el = el;
 }
 
-static void dl_list_add(struct dl_list *list, struct dl_list *item) {
+static void dl_list_add(struct dl_list *list, struct dl_list *item, void *el) {
   item->next = list->next;
   item->prev = list;
   list->next->prev = item;
   list->next = item;
+  list->next->el = el;
 }
 
 static void dl_list_add_tail(struct dl_list *list,
-                                    struct dl_list *item) {
-  dl_list_add(list->prev, item);
+                                    struct dl_list *item, void *el) {
+  dl_list_add(list->prev, item, el);
 }
 
 static void dl_list_del(struct dl_list *item) {
@@ -63,7 +62,7 @@ struct keyvalue_list *init_keyvalue_list(void) {
     return NULL;
   }
 
-  dl_list_init(&kv_list->list);
+  dl_list_init(&kv_list->list, (void*)kv_list);
 
   return kv_list;
 }
@@ -113,7 +112,7 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
     return -1;
   }
 
-  struct keyvalue_list *el = init_keyvalue_list();
+  struct keyvalue_list *el = sys_zalloc(sizeof(struct keyvalue_list));
 
   if (el == NULL) {
     log_error("init_keyvalue_list fail");
@@ -122,8 +121,8 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
 
   el->key = key;
   el->value = value;
-
-  dl_list_add_tail(&kv_list->list, &el->list);
+  
+  dl_list_add_tail(&kv_list->list, &el->list, (void*)el);
 
   return 0;
 }
@@ -136,7 +135,7 @@ struct buffer_list *init_buffer_list(void) {
     return NULL;
   }
 
-  dl_list_init(&buf_list->list);
+  dl_list_init(&buf_list->list, (void *)buf_list);
 
   return buf_list;
 }
@@ -178,7 +177,7 @@ int push_buffer_list(struct buffer_list *buf_list, uint8_t *const buf,
     return -1;
   }
 
-  struct buffer_list *el = init_buffer_list();
+  struct buffer_list *el = sys_zalloc(sizeof(struct buffer_list));
 
   if (el == NULL) {
     log_error("init_buffer_list fail");
@@ -189,7 +188,7 @@ int push_buffer_list(struct buffer_list *buf_list, uint8_t *const buf,
   el->length = length;
   el->flags = flags;
 
-  dl_list_add_tail(&buf_list->list, &el->list);
+  dl_list_add_tail(&buf_list->list, &el->list, (void*)el);
 
   return 0;
 }
@@ -202,7 +201,7 @@ struct ptr_list *init_ptr_list(void) {
     return NULL;
   }
 
-  dl_list_init(&ptr_list->list);
+  dl_list_init(&ptr_list->list, (void*)ptr_list);
 
   return ptr_list;
 }
@@ -242,7 +241,7 @@ int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags) {
     return -1;
   }
 
-  struct ptr_list *el = init_ptr_list();
+  struct ptr_list *el = sys_zalloc(sizeof(struct ptr_list));
 
   if (el == NULL) {
     log_error("init_ptr_list fail");
@@ -252,7 +251,7 @@ int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags) {
   el->ptr = ptr;
   el->flags = flags;
 
-  dl_list_add_tail(&ptr_list->list, &el->list);
+  dl_list_add_tail(&ptr_list->list, &el->list, (void*)el);
 
   return 0;
 }
