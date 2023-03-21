@@ -48,11 +48,6 @@ string(TOLOWER ${PROJECT_NAME} _project_lower)
 include(BrskiInstallLocations)
 
 # Installation options
-# Only overwrite CMAKE_INSTALL_PREFIX if there is no -DCMAKE_INSTALL_PREFIX
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/${_project_lower}-dist" CACHE PATH "Installation path" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
 # RPATH must be set before defining targets
 # $ORIGIN is so that shared libs can view other shared libs (e.g. libgrpc++ can see libxxx)
 # $ORIGIN/lib is to support where we used to store shared libs
@@ -228,6 +223,16 @@ if (NOT BUILD_ONLY_DOCS)
         "${PROJECT_SOURCE_DIR}/_deps/*"
     )
   endif()
+
+  #add_compile_options(
+  #  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
+  #  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
+  #)
+
+  #add_link_options(
+  #  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
+  #  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
+  #)
 
   # src must be after codecoverage but before tests
   add_subdirectory(src)

@@ -17,6 +17,7 @@
 #include <time.h>
 
 #include "list.h"
+#include "../utils/os.h"
 
 /**
  * @brief Encodes an array to base64
@@ -54,7 +55,7 @@ ssize_t serialize_base64str2array(const uint8_t *src, const size_t length,
  * @param[in] value The bool value
  * @return char * encoded bool, NULL on failure
  */
-__must_free char *serialize_bool2str(const bool value);
+__must_sys_free char *serialize_bool2str(const bool value);
 
 /**
  * @brief Encodes a string value to a bool
@@ -75,7 +76,7 @@ int serialize_str2bool(const char *str, const size_t length);
  * @param[in] value The time struct
  * @return char * encoded time, NULL on failure
  */
-__must_free char *serialize_time2str(const struct tm *value);
+__must_sys_free char *serialize_time2str(const struct tm *value);
 
 /**
  * @brief decodes a ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
@@ -95,7 +96,7 @@ int serialize_str2time(const char *str, const struct tm *tm);
  * @param[in] value The input string to escape
  * @return char * the escaped string, NULL on failure
  */
-__must_free char *serialize_escapestr(const char *str);
+__must_sys_free char *serialize_escapestr(const char *str);
 
 /**
  * @brief Encodes a key/value list to a json
@@ -107,5 +108,5 @@ __must_free char *serialize_escapestr(const char *str);
  * @param[in] kv_list The key/value list
  * @return char * encoded json, NULL on failure
  */
-__must_free char *serialize_keyvalue2json(const struct keyvalue_list *kv_list);
+__must_sys_free char *serialize_keyvalue2json(const struct keyvalue_list *kv_list);
 #endif

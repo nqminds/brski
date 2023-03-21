@@ -668,6 +668,9 @@ struct buffer_list *create_cert_list(void) {
   push_buffer_list(certs, cert, cert_length, 0);
 
   sys_free(key);
+  free_keyvalue_list(meta.issuer);
+  free_keyvalue_list(meta.subject);
+
   return certs;
 }
 

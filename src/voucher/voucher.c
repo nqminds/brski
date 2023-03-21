@@ -116,6 +116,9 @@ void free_voucher(struct Voucher *voucher) {
     free_binary_array_content(&voucher->idevid_issuer);
     free_binary_array_content(&voucher->pinned_domain_cert);
     free_binary_array_content(&voucher->nonce);
+    free_binary_array_content(&voucher->prior_signed_voucher_request);
+    free_binary_array_content(&voucher->proximity_registrar_cert);
+
     sys_free(voucher);
   }
 }
@@ -1026,7 +1029,7 @@ struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
   return out;
 }
 
-__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
+__must_sys_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs) {

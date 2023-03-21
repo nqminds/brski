@@ -22,5 +22,5 @@ add_cmocka_test(test_voucher
   LINK_LIBRARIES voucher log cmocka::cmocka
 )
 
-target_link_libraries(test_crypto PRIVATE voucher)
-target_link_libraries(test_voucher PRIVATE voucher)
+target_link_libraries(test_crypto PRIVATE voucher os)
+target_link_libraries(test_voucher PRIVATE voucher os)

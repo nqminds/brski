@@ -33,6 +33,7 @@ static void test_serialize_array2base64str(void **state) {
   assert_true(out_len > 0);
   assert_non_null(out);
   assert_string_equal((char *)out, STR_TO_BASE64);
+  sys_free(out);
 }
 
 static void test_serialize_base64str2array(void **state) {
@@ -44,6 +45,7 @@ static void test_serialize_base64str2array(void **state) {
   assert_true(out_len > 0);
   assert_non_null(out);
   assert_string_equal((char *)out, STR_FROM_BASE64);
+  sys_free(out);
 }
 
 static void test_serialize_bool2str(void **state) {

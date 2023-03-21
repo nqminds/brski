@@ -461,7 +461,7 @@ get_attr_array_voucher(struct Voucher *voucher,
  * @param[in] voucher The allocated voucher structure
  * @return char* serialized voucher, NULL on failure
  */
-__must_free char *serialize_voucher(const struct Voucher *voucher);
+__must_sys_free char *serialize_voucher(const struct Voucher *voucher);
 
 /**
  * @brief Deserializes a json string buffer to a voucher structure
@@ -489,7 +489,7 @@ __must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json, con
  * @return struct VoucherBinaryArray * the signed CMS structure in binary (DER format), NULL on
  * failure
  */
-__must_free_voucher struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
+__must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
                                      const struct VoucherBinaryArray *cert,
                                      const struct VoucherBinaryArray *key,
                                      const struct buffer_list *certs);
@@ -509,7 +509,7 @@ __must_free_voucher struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher
  * @return struct VoucherBinaryArray* the signed CMS structure in binary (DER format), NULL on
  * failure
  */
-__must_free_voucher struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
+__must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
                                       const struct VoucherBinaryArray *cert,
                                       const struct VoucherBinaryArray *key,
                                       const struct buffer_list *certs);
@@ -529,7 +529,7 @@ __must_free_voucher struct VoucherBinaryArray *sign_rsacms_voucher(struct Vouche
  * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
  * failure
  */
-__must_free_voucher struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
+__must_free_binary_array struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
                                    const struct VoucherBinaryArray *cert,
                                    const struct VoucherBinaryArray *key,
                                    const struct buffer_list *certs);

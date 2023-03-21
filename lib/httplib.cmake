@@ -9,5 +9,13 @@ if(USE_CPPHTTPLIB_LIB AND NOT BUILD_ONLY_DOCS)
 
   # create static lib using -fPIC, so we can make it into a sharedobject later
   set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-  FetchContent_MakeAvailable(cpp-httplib)
+  #FetchContent_MakeAvailable(cpp-httplib)
+
+  # Exclude install targets from cpp-httplib
+
+  FetchContent_GetProperties(cpp-httplib)
+  if(NOT cpp-httplib_POPULATED)
+    FetchContent_Populate(cpp-httplib)
+    add_subdirectory(${cpp-httplib_SOURCE_DIR} ${cpp-httplib_BINARY_DIR} EXCLUDE_FROM_ALL)
+  endif()
 endif ()

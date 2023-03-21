@@ -41,30 +41,26 @@
 #endif /* defined __has_attribute */
 #endif /* __has_attribute */
 
-#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
-                   // __attribute__((malloc)) accepts no args
-/**
- * Declares that the attributed function must be free()-ed with `__must_free()`.
- *
- * Expects that this function returns a pointer that must be `free()`-ed with
- * `free()`.
- *
- * Please be aware that `__attribute((malloc))` instead does something
- * completely different and should **NOT** be used. It tells the compiler about
- * pointer aliasing, which does not apply to functions like `realloc()`, and
- * so are not part of this macro.
- *
- * @see
- * https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Common-Function-Attributes.html#index-malloc-function-attribute
- */
-#define __must_free __attribute__((malloc(free, 1))) __must_check
-#else
-#define __must_free __must_check
-#endif /* __GNUC__ >= 11 */
-
 #ifndef ARRAY_SIZE
 #define ARRAY_SIZE(s) (sizeof(s) / sizeof(s[0]))
 #endif
+
+/**
+ * @brief Allocate memory
+ *
+ * Caller is responsible for freeing the returned buffer with sys_free().
+ *
+ * @param s Number of bytes to allocate
+ * @return void* Pointer to allocated memory or %NULL on failure
+ */
+void *sys_malloc(size_t s);
+
+/**
+ * @brief Frees memory
+ *
+ * @param p The pointer to the allocated memory
+ */
+void sys_free(void *p);
 
 /**
  * @brief Allocate and zero memory
@@ -92,23 +88,12 @@ void *sys_memdup(const void *const src, const size_t len);
 #define sys_zalloc(s) sys_zalloc(s)
 #endif
 
-// void *sys_malloc(size_t size);
-// void sys_free(void* ptr);
-
-#ifndef sys_malloc
-#define sys_malloc(s) malloc(s)
-#endif
-
 #ifndef sys_realloc
 #define sys_realloc(p, s) realloc(p, s)
 #endif
 
 #ifndef sys_calloc
 #define sys_calloc(nm, s) calloc(nm, s)
-#endif
-
-#ifndef sys_free
-#define sys_free(p) free(p)
 #endif
 
 #ifndef sys_memcpy
@@ -126,6 +111,27 @@ void *sys_memdup(const void *const src, const size_t len);
 #ifndef sys_memcmp
 #define sys_memcmp(s1, s2, n) memcmp(s1, s2, n)
 #endif
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+                   // __attribute__((malloc)) accepts no args
+/**
+ * Declares that the attributed function must be free()-ed with `__must_free()`.
+ *
+ * Expects that this function returns a pointer that must be `free()`-ed with
+ * `free()`.
+ *
+ * Please be aware that `__attribute((malloc))` instead does something
+ * completely different and should **NOT** be used. It tells the compiler about
+ * pointer aliasing, which does not apply to functions like `realloc()`, and
+ * so are not part of this macro.
+ *
+ * @see
+ * https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Common-Function-Attributes.html#index-malloc-function-attribute
+ */
+#define __must_sys_free __attribute__((malloc(sys_free, 1))) __must_check
+#else
+#define __must_sys_free __must_check
+#endif /* __GNUC__ >= 11 */
 
 /**
  * @brief Reallocates the given area of a memory array (uses realloc).

@@ -759,6 +759,9 @@ struct buffer_list *create_cert_list(void) {
   push_buffer_list(certs, cert, cert_length, 0);
 
   sys_free(key);
+  free_keyvalue_list(meta.issuer);
+  free_keyvalue_list(meta.subject);
+
   return certs;
 }
 
@@ -816,6 +819,7 @@ static void test_verify_cms_voucher(void **state) {
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
+  free_voucher(voucher);
   free_voucher(decoded_voucher);
   free_binary_array(signed_voucher);
 

@@ -33,7 +33,3 @@ install(CODE
       -P ${CMAKE_SOURCE_DIR}/CMakeModules/InstallConfigFile.cmake
   )"
 )
-
-if(BUILD_OPENSSL3_LIB AND LIBOPENSSL3_LIB_PATH)
-  install(DIRECTORY "${LIBOPENSSL3_LIB_PATH}/" DESTINATION ${BRSKI_private_lib_dir})
-endif ()
