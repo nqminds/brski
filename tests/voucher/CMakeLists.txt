@@ -2,6 +2,11 @@ include_directories (
   "${PROJECT_SOURCE_DIR}/src"
 )
 
+add_cmocka_test(test_list
+  SOURCES test_list.c
+  LINK_LIBRARIES list log cmocka::cmocka
+)
+
 add_cmocka_test(test_crypto
   SOURCES test_crypto.c
   LINK_LIBRARIES list log cmocka::cmocka
