@@ -46,6 +46,34 @@
 #endif
 
 /**
+ * @brief Frees memory
+ *
+ * @param p The pointer to the allocated memory
+ */
+void sys_free(void *p);
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+                   // __attribute__((malloc)) accepts no args
+/**
+ * Declares that the attributed function must be free()-ed with `__must_free()`.
+ *
+ * Expects that this function returns a pointer that must be `free()`-ed with
+ * `free()`.
+ *
+ * Please be aware that `__attribute((malloc))` instead does something
+ * completely different and should **NOT** be used. It tells the compiler about
+ * pointer aliasing, which does not apply to functions like `realloc()`, and
+ * so are not part of this macro.
+ *
+ * @see
+ * https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Common-Function-Attributes.html#index-malloc-function-attribute
+ */
+#define __must_sys_free __attribute__((malloc(sys_free, 1))) __must_check
+#else
+#define __must_sys_free __must_check
+#endif /* __GNUC__ >= 11 */
+
+/**
  * @brief Allocate memory
  *
  * Caller is responsible for freeing the returned buffer with sys_free().
@@ -56,13 +84,6 @@
 void *sys_malloc(size_t s);
 
 /**
- * @brief Frees memory
- *
- * @param p The pointer to the allocated memory
- */
-void sys_free(void *p);
-
-/**
  * @brief Allocate and zero memory
  *
  * Caller is responsible for freeing the returned buffer with sys_free().
@@ -71,22 +92,6 @@ void sys_free(void *p);
  * @return void* Pointer to allocated and zeroed memory or %NULL on failure
  */
 void *sys_zalloc(const size_t size);
-
-/**
- * sys_memdup - Allocate duplicate of passed memory chunk
- *
- * This function allocates a memory block like sys_malloc() would, and
- * copies the given source buffer into it.
- *
- * @param src Source buffer to duplicate
- * @param len Length of source buffer
- * @return void* %NULL if allocation failed, copy of src buffer otherwise
- */
-void *sys_memdup(const void *const src, const size_t len);
-
-#ifndef sys_zalloc
-#define sys_zalloc(s) sys_zalloc(s)
-#endif
 
 #ifndef sys_realloc
 #define sys_realloc(p, s) realloc(p, s)
@@ -112,27 +117,6 @@ void *sys_memdup(const void *const src, const size_t len);
 #define sys_memcmp(s1, s2, n) memcmp(s1, s2, n)
 #endif
 
-#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
-                   // __attribute__((malloc)) accepts no args
-/**
- * Declares that the attributed function must be free()-ed with `__must_free()`.
- *
- * Expects that this function returns a pointer that must be `free()`-ed with
- * `free()`.
- *
- * Please be aware that `__attribute((malloc))` instead does something
- * completely different and should **NOT** be used. It tells the compiler about
- * pointer aliasing, which does not apply to functions like `realloc()`, and
- * so are not part of this macro.
- *
- * @see
- * https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Common-Function-Attributes.html#index-malloc-function-attribute
- */
-#define __must_sys_free __attribute__((malloc(sys_free, 1))) __must_check
-#else
-#define __must_sys_free __must_check
-#endif /* __GNUC__ >= 11 */
-
 /**
  * @brief Reallocates the given area of a memory array (uses realloc).
  *
@@ -142,7 +126,7 @@ void *sys_memdup(const void *const src, const size_t len);
  * @return void* the pointer to the beginning of newly allocated memory array,
  * NULL on failure.
  */
-void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size);
+__must_sys_free void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size);
 
 /**
  * @brief Allocate duplicate of passed memory chunk
@@ -154,7 +138,7 @@ void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size);
  * @param len Length of source buffer
  * @return void* %NULL if allocation failed, copy of src buffer otherwise
  */
-void *sys_memdup(const void *const src, const size_t len);
+__must_sys_free void *sys_memdup(const void *const src, const size_t len);
 
 /**
  * @brief Returns a pointer to a new string which is a duplicate of the string s
@@ -172,7 +156,7 @@ char *sys_strndup(const char *const s, const size_t length);
  * @param s The input string
  * @return char* The dublicate string pointer, NULL on error
  */
-char *sys_strdup(const char *const s);
+__must_sys_free char *sys_strdup(const char *const s);
 
 /**
  * @brief Copy a string with size bound and NUL-termination

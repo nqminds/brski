@@ -275,8 +275,7 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length) {
     return NULL;
   }
 
-  CRYPTO_KEY ctx = (CRYPTO_KEY)pkey;
-  return ctx;
+  return (CRYPTO_KEY)pkey;
 }
 
 CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length) {
@@ -533,7 +532,7 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
 
   if (sign_sha256_certificate(x509, pkey) < 0) {
     log_error("sign_sha256_certificate fail");
-    EVP_PKEY_free(pkey);
+    crypto_free_keycontext(pkey);
     X509_free(x509);
     return -1;
   }
@@ -543,7 +542,7 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
     log_error("cert_to_derbuf fail");
   }
 
-  EVP_PKEY_free(pkey);
+  crypto_free_keycontext(pkey);
   X509_free(x509);
 
   return length;
@@ -640,7 +639,7 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
   X509 *x509_ca = crypto_cert2context(ca_cert, ca_cert_length);
   if (x509_ca == NULL) {
     log_error("crypto_cert2context fail");
-    EVP_PKEY_free(sign_pkey);
+    crypto_free_keycontext(sign_pkey);
     return -1;
   }
 
@@ -648,7 +647,7 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
   if (x509 == NULL) {
     log_error("crypto_cert2context fail");
     X509_free(x509_ca);
-    EVP_PKEY_free(sign_pkey);
+    crypto_free_keycontext(sign_pkey);
     return -1;
   }
 
@@ -682,13 +681,13 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
 
   X509_free(x509_ca);
   X509_free(x509);
-  EVP_PKEY_free(sign_pkey);
+  crypto_free_keycontext(sign_pkey);
   return out_cert_length;
 
 crypto_sign_cert_fail:
   X509_free(x509_ca);
   X509_free(x509);
-  EVP_PKEY_free(sign_pkey);
+  crypto_free_keycontext(sign_pkey);
   return -1;
 }
 
@@ -950,22 +949,22 @@ ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
 
   *cms = NULL;
 
-  EVP_PKEY *pkey = (EVP_PKEY *)crypto_eckey2context(key, key_length);
+  CRYPTO_KEY *pkey = crypto_eckey2context(key, key_length);
   if (pkey == NULL) {
     log_error("crypto_eckey2context fail");
     return -1;
   }
 
   ssize_t length =
-      sign_withkey_cms(data, data_length, cert, cert_length, pkey, certs, cms);
+      sign_withkey_cms(data, data_length, cert, cert_length, (EVP_PKEY *) pkey, certs, cms);
 
   if (length < 0) {
     log_error("sign_withkey_eccms fail");
-    EVP_PKEY_free(pkey);
+    crypto_free_keycontext(pkey);
     return -1;
   }
 
-  EVP_PKEY_free(pkey);
+  crypto_free_keycontext(pkey);
   return length;
 }
 
@@ -1006,11 +1005,11 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
 
   if (length < 0) {
     log_error("sign_withkey_eccms fail");
-    EVP_PKEY_free(pkey);
+    crypto_free_keycontext(pkey);
     return -1;
   }
 
-  EVP_PKEY_free(pkey);
+  crypto_free_keycontext(pkey);
   return length;
 }
 
@@ -1051,11 +1050,11 @@ ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
 
   if (length < 0) {
     log_error("sign_withkey_eccms fail");
-    EVP_PKEY_free(pkey);
+    crypto_free_keycontext(pkey);
     return -1;
   }
 
-  EVP_PKEY_free(pkey);
+  crypto_free_keycontext(pkey);
   return length;
 }
 
