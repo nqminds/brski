@@ -262,7 +262,7 @@ void free_binary_array_content(struct VoucherBinaryArray *arr);
  */
 void free_binary_array(struct VoucherBinaryArray *arr);
 
-#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
 #define __must_free_binary_array __attribute__((malloc(free_binary_array, 1))) __must_check
 #else
 #define __must_free_binary_array __must_check
@@ -287,7 +287,7 @@ struct Voucher;
  */
 void free_voucher(struct Voucher *voucher);
 
-#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
 #define __must_free_voucher __attribute__((malloc(free_voucher, 1))) __must_check
 #else
 #define __must_free_voucher __must_check
