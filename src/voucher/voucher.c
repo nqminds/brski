@@ -331,7 +331,7 @@ set_attr_array_voucher_fail:
 int set_attr_base64_voucher(struct Voucher *voucher,
                             const enum VoucherAttributes attr,
                             const char *value, const size_t length) {
-  struct VoucherBinaryArray binary_array;
+  struct VoucherBinaryArray binary_array = {0};
   ssize_t out_length = 0;
   if ((out_length = serialize_base64str2array((const uint8_t *)value, length,
                                               &binary_array.array)) < 0) {
@@ -346,6 +346,7 @@ int set_attr_base64_voucher(struct Voucher *voucher,
     return -1;
   }
 
+  free_binary_array_content(&binary_array);
   return 0;
 }
 
@@ -876,15 +877,14 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
     return NULL;
   }
 
-  struct Voucher *voucher = NULL;
+  struct Voucher *voucher = init_voucher();
+  bool found_root = false;
 
   for (int idx = 1; idx < count; idx++) {
     int length = tokens[idx].end - tokens[idx].start;
     /* Find the voucher root key */
     if (strncmp(VOUCHER_ROOT_NAME, (char *)(json + tokens[idx].start),
                 length) == 0) {
-      voucher = init_voucher();
-
       idx++;
       if (idx < count && tokens[idx].type == JSMN_OBJECT) {
         /* Iterate over all the key/value pairs of the voucher root */
@@ -908,6 +908,7 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
             goto deserialize_voucher_fail;
           }
         }
+        found_root = true;
       } else {
         log_error("Malformed voucher json");
         goto deserialize_voucher_fail;
@@ -917,8 +918,10 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
     }
   }
 
-  if (voucher == NULL) {
-    log_error("Malformed voucher json");
+  if (!found_root) {
+    log_error("Voucher root not found");
+    free_voucher(voucher);
+    return NULL;  
   }
 
   return voucher;

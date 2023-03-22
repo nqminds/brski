@@ -224,19 +224,19 @@ if (NOT BUILD_ONLY_DOCS)
     )
   endif()
 
-  #add_compile_options(
-  #  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fno-omit-frame-pointer>>
-  #  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fno-omit-frame-pointer>>
-  #  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
-  #  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
-  #)
+  add_compile_options(
+    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fno-omit-frame-pointer>>
+    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fno-omit-frame-pointer>>
+    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
+    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
+  )
 
-  #add_link_options(
-  #  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fno-omit-frame-pointer>>
-  #  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fno-omit-frame-pointer>>
-  #  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
-  #  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
-  #)
+  add_link_options(
+    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fno-omit-frame-pointer>>
+    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fno-omit-frame-pointer>>
+    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
+    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
+  )
 
   # src must be after codecoverage but before tests
   add_subdirectory(src)

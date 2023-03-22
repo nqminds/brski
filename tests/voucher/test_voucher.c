@@ -353,61 +353,60 @@ __attribute__((no_sanitize_address)) static void test_deserialize_voucher(void *
   test_compare_array(&array_value, &voucher->idevid_issuer);
   free_voucher(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"pinned-domain-cert\":\"AQIDBAU=\"}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // test_compare_array(&array_value, &voucher->pinned_domain_cert);
-  // free_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"pinned-domain-cert\":\"AQIDBAU=\"}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  test_compare_array(&array_value, &voucher->pinned_domain_cert);
+  free_voucher(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // assert_true(voucher->domain_cert_revocation_checks);
-  // free_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  assert_true(voucher->domain_cert_revocation_checks);
+  free_voucher(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"nonce\":\"AQIDBAU=\"}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // test_compare_array(&array_value, &voucher->nonce);
-  // free_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"nonce\":\"AQIDBAU=\"}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  test_compare_array(&array_value, &voucher->nonce);
+  free_voucher(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"last-renewal-date\":\"1973-11-29T21:33:"
-  //        "09Z\"}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // test_compare_time(&tm, &voucher->last_renewal_date);
-  // free_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"last-renewal-date\":\"1973-11-29T21:33:"
+         "09Z\"}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  test_compare_time(&tm, &voucher->last_renewal_date);
+  free_voucher(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"prior-signed-voucher-request\":"
-  //        "\"AQIDBAU=\"}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
-  // free_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"prior-signed-voucher-request\":"
+         "\"AQIDBAU=\"}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
+  free_voucher(voucher);
 
-  // json =
-  //     "{\"ietf-voucher:voucher\":{\"proximity-registrar-cert\":\"AQIDBAU=\"}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // test_compare_array(&array_value, &voucher->proximity_registrar_cert);
-  // free_voucher(voucher);
+  json =
+      "{\"ietf-voucher:voucher\":{\"proximity-registrar-cert\":\"AQIDBAU=\"}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  test_compare_array(&array_value, &voucher->proximity_registrar_cert);
+  free_voucher(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-c\":true}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_null(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-c\":true}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_null(voucher);
 
-  // json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true,"
-  //        "\"prior-signed-voucher-request\":\"AQIDBAU=\", "
-  //        "\"last-renewal-date\":\"1973-11-29T21:33:09Z\"}}";
-  // voucher = deserialize_voucher((uint8_t *)json, strlen(json));
-  // assert_non_null(voucher);
-  // assert_true(voucher->domain_cert_revocation_checks);
-  // test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
-  // test_compare_time(&tm, &voucher->last_renewal_date);
-  // free_voucher(voucher);
+  json = "{\"ietf-voucher:voucher\":{\"domain-cert-revocation-checks\":true,"
+         "\"prior-signed-voucher-request\":\"AQIDBAU=\", "
+         "\"last-renewal-date\":\"1973-11-29T21:33:09Z\"}}";
+  voucher = deserialize_voucher((uint8_t *)json, strlen(json));
+  assert_non_null(voucher);
+  assert_true(voucher->domain_cert_revocation_checks);
+  test_compare_array(&array_value, &voucher->prior_signed_voucher_request);
+  test_compare_time(&tm, &voucher->last_renewal_date);
+  free_voucher(voucher);
 }
 
-/*
 static void test_clear_attr_voucher(void **state) {
   (void)state;
 
@@ -691,6 +690,8 @@ static void test_sign_cms_voucher(void **state) {
 
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
 
+  sys_free(key_in_list);
+
   struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
   free_binary_array(signed_voucher);
@@ -714,6 +715,8 @@ static void test_sign_cms_voucher(void **state) {
 
   certs = init_buffer_list();
   push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
+
+  sys_free(key_in_list);
 
   signed_voucher = sign_rsacms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
@@ -831,7 +834,6 @@ static void test_verify_cms_voucher(void **state) {
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
 }
-*/
 
 int main(int argc, char *argv[]) {
   (void)argc;
@@ -849,14 +851,14 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_set_attr_voucher),
       cmocka_unit_test(test_serialize_voucher),
       cmocka_unit_test(test_deserialize_voucher),
-      // cmocka_unit_test(test_clear_attr_voucher),
-      // cmocka_unit_test(test_get_attr_bool_voucher),
-      // cmocka_unit_test(test_get_attr_time_voucher),
-      // cmocka_unit_test(test_get_attr_enum_voucher),
-      // cmocka_unit_test(test_get_attr_str_voucher),
-      // cmocka_unit_test(test_get_attr_array_voucher),
-      // cmocka_unit_test(test_sign_cms_voucher),
-      // cmocka_unit_test(test_verify_cms_voucher)
+      cmocka_unit_test(test_clear_attr_voucher),
+      cmocka_unit_test(test_get_attr_bool_voucher),
+      cmocka_unit_test(test_get_attr_time_voucher),
+      cmocka_unit_test(test_get_attr_enum_voucher),
+      cmocka_unit_test(test_get_attr_str_voucher),
+      cmocka_unit_test(test_get_attr_array_voucher),
+      cmocka_unit_test(test_sign_cms_voucher),
+      cmocka_unit_test(test_verify_cms_voucher)
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);
