@@ -574,6 +574,7 @@ static void test_verify_masa_pledge_voucher(void **state) {
   assert_int_equal(
       compare_binary_array(&pinned_domain_cert, &test_pinned_domain_cert), 1);
 
+  free_binary_array_content(&pinned_domain_cert);  
   free_binary_array(masa_pledge_voucher_cms);
   free_binary_array_content(&registrar_tls_key);
   free_binary_array_content(&registrar_tls_cert);

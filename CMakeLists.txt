@@ -73,6 +73,8 @@ option(USE_CPPHTTPLIB_LIB "Build and use the cpp-httplib" OFF)
 option(USE_VOUCHER_OPENSSL "Build voucher library with openssl support" OFF)
 option(USE_VOUCHER_WOLFSSL "Build voucher library with wolfssl support" OFF)
 
+option(SANITIZE_ADDRESS "Enable AddressSanitizer for debug builds." OFF)
+
 cmake_dependent_option(CONFIGURE_COVERAGE "Configure for code coverage (requires lcov)" OFF BUILD_TESTING OFF)
 
 # Default ExternalProject download directory.
@@ -224,19 +226,31 @@ if (NOT BUILD_ONLY_DOCS)
     )
   endif()
 
-  add_compile_options(
-    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fno-omit-frame-pointer>>
-    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fno-omit-frame-pointer>>
-    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
-    $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
-  )
+  if (SANITIZE_ADDRESS)
+    include(CheckCCompilerFlag)
 
-  add_link_options(
-    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fno-omit-frame-pointer>>
-    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fno-omit-frame-pointer>>
-    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
-    $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
-  )
+    set(CMAKE_REQUIRED_LINK_OPTIONS "-fsanitize=address")
+    check_c_compiler_flag("-fsanitize=address" C_COMPILER_SUPPORTS_ASAN)
+    set(CMAKE_REQUIRED_LINK_OPTIONS "")
+
+    if (NOT C_COMPILER_SUPPORTS_ASAN)
+      message(
+        FATAL_ERROR
+        "${CMAKE_C_COMPILER} version ${CMAKE_C_COMPILER_VERSION} does not "
+        "support -fsanitize=address for target "
+        "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}"
+      )
+    endif()
+    add_compile_options(
+      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
+      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
+    )
+
+    add_link_options(
+      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
+      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
+    )
+  endif()
 
   # src must be after codecoverage but before tests
   add_subdirectory(src)
