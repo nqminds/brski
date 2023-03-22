@@ -25,7 +25,7 @@
 ## Voucher binary array
 The voucher library defines a structure to encode binary arrays used in the voucher artifact API calls:
 ```c
-struct VoucherBinaryArray {
+struct BinaryArray {
   uint8_t *array;
   size_t length;
 };
@@ -36,8 +36,8 @@ If `array == NULL` and `length == 0` the array is considered to be emtpy.
 Copies a binary arrays to a destination.
 
 ```c
-int copy_binary_array(struct VoucherBinaryArray *const dst,
-                      const struct VoucherBinaryArray *src);
+int copy_binary_array(struct BinaryArray *const dst,
+                      const struct BinaryArray *src);
 ```
 **Parameters**:
 * `dst` - The destination binary array and
@@ -50,8 +50,8 @@ int copy_binary_array(struct VoucherBinaryArray *const dst,
 Compare two binary arrays.
 
 ```c
-int compare_binary_array(const struct VoucherBinaryArray *src,
-                         const struct VoucherBinaryArray *dst);
+int compare_binary_array(const struct BinaryArray *src,
+                         const struct BinaryArray *dst);
 ```
 **Parameters**:
 * `src` - The source binary array and
@@ -61,9 +61,9 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
 `1` if arrays are equal, `0` otherwise or `-1` on failure.
 
 ### `free_binary_array_content`
-Frees a binary array content, i.e., frees the `array` element of the `struct VoucherBinaryArray`.
+Frees a binary array content, i.e., frees the `array` element of the `struct BinaryArray`.
 ```c
-void free_binary_array_content(struct VoucherBinaryArray *arr);
+void free_binary_array_content(struct BinaryArray *arr);
 ```
 **Parameters**:
 * `arr` - The binary array
@@ -71,7 +71,7 @@ void free_binary_array_content(struct VoucherBinaryArray *arr);
 ### `free_binary_array`
 Frees a binary array structure and its content.
 ```c
-void free_binary_array(struct VoucherBinaryArray *arr);
+void free_binary_array(struct BinaryArray *arr);
 ```
 **Parameters**:
 * `arr` - The binary array
@@ -189,7 +189,7 @@ Sets the value for a voucher array attribute.
 ```c
 int set_attr_array_voucher(struct Voucher *voucher,
                            const enum VoucherAttributes attr,
-                           const struct VoucherBinaryArray *value);
+                           const struct BinaryArray *value);
 ```
 **Parameters**:
 * `voucher` - The allocated voucher structure,
@@ -216,11 +216,11 @@ int set_attr_voucher(struct Voucher *voucher,
     *  `ATTR_LAST_RENEWAL_DATE` => `struct tm *`
     *  `ATTR_ASSERTION` => `enum VoucherAssertions`
     *  `ATTR_SERIAL_NUMBER` => `char *`
-    *  `ATTR_IDEVID_ISSUER` => `struct VoucherBinaryArray *`
-    *  `ATTR_PINNED_DOMAIN_CERT` => `struct VoucherBinaryArray *`
-    *  `ATTR_NONCE` => `struct VoucherBinaryArray *`
-    *  `ATTR_PRIOR_SIGNED_VOUCHER_REQUEST` => `struct VoucherBinaryArray *`
-    *  `ATTR_PROXIMITY_REGISTRAR_CERT` => `struct VoucherBinaryArray *`
+    *  `ATTR_IDEVID_ISSUER` => `struct BinaryArray *`
+    *  `ATTR_PINNED_DOMAIN_CERT` => `struct BinaryArray *`
+    *  `ATTR_NONCE` => `struct BinaryArray *`
+    *  `ATTR_PRIOR_SIGNED_VOUCHER_REQUEST` => `struct BinaryArray *`
+    *  `ATTR_PROXIMITY_REGISTRAR_CERT` => `struct BinaryArray *`
     *  `ATTR_DOMAIN_CERT_REVOCATION_CHECKS` => `bool`
 
 **Return**:
@@ -313,7 +313,7 @@ if (strcmp(*serial_number, "12345")) {}
 ### `get_attr_array_voucher`
 Gets the pointer to the value for a voucher array attribute.
 ```c
-const struct VoucherBinaryArray * get_attr_array_voucher(struct Voucher *voucher,
+const struct BinaryArray * get_attr_array_voucher(struct Voucher *voucher,
                                                          const enum VoucherAttributes attr);
 ```
 **Parameters**:
@@ -428,9 +428,9 @@ int push_buffer_list(struct buffer_list *buf_list,
 ### `sign_eccms_voucher`
 Signs a voucher using CMS with an Elliptic Curve private key and output to a binary buffer (`DER` format).
 ```c
-__must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
-                                     const struct VoucherBinaryArray *cert,
-                                     const struct VoucherBinaryArray *key,
+__must_free_binary_array struct BinaryArray *sign_eccms_voucher(struct Voucher *voucher,
+                                     const struct BinaryArray *cert,
+                                     const struct BinaryArray *key,
                                      const struct buffer_list *certs);
 ```
 **Parameters**:
@@ -445,9 +445,9 @@ The signed CMS structure in binary (`DER` format) or `NULL` on failure.
 ### `sign_rsacms_voucher`
 Signs a voucher using CMS with a RSA private key and output to a binary buffer (`DER` format).
 ```c
-__must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
-                                      const struct VoucherBinaryArray *cert,
-                                      const struct VoucherBinaryArray *key,
+__must_free_binary_array struct BinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
+                                      const struct BinaryArray *cert,
+                                      const struct BinaryArray *key,
                                       const struct buffer_list *certs);
 ```
 **Parameters**:
@@ -462,9 +462,9 @@ The signed CMS structure in binary (`DER` format) or `NULL` on failure.
 ### `sign_cms_voucher`
 Signs a voucher using CMS with a private key (detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free_binary_array struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
-                                   const struct VoucherBinaryArray *cert,
-                                   const struct VoucherBinaryArray *key,
+__must_free_binary_array struct BinaryArray *sign_cms_voucher(struct Voucher *voucher,
+                                   const struct BinaryArray *cert,
+                                   const struct BinaryArray *key,
                                    const struct buffer_list *certs);
 ```
 **Parameters**:
@@ -479,7 +479,7 @@ The signed CMS structure as binary array (`DER` format) or `NULL` on failure.
 ### `verify_cms_voucher`
 Verifies a CMS binary buffer and extracts the voucher structure, and the list of included certificates.
 ```c
-__must_free_voucher struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
+__must_free_voucher struct Voucher *verify_cms_voucher(const struct BinaryArray *cms,
                                    const struct buffer_list *certs,
                                    const struct buffer_list *store,
                                    struct buffer_list **out_certs);

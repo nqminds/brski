@@ -15,6 +15,7 @@
 #include <time.h>
 
 #include "voucher.h"
+#include "array.h"
 
 struct Voucher {
   /* ATTR_CREATED_ON */
@@ -30,25 +31,25 @@ struct Voucher {
   char *serial_number;
 
   /* ATTR_IDEVID_ISSUER */
-  struct VoucherBinaryArray idevid_issuer;
+  struct BinaryArray idevid_issuer;
 
   /* ATTR_PINNED_DOMAIN_CERT */
-  struct VoucherBinaryArray pinned_domain_cert;
+  struct BinaryArray pinned_domain_cert;
 
   /* ATTR_DOMAIN_CERT_REVOCATION_CHECKS */
   bool domain_cert_revocation_checks;
 
   /* ATTR_NONCE */
-  struct VoucherBinaryArray nonce;
+  struct BinaryArray nonce;
 
   /* ATTR_LAST_RENEWAL_DATE */
   struct tm last_renewal_date;
 
   /* ATTR_PRIOR_SIGNED_VOUCHER_REQUEST */
-  struct VoucherBinaryArray prior_signed_voucher_request;
+  struct BinaryArray prior_signed_voucher_request;
 
   /* ATTR_PROXIMITY_REGISTRAR_CERT */
-  struct VoucherBinaryArray proximity_registrar_cert;
+  struct BinaryArray proximity_registrar_cert;
 };
 
 #define VOUCHER_ROOT_NAME "ietf-voucher:voucher"

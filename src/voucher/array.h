@@ -101,7 +101,7 @@ __must_free_array_list struct BinaryArrayList *init_array_list(void);
 int push_array_list(struct BinaryArrayList *arr_list, uint8_t *const arr,
                     const size_t length, const int flags);
 
-struct VoucherBinaryArray {
+struct BinaryArray {
   uint8_t *array;
   size_t length;
 };
@@ -113,22 +113,22 @@ struct VoucherBinaryArray {
  * @param[in] src The source binary array
  * @return int 0 on success, -1 on failure
  */
-int copy_binary_array(struct VoucherBinaryArray *const dst,
-                      const struct VoucherBinaryArray *src);
+int copy_binary_array(struct BinaryArray *const dst,
+                      const struct BinaryArray *src);
 
 /**
  * @brief Frees a binary array content
  *
  * @param[in] arr The binary array
  */
-void free_binary_array_content(struct VoucherBinaryArray *arr);
+void free_binary_array_content(struct BinaryArray *arr);
 
 /**
  * @brief Frees a binary array structure and its content
  *
  * @param[in] arr The binary array
  */
-void free_binary_array(struct VoucherBinaryArray *arr);
+void free_binary_array(struct BinaryArray *arr);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
 #define __must_free_binary_array                                               \
@@ -144,7 +144,7 @@ void free_binary_array(struct VoucherBinaryArray *arr);
  * @param[in] dst The destination binary array
  * @return int 1 if array equal, 0 otherwise, -1 on failure
  */
-int compare_binary_array(const struct VoucherBinaryArray *src,
-                         const struct VoucherBinaryArray *dst);
+int compare_binary_array(const struct BinaryArray *src,
+                         const struct BinaryArray *dst);
 
 #endif /* ARRAY_H */

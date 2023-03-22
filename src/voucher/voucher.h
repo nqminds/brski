@@ -319,7 +319,7 @@ int set_attr_str_voucher(struct Voucher *voucher,
  */
 int set_attr_array_voucher(struct Voucher *voucher,
                            const enum VoucherAttributes attr,
-                           const struct VoucherBinaryArray *value);
+                           const struct BinaryArray *value);
 
 /**
  * @brief Sets the value for a voucher attribute
@@ -332,11 +332,11 @@ int set_attr_array_voucher(struct Voucher *voucher,
  *  ATTR_LAST_RENEWAL_DATE => struct tm *
  *  ATTR_ASSERTION => enum VoucherAssertions
  *  ATTR_SERIAL_NUMBER => char *
- *  ATTR_IDEVID_ISSUER => struct VoucherBinaryArray *
- *  ATTR_PINNED_DOMAIN_CERT => struct VoucherBinaryArray *
- *  ATTR_NONCE => struct VoucherBinaryArray *
- *  ATTR_PRIOR_SIGNED_VOUCHER_REQUEST => struct VoucherBinaryArray *
- *  ATTR_PROXIMITY_REGISTRAR_CERT => struct VoucherBinaryArray *
+ *  ATTR_IDEVID_ISSUER => struct BinaryArray *
+ *  ATTR_PINNED_DOMAIN_CERT => struct BinaryArray *
+ *  ATTR_NONCE => struct BinaryArray *
+ *  ATTR_PRIOR_SIGNED_VOUCHER_REQUEST => struct BinaryArray *
+ *  ATTR_PROXIMITY_REGISTRAR_CERT => struct BinaryArray *
  *  ATTR_DOMAIN_CERT_REVOCATION_CHECKS => bool
  * @return 0 on success, -1 on failure
  */
@@ -408,10 +408,10 @@ const char *const *get_attr_str_voucher(struct Voucher *voucher,
  *
  * @param[in] voucher The allocated voucher structure
  * @param[in] attr The array voucher attribute name
- * @return const struct VoucherBinaryArray* pointer to the array value, NULL on
+ * @return const struct BinaryArray* pointer to the array value, NULL on
  * failure
  */
-const struct VoucherBinaryArray *
+const struct BinaryArray *
 get_attr_array_voucher(struct Voucher *voucher,
                        const enum VoucherAttributes attr);
 
@@ -450,12 +450,12 @@ __must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json,
  * certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return struct VoucherBinaryArray * the signed CMS structure in binary (DER
+ * @return struct BinaryArray * the signed CMS structure in binary (DER
  * format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(
-    struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct BinaryArrayList *certs);
+__must_free_binary_array struct BinaryArray *sign_eccms_voucher(
+    struct Voucher *voucher, const struct BinaryArray *cert,
+    const struct BinaryArray *key, const struct BinaryArrayList *certs);
 
 /**
  * @brief Signs a voucher using CMS with a RSA private key
@@ -469,12 +469,12 @@ __must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(
  * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return struct VoucherBinaryArray* the signed CMS structure in binary (DER
+ * @return struct BinaryArray* the signed CMS structure in binary (DER
  * format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(
-    struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct BinaryArrayList *certs);
+__must_free_binary_array struct BinaryArray *sign_rsacms_voucher(
+    struct Voucher *voucher, const struct BinaryArray *cert,
+    const struct BinaryArray *key, const struct BinaryArrayList *certs);
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
@@ -488,12 +488,12 @@ __must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(
  * @param[in] key The private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return struct VoucherBinaryArray* the signed CMS structure as binary array
+ * @return struct BinaryArray* the signed CMS structure as binary array
  * (DER format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *
-sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-                 const struct VoucherBinaryArray *key,
+__must_free_binary_array struct BinaryArray *
+sign_cms_voucher(struct Voucher *voucher, const struct BinaryArray *cert,
+                 const struct BinaryArray *key,
                  const struct BinaryArrayList *certs);
 
 /**
@@ -510,7 +510,7 @@ sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
  * @return struct Voucher * the verified voucher, NULL on failure
  */
 __must_free_voucher struct Voucher *verify_cms_voucher(
-    const struct VoucherBinaryArray *cms, const struct BinaryArrayList *certs,
+    const struct BinaryArray *cms, const struct BinaryArrayList *certs,
     const struct BinaryArrayList *store, struct BinaryArrayList **out_certs);
 
 /**
@@ -531,15 +531,15 @@ __must_free_voucher struct Voucher *verify_cms_voucher(
  * the pledge-voucher request
  * @param[in] additional_pledge_certs The list of additional pledge certificates
  * (DER format) to append to CMS (NULL for empty)
- * @return struct VoucherBinaryArray* the signed pledge-voucher CMS structure as
+ * @return struct BinaryArray* the signed pledge-voucher CMS structure as
  * binary array (DER format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_pledge_voucher_request(
+__must_free_binary_array struct BinaryArray *sign_pledge_voucher_request(
     const struct tm *created_on, const char *serial_number,
-    const struct VoucherBinaryArray *nonce,
-    const struct VoucherBinaryArray *registrar_tls_cert,
-    const struct VoucherBinaryArray *pledge_sign_cert,
-    const struct VoucherBinaryArray *pledge_sign_key,
+    const struct BinaryArray *nonce,
+    const struct BinaryArray *registrar_tls_cert,
+    const struct BinaryArray *pledge_sign_cert,
+    const struct BinaryArray *pledge_sign_key,
     const struct BinaryArrayList *additional_pledge_certs);
 
 /**
@@ -566,16 +566,16 @@ __must_free_binary_array struct VoucherBinaryArray *sign_pledge_voucher_request(
  * format) to verify the pledge-voucher request (NULL for empty)
  * @param[in] additional_registrar_certs The list of additional registrar
  * certificate buffers (DER format) to append to CMS (NULL for empty)
- * @return struct VoucherBinaryArray* the signed CMS structure as binary array
+ * @return struct BinaryArray* the signed CMS structure as binary array
  * (DER format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_voucher_request(
-    const struct VoucherBinaryArray *pledge_voucher_request_cms,
+__must_free_binary_array struct BinaryArray *sign_voucher_request(
+    const struct BinaryArray *pledge_voucher_request_cms,
     const struct tm *created_on, const char *serial_number,
-    const struct VoucherBinaryArray *idevid_issuer,
-    const struct VoucherBinaryArray *registrar_tls_cert,
-    const struct VoucherBinaryArray *registrar_sign_cert,
-    const struct VoucherBinaryArray *registrar_sign_key,
+    const struct BinaryArray *idevid_issuer,
+    const struct BinaryArray *registrar_tls_cert,
+    const struct BinaryArray *registrar_sign_cert,
+    const struct BinaryArray *registrar_sign_key,
     const struct BinaryArrayList *pledge_verify_certs,
     const struct BinaryArrayList *pledge_verify_store,
     const struct BinaryArrayList *additional_registrar_certs);
@@ -597,7 +597,7 @@ __must_free_binary_array struct VoucherBinaryArray *sign_voucher_request(
 typedef int (*voucher_req_fn)(
     const char *serial_number,
     const struct BinaryArrayList *additional_registrar_certs,
-    const void *user_ctx, struct VoucherBinaryArray *pinned_domain_cert);
+    const void *user_ctx, struct BinaryArray *pinned_domain_cert);
 
 /**
  * @brief Signs a MASA voucher request using CMS with a private key
@@ -626,15 +626,15 @@ typedef int (*voucher_req_fn)(
  * format) to verify the pledge-voucher request (NULL for empty)
  * @param[in] additional_masa_certs The list of additional MASA
  * certificate buffers (DER format) to append to CMS (NULL for empty)
- * @return struct VoucherBinaryArray* the signed CMS structure as binary array
+ * @return struct BinaryArray* the signed CMS structure as binary array
  * (DER format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *
-sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
+__must_free_binary_array struct BinaryArray *
+sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,
-                         const struct VoucherBinaryArray *masa_sign_cert,
-                         const struct VoucherBinaryArray *masa_sign_key,
+                         const struct BinaryArray *masa_sign_cert,
+                         const struct BinaryArray *masa_sign_key,
                          const struct BinaryArrayList *registrar_verify_certs,
                          const struct BinaryArrayList *registrar_verify_store,
                          const struct BinaryArrayList *pledge_verify_certs,
@@ -668,12 +668,12 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
  * @return 0 on success, -1 on failure
  */
 int verify_masa_pledge_voucher(
-    const struct VoucherBinaryArray *masa_pledge_voucher_cms,
-    const char *serial_number, const struct VoucherBinaryArray *nonce,
-    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct BinaryArray *masa_pledge_voucher_cms,
+    const char *serial_number, const struct BinaryArray *nonce,
+    const struct BinaryArray *registrar_tls_cert,
     const struct BinaryArrayList *domain_store,
     const struct BinaryArrayList *pledge_verify_certs,
     const struct BinaryArrayList *pledge_verify_store,
     struct BinaryArrayList **pledge_out_certs,
-    struct VoucherBinaryArray *const pinned_domain_cert);
+    struct BinaryArray *const pinned_domain_cert);
 #endif

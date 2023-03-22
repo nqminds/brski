@@ -38,8 +38,8 @@ void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
   assert_int_equal(tm1->tm_sec, tm2->tm_sec);
 }
 
-void test_compare_array(const struct VoucherBinaryArray *src,
-                        const struct VoucherBinaryArray *dst) {
+void test_compare_array(const struct BinaryArray *src,
+                        const struct BinaryArray *dst) {
   assert_int_equal(src->length, dst->length);
   assert_memory_equal(src->array, dst->array, src->length);
 }
@@ -122,18 +122,18 @@ static void test_set_attr_array_voucher(void **state) {
   assert_int_equal(set_attr_array_voucher(NULL, ATTR_NONCE, NULL), -1);
   assert_int_equal(set_attr_array_voucher(voucher, -1, NULL), -1);
 
-  struct VoucherBinaryArray arr1 = {.array = NULL, .length = 10};
+  struct BinaryArray arr1 = {.array = NULL, .length = 10};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr1),
                    -1);
 
   uint8_t array2[] = {1, 2, 3, 4};
-  struct VoucherBinaryArray arr2 = {.array = NULL, .length = 0};
+  struct BinaryArray arr2 = {.array = NULL, .length = 0};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr2),
                    -1);
 
-  struct VoucherBinaryArray arr3 = {.array = array2, .length = 4};
+  struct BinaryArray arr3 = {.array = array2, .length = 4};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr3),
                    0);
@@ -161,7 +161,7 @@ static void test_set_attr_voucher(void **state) {
   enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
   char *str_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_value = {.array = array, .length = 5};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -222,7 +222,7 @@ static void test_serialize_voucher(void **state) {
   enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
   char *str_array_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_value = {.array = array, .length = 5};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -287,9 +287,9 @@ test_deserialize_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+  struct BinaryArray array_zero = {.array = NULL, .length = 0};
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_value = {.array = array, .length = 5};
 
   char *json = "{\"ietf-voucher:voucher\":";
   struct Voucher *voucher = deserialize_voucher((uint8_t *)json, strlen(json));
@@ -428,8 +428,8 @@ static void test_clear_attr_voucher(void **state) {
   enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
   char *str_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
-  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+  struct BinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_zero = {.array = NULL, .length = 0};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -589,11 +589,11 @@ static void test_get_attr_array_voucher(void **state) {
   (void)state;
 
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
-  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+  struct BinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_zero = {.array = NULL, .length = 0};
 
   struct Voucher *voucher = init_voucher();
-  const struct VoucherBinaryArray *value =
+  const struct BinaryArray *value =
       get_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER);
   assert_non_null(value);
   test_compare_array(&array_zero, value);
@@ -655,7 +655,7 @@ static void test_sign_cms_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-  struct VoucherBinaryArray cert = {}, key = {};
+  struct BinaryArray cert = {}, key = {};
 
   struct Voucher *voucher = init_voucher();
 
@@ -694,7 +694,7 @@ static void test_sign_cms_voucher(void **state) {
 
   sys_free(key_in_list);
 
-  struct VoucherBinaryArray *signed_voucher =
+  struct BinaryArray *signed_voucher =
       sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
   free_binary_array(signed_voucher);
@@ -781,7 +781,7 @@ static void test_verify_cms_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-  struct VoucherBinaryArray cert = {}, key = {};
+  struct BinaryArray cert = {}, key = {};
 
   struct Voucher *voucher = init_voucher();
 
@@ -809,7 +809,7 @@ static void test_verify_cms_voucher(void **state) {
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
 
-  struct VoucherBinaryArray *signed_voucher =
+  struct BinaryArray *signed_voucher =
       sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
 

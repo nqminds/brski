@@ -117,8 +117,8 @@ int push_array_list(struct BinaryArrayList *arr_list, uint8_t *const arr,
   return 0;
 }
 
-int copy_binary_array(struct VoucherBinaryArray *const dst,
-                      const struct VoucherBinaryArray *src) {
+int copy_binary_array(struct BinaryArray *const dst,
+                      const struct BinaryArray *src) {
   if (dst == NULL) {
     log_error("dst param is NULL");
     return -1;
@@ -138,8 +138,8 @@ int copy_binary_array(struct VoucherBinaryArray *const dst,
   return 0;
 }
 
-int compare_binary_array(const struct VoucherBinaryArray *src,
-                         const struct VoucherBinaryArray *dst) {
+int compare_binary_array(const struct BinaryArray *src,
+                         const struct BinaryArray *dst) {
   if (src == NULL) {
     log_error("src param is NULL");
     return -1;
@@ -161,7 +161,7 @@ int compare_binary_array(const struct VoucherBinaryArray *src,
   return 1;
 }
 
-void free_binary_array_content(struct VoucherBinaryArray *arr) {
+void free_binary_array_content(struct BinaryArray *arr) {
   if (arr != NULL) {
     if (arr->array != NULL) {
       sys_free(arr->array);
@@ -171,7 +171,7 @@ void free_binary_array_content(struct VoucherBinaryArray *arr) {
   }
 }
 
-void free_binary_array(struct VoucherBinaryArray *arr) {
+void free_binary_array(struct BinaryArray *arr) {
   if (arr != NULL) {
     free_binary_array_content(arr);
     sys_free(arr);
