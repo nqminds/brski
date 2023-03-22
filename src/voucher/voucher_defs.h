@@ -14,8 +14,8 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "voucher.h"
 #include "array.h"
+#include "voucher.h"
 
 struct Voucher {
   /* ATTR_CREATED_ON */

@@ -453,9 +453,10 @@ __must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json,
  * @return struct BinaryArray * the signed CMS structure in binary (DER
  * format), NULL on failure
  */
-__must_free_binary_array struct BinaryArray *sign_eccms_voucher(
-    struct Voucher *voucher, const struct BinaryArray *cert,
-    const struct BinaryArray *key, const struct BinaryArrayList *certs);
+__must_free_binary_array struct BinaryArray *
+sign_eccms_voucher(struct Voucher *voucher, const struct BinaryArray *cert,
+                   const struct BinaryArray *key,
+                   const struct BinaryArrayList *certs);
 
 /**
  * @brief Signs a voucher using CMS with a RSA private key
@@ -472,9 +473,10 @@ __must_free_binary_array struct BinaryArray *sign_eccms_voucher(
  * @return struct BinaryArray* the signed CMS structure in binary (DER
  * format), NULL on failure
  */
-__must_free_binary_array struct BinaryArray *sign_rsacms_voucher(
-    struct Voucher *voucher, const struct BinaryArray *cert,
-    const struct BinaryArray *key, const struct BinaryArrayList *certs);
+__must_free_binary_array struct BinaryArray *
+sign_rsacms_voucher(struct Voucher *voucher, const struct BinaryArray *cert,
+                    const struct BinaryArray *key,
+                    const struct BinaryArrayList *certs);
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
@@ -569,16 +571,16 @@ __must_free_binary_array struct BinaryArray *sign_pledge_voucher_request(
  * @return struct BinaryArray* the signed CMS structure as binary array
  * (DER format), NULL on failure
  */
-__must_free_binary_array struct BinaryArray *sign_voucher_request(
-    const struct BinaryArray *pledge_voucher_request_cms,
-    const struct tm *created_on, const char *serial_number,
-    const struct BinaryArray *idevid_issuer,
-    const struct BinaryArray *registrar_tls_cert,
-    const struct BinaryArray *registrar_sign_cert,
-    const struct BinaryArray *registrar_sign_key,
-    const struct BinaryArrayList *pledge_verify_certs,
-    const struct BinaryArrayList *pledge_verify_store,
-    const struct BinaryArrayList *additional_registrar_certs);
+__must_free_binary_array struct BinaryArray *
+sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
+                     const struct tm *created_on, const char *serial_number,
+                     const struct BinaryArray *idevid_issuer,
+                     const struct BinaryArray *registrar_tls_cert,
+                     const struct BinaryArray *registrar_sign_cert,
+                     const struct BinaryArray *registrar_sign_key,
+                     const struct BinaryArrayList *pledge_verify_certs,
+                     const struct BinaryArrayList *pledge_verify_store,
+                     const struct BinaryArrayList *additional_registrar_certs);
 
 /**
  * @brief Callback function definition to find a pledge serial number in a

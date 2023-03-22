@@ -19,8 +19,8 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/keyvalue.h"
 #include "voucher/array.h"
+#include "voucher/keyvalue.h"
 
 static void test_init_keyvalue_list(void **state) {
   (void)state;
@@ -36,10 +36,8 @@ static void test_push_keyvalue_list(void **state) {
   struct keyvalue_list *ll = init_keyvalue_list();
   assert_non_null(ll);
 
-  assert_int_equal(
-      push_keyvalue_list(ll, "key1", "value1"), 0);
-  assert_int_equal(
-      push_keyvalue_list(ll, "key2", "value2"), 0);
+  assert_int_equal(push_keyvalue_list(ll, "key1", "value1"), 0);
+  assert_int_equal(push_keyvalue_list(ll, "key2", "value2"), 0);
 
   struct keyvalue_list *item =
       dl_list_entry((&ll->list)->next, struct keyvalue_list, list);
@@ -57,8 +55,9 @@ int main(int argc, char *argv[]) {
 
   log_set_quiet(false);
 
-  const struct CMUnitTest tests[] = {cmocka_unit_test(test_init_keyvalue_list),
-                                     cmocka_unit_test(test_push_keyvalue_list),
+  const struct CMUnitTest tests[] = {
+      cmocka_unit_test(test_init_keyvalue_list),
+      cmocka_unit_test(test_push_keyvalue_list),
   };
 
   return cmocka_run_group_tests(tests, NULL, NULL);

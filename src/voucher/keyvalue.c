@@ -21,8 +21,8 @@
 #include "../utils/log.h"
 #include "../utils/os.h"
 
-#include "keyvalue.h"
 #include "array.h"
+#include "keyvalue.h"
 
 struct keyvalue_list *init_keyvalue_list(void) {
   struct keyvalue_list *kv_list = NULL;

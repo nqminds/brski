@@ -872,9 +872,10 @@ deserialize_voucher_fail:
   return NULL;
 }
 
-struct BinaryArray *sign_eccms_voucher(
-    struct Voucher *voucher, const struct BinaryArray *cert,
-    const struct BinaryArray *key, const struct BinaryArrayList *certs) {
+struct BinaryArray *sign_eccms_voucher(struct Voucher *voucher,
+                                       const struct BinaryArray *cert,
+                                       const struct BinaryArray *key,
+                                       const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -910,8 +911,7 @@ struct BinaryArray *sign_eccms_voucher(
   }
   sys_free(serialized);
 
-  struct BinaryArray *out =
-      sys_malloc(sizeof(struct BinaryArray));
+  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -923,9 +923,10 @@ struct BinaryArray *sign_eccms_voucher(
   return out;
 }
 
-struct BinaryArray *sign_rsacms_voucher(
-    struct Voucher *voucher, const struct BinaryArray *cert,
-    const struct BinaryArray *key, const struct BinaryArrayList *certs) {
+struct BinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
+                                        const struct BinaryArray *cert,
+                                        const struct BinaryArray *key,
+                                        const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -960,8 +961,7 @@ struct BinaryArray *sign_rsacms_voucher(
   }
   sys_free(serialized);
 
-  struct BinaryArray *out =
-      sys_malloc(sizeof(struct BinaryArray));
+  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -1011,8 +1011,7 @@ sign_cms_voucher(struct Voucher *voucher, const struct BinaryArray *cert,
   }
   sys_free(serialized);
 
-  struct BinaryArray *out =
-      sys_malloc(sizeof(struct BinaryArray));
+  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);

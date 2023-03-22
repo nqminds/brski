@@ -115,12 +115,10 @@ static void test_crypto_generate_eccert(void **state) {
   meta.subject = init_keyvalue_list();
 
   push_keyvalue_list(meta.issuer, "C", "IE");
-  push_keyvalue_list(meta.issuer, "CN",
-                     "issuertest.info");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
   push_keyvalue_list(meta.subject, "C", "IE");
-  push_keyvalue_list(meta.subject, "CN",
-                     "subjecttest.info");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_true(length > 0);
@@ -204,8 +202,7 @@ static void test_crypto_sign_eccms(void **state) {
   push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
   push_keyvalue_list(meta.subject, "C", "IE");
-  push_keyvalue_list(meta.subject, "CN",
-                     "subjecttest.info");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
@@ -286,8 +283,7 @@ static void test_crypto_sign_rsacms(void **state) {
   meta.subject = init_keyvalue_list();
 
   push_keyvalue_list(meta.issuer, "C", "IE");
-  push_keyvalue_list(meta.issuer, "CN",
-                     "issuertest.info");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");

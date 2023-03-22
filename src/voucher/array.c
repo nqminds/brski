@@ -24,7 +24,7 @@ struct BinaryArrayList *init_array_list(void) {
     return NULL;
   }
 
-  dl_list_init(&arr_list->list, (void*)arr_list);
+  dl_list_init(&arr_list->list, (void *)arr_list);
 
   return arr_list;
 }

@@ -97,16 +97,16 @@ struct BinaryArray *sign_pledge_voucher_request(
   return cms;
 }
 
-struct BinaryArray *sign_voucher_request(
-    const struct BinaryArray *pledge_voucher_request_cms,
-    const struct tm *created_on, const char *serial_number,
-    const struct BinaryArray *idevid_issuer,
-    const struct BinaryArray *registrar_tls_cert,
-    const struct BinaryArray *registrar_sign_cert,
-    const struct BinaryArray *registrar_sign_key,
-    const struct BinaryArrayList *pledge_verify_certs,
-    const struct BinaryArrayList *pledge_verify_store,
-    const struct BinaryArrayList *additional_registrar_certs) {
+struct BinaryArray *
+sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
+                     const struct tm *created_on, const char *serial_number,
+                     const struct BinaryArray *idevid_issuer,
+                     const struct BinaryArray *registrar_tls_cert,
+                     const struct BinaryArray *registrar_sign_cert,
+                     const struct BinaryArray *registrar_sign_key,
+                     const struct BinaryArrayList *pledge_verify_certs,
+                     const struct BinaryArrayList *pledge_verify_store,
+                     const struct BinaryArrayList *additional_registrar_certs) {
 
   if (serial_number == NULL) {
     log_error("serial_number param in NULL");
@@ -144,9 +144,8 @@ struct BinaryArray *sign_voucher_request(
 
   /* check if the proximity registrar certificat is the same as the registrar
    * certificate */
-  const struct BinaryArray *proximity_registrar_cert =
-      get_attr_array_voucher(pledge_voucher_request,
-                             ATTR_PROXIMITY_REGISTRAR_CERT);
+  const struct BinaryArray *proximity_registrar_cert = get_attr_array_voucher(
+      pledge_voucher_request, ATTR_PROXIMITY_REGISTRAR_CERT);
 
   if (compare_binary_array(proximity_registrar_cert, registrar_tls_cert) < 1) {
     log_error("proximity cert != registrar cert");
