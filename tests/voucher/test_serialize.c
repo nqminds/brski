@@ -135,9 +135,9 @@ static void test_push_keyvalue_list(void **state) {
 
   struct keyvalue_list *kv_list = init_keyvalue_list();
 
-  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"));
-  push_keyvalue_list(kv_list, sys_strdup("key2"), sys_strdup("value2"));
-  push_keyvalue_list(kv_list, sys_strdup("key3"), sys_strdup("value3"));
+  push_keyvalue_list(kv_list, "key1", "value1");
+  push_keyvalue_list(kv_list, "key2", "value2");
+  push_keyvalue_list(kv_list, "key3", "value3");
 
   assert_int_equal(dl_list_len(&kv_list->list), 3);
 
@@ -163,9 +163,9 @@ static void test_serialize_keyvalue2json(void **state) {
 
   struct keyvalue_list *kv_list = init_keyvalue_list();
 
-  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"));
-  push_keyvalue_list(kv_list, sys_strdup("key2"), sys_strdup("value2"));
-  push_keyvalue_list(kv_list, sys_strdup("key3"), sys_strdup("value3"));
+  push_keyvalue_list(kv_list, "key1", "value1");
+  push_keyvalue_list(kv_list, "key2", "value2");
+  push_keyvalue_list(kv_list, "key3", "value3");
 
   char *json = serialize_keyvalue2json(kv_list);
   assert_non_null(json);
@@ -177,7 +177,7 @@ static void test_serialize_keyvalue2json(void **state) {
 
   kv_list = init_keyvalue_list();
 
-  push_keyvalue_list(kv_list, sys_strdup("key1"), sys_strdup("value1"));
+  push_keyvalue_list(kv_list, "key1", "value1");
 
   json = serialize_keyvalue2json(kv_list);
   assert_non_null(json);

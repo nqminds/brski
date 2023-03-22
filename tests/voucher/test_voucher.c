@@ -673,13 +673,11 @@ static void test_sign_cms_voucher(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
@@ -751,13 +749,11 @@ struct BinaryArrayList *create_cert_list(void) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("cert_list_issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "cert_list_issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("cert_list_subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "cert_list_subject.info");
 
   uint8_t *cert = NULL;
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
@@ -799,12 +795,11 @@ static void test_verify_cms_voucher(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"), sys_strdup("issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subject.info");
 
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);

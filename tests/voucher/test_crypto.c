@@ -114,13 +114,13 @@ static void test_crypto_generate_eccert(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN",
+                     "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN",
+                     "subjecttest.info");
 
   length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_true(length > 0);
@@ -165,13 +165,11 @@ static void test_crypto_generate_rsacert(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   length = crypto_generate_rsacert(&meta, key, key_length, &cert);
   assert_true(length > 0);
@@ -202,13 +200,12 @@ static void test_crypto_sign_eccms(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN",
+                     "subjecttest.info");
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
@@ -288,13 +285,12 @@ static void test_crypto_sign_rsacms(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN",
+                     "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
 
@@ -368,10 +364,10 @@ static void test_crypto_sign_cert(void **state) {
 
   ca_meta.issuer = init_keyvalue_list();
   ca_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"), sys_strdup("catest"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"), sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(ca_meta.issuer, "CN", "catest");
+  push_keyvalue_list(ca_meta.subject, "C", "IE");
+  push_keyvalue_list(ca_meta.subject, "CN", "catest");
 
   uint8_t *ca_cert = NULL;
   ssize_t ca_cert_length =
@@ -391,10 +387,8 @@ static void test_crypto_sign_cert(void **state) {
 
   intermediate_meta.issuer = init_keyvalue_list();
   intermediate_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(intermediate_meta.subject, sys_strdup("C"),
-                     sys_strdup("IE"));
-  push_keyvalue_list(intermediate_meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjectintermediate"));
+  push_keyvalue_list(intermediate_meta.subject, "C", "IE");
+  push_keyvalue_list(intermediate_meta.subject, "CN", "subjectintermediate");
 
   uint8_t *intermediate_cert = NULL;
   ssize_t intermediate_cert_length =
@@ -421,9 +415,8 @@ static void test_crypto_sign_cert(void **state) {
 
   untrusted_meta.issuer = init_keyvalue_list();
   untrusted_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(untrusted_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(untrusted_meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjectuntrusted"));
+  push_keyvalue_list(untrusted_meta.subject, "C", "IE");
+  push_keyvalue_list(untrusted_meta.subject, "CN", "subjectuntrusted");
 
   uint8_t *untrusted_cert = NULL;
   ssize_t untrusted_cert_length = crypto_generate_eccert(
@@ -466,10 +459,10 @@ static void test_crypto_verify_cert(void **state) {
 
   ca_meta.issuer = init_keyvalue_list();
   ca_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"), sys_strdup("catest"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"), sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(ca_meta.issuer, "CN", "catest");
+  push_keyvalue_list(ca_meta.subject, "C", "IE");
+  push_keyvalue_list(ca_meta.subject, "CN", "catest");
 
   uint8_t *ca_cert = NULL;
   ssize_t ca_cert_length =
@@ -489,10 +482,8 @@ static void test_crypto_verify_cert(void **state) {
 
   intermediate_meta.issuer = init_keyvalue_list();
   intermediate_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(intermediate_meta.subject, sys_strdup("C"),
-                     sys_strdup("IE"));
-  push_keyvalue_list(intermediate_meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjectintermediate"));
+  push_keyvalue_list(intermediate_meta.subject, "C", "IE");
+  push_keyvalue_list(intermediate_meta.subject, "CN", "subjectintermediate");
 
   uint8_t *intermediate_cert = NULL;
   ssize_t intermediate_cert_length =
@@ -519,9 +510,8 @@ static void test_crypto_verify_cert(void **state) {
 
   untrusted_meta.issuer = init_keyvalue_list();
   untrusted_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(untrusted_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(untrusted_meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjectuntrusted"));
+  push_keyvalue_list(untrusted_meta.subject, "C", "IE");
+  push_keyvalue_list(untrusted_meta.subject, "CN", "subjectuntrusted");
 
   uint8_t *untrusted_cert = NULL;
   ssize_t untrusted_cert_length = crypto_generate_eccert(
@@ -584,13 +574,11 @@ static void test_crypto_sign_cms(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
 
@@ -662,13 +650,11 @@ struct BinaryArrayList *create_cert_list(void) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("cert_list_issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "cert_list_issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("cert_list_subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "cert_list_subject.info");
 
   uint8_t *cert = NULL;
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
@@ -705,12 +691,11 @@ static void test_crypto_verify_cms(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"), sys_strdup("issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("serialNumber"),
-                     sys_strdup("1234567890"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "serialNumber", "1234567890");
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 

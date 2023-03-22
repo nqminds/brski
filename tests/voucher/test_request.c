@@ -44,13 +44,11 @@ struct BinaryArrayList *create_cert_list(void) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("cert_list_issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "cert_list_issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("cert_list_subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "cert_list_subject.info");
 
   uint8_t *cert = NULL;
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
@@ -77,13 +75,11 @@ static struct crypto_cert_meta create_cert_meta(void) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("pledge-voucher-issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "pledge-voucher-issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("pledge-voucher-subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "pledge-voucher-subject.info");
 
   return meta;
 }
@@ -535,10 +531,8 @@ static void test_verify_masa_pledge_voucher(void **state) {
                                                     "CA:false"};
   registrar_tls_meta.issuer = init_keyvalue_list();
   registrar_tls_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("C"),
-                     sys_strdup("IE"));
-  push_keyvalue_list(registrar_tls_meta.subject, sys_strdup("CN"),
-                     sys_strdup("registrar-tls-cert"));
+  push_keyvalue_list(registrar_tls_meta.subject, "C", "IE");
+  push_keyvalue_list(registrar_tls_meta.subject, "CN", "registrar-tls-cert");
 
   registrar_tls_key.length =
       (size_t)crypto_generate_eckey(&registrar_tls_key.array);
@@ -599,10 +593,10 @@ static int test_group_setup(void **state) {
 
   ca_meta.issuer = init_keyvalue_list();
   ca_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.issuer, sys_strdup("CN"), sys_strdup("catest"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(ca_meta.subject, sys_strdup("CN"), sys_strdup("catest"));
+  push_keyvalue_list(ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(ca_meta.issuer, "CN", "catest");
+  push_keyvalue_list(ca_meta.subject, "C", "IE");
+  push_keyvalue_list(ca_meta.subject, "CN", "catest");
 
   test_ca_cert.length = crypto_generate_eccert(
       &ca_meta, test_ca_key.array, test_ca_key.length, &test_ca_cert.array);
@@ -617,10 +611,8 @@ static int test_group_setup(void **state) {
                                                     "CA:false"};
   pinned_domain_meta.issuer = init_keyvalue_list();
   pinned_domain_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("C"),
-                     sys_strdup("IE"));
-  push_keyvalue_list(pinned_domain_meta.subject, sys_strdup("CN"),
-                     sys_strdup("pinned-domain-cert"));
+  push_keyvalue_list(pinned_domain_meta.subject, "C", "IE");
+  push_keyvalue_list(pinned_domain_meta.subject, "CN", "pinned-domain-cert");
 
   test_pinned_domain_key.length =
       (size_t)crypto_generate_eckey(&test_pinned_domain_key.array);

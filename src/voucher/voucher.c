@@ -617,6 +617,8 @@ voucher_to_keyvalue(const struct Voucher *voucher) {
         free_keyvalue_list(kv_list);
         return NULL;
       }
+      sys_free(key);
+      sys_free(value);
     }
     attr++;
   }
@@ -671,6 +673,8 @@ char *serialize_voucher(const struct Voucher *voucher) {
     free_keyvalue_list(kv_list);
     return NULL;
   }
+  sys_free(key);
+  sys_free(json_child);
 
   char *json = serialize_keyvalue2json(kv_list);
   if (json == NULL) {

@@ -89,8 +89,19 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
     return -1;
   }
 
-  el->key = key;
-  el->value = value;
+  el->key = sys_strdup(key);
+  if (el->key == NULL) {
+    log_errno("sys_strdup");
+    free_keyvalue_list_el(el);
+    return -1;
+  }
+
+  el->value = sys_strdup(value);
+  if (el->value == NULL) {
+    log_errno("sys_strdup");
+    free_keyvalue_list_el(el);
+    return -1;
+  }
 
   dl_list_add_tail(&kv_list->list, &el->list, (void *)el);
 

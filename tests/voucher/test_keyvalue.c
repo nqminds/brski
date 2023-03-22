@@ -37,9 +37,9 @@ static void test_push_keyvalue_list(void **state) {
   assert_non_null(ll);
 
   assert_int_equal(
-      push_keyvalue_list(ll, sys_strdup("key1"), sys_strdup("value1")), 0);
+      push_keyvalue_list(ll, "key1", "value1"), 0);
   assert_int_equal(
-      push_keyvalue_list(ll, sys_strdup("key2"), sys_strdup("value2")), 0);
+      push_keyvalue_list(ll, "key2", "value2"), 0);
 
   struct keyvalue_list *item =
       dl_list_entry((&ll->list)->next, struct keyvalue_list, list);
