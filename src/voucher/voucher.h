@@ -10,9 +10,15 @@
 #ifndef VOUCHER_H
 #define VOUCHER_H
 
+#include <stdarg.h>
 #include <stdbool.h>
+#include <stddef.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
 #include <time.h>
+#include <unistd.h>
 
 #include "array.h"
 
@@ -528,14 +534,13 @@ __must_free_voucher struct Voucher *verify_cms_voucher(
  * @return struct VoucherBinaryArray* the signed pledge-voucher CMS structure as
  * binary array (DER format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *
-sign_pledge_voucher_request(const struct tm *created_on,
-                            const char *serial_number,
-                            const struct VoucherBinaryArray *nonce,
-                            const struct VoucherBinaryArray *registrar_tls_cert,
-                            const struct VoucherBinaryArray *pledge_sign_cert,
-                            const struct VoucherBinaryArray *pledge_sign_key,
-                            const struct BinaryArrayList *additional_pledge_certs);
+__must_free_binary_array struct VoucherBinaryArray *sign_pledge_voucher_request(
+    const struct tm *created_on, const char *serial_number,
+    const struct VoucherBinaryArray *nonce,
+    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct VoucherBinaryArray *pledge_sign_cert,
+    const struct VoucherBinaryArray *pledge_sign_key,
+    const struct BinaryArrayList *additional_pledge_certs);
 
 /**
  * @brief Signs a voucher request using CMS with a private key (type detected
@@ -591,8 +596,8 @@ __must_free_binary_array struct VoucherBinaryArray *sign_voucher_request(
  */
 typedef int (*voucher_req_fn)(
     const char *serial_number,
-    const struct BinaryArrayList *additional_registrar_certs, const void *user_ctx,
-    struct VoucherBinaryArray *pinned_domain_cert);
+    const struct BinaryArrayList *additional_registrar_certs,
+    const void *user_ctx, struct VoucherBinaryArray *pinned_domain_cert);
 
 /**
  * @brief Signs a MASA voucher request using CMS with a private key

@@ -110,9 +110,9 @@ create_pledge_voucher_request(char *serial_number,
       &pledge_sign_meta, pledge_sign_key.array, pledge_sign_key.length,
       &pledge_sign_cert.array);
 
-  struct VoucherBinaryArray *cms = sign_pledge_voucher_request(&created_on, serial_number, nonce,
-                                          registrar_tls_cert, &pledge_sign_cert,
-                                          &pledge_sign_key, certs);
+  struct VoucherBinaryArray *cms = sign_pledge_voucher_request(
+      &created_on, serial_number, nonce, registrar_tls_cert, &pledge_sign_cert,
+      &pledge_sign_key, certs);
 
   free_binary_array_content(&pledge_sign_key);
   free_binary_array_content(&pledge_sign_cert);
@@ -136,8 +136,8 @@ static void test_sign_pledge_voucher_request(void **state) {
       &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
       &registrar_tls_cert.array);
 
-  struct VoucherBinaryArray *cms = create_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &nonce,
-                                            &registrar_tls_cert);
+  struct VoucherBinaryArray *cms = create_pledge_voucher_request(
+      "AA:BB:CC:DD:EE:FF", &nonce, &registrar_tls_cert);
   assert_non_null(cms);
   free_binary_array(cms);
 
@@ -178,8 +178,8 @@ struct VoucherBinaryArray *faulty_create_pledge_voucher_request(
       &pledge_sign_meta, pledge_sign_key.array, pledge_sign_key.length,
       &pledge_sign_cert.array);
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher_request, &pledge_sign_cert,
-                               &pledge_sign_key, NULL);
+  struct VoucherBinaryArray *cms = sign_cms_voucher(
+      voucher_request, &pledge_sign_cert, &pledge_sign_key, NULL);
 
   free_binary_array_content(&pledge_sign_key);
   free_binary_array_content(&pledge_sign_cert);
@@ -202,8 +202,9 @@ static void test_sign_voucher_request(void **state) {
   registrar_tls_cert.length = (size_t)crypto_generate_eccert(
       &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
       &registrar_tls_cert.array);
-  struct VoucherBinaryArray *pledge_voucher_request_cms = create_pledge_voucher_request(
-      "AA:BB:CC:DD:EE:FF", &nonce, &registrar_tls_cert);
+  struct VoucherBinaryArray *pledge_voucher_request_cms =
+      create_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &nonce,
+                                    &registrar_tls_cert);
 
   assert_non_null(pledge_voucher_request_cms);
 
@@ -226,10 +227,10 @@ static void test_sign_voucher_request(void **state) {
       &registrar_sign_meta, registrar_sign_key.array, registrar_sign_key.length,
       &registrar_sign_cert.array);
 
-  struct VoucherBinaryArray *cms = sign_voucher_request(pledge_voucher_request_cms, &created_on,
-                                   "AA:BB:CC:DD:EE:FF", &idevid_issuer,
-                                   &registrar_tls_cert, &registrar_sign_cert,
-                                   &registrar_sign_key, NULL, NULL, NULL);
+  struct VoucherBinaryArray *cms = sign_voucher_request(
+      pledge_voucher_request_cms, &created_on, "AA:BB:CC:DD:EE:FF",
+      &idevid_issuer, &registrar_tls_cert, &registrar_sign_cert,
+      &registrar_sign_key, NULL, NULL, NULL);
   assert_non_null(cms);
 
   free_binary_array(cms);
@@ -315,8 +316,8 @@ struct VoucherBinaryArray *faulty_create_voucher_request(
       &registrar_sign_meta, registrar_sign_key.array, registrar_sign_key.length,
       &registrar_sign_cert.array);
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher_request, &registrar_sign_cert,
-                               &registrar_sign_key, NULL);
+  struct VoucherBinaryArray *cms = sign_cms_voucher(
+      voucher_request, &registrar_sign_cert, &registrar_sign_key, NULL);
 
   free_binary_array_content(&registrar_sign_key);
   free_binary_array_content(&registrar_sign_cert);
@@ -353,8 +354,9 @@ static void test_sign_masa_pledge_voucher(void **state) {
   registrar_tls_cert.length = (size_t)crypto_generate_eccert(
       &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
       &registrar_tls_cert.array);
-  struct VoucherBinaryArray *pledge_voucher_request_cms = create_pledge_voucher_request(
-      "AA:BB:CC:DD:EE:FF", &nonce, &registrar_tls_cert);
+  struct VoucherBinaryArray *pledge_voucher_request_cms =
+      create_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &nonce,
+                                    &registrar_tls_cert);
 
   struct tm created_on = {.tm_year = 73,
                           .tm_mon = 10,
@@ -417,8 +419,8 @@ static void test_sign_masa_pledge_voucher(void **state) {
   free_binary_array(voucher_request_cms);
 
   /* Missing serial number */
-  voucher_request_cms = faulty_create_voucher_request(
-      NULL, &nonce, pledge_voucher_request_cms);
+  voucher_request_cms =
+      faulty_create_voucher_request(NULL, &nonce, pledge_voucher_request_cms);
   assert_non_null(voucher_request_cms);
   cms = sign_masa_pledge_voucher(voucher_request_cms, &expires_on,
                                  voucher_req_fun, user_ctx, &masa_sign_cert,
@@ -457,8 +459,9 @@ static struct VoucherBinaryArray *
 create_masa_pledge_voucher(struct VoucherBinaryArray *registrar_tls_cert) {
   uint8_t nonce_array[] = {1, 2, 3, 4, 5};
   struct VoucherBinaryArray nonce = {.array = nonce_array, .length = 5};
-  struct VoucherBinaryArray *pledge_voucher_request_cms = create_pledge_voucher_request(
-      "AA:BB:CC:DD:EE:FF", &nonce, registrar_tls_cert);
+  struct VoucherBinaryArray *pledge_voucher_request_cms =
+      create_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &nonce,
+                                    registrar_tls_cert);
 
   struct tm created_on = {.tm_year = 73,
                           .tm_mon = 10,
@@ -573,7 +576,7 @@ static void test_verify_masa_pledge_voucher(void **state) {
   assert_int_equal(
       compare_binary_array(&pinned_domain_cert, &test_pinned_domain_cert), 1);
 
-  free_binary_array_content(&pinned_domain_cert);  
+  free_binary_array_content(&pinned_domain_cert);
   free_binary_array(masa_pledge_voucher_cms);
   free_binary_array_content(&registrar_tls_key);
   free_binary_array_content(&registrar_tls_cert);
@@ -635,7 +638,7 @@ static int test_group_setup(void **state) {
 
   test_domain_store = init_array_list();
   push_array_list(test_domain_store, test_ca_cert.array, test_ca_cert.length,
-                   0);
+                  0);
 
   int verified = crypto_verify_cert(test_pinned_domain_cert.array,
                                     test_pinned_domain_cert.length,
@@ -644,7 +647,7 @@ static int test_group_setup(void **state) {
 
   test_pinned_domain_certs = init_array_list();
   push_array_list(test_pinned_domain_certs, test_pinned_domain_cert.array,
-                   test_pinned_domain_cert.length, 0);
+                  test_pinned_domain_cert.length, 0);
 
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);

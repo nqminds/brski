@@ -13,18 +13,17 @@
 #include <time.h>
 
 #include "../utils/os.h"
+#include "crypto.h"
 #include "serialize.h"
 #include "voucher.h"
-#include "crypto.h"
 
-struct VoucherBinaryArray *
-sign_pledge_voucher_request(const struct tm *created_on,
-                            const char *serial_number,
-                            const struct VoucherBinaryArray *nonce,
-                            const struct VoucherBinaryArray *registrar_tls_cert,
-                            const struct VoucherBinaryArray *pledge_sign_cert,
-                            const struct VoucherBinaryArray *pledge_sign_key,
-                            const struct BinaryArrayList *additional_pledge_certs) {
+struct VoucherBinaryArray *sign_pledge_voucher_request(
+    const struct tm *created_on, const char *serial_number,
+    const struct VoucherBinaryArray *nonce,
+    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct VoucherBinaryArray *pledge_sign_cert,
+    const struct VoucherBinaryArray *pledge_sign_key,
+    const struct BinaryArrayList *additional_pledge_certs) {
   struct Voucher *voucher = init_voucher();
   if (voucher == NULL) {
     log_error("init_voucher fail");
@@ -86,8 +85,8 @@ sign_pledge_voucher_request(const struct tm *created_on,
     return NULL;
   }
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher, pledge_sign_cert, pledge_sign_key,
-                               additional_pledge_certs);
+  struct VoucherBinaryArray *cms = sign_cms_voucher(
+      voucher, pledge_sign_cert, pledge_sign_key, additional_pledge_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     free_voucher(voucher);
@@ -98,16 +97,16 @@ sign_pledge_voucher_request(const struct tm *created_on,
   return cms;
 }
 
-struct VoucherBinaryArray *
-sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
-                     const struct tm *created_on, const char *serial_number,
-                     const struct VoucherBinaryArray *idevid_issuer,
-                     const struct VoucherBinaryArray *registrar_tls_cert,
-                     const struct VoucherBinaryArray *registrar_sign_cert,
-                     const struct VoucherBinaryArray *registrar_sign_key,
-                     const struct BinaryArrayList *pledge_verify_certs,
-                     const struct BinaryArrayList *pledge_verify_store,
-                     const struct BinaryArrayList *additional_registrar_certs) {
+struct VoucherBinaryArray *sign_voucher_request(
+    const struct VoucherBinaryArray *pledge_voucher_request_cms,
+    const struct tm *created_on, const char *serial_number,
+    const struct VoucherBinaryArray *idevid_issuer,
+    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct VoucherBinaryArray *registrar_sign_cert,
+    const struct VoucherBinaryArray *registrar_sign_key,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    const struct BinaryArrayList *additional_registrar_certs) {
 
   if (serial_number == NULL) {
     log_error("serial_number param in NULL");
@@ -228,8 +227,9 @@ sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms
     goto sign_voucher_request_fail;
   }
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher_request, registrar_sign_cert,
-                               registrar_sign_key, additional_registrar_certs);
+  struct VoucherBinaryArray *cms =
+      sign_cms_voucher(voucher_request, registrar_sign_cert, registrar_sign_key,
+                       additional_registrar_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_voucher_request_fail;
@@ -426,8 +426,9 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(masa_pledge_voucher, masa_sign_cert,
-                               masa_sign_key, additional_masa_certs);
+  struct VoucherBinaryArray *cms =
+      sign_cms_voucher(masa_pledge_voucher, masa_sign_cert, masa_sign_key,
+                       additional_masa_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_masa_pledge_voucher_fail;
@@ -448,8 +449,8 @@ sign_masa_pledge_voucher_fail:
 }
 
 int verify_masa_pledge_voucher(
-    const struct VoucherBinaryArray *masa_pledge_voucher_cms, const char *serial_number,
-    const struct VoucherBinaryArray *nonce,
+    const struct VoucherBinaryArray *masa_pledge_voucher_cms,
+    const char *serial_number, const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *registrar_tls_cert,
     const struct BinaryArrayList *domain_store,
     const struct BinaryArrayList *pledge_verify_certs,
@@ -548,7 +549,7 @@ int verify_masa_pledge_voucher(
 
     struct BinaryArrayList *intermediate_certs = init_array_list();
     if (push_array_list(intermediate_certs, cert_copy.array, cert_copy.length,
-                         0) < 0) {
+                        0) < 0) {
       log_error("push_array_list fail");
       free_array_list(intermediate_certs);
       goto verify_masa_pledge_voucher_fail;

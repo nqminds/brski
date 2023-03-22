@@ -32,7 +32,81 @@
 #include "../utils/log.h"
 #include "../utils/os.h"
 
+#include "array.h"
 #include "crypto.h"
+#include "keyvalue.h"
+
+struct ptr_list {
+  void *ptr;           /**< The pointer (points to heap memory) */
+  int flags;           /**< The generic pointer flags */
+  struct dl_list list; /**< List definition */
+};
+
+typedef void (*ptr_free_fn)(void *ptr, const int flag);
+
+static struct ptr_list *init_ptr_list(void) {
+  struct ptr_list *ptr_list = NULL;
+
+  if ((ptr_list = sys_zalloc(sizeof(struct ptr_list))) == NULL) {
+    log_errno("sys_zalloc");
+    return NULL;
+  }
+
+  dl_list_init(&ptr_list->list, (void *)ptr_list);
+
+  return ptr_list;
+}
+
+static void free_ptr_list_el(struct ptr_list *el, const ptr_free_fn cb) {
+  if (el != NULL) {
+    if (el->ptr != NULL && cb != NULL) {
+      cb(el->ptr, el->flags);
+    }
+    dl_list_del(&el->list);
+    sys_free(el);
+  }
+}
+
+static void free_ptr_list(struct ptr_list *ptr_list, const ptr_free_fn cb) {
+  struct ptr_list *el;
+
+  if (ptr_list == NULL) {
+    return;
+  }
+
+  while ((el = dl_list_first(&ptr_list->list, struct ptr_list, list)) != NULL) {
+    free_ptr_list_el(el, cb);
+  }
+
+  free_ptr_list_el(ptr_list, cb);
+}
+
+static int push_ptr_list(struct ptr_list *ptr_list, void *const ptr,
+                         const int flags) {
+  if (ptr_list == NULL) {
+    log_error("ptr_list param is empty");
+    return -1;
+  }
+
+  if (ptr == NULL) {
+    log_error("ptr param is empty");
+    return -1;
+  }
+
+  struct ptr_list *el = sys_zalloc(sizeof(struct ptr_list));
+
+  if (el == NULL) {
+    log_error("init_ptr_list fail");
+    return -1;
+  }
+
+  el->ptr = ptr;
+  el->flags = flags;
+
+  dl_list_add_tail(&ptr_list->list, &el->list, (void *)el);
+
+  return 0;
+}
 
 void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
   BIO *out = BIO_new_file(filename, "w");
@@ -691,7 +765,8 @@ crypto_sign_cert_fail:
   return -1;
 }
 
-static STACK_OF(X509) * get_certificate_stack(const struct BinaryArrayList *certs) {
+static STACK_OF(X509) *
+    get_certificate_stack(const struct BinaryArrayList *certs) {
   STACK_OF(X509) *cert_stack = sk_X509_new_null();
 
   if (cert_stack == NULL) {
@@ -955,8 +1030,8 @@ ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
     return -1;
   }
 
-  ssize_t length =
-      sign_withkey_cms(data, data_length, cert, cert_length, (EVP_PKEY *) pkey, certs, cms);
+  ssize_t length = sign_withkey_cms(data, data_length, cert, cert_length,
+                                    (EVP_PKEY *)pkey, certs, cms);
 
   if (length < 0) {
     log_error("sign_withkey_eccms fail");

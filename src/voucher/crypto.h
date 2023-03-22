@@ -86,7 +86,8 @@ ssize_t crypto_generate_eckey(uint8_t **key);
 void crypto_free_keycontext(CRYPTO_KEY ctx);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_crypto_free_keycontext __attribute__((malloc(crypto_free_keycontext, 1))) __must_check
+#define __must_crypto_free_keycontext                                          \
+  __attribute__((malloc(crypto_free_keycontext, 1))) __must_check
 #else
 #define __must_crypto_free_keycontext __must_check
 #endif /* __GNUC__ >= 11 */
@@ -153,8 +154,8 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                uint8_t **cert);
 
 /**
- * @brief Generate a certificate and self signs with a RSA private key (DER format)
- * using sha256
+ * @brief Generate a certificate and self signs with a RSA private key (DER
+ * format) using sha256
  *
  * Caller is responsible for freeing the cert buffer
  *
@@ -191,16 +192,18 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
  *
  * @param[in] cert The certificate buffer (DER format) to be verified
  * @param[in] cert_length The certificate buffer length
- * @param[in] certs The list of certificate buffers (DER format) to verify the certificate
- * @param[in] store The list of trusted certificate store buffers (DER format) to verify the
+ * @param[in] certs The list of certificate buffers (DER format) to verify the
  * certificate
+ * @param[in] store The list of trusted certificate store buffers (DER format)
+ * to verify the certificate
  * @return int 0 if certificate is signed by the certs/store, -1 on failure
  */
 int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
                        const struct BinaryArrayList *certs,
                        const struct BinaryArrayList *store);
 /**
- * @brief Signs a buffer using CMS for an Elliptic Curve private key (DER format)
+ * @brief Signs a buffer using CMS for an Elliptic Curve private key (DER
+ * format)
  *
  * Caller is responsible for freeing the CMS buffer
  *
@@ -208,7 +211,8 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
  * @param[in] data_length The data buffer length
  * @param[in] cert The certificate buffer (DER format) for signing private key
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The signing Elliptic Curve private key buffer (DER format) of the certificate
+ * @param[in] key The signing Elliptic Curve private key buffer (DER format) of
+ * the certificate
  * @param[in] key_length The length of the private key buffer
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[out] cms The output CMS buffer (DER format)
@@ -227,9 +231,11 @@ ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
  *
  * @param[in] data The data buffer to be signed
  * @param[in] data_length The data buffer length
- * @param[in] cert The certificate buffer (DER format) for the signing private key
+ * @param[in] cert The certificate buffer (DER format) for the signing private
+ * key
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The signing Elliptic Curve private key buffer (DER format) of the certificate
+ * @param[in] key The signing Elliptic Curve private key buffer (DER format) of
+ * the certificate
  * @param[in] key_length The length of the private key buffer
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[out] cms The output CMS buffer (DER format)
@@ -247,7 +253,8 @@ ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
  *
  * @param[in] data The data buffer to be signed
  * @param[in] data_length The data buffer length
- * @param[in] cert The certificate buffer (DER format) for the signing private key
+ * @param[in] cert The certificate buffer (DER format) for the signing private
+ * key
  * @param[in] cert_length The certificate buffer length
  * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] key_length The length of the private key buffer
@@ -271,7 +278,8 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[in] store The list of trusted certificate for store (DER format)
  * @param[out] data The output data buffer
- * @param[out] out_certs The list of certificate buffers (DER format) from the CMS structure (NULL for empty)
+ * @param[out] out_certs The list of certificate buffers (DER format) from the
+ * CMS structure (NULL for empty)
  * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,

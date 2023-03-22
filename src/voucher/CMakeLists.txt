@@ -7,16 +7,19 @@ add_compile_options(
 add_library(array array.c)
 target_link_libraries(array PRIVATE os log)
 
+add_library(keyvalue keyvalue.c)
+target_link_libraries(keyvalue PRIVATE array os log)
+
 add_library(serialize serialize.c)
-target_link_libraries(serialize PRIVATE array os)
+target_link_libraries(serialize PRIVATE keyvalue array os)
 target_compile_definitions(serialize PRIVATE _DEFAULT_SOURCE _BSD_SOURCE _XOPEN_SOURCE)
 
 if (USE_VOUCHER_OPENSSL AND (NOT USE_VOUCHER_WOLFSSL))
     add_library(voucher crypto_ossl.c voucher.c request.c)
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE OpenSSL3::Crypto array serialize os log)
+    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE OpenSSL3::Crypto keyvalue array serialize os log)
 elseif (USE_VOUCHER_WOLFSSL)
     add_library(voucher crypto_wssl.c voucher.c request.c)
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE array serialize os log)
+    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE keyvalue array serialize os log)
 else ()
     message(FATAL_ERROR "No crypto library option defined")
 endif ()

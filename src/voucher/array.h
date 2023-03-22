@@ -7,13 +7,20 @@
  * Copyright (c) 2009-2019, Jouni Malinen <j@w1.fi> and Alexandru Mereacre
  * SPDX-License-Identifier: BSD licence
  * @version hostapd-2.10
- * @brief Doubly-linked list and key/value list definition
+ * @brief Binary array(list) definition
  */
 
-#ifndef LIST_H
-#define LIST_H
+#ifndef ARRAY_H
+#define ARRAY_H
 
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+#include <stdlib.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 /**
  * struct dl_list - Doubly-linked list
@@ -24,8 +31,11 @@ struct dl_list {
   void *el;
 };
 
+void dl_list_init(struct dl_list *list, void *el);
+void dl_list_add(struct dl_list *list, struct dl_list *item, void *el);
+void dl_list_add_tail(struct dl_list *list, struct dl_list *item, void *el);
+void dl_list_del(struct dl_list *item);
 int dl_list_empty(const struct dl_list *list);
-
 unsigned int dl_list_len(const struct dl_list *list);
 
 #define dl_list_entry(item, type, member) ((type *)((void *)item->el))
@@ -49,85 +59,6 @@ unsigned int dl_list_len(const struct dl_list *list);
 
 #define DEFINE_DL_LIST(name) struct dl_list name = {&(name), &(name)}
 
-struct keyvalue_list {
-  char *key;           /**< The attribute name (heap allocated) */
-  char *value;         /**< The attribute value (heap allocated) */
-  struct dl_list list; /**< List definition */
-};
-
-/**
- * @brief Frees the key/value list and all of its elements
- *
- * @param[in] kv_list The key/value list
- */
-void free_keyvalue_list(struct keyvalue_list *kv_list);
-
-#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_keyvalue_list                                              \
-  __attribute__((malloc(free_keyvalue_list, 1))) __must_check
-#else
-#define __must_free_keyvalue_list __must_check
-#endif /* __GNUC__ >= 11 */
-
-/**
- * @brief Initializes the key/value list
- *
- * @return struct keyvalue_list * initialised key/value list, NULL on failure
- */
-__must_free_keyvalue_list struct keyvalue_list *init_keyvalue_list(void);
-
-/**
- * @brief Pushes the key/value/escape elements into the list
- *
- * @param[in] kv_list The key/value list
- * @param[in] key The key attribute
- * @param[in] value The attribute value
- * @return int 0 on success, -1 on failure
- */
-int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
-                       char *const value);
-
-struct ptr_list {
-  void *ptr;           /**< The pointer (points to heap memory) */
-  int flags;           /**< The generic pointer flags */
-  struct dl_list list; /**< List definition */
-};
-
-typedef void (*ptr_free_fn)(void *ptr, const int flag);
-
-/**
- * @brief Frees the ptr list and all of its elements
- * using a a user supplied callback function
- *
- * @param[in] ptr_list The ptr list
- * @param[in] cb The user supplied callback functio to free the ptr element
- */
-void free_ptr_list(struct ptr_list *ptr_list, const ptr_free_fn cb);
-
-#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_ptr_list                                                   \
-  __attribute__((malloc(free_ptr_list, 1))) __must_check
-#else
-#define __must_free_ptr_list __must_check
-#endif /* __GNUC__ >= 11 */
-
-/**
- * @brief Initializes the ptr list
- *
- * @return struct ptr_list * initialised ptr list, NULL on failure
- */
-__must_free_ptr_list struct ptr_list *init_ptr_list(void);
-
-/**
- * @brief Pushes a pointer into the list and assigns the flags
- *
- * @param[in] ptr_list The ptr list
- * @param[in] ptr The ptr value
- * @param[in] flags The ptr flags
- * @return int 0 on success, -1 on failure
- */
-int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags);
-
 struct BinaryArrayList {
   uint8_t *arr;        /**< The binary array (heap allocated) */
   size_t length;       /**< The binary array length */
@@ -143,7 +74,7 @@ struct BinaryArrayList {
 void free_array_list(struct BinaryArrayList *arr_list);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_array_list                                                \
+#define __must_free_array_list                                                 \
   __attribute__((malloc(free_array_list, 1))) __must_check
 #else
 #define __must_free_array_list __must_check
@@ -151,8 +82,9 @@ void free_array_list(struct BinaryArrayList *arr_list);
 
 /**
  * @brief Initializes the binary array list parameters
- * 
- * @return struct BinaryArrayList * initialised binary array list, NULL on failure
+ *
+ * @return struct BinaryArrayList * initialised binary array list, NULL on
+ * failure
  */
 __must_free_array_list struct BinaryArrayList *init_array_list(void);
 
@@ -167,7 +99,7 @@ __must_free_array_list struct BinaryArrayList *init_array_list(void);
  * @return int 0 on success, -1 on failure
  */
 int push_array_list(struct BinaryArrayList *arr_list, uint8_t *const arr,
-                     const size_t length, const int flags);
+                    const size_t length, const int flags);
 
 struct VoucherBinaryArray {
   uint8_t *array;
@@ -215,4 +147,4 @@ void free_binary_array(struct VoucherBinaryArray *arr);
 int compare_binary_array(const struct VoucherBinaryArray *src,
                          const struct VoucherBinaryArray *dst);
 
-#endif /* LIST_H */
+#endif /* ARRAY_H */

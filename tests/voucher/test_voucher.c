@@ -19,6 +19,7 @@
 #include "utils/os.h"
 
 #include "voucher/crypto.h"
+#include "voucher/keyvalue.h"
 #include "voucher/voucher.h"
 #include "voucher/voucher_defs.h"
 

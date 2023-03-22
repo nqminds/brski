@@ -13,8 +13,8 @@
 
 #include "../utils/os.h"
 
-#include "crypto.h"
 #include "array.h"
+#include "crypto.h"
 #include "serialize.h"
 #include "voucher.h"
 #include "voucher_defs.h"
@@ -32,8 +32,7 @@ static bool check_size_str_equal(const char *src, const char *dst,
   }
 }
 
-static bool
-is_attr_array_nonempty(const struct VoucherBinaryArray *value) {
+static bool is_attr_array_nonempty(const struct VoucherBinaryArray *value) {
   if (value == NULL) {
     return false;
   }
@@ -367,8 +366,7 @@ bool is_attr_voucher_nonempty(const struct Voucher *voucher,
     case ATTR_NONCE:
       return is_attr_array_nonempty(&voucher->nonce);
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      return is_attr_array_nonempty(
-          &voucher->prior_signed_voucher_request);
+      return is_attr_array_nonempty(&voucher->prior_signed_voucher_request);
     case ATTR_PROXIMITY_REGISTRAR_CERT:
       return is_attr_array_nonempty(&voucher->proximity_registrar_cert);
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:

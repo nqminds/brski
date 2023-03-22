@@ -18,6 +18,7 @@
 
 #include "../utils/os.h"
 #include "array.h"
+#include "keyvalue.h"
 
 /**
  * @brief Encodes an array to base64

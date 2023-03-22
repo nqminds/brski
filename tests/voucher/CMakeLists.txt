@@ -7,6 +7,11 @@ add_cmocka_test(test_array
   LINK_LIBRARIES array log cmocka::cmocka
 )
 
+add_cmocka_test(test_keyvalue
+  SOURCES test_keyvalue.c
+  LINK_LIBRARIES keyvalue array log cmocka::cmocka
+)
+
 add_cmocka_test(test_crypto
   SOURCES test_crypto.c
   LINK_LIBRARIES array log cmocka::cmocka
@@ -27,5 +32,5 @@ add_cmocka_test(test_voucher
   LINK_LIBRARIES voucher log cmocka::cmocka
 )
 
-target_link_libraries(test_crypto PRIVATE voucher os)
-target_link_libraries(test_voucher PRIVATE voucher os)
+target_link_libraries(test_crypto PRIVATE voucher array keyvalue os)
+target_link_libraries(test_voucher PRIVATE voucher array keyvalue os)

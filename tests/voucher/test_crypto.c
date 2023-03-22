@@ -20,6 +20,7 @@
 #include "utils/os.h"
 
 #include "voucher/crypto.h"
+#include "voucher/keyvalue.h"
 
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;
@@ -220,8 +221,8 @@ static void test_crypto_sign_eccms(void **state) {
 
   sys_free(key_in_list);
 
-  assert_int_equal(
-      push_array_list(certs, cert_in_list, cert_in_list_length, 0), 0);
+  assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
+                   0);
 
   ssize_t length =
       crypto_sign_eccms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
@@ -305,8 +306,8 @@ static void test_crypto_sign_rsacms(void **state) {
 
   sys_free(key_in_list);
 
-  assert_int_equal(
-      push_array_list(certs, cert_in_list, cert_in_list_length, 0), 0);
+  assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
+                   0);
 
   ssize_t length =
       crypto_sign_rsacms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
@@ -539,7 +540,7 @@ static void test_crypto_verify_cert(void **state) {
 
   struct BinaryArrayList *intermediate_certs = init_array_list();
   push_array_list(intermediate_certs, intermediate_cert,
-                   signed_intermediate_cert_length, 0);
+                  signed_intermediate_cert_length, 0);
 
   int verified =
       crypto_verify_cert(untrusted_cert, signed_untrusted_cert_length,
@@ -599,8 +600,8 @@ static void test_crypto_sign_cms(void **state) {
   ssize_t cert_in_list_length = crypto_generate_rsacert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  assert_int_equal(
-      push_array_list(certs, cert_in_list, cert_in_list_length, 0), 0);
+  assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
+                   0);
 
   sys_free(key_in_list);
 
