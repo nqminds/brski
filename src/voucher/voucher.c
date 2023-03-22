@@ -14,7 +14,7 @@
 #include "../utils/os.h"
 
 #include "crypto.h"
-#include "vutils.h"
+#include "array.h"
 #include "serialize.h"
 #include "voucher.h"
 #include "voucher_defs.h"

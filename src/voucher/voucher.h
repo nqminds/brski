@@ -14,6 +14,8 @@
 #include <stdint.h>
 #include <time.h>
 
+#include "array.h"
+
 /**
  *
  * module: ietf-voucher

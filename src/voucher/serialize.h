@@ -17,7 +17,7 @@
 #include <time.h>
 
 #include "../utils/os.h"
-#include "vutils.h"
+#include "array.h"
 
 /**
  * @brief Encodes an array to base64

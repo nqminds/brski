@@ -14,7 +14,7 @@
 
 #include "../utils/os.h"
 
-#include "vutils.h"
+#include "array.h"
 
 static void dl_list_init(struct dl_list *list, void *el) {
   list->next = list;

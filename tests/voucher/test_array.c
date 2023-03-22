@@ -19,7 +19,7 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/vutils.h"
+#include "voucher/array.h"
 
 static void test_init_keyvalue_list(void **state) {
   (void)state;
@@ -50,14 +50,14 @@ static void test_push_keyvalue_list(void **state) {
   free_keyvalue_list(ll);
 }
 
-static void test_init_buffer_list(void **state) {
+static void test_init_array_list(void **state) {
   (void)state;
   struct BinaryArrayList *ll = init_array_list();
   assert_non_null(ll);
   free_array_list(ll);
 }
 
-static void test_push_buffer_list(void **state) {
+static void test_push_array_list(void **state) {
   (void)state;
 
   struct BinaryArrayList *ll = init_array_list();
@@ -122,8 +122,8 @@ int main(int argc, char *argv[]) {
 
   const struct CMUnitTest tests[] = {cmocka_unit_test(test_init_keyvalue_list),
                                      cmocka_unit_test(test_push_keyvalue_list),
-                                     cmocka_unit_test(test_init_buffer_list),
-                                     cmocka_unit_test(test_push_buffer_list),
+                                     cmocka_unit_test(test_init_array_list),
+                                     cmocka_unit_test(test_push_array_list),
                                      cmocka_unit_test(test_init_ptr_list),
                                      cmocka_unit_test(test_push_ptr_list)};
 
