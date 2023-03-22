@@ -89,12 +89,9 @@ The cmake installs the following artifacts:
 - `/../bin/brski`
 - `/../lib/libvoucher.a`
 - `/../include/voucher/list.h`
-- `/../include/voucher/voucher_crypto.h`
-- `/../include/voucher/voucher_request.h`
 - `/../include/voucher/voucher.h`
 - `/../etc/brski/config.ini`
 
-alexandru@alexandru12th:~/projects/brski$ 
 ## Testing
 
 To compile the tests use:

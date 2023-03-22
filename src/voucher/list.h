@@ -63,7 +63,8 @@ struct keyvalue_list {
 void free_keyvalue_list(struct keyvalue_list *kv_list);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_keyvalue_list __attribute__((malloc(free_keyvalue_list, 1))) __must_check
+#define __must_free_keyvalue_list                                              \
+  __attribute__((malloc(free_keyvalue_list, 1))) __must_check
 #else
 #define __must_free_keyvalue_list __must_check
 #endif /* __GNUC__ >= 11 */
@@ -101,7 +102,8 @@ struct buffer_list {
 void free_buffer_list(struct buffer_list *buf_list);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_buffer_list __attribute__((malloc(free_buffer_list, 1))) __must_check
+#define __must_free_buffer_list                                                \
+  __attribute__((malloc(free_buffer_list, 1))) __must_check
 #else
 #define __must_free_buffer_list __must_check
 #endif /* __GNUC__ >= 11 */
@@ -144,7 +146,8 @@ typedef void (*ptr_free_fn)(void *ptr, const int flag);
 void free_ptr_list(struct ptr_list *ptr_list, const ptr_free_fn cb);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_ptr_list __attribute__((malloc(free_ptr_list, 1))) __must_check
+#define __must_free_ptr_list                                                   \
+  __attribute__((malloc(free_ptr_list, 1))) __must_check
 #else
 #define __must_free_ptr_list __must_check
 #endif /* __GNUC__ >= 11 */

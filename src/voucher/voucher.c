@@ -13,7 +13,7 @@
 
 #include "../utils/os.h"
 
-#include "voucher_crypto.h"
+#include "crypto.h"
 #include "list.h"
 #include "serialize.h"
 #include "voucher.h"
@@ -921,7 +921,7 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
   if (!found_root) {
     log_error("Voucher root not found");
     free_voucher(voucher);
-    return NULL;  
+    return NULL;
   }
 
   return voucher;
@@ -931,10 +931,9 @@ deserialize_voucher_fail:
   return NULL;
 }
 
-struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
-                         const struct VoucherBinaryArray *cert,
-                         const struct VoucherBinaryArray *key,
-                         const struct buffer_list *certs) {
+struct VoucherBinaryArray *sign_eccms_voucher(
+    struct Voucher *voucher, const struct VoucherBinaryArray *cert,
+    const struct VoucherBinaryArray *key, const struct buffer_list *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -970,7 +969,8 @@ struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  struct VoucherBinaryArray *out =
+      sys_malloc(sizeof(struct VoucherBinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -982,10 +982,9 @@ struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
   return out;
 }
 
-struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
-                          const struct VoucherBinaryArray *cert,
-                          const struct VoucherBinaryArray *key,
-                          const struct buffer_list *certs) {
+struct VoucherBinaryArray *sign_rsacms_voucher(
+    struct Voucher *voucher, const struct VoucherBinaryArray *cert,
+    const struct VoucherBinaryArray *key, const struct buffer_list *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -1020,7 +1019,8 @@ struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  struct VoucherBinaryArray *out =
+      sys_malloc(sizeof(struct VoucherBinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -1032,10 +1032,10 @@ struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
   return out;
 }
 
-__must_sys_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
-                                   const struct VoucherBinaryArray *cert,
-                                   const struct VoucherBinaryArray *key,
-                                   const struct buffer_list *certs) {
+__must_sys_free struct VoucherBinaryArray *
+sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
+                 const struct VoucherBinaryArray *key,
+                 const struct buffer_list *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -1070,7 +1070,8 @@ __must_sys_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *vouc
   }
   sys_free(serialized);
 
-  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  struct VoucherBinaryArray *out =
+      sys_malloc(sizeof(struct VoucherBinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -1092,8 +1093,8 @@ struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
   }
 
   uint8_t *data = NULL;
-  ssize_t data_length =
-      crypto_verify_cms(cms->array, cms->length, certs, store, &data, out_certs);
+  ssize_t data_length = crypto_verify_cms(cms->array, cms->length, certs, store,
+                                          &data, out_certs);
 
   if (data_length < 0) {
     log_error("crypto_verify_cms fail");

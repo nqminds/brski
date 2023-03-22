@@ -30,8 +30,8 @@ static void dl_list_add(struct dl_list *list, struct dl_list *item, void *el) {
   list->next->el = el;
 }
 
-static void dl_list_add_tail(struct dl_list *list,
-                                    struct dl_list *item, void *el) {
+static void dl_list_add_tail(struct dl_list *list, struct dl_list *item,
+                             void *el) {
   dl_list_add(list->prev, item, el);
 }
 
@@ -42,9 +42,7 @@ static void dl_list_del(struct dl_list *item) {
   item->prev = NULL;
 }
 
-int dl_list_empty(const struct dl_list *list) {
-  return list->next == list;
-}
+int dl_list_empty(const struct dl_list *list) { return list->next == list; }
 
 unsigned int dl_list_len(const struct dl_list *list) {
   struct dl_list *item;
@@ -62,7 +60,7 @@ struct keyvalue_list *init_keyvalue_list(void) {
     return NULL;
   }
 
-  dl_list_init(&kv_list->list, (void*)kv_list);
+  dl_list_init(&kv_list->list, (void *)kv_list);
 
   return kv_list;
 }
@@ -121,8 +119,8 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
 
   el->key = key;
   el->value = value;
-  
-  dl_list_add_tail(&kv_list->list, &el->list, (void*)el);
+
+  dl_list_add_tail(&kv_list->list, &el->list, (void *)el);
 
   return 0;
 }
@@ -188,7 +186,7 @@ int push_buffer_list(struct buffer_list *buf_list, uint8_t *const buf,
   el->length = length;
   el->flags = flags;
 
-  dl_list_add_tail(&buf_list->list, &el->list, (void*)el);
+  dl_list_add_tail(&buf_list->list, &el->list, (void *)el);
 
   return 0;
 }
@@ -201,7 +199,7 @@ struct ptr_list *init_ptr_list(void) {
     return NULL;
   }
 
-  dl_list_init(&ptr_list->list, (void*)ptr_list);
+  dl_list_init(&ptr_list->list, (void *)ptr_list);
 
   return ptr_list;
 }
@@ -251,7 +249,7 @@ int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags) {
   el->ptr = ptr;
   el->flags = flags;
 
-  dl_list_add_tail(&ptr_list->list, &el->list, (void*)el);
+  dl_list_add_tail(&ptr_list->list, &el->list, (void *)el);
 
   return 0;
 }

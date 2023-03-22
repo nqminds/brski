@@ -19,7 +19,7 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/voucher_crypto.h"
+#include "voucher/crypto.h"
 
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;
@@ -781,8 +781,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_crypto_sign_cert),
       cmocka_unit_test(test_crypto_verify_cert),
       cmocka_unit_test(test_crypto_sign_cms),
-      cmocka_unit_test(test_crypto_verify_cms)
-  };
+      cmocka_unit_test(test_crypto_verify_cms)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

@@ -173,7 +173,8 @@ static uint8_t *base64_gen_encode(const uint8_t *src, const size_t len,
   return out;
 }
 
-static ssize_t base64_gen_decode(const uint8_t *src, const size_t len, const uint8_t *table, uint8_t **out) {
+static ssize_t base64_gen_decode(const uint8_t *src, const size_t len,
+                                 const uint8_t *table, uint8_t **out) {
   uint8_t dtable[256], *pos, block[4], tmp;
   size_t i, count, olen;
   int pad = 0;

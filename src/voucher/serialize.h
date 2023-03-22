@@ -16,8 +16,8 @@
 #include <stdlib.h>
 #include <time.h>
 
-#include "list.h"
 #include "../utils/os.h"
+#include "list.h"
 
 /**
  * @brief Encodes an array to base64
@@ -108,5 +108,6 @@ __must_sys_free char *serialize_escapestr(const char *str);
  * @param[in] kv_list The key/value list
  * @return char * encoded json, NULL on failure
  */
-__must_sys_free char *serialize_keyvalue2json(const struct keyvalue_list *kv_list);
+__must_sys_free char *
+serialize_keyvalue2json(const struct keyvalue_list *kv_list);
 #endif

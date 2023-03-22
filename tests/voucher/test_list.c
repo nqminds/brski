@@ -35,10 +35,13 @@ static void test_push_keyvalue_list(void **state) {
   struct keyvalue_list *ll = init_keyvalue_list();
   assert_non_null(ll);
 
-  assert_int_equal(push_keyvalue_list(ll, sys_strdup("key1"), sys_strdup("value1")), 0);
-  assert_int_equal(push_keyvalue_list(ll, sys_strdup("key2"), sys_strdup("value2")), 0);
+  assert_int_equal(
+      push_keyvalue_list(ll, sys_strdup("key1"), sys_strdup("value1")), 0);
+  assert_int_equal(
+      push_keyvalue_list(ll, sys_strdup("key2"), sys_strdup("value2")), 0);
 
-  struct keyvalue_list *item = dl_list_entry((&ll->list)->next, struct keyvalue_list, list);
+  struct keyvalue_list *item =
+      dl_list_entry((&ll->list)->next, struct keyvalue_list, list);
   assert_string_equal(item->key, "key1");
   assert_string_equal(item->value, "value1");
   item = dl_list_entry(item->list.next, struct keyvalue_list, list);
@@ -65,7 +68,8 @@ static void test_push_buffer_list(void **state) {
   assert_int_equal(push_buffer_list(ll, sys_memdup(buf1, 3), 3, 0xAA), 0);
   assert_int_equal(push_buffer_list(ll, sys_memdup(buf2, 4), 4, 0xBB), 0);
 
-  struct buffer_list *item = dl_list_entry((&ll->list)->next, struct buffer_list, list);
+  struct buffer_list *item =
+      dl_list_entry((&ll->list)->next, struct buffer_list, list);
   assert_int_equal(item->length, 3);
   assert_memory_equal(item->buf, buf1, 3);
   assert_int_equal(item->flags, 0xAA);
@@ -99,7 +103,8 @@ static void test_push_ptr_list(void **state) {
   assert_int_equal(push_ptr_list(ll, sys_strdup("key1"), 0xAA), 0);
   assert_int_equal(push_ptr_list(ll, sys_strdup("key2"), 0xBB), 0);
 
-  struct ptr_list *item = dl_list_entry((&ll->list)->next, struct ptr_list, list);
+  struct ptr_list *item =
+      dl_list_entry((&ll->list)->next, struct ptr_list, list);
   assert_int_equal(item->flags, 0xAA);
   assert_string_equal((char *)item->ptr, "key1");
   item = dl_list_entry(item->list.next, struct ptr_list, list);
@@ -115,14 +120,12 @@ int main(int argc, char *argv[]) {
 
   log_set_quiet(false);
 
-  const struct CMUnitTest tests[] = {
-      cmocka_unit_test(test_init_keyvalue_list),
-      cmocka_unit_test(test_push_keyvalue_list),
-      cmocka_unit_test(test_init_buffer_list),
-      cmocka_unit_test(test_push_buffer_list),
-      cmocka_unit_test(test_init_ptr_list),
-      cmocka_unit_test(test_push_ptr_list)
-  };
+  const struct CMUnitTest tests[] = {cmocka_unit_test(test_init_keyvalue_list),
+                                     cmocka_unit_test(test_push_keyvalue_list),
+                                     cmocka_unit_test(test_init_buffer_list),
+                                     cmocka_unit_test(test_push_buffer_list),
+                                     cmocka_unit_test(test_init_ptr_list),
+                                     cmocka_unit_test(test_push_ptr_list)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

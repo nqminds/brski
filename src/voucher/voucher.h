@@ -14,8 +14,6 @@
 #include <stdint.h>
 #include <time.h>
 
-#include "voucher_crypto.h"
-
 /**
  *
  * module: ietf-voucher
@@ -263,7 +261,8 @@ void free_binary_array_content(struct VoucherBinaryArray *arr);
 void free_binary_array(struct VoucherBinaryArray *arr);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_binary_array __attribute__((malloc(free_binary_array, 1))) __must_check
+#define __must_free_binary_array                                               \
+  __attribute__((malloc(free_binary_array, 1))) __must_check
 #else
 #define __must_free_binary_array __must_check
 #endif /* __GNUC__ >= 11 */
@@ -288,7 +287,8 @@ struct Voucher;
 void free_voucher(struct Voucher *voucher);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
-#define __must_free_voucher __attribute__((malloc(free_voucher, 1))) __must_check
+#define __must_free_voucher                                                    \
+  __attribute__((malloc(free_voucher, 1))) __must_check
 #else
 #define __must_free_voucher __must_check
 #endif /* __GNUC__ >= 11 */
@@ -297,7 +297,7 @@ void free_voucher(struct Voucher *voucher);
  * @brief Initialises an empty voucher structure
  *
  * Caller is responsible for freeing the voucher
- * 
+ *
  * @return struct Voucher* pointer to allocated voucher, NULL on failure
  */
 __must_free_voucher struct Voucher *init_voucher(void);
@@ -472,7 +472,8 @@ __must_sys_free char *serialize_voucher(const struct Voucher *voucher);
  * @param[in] length The json string buffer length
  * @return struct Voucher * voucher structure, NULL on failure
  */
-__must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length);
+__must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json,
+                                                        const size_t length);
 
 /**
  * @brief Signs a voucher using CMS with an Elliptic Curve private key
@@ -483,16 +484,16 @@ __must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json, con
  * @param[in] voucher The allocated voucher structure
  * @param[in] cert The certificate buffer (DER format) correspoding to the
  * private key
- * @param[in] key The Elliptic Curve private key buffer (DER format) of the certificate
+ * @param[in] key The Elliptic Curve private key buffer (DER format) of the
+ * certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return struct VoucherBinaryArray * the signed CMS structure in binary (DER format), NULL on
- * failure
+ * @return struct VoucherBinaryArray * the signed CMS structure in binary (DER
+ * format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
-                                     const struct VoucherBinaryArray *cert,
-                                     const struct VoucherBinaryArray *key,
-                                     const struct buffer_list *certs);
+__must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(
+    struct Voucher *voucher, const struct VoucherBinaryArray *cert,
+    const struct VoucherBinaryArray *key, const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS with a RSA private key
@@ -506,13 +507,12 @@ __must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(struct Vo
  * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return struct VoucherBinaryArray* the signed CMS structure in binary (DER format), NULL on
- * failure
+ * @return struct VoucherBinaryArray* the signed CMS structure in binary (DER
+ * format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
-                                      const struct VoucherBinaryArray *cert,
-                                      const struct VoucherBinaryArray *key,
-                                      const struct buffer_list *certs);
+__must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(
+    struct Voucher *voucher, const struct VoucherBinaryArray *cert,
+    const struct VoucherBinaryArray *key, const struct buffer_list *certs);
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
@@ -526,17 +526,17 @@ __must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(struct V
  * @param[in] key The private key buffer (DER format) of the certificate
  * @param[in] certs The list of additional certificate buffers (DER format) to
  * be included in the CMS (NULL if none)
- * @return struct VoucherBinaryArray* the signed CMS structure as binary array (DER format), NULL on
- * failure
+ * @return struct VoucherBinaryArray* the signed CMS structure as binary array
+ * (DER format), NULL on failure
  */
-__must_free_binary_array struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
-                                   const struct VoucherBinaryArray *cert,
-                                   const struct VoucherBinaryArray *key,
-                                   const struct buffer_list *certs);
+__must_free_binary_array struct VoucherBinaryArray *
+sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
+                 const struct VoucherBinaryArray *key,
+                 const struct buffer_list *certs);
 
 /**
- * @brief Verifies a CMS binary buffer and extracts the voucher structure, and the list of
- * included certificates
+ * @brief Verifies a CMS binary buffer and extracts the voucher structure, and
+ * the list of included certificates
  *
  * Caller is responsible for freeing the voucher and output certs buffer
  *
@@ -547,9 +547,172 @@ __must_free_binary_array struct VoucherBinaryArray *sign_cms_voucher(struct Vouc
  * structure
  * @return struct Voucher * the verified voucher, NULL on failure
  */
-__must_free_voucher struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
-                                   const struct buffer_list *certs,
-                                   const struct buffer_list *store,
-                                   struct buffer_list **out_certs);
+__must_free_voucher struct Voucher *verify_cms_voucher(
+    const struct VoucherBinaryArray *cms, const struct buffer_list *certs,
+    const struct buffer_list *store, struct buffer_list **out_certs);
 
+/**
+ * @brief Signs a pledge-voucher request using CMS with a private key (type
+ * detected automatically) and output as a binary array (DER format)
+ *
+ * Caller is responsible for freeing the output binary array
+ *
+ * @param[in] created_on Time when the pledge is created
+ * @param[in] serial_number The serial number string of the pledge
+ * @param[in] nonce Random/pseudo-random nonce (NULL for empty)
+ * @param[in] registrar_tls_cert The first certificate in the TLS server
+ * "certificate_list" sequence presented by the registrar to the pledge (DER
+ * format)
+ * @param[in] pledge_sign_cert The certificate buffer (DER format) corresponding
+ * to the signing private key
+ * @param[in] pledge_sign_key The private key buffer (DER format) for signing
+ * the pledge-voucher request
+ * @param[in] additional_pledge_certs The list of additional pledge certificates
+ * (DER format) to append to CMS (NULL for empty)
+ * @return struct VoucherBinaryArray* the signed pledge-voucher CMS structure as
+ * binary array (DER format), NULL on failure
+ */
+__must_free_binary_array struct VoucherBinaryArray *
+sign_pledge_voucher_request(const struct tm *created_on,
+                            const char *serial_number,
+                            const struct VoucherBinaryArray *nonce,
+                            const struct VoucherBinaryArray *registrar_tls_cert,
+                            const struct VoucherBinaryArray *pledge_sign_cert,
+                            const struct VoucherBinaryArray *pledge_sign_key,
+                            const struct buffer_list *additional_pledge_certs);
+
+/**
+ * @brief Signs a voucher request using CMS with a private key (type detected
+ * automatically) and output to base64 (PEM format)
+ *
+ * Caller is responsible for freeing the output binary array
+ *
+ * @param[in] pledge_voucher_request_cms The signed pledge-voucher request CMS
+ * structure as binary array (DER format)
+ * @param[in] created_on Time when the voucher request is created
+ * @param[in] serial_number The serial number string from the idevid certificate
+ * @param[in] idevid_issuer The idevid issuer from the idevid certificate
+ * @param[in] registrar_tls_cert The first certificate in the TLS server
+ * "certificate_list" sequence presented by the registrar to the pledge (DER
+ * format)
+ * @param[in] registrar_sign_cert The certificate buffer (
+ * DER format) corresponding to the signing private key
+ * @param[in] registrar_sign_key The private key buffer (DER format) for signing
+ * the voucher request
+ * @param[in] pledge_verify_certs The list of intermediate certificate buffers
+ * (DER format) to verify the pledge-voucher request (NULL for empty)
+ * @param[in] pledge_verify_store The list of trusted certificate buffers (DER
+ * format) to verify the pledge-voucher request (NULL for empty)
+ * @param[in] additional_registrar_certs The list of additional registrar
+ * certificate buffers (DER format) to append to CMS (NULL for empty)
+ * @return struct VoucherBinaryArray* the signed CMS structure as binary array
+ * (DER format), NULL on failure
+ */
+__must_free_binary_array struct VoucherBinaryArray *sign_voucher_request(
+    const struct VoucherBinaryArray *pledge_voucher_request_cms,
+    const struct tm *created_on, const char *serial_number,
+    const struct VoucherBinaryArray *idevid_issuer,
+    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct VoucherBinaryArray *registrar_sign_cert,
+    const struct VoucherBinaryArray *registrar_sign_key,
+    const struct buffer_list *pledge_verify_certs,
+    const struct buffer_list *pledge_verify_store,
+    const struct buffer_list *additional_registrar_certs);
+
+/**
+ * @brief Callback function definition to find a pledge serial number in a
+ * user defined database and a output a pinned domain certificate (DER format).
+ *
+ * Caller is responsible for freeing output pinned domain certificate
+ *
+ * @param[in] serial_number The serial number string from the idevid certificate
+ * @param[in] additional_registrar_certs The list of additional registrar
+ * certificates (DER format) appended to the voucher request CMS
+ * @param[in] user_ctx The callback function user context
+ * @param[out] voucher_req_fn The output pinned domain certificate (DER
+ * format) for the pledge
+ * @return 0 on success, -1 on failure
+ */
+typedef int (*voucher_req_fn)(
+    const char *serial_number,
+    const struct buffer_list *additional_registrar_certs, const void *user_ctx,
+    struct VoucherBinaryArray *pinned_domain_cert);
+
+/**
+ * @brief Signs a MASA voucher request using CMS with a private key
+ * (type detected automatically) and output as binary array (DER format)
+ *
+ * Caller is responsible for freeing the output binary array
+ *
+ * @param[in] voucher_request_cms The signed pledge voucher request CMS
+ * structure as binary array (DER format)
+ * @param[in] expires_on Time when the new voucher will expire
+ * @param[in] voucher_req_fn The callback function to output pinned domain
+ * certificate (DER format)
+ * @param[in] user_ctx The callback function user context (NULL for empty)
+ * @param[in] masa_sign_cert The certificate buffer (DER format) corresponding
+ * to the signing private key
+ * @param[in] masa_sign_key The private key buffer (DER format) for signing the
+ * MASA voucher request
+ * @param[in] registrar_verify_certs The list of intermediate certificate
+ * buffers (DER format) to verify the voucher request from registrar (NULL for
+ * empty)
+ * @param[in] registrar_verify_store The list of trusted certificate buffers
+ * (DER format) to verify the voucher request from registrar (NULL for empty)
+ * @param[in] pledge_verify_certs The list of intermediate certificate buffers
+ * (DER format) to verify the pledge-voucher request (NULL for empty)
+ * @param[in] pledge_verify_store The list of trusted certificate buffers (DER
+ * format) to verify the pledge-voucher request (NULL for empty)
+ * @param[in] additional_masa_certs The list of additional MASA
+ * certificate buffers (DER format) to append to CMS (NULL for empty)
+ * @return struct VoucherBinaryArray* the signed CMS structure as binary array
+ * (DER format), NULL on failure
+ */
+__must_free_binary_array struct VoucherBinaryArray *
+sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
+                         const struct tm *expires_on, const voucher_req_fn cb,
+                         const void *user_ctx,
+                         const struct VoucherBinaryArray *masa_sign_cert,
+                         const struct VoucherBinaryArray *masa_sign_key,
+                         const struct buffer_list *registrar_verify_certs,
+                         const struct buffer_list *registrar_verify_store,
+                         const struct buffer_list *pledge_verify_certs,
+                         const struct buffer_list *pledge_verify_store,
+                         const struct buffer_list *additional_masa_certs);
+
+/**
+ * @brief Verifies a MASA pledge voucher and outputs a pinned domain certificate
+ * (DER format)
+ *
+ * Caller is reponsible for freeing the output certificate list
+ *
+ * @param[in] masa_pledge_voucher_cms The signed MASA pledge voucher CMS
+ * structure as binarry (DER format)
+ * @param[in] serial_number The serial number string from the idevid certificate
+ * @param[in] nonce Random/pseudo-random nonce from the pledge voucher request
+ * (NULL for empty)
+ * @param[in] registrar_tls_cert The first certificate in the TLS server
+ * "certificate_list" sequence presented by the registrar to the pledge (DER
+ * format)
+ * @param[in] domain_store The list of trusted certificate buffers (DER
+ * format) to verify the pinned domain certificate (NULL for empty)
+ * @param[in] pledge_verify_certs The list of intermediate certificate buffers
+ * (DER format) to verify the MASA pledge voucher (NULL for empty)
+ * @param[in] pledge_verify_store The list of trusted certificate buffers
+ * (DER format) to verify the MASA pledge voucher (NULL for empty)
+ * @param[out] pledge_out_certs The list of output certificate buffers (NULL for
+ * empty) from the MASA pledge CMS structure
+ * @param[out] pinned_domain_cert The output pinned domain certificate buffer
+ * (DER format)
+ * @return 0 on success, -1 on failure
+ */
+int verify_masa_pledge_voucher(
+    const struct VoucherBinaryArray *masa_pledge_voucher_cms,
+    const char *serial_number, const struct VoucherBinaryArray *nonce,
+    const struct VoucherBinaryArray *registrar_tls_cert,
+    const struct buffer_list *domain_store,
+    const struct buffer_list *pledge_verify_certs,
+    const struct buffer_list *pledge_verify_store,
+    struct buffer_list **pledge_out_certs,
+    struct VoucherBinaryArray *const pinned_domain_cert);
 #endif

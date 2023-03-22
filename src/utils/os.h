@@ -126,7 +126,8 @@ void *sys_zalloc(const size_t size);
  * @return void* the pointer to the beginning of newly allocated memory array,
  * NULL on failure.
  */
-__must_sys_free void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size);
+__must_sys_free void *sys_realloc_array(void *ptr, const size_t nmemb,
+                                        const size_t size);
 
 /**
  * @brief Allocate duplicate of passed memory chunk

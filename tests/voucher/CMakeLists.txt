@@ -17,8 +17,8 @@ add_cmocka_test(test_serialize
   LINK_LIBRARIES serialize log cmocka::cmocka
 )
 
-add_cmocka_test(test_voucher_request
-  SOURCES test_voucher_request.c
+add_cmocka_test(test_request
+  SOURCES test_request.c
   LINK_LIBRARIES voucher serialize log cmocka::cmocka
 )
 

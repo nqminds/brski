@@ -18,7 +18,7 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/voucher_crypto.h"
+#include "voucher/crypto.h"
 #include "voucher/voucher.h"
 #include "voucher/voucher_defs.h"
 
@@ -269,7 +269,8 @@ static void test_serialize_voucher(void **state) {
   free_voucher(voucher);
 }
 
-__attribute__((no_sanitize_address)) static void test_deserialize_voucher(void **state) {
+__attribute__((no_sanitize_address)) static void
+test_deserialize_voucher(void **state) {
   (void)state;
 
   struct tm tm_null = {.tm_year = 0,
@@ -692,7 +693,8 @@ static void test_sign_cms_voucher(void **state) {
 
   sys_free(key_in_list);
 
-  struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  struct VoucherBinaryArray *signed_voucher =
+      sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
   free_binary_array(signed_voucher);
 
@@ -806,10 +808,12 @@ static void test_verify_cms_voucher(void **state) {
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
 
-  struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  struct VoucherBinaryArray *signed_voucher =
+      sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
 
-  struct Voucher *decoded_voucher = verify_cms_voucher(signed_voucher, NULL, NULL, NULL);
+  struct Voucher *decoded_voucher =
+      verify_cms_voucher(signed_voucher, NULL, NULL, NULL);
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
@@ -858,8 +862,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_get_attr_str_voucher),
       cmocka_unit_test(test_get_attr_array_voucher),
       cmocka_unit_test(test_sign_cms_voucher),
-      cmocka_unit_test(test_verify_cms_voucher)
-  };
+      cmocka_unit_test(test_verify_cms_voucher)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }
