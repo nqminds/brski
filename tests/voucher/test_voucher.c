@@ -660,7 +660,7 @@ static void test_sign_cms_voucher(void **state) {
 
   set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
 
-  struct buffer_list *certs = init_buffer_list();
+  struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
@@ -689,7 +689,7 @@ static void test_sign_cms_voucher(void **state) {
   ssize_t cert_in_list_length = crypto_generate_eccert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
+  push_array_list(certs, cert_in_list, cert_in_list_length, 0);
 
   sys_free(key_in_list);
 
@@ -703,7 +703,7 @@ static void test_sign_cms_voucher(void **state) {
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
-  free_buffer_list(certs);
+  free_array_list(certs);
 
   key.length = crypto_generate_rsakey(2048, &key.array);
   assert_non_null(key.array);
@@ -715,8 +715,8 @@ static void test_sign_cms_voucher(void **state) {
   cert_in_list_length = crypto_generate_rsacert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  certs = init_buffer_list();
-  push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
+  certs = init_array_list();
+  push_array_list(certs, cert_in_list, cert_in_list_length, 0);
 
   sys_free(key_in_list);
 
@@ -729,7 +729,7 @@ static void test_sign_cms_voucher(void **state) {
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
-  free_buffer_list(certs);
+  free_array_list(certs);
 
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
@@ -737,8 +737,8 @@ static void test_sign_cms_voucher(void **state) {
   free_voucher(voucher);
 }
 
-struct buffer_list *create_cert_list(void) {
-  struct buffer_list *certs = init_buffer_list();
+struct BinaryArrayList *create_cert_list(void) {
+  struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 123456789,
@@ -762,7 +762,7 @@ struct buffer_list *create_cert_list(void) {
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_non_null(cert);
 
-  push_buffer_list(certs, cert, cert_length, 0);
+  push_array_list(certs, cert, cert_length, 0);
 
   sys_free(key);
   free_keyvalue_list(meta.issuer);
@@ -786,7 +786,7 @@ static void test_verify_cms_voucher(void **state) {
 
   set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
 
-  struct buffer_list *certs = create_cert_list();
+  struct BinaryArrayList *certs = create_cert_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
@@ -833,7 +833,7 @@ static void test_verify_cms_voucher(void **state) {
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
-  free_buffer_list(certs);
+  free_array_list(certs);
 
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);

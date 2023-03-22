@@ -27,11 +27,11 @@ static struct VoucherBinaryArray test_pinned_domain_key = {};
 static struct VoucherBinaryArray test_pinned_domain_cert = {};
 static struct VoucherBinaryArray test_ca_key = {};
 static struct VoucherBinaryArray test_ca_cert = {};
-static struct buffer_list *test_domain_store = NULL;
-static struct buffer_list *test_pinned_domain_certs = NULL;
+static struct BinaryArrayList *test_domain_store = NULL;
+static struct BinaryArrayList *test_pinned_domain_certs = NULL;
 
-struct buffer_list *create_cert_list(void) {
-  struct buffer_list *certs = init_buffer_list();
+struct BinaryArrayList *create_cert_list(void) {
+  struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 123456789,
@@ -56,7 +56,7 @@ struct buffer_list *create_cert_list(void) {
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_non_null(cert);
 
-  push_buffer_list(certs, cert, cert_length, 0);
+  push_array_list(certs, cert, cert_length, 0);
 
   sys_free(key);
 
@@ -99,7 +99,7 @@ create_pledge_voucher_request(char *serial_number,
                           .tm_min = 33,
                           .tm_sec = 9};
 
-  struct buffer_list *certs = create_cert_list();
+  struct BinaryArrayList *certs = create_cert_list();
 
   struct crypto_cert_meta pledge_sign_meta = create_cert_meta();
   struct VoucherBinaryArray pledge_sign_key = {};
@@ -118,7 +118,7 @@ create_pledge_voucher_request(char *serial_number,
   free_binary_array_content(&pledge_sign_cert);
   free_keyvalue_list(pledge_sign_meta.issuer);
   free_keyvalue_list(pledge_sign_meta.subject);
-  free_buffer_list(certs);
+  free_array_list(certs);
   return cms;
 }
 static void test_sign_pledge_voucher_request(void **state) {
@@ -327,7 +327,7 @@ struct VoucherBinaryArray *faulty_create_voucher_request(
 }
 
 int voucher_req_fun(const char *serial_number,
-                    const struct buffer_list *additional_registrar_certs,
+                    const struct BinaryArrayList *additional_registrar_certs,
                     const void *user_ctx,
                     struct VoucherBinaryArray *pinned_domain_cert) {
   (void)serial_number;
@@ -633,8 +633,8 @@ static int test_group_setup(void **state) {
   assert_non_null(test_pinned_domain_cert.array);
   test_pinned_domain_cert.length = signed_pinned_domain_cert_length;
 
-  test_domain_store = init_buffer_list();
-  push_buffer_list(test_domain_store, test_ca_cert.array, test_ca_cert.length,
+  test_domain_store = init_array_list();
+  push_array_list(test_domain_store, test_ca_cert.array, test_ca_cert.length,
                    0);
 
   int verified = crypto_verify_cert(test_pinned_domain_cert.array,
@@ -642,8 +642,8 @@ static int test_group_setup(void **state) {
                                     test_domain_store, NULL);
   assert_int_equal(verified, 0);
 
-  test_pinned_domain_certs = init_buffer_list();
-  push_buffer_list(test_pinned_domain_certs, test_pinned_domain_cert.array,
+  test_pinned_domain_certs = init_array_list();
+  push_array_list(test_pinned_domain_certs, test_pinned_domain_cert.array,
                    test_pinned_domain_cert.length, 0);
 
   free_keyvalue_list(pinned_domain_meta.issuer);
@@ -659,8 +659,8 @@ static int test_group_teardown(void **state) {
 
   free_binary_array_content(&test_pinned_domain_key);
   free_binary_array_content(&test_ca_key);
-  free_buffer_list(test_pinned_domain_certs);
-  free_buffer_list(test_domain_store);
+  free_array_list(test_pinned_domain_certs);
+  free_array_list(test_domain_store);
   return 0;
 }
 

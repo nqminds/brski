@@ -447,7 +447,7 @@ __must_free_voucher struct Voucher *deserialize_voucher(const uint8_t *json,
  */
 __must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(
     struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct buffer_list *certs);
+    const struct VoucherBinaryArray *key, const struct BinaryArrayList *certs);
 
 /**
  * @brief Signs a voucher using CMS with a RSA private key
@@ -466,7 +466,7 @@ __must_free_binary_array struct VoucherBinaryArray *sign_eccms_voucher(
  */
 __must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(
     struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct buffer_list *certs);
+    const struct VoucherBinaryArray *key, const struct BinaryArrayList *certs);
 
 /**
  * @brief Signs a voucher using CMS with a private key (detected automatically)
@@ -486,7 +486,7 @@ __must_free_binary_array struct VoucherBinaryArray *sign_rsacms_voucher(
 __must_free_binary_array struct VoucherBinaryArray *
 sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
                  const struct VoucherBinaryArray *key,
-                 const struct buffer_list *certs);
+                 const struct BinaryArrayList *certs);
 
 /**
  * @brief Verifies a CMS binary buffer and extracts the voucher structure, and
@@ -502,8 +502,8 @@ sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
  * @return struct Voucher * the verified voucher, NULL on failure
  */
 __must_free_voucher struct Voucher *verify_cms_voucher(
-    const struct VoucherBinaryArray *cms, const struct buffer_list *certs,
-    const struct buffer_list *store, struct buffer_list **out_certs);
+    const struct VoucherBinaryArray *cms, const struct BinaryArrayList *certs,
+    const struct BinaryArrayList *store, struct BinaryArrayList **out_certs);
 
 /**
  * @brief Signs a pledge-voucher request using CMS with a private key (type
@@ -533,7 +533,7 @@ sign_pledge_voucher_request(const struct tm *created_on,
                             const struct VoucherBinaryArray *registrar_tls_cert,
                             const struct VoucherBinaryArray *pledge_sign_cert,
                             const struct VoucherBinaryArray *pledge_sign_key,
-                            const struct buffer_list *additional_pledge_certs);
+                            const struct BinaryArrayList *additional_pledge_certs);
 
 /**
  * @brief Signs a voucher request using CMS with a private key (type detected
@@ -569,9 +569,9 @@ __must_free_binary_array struct VoucherBinaryArray *sign_voucher_request(
     const struct VoucherBinaryArray *registrar_tls_cert,
     const struct VoucherBinaryArray *registrar_sign_cert,
     const struct VoucherBinaryArray *registrar_sign_key,
-    const struct buffer_list *pledge_verify_certs,
-    const struct buffer_list *pledge_verify_store,
-    const struct buffer_list *additional_registrar_certs);
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    const struct BinaryArrayList *additional_registrar_certs);
 
 /**
  * @brief Callback function definition to find a pledge serial number in a
@@ -589,7 +589,7 @@ __must_free_binary_array struct VoucherBinaryArray *sign_voucher_request(
  */
 typedef int (*voucher_req_fn)(
     const char *serial_number,
-    const struct buffer_list *additional_registrar_certs, const void *user_ctx,
+    const struct BinaryArrayList *additional_registrar_certs, const void *user_ctx,
     struct VoucherBinaryArray *pinned_domain_cert);
 
 /**
@@ -628,11 +628,11 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
                          const void *user_ctx,
                          const struct VoucherBinaryArray *masa_sign_cert,
                          const struct VoucherBinaryArray *masa_sign_key,
-                         const struct buffer_list *registrar_verify_certs,
-                         const struct buffer_list *registrar_verify_store,
-                         const struct buffer_list *pledge_verify_certs,
-                         const struct buffer_list *pledge_verify_store,
-                         const struct buffer_list *additional_masa_certs);
+                         const struct BinaryArrayList *registrar_verify_certs,
+                         const struct BinaryArrayList *registrar_verify_store,
+                         const struct BinaryArrayList *pledge_verify_certs,
+                         const struct BinaryArrayList *pledge_verify_store,
+                         const struct BinaryArrayList *additional_masa_certs);
 
 /**
  * @brief Verifies a MASA pledge voucher and outputs a pinned domain certificate
@@ -664,9 +664,9 @@ int verify_masa_pledge_voucher(
     const struct VoucherBinaryArray *masa_pledge_voucher_cms,
     const char *serial_number, const struct VoucherBinaryArray *nonce,
     const struct VoucherBinaryArray *registrar_tls_cert,
-    const struct buffer_list *domain_store,
-    const struct buffer_list *pledge_verify_certs,
-    const struct buffer_list *pledge_verify_store,
-    struct buffer_list **pledge_out_certs,
+    const struct BinaryArrayList *domain_store,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    struct BinaryArrayList **pledge_out_certs,
     struct VoucherBinaryArray *const pinned_domain_cert);
 #endif

@@ -872,7 +872,7 @@ deserialize_voucher_fail:
 
 struct VoucherBinaryArray *sign_eccms_voucher(
     struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct buffer_list *certs) {
+    const struct VoucherBinaryArray *key, const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -923,7 +923,7 @@ struct VoucherBinaryArray *sign_eccms_voucher(
 
 struct VoucherBinaryArray *sign_rsacms_voucher(
     struct Voucher *voucher, const struct VoucherBinaryArray *cert,
-    const struct VoucherBinaryArray *key, const struct buffer_list *certs) {
+    const struct VoucherBinaryArray *key, const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -974,7 +974,7 @@ struct VoucherBinaryArray *sign_rsacms_voucher(
 __must_sys_free struct VoucherBinaryArray *
 sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
                  const struct VoucherBinaryArray *key,
-                 const struct buffer_list *certs) {
+                 const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -1023,9 +1023,9 @@ sign_cms_voucher(struct Voucher *voucher, const struct VoucherBinaryArray *cert,
 }
 
 struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
-                                   const struct buffer_list *certs,
-                                   const struct buffer_list *store,
-                                   struct buffer_list **out_certs) {
+                                   const struct BinaryArrayList *certs,
+                                   const struct BinaryArrayList *store,
+                                   struct BinaryArrayList **out_certs) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return NULL;

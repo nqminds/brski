@@ -52,32 +52,32 @@ static void test_push_keyvalue_list(void **state) {
 
 static void test_init_buffer_list(void **state) {
   (void)state;
-  struct buffer_list *ll = init_buffer_list();
+  struct BinaryArrayList *ll = init_array_list();
   assert_non_null(ll);
-  free_buffer_list(ll);
+  free_array_list(ll);
 }
 
 static void test_push_buffer_list(void **state) {
   (void)state;
 
-  struct buffer_list *ll = init_buffer_list();
+  struct BinaryArrayList *ll = init_array_list();
   assert_non_null(ll);
 
   uint8_t buf1[3] = {1, 2, 3};
   uint8_t buf2[4] = {4, 5, 6, 7};
-  assert_int_equal(push_buffer_list(ll, sys_memdup(buf1, 3), 3, 0xAA), 0);
-  assert_int_equal(push_buffer_list(ll, sys_memdup(buf2, 4), 4, 0xBB), 0);
+  assert_int_equal(push_array_list(ll, sys_memdup(buf1, 3), 3, 0xAA), 0);
+  assert_int_equal(push_array_list(ll, sys_memdup(buf2, 4), 4, 0xBB), 0);
 
-  struct buffer_list *item =
-      dl_list_entry((&ll->list)->next, struct buffer_list, list);
+  struct BinaryArrayList *item =
+      dl_list_entry((&ll->list)->next, struct BinaryArrayList, list);
   assert_int_equal(item->length, 3);
-  assert_memory_equal(item->buf, buf1, 3);
+  assert_memory_equal(item->arr, buf1, 3);
   assert_int_equal(item->flags, 0xAA);
-  item = dl_list_entry(item->list.next, struct buffer_list, list);
+  item = dl_list_entry(item->list.next, struct BinaryArrayList, list);
   assert_int_equal(item->length, 4);
-  assert_memory_equal(item->buf, buf2, 4);
+  assert_memory_equal(item->arr, buf2, 4);
   assert_int_equal(item->flags, 0xBB);
-  free_buffer_list(ll);
+  free_array_list(ll);
 }
 
 void ptr_free_fun(void *ptr, const int flag) {

@@ -197,8 +197,8 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
  * @return int 0 if certificate is signed by the certs/store, -1 on failure
  */
 int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
-                       const struct buffer_list *certs,
-                       const struct buffer_list *store);
+                       const struct BinaryArrayList *certs,
+                       const struct BinaryArrayList *store);
 /**
  * @brief Signs a buffer using CMS for an Elliptic Curve private key (DER format)
  *
@@ -217,7 +217,7 @@ int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
 ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
                           const uint8_t *cert, const size_t cert_length,
                           const uint8_t *key, const size_t key_length,
-                          const struct buffer_list *certs, uint8_t **cms);
+                          const struct BinaryArrayList *certs, uint8_t **cms);
 
 /**
  * @brief Signs a buffer using CMS for a private key (DER format).
@@ -238,7 +238,7 @@ ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
 ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
                         const uint8_t *cert, const size_t cert_length,
                         const uint8_t *key, const size_t key_length,
-                        const struct buffer_list *certs, uint8_t **cms);
+                        const struct BinaryArrayList *certs, uint8_t **cms);
 
 /**
  * @brief Signs a buffer using CMS for an RSA private key (DER format)
@@ -258,7 +258,7 @@ ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
 ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
                            const uint8_t *cert, const size_t cert_length,
                            const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs, uint8_t **cms);
+                           const struct BinaryArrayList *certs, uint8_t **cms);
 
 /**
  * @brief Verifies a CMS buffer (DER format) and extract the data
@@ -275,9 +275,9 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
  * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
-                          const struct buffer_list *certs,
-                          const struct buffer_list *store, uint8_t **data,
-                          struct buffer_list **out_certs);
+                          const struct BinaryArrayList *certs,
+                          const struct BinaryArrayList *store, uint8_t **data,
+                          struct BinaryArrayList **out_certs);
 
 void x509_to_tmpfile(const uint8_t *cert, const size_t length,
                      const char *filename);

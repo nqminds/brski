@@ -125,72 +125,6 @@ int push_keyvalue_list(struct keyvalue_list *kv_list, char *const key,
   return 0;
 }
 
-struct buffer_list *init_buffer_list(void) {
-  struct buffer_list *buf_list = NULL;
-
-  if ((buf_list = sys_zalloc(sizeof(struct buffer_list))) == NULL) {
-    log_errno("sys_zalloc");
-    return NULL;
-  }
-
-  dl_list_init(&buf_list->list, (void *)buf_list);
-
-  return buf_list;
-}
-
-static void free_buffer_list_el(struct buffer_list *el) {
-  if (el != NULL) {
-    if (el->buf != NULL) {
-      sys_free(el->buf);
-    }
-    dl_list_del(&el->list);
-    sys_free(el);
-  }
-}
-
-void free_buffer_list(struct buffer_list *buf_list) {
-  struct buffer_list *el;
-
-  if (buf_list == NULL) {
-    return;
-  }
-
-  while ((el = dl_list_first(&buf_list->list, struct buffer_list, list)) !=
-         NULL) {
-    free_buffer_list_el(el);
-  }
-
-  free_buffer_list_el(buf_list);
-}
-
-int push_buffer_list(struct buffer_list *buf_list, uint8_t *const buf,
-                     const size_t length, const int flags) {
-  if (buf_list == NULL) {
-    log_error("buf_list param is empty");
-    return -1;
-  }
-
-  if (buf == NULL) {
-    log_error("buf param is empty");
-    return -1;
-  }
-
-  struct buffer_list *el = sys_zalloc(sizeof(struct buffer_list));
-
-  if (el == NULL) {
-    log_error("init_buffer_list fail");
-    return -1;
-  }
-
-  el->buf = buf;
-  el->length = length;
-  el->flags = flags;
-
-  dl_list_add_tail(&buf_list->list, &el->list, (void *)el);
-
-  return 0;
-}
-
 struct ptr_list *init_ptr_list(void) {
   struct ptr_list *ptr_list = NULL;
 
@@ -250,6 +184,72 @@ int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags) {
   el->flags = flags;
 
   dl_list_add_tail(&ptr_list->list, &el->list, (void *)el);
+
+  return 0;
+}
+
+struct BinaryArrayList *init_array_list(void) {
+  struct BinaryArrayList *arr_list = NULL;
+
+  if ((arr_list = sys_zalloc(sizeof(struct BinaryArrayList))) == NULL) {
+    log_errno("sys_zalloc");
+    return NULL;
+  }
+
+  dl_list_init(&arr_list->list, (void *)arr_list);
+
+  return arr_list;
+}
+
+static void free_array_list_el(struct BinaryArrayList *el) {
+  if (el != NULL) {
+    if (el->arr != NULL) {
+      sys_free(el->arr);
+    }
+    dl_list_del(&el->list);
+    sys_free(el);
+  }
+}
+
+void free_array_list(struct BinaryArrayList *arr_list) {
+  struct BinaryArrayList *el;
+
+  if (arr_list == NULL) {
+    return;
+  }
+
+  while ((el = dl_list_first(&arr_list->list, struct BinaryArrayList, list)) !=
+         NULL) {
+    free_array_list_el(el);
+  }
+
+  free_array_list_el(arr_list);
+}
+
+int push_array_list(struct BinaryArrayList *arr_list, uint8_t *const arr,
+                     const size_t length, const int flags) {
+  if (arr_list == NULL) {
+    log_error("arr_list param is empty");
+    return -1;
+  }
+
+  if (arr == NULL) {
+    log_error("arr param is empty");
+    return -1;
+  }
+
+  struct BinaryArrayList *el = sys_zalloc(sizeof(struct BinaryArrayList));
+
+  if (el == NULL) {
+    log_error("init_array_list fail");
+    return -1;
+  }
+
+  el->arr = arr;
+  el->length = length;
+  el->flags = flags;
+
+  dl_list_add_tail(&arr_list->list, &el->list, (void *)el);
 
   return 0;
 }
