@@ -14,7 +14,7 @@
 #include "../utils/os.h"
 
 #include "crypto.h"
-#include "list.h"
+#include "vutils.h"
 #include "serialize.h"
 #include "voucher.h"
 #include "voucher_defs.h"
@@ -33,7 +33,7 @@ static bool check_size_str_equal(const char *src, const char *dst,
 }
 
 static bool
-check_binary_array_nonempty(const struct VoucherBinaryArray *value) {
+is_attr_array_nonempty(const struct VoucherBinaryArray *value) {
   if (value == NULL) {
     return false;
   }
@@ -43,67 +43,6 @@ check_binary_array_nonempty(const struct VoucherBinaryArray *value) {
   }
 
   return true;
-}
-
-int copy_binary_array(struct VoucherBinaryArray *const dst,
-                      const struct VoucherBinaryArray *src) {
-  if (dst == NULL) {
-    log_error("dst param is NULL");
-    return -1;
-  }
-
-  if (src == NULL) {
-    log_error("src param is NULL");
-    return -1;
-  }
-  dst->length = 0;
-  if ((dst->array = sys_memdup((uint8_t *)src->array, src->length)) == NULL) {
-    log_errno("sys_memdup");
-    return -1;
-  }
-  dst->length = src->length;
-
-  return 0;
-}
-
-int compare_binary_array(const struct VoucherBinaryArray *src,
-                         const struct VoucherBinaryArray *dst) {
-  if (src == NULL) {
-    log_error("src param is NULL");
-    return -1;
-  }
-
-  if (dst == NULL) {
-    log_error("dst param is NULL");
-    return -1;
-  }
-
-  if (dst->length != src->length) {
-    return 0;
-  }
-
-  if (sys_memcmp(dst->array, src->array, src->length) != 0) {
-    return 0;
-  };
-
-  return 1;
-}
-
-void free_binary_array_content(struct VoucherBinaryArray *arr) {
-  if (arr != NULL) {
-    if (arr->array != NULL) {
-      sys_free(arr->array);
-      arr->array = NULL;
-    }
-    arr->length = 0;
-  }
-}
-
-void free_binary_array(struct VoucherBinaryArray *arr) {
-  if (arr != NULL) {
-    free_binary_array_content(arr);
-    sys_free(arr);
-  }
 }
 
 void free_voucher(struct Voucher *voucher) {
@@ -285,7 +224,7 @@ int set_attr_array_voucher(struct Voucher *voucher,
     return -1;
   }
 
-  if (!check_binary_array_nonempty(value)) {
+  if (!is_attr_array_nonempty(value)) {
     log_error("value is empty");
     return -1;
   }
@@ -422,16 +361,16 @@ bool is_attr_voucher_nonempty(const struct Voucher *voucher,
     case ATTR_SERIAL_NUMBER:
       return (voucher->serial_number != NULL);
     case ATTR_IDEVID_ISSUER:
-      return check_binary_array_nonempty(&voucher->idevid_issuer);
+      return is_attr_array_nonempty(&voucher->idevid_issuer);
     case ATTR_PINNED_DOMAIN_CERT:
-      return check_binary_array_nonempty(&voucher->pinned_domain_cert);
+      return is_attr_array_nonempty(&voucher->pinned_domain_cert);
     case ATTR_NONCE:
-      return check_binary_array_nonempty(&voucher->nonce);
+      return is_attr_array_nonempty(&voucher->nonce);
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      return check_binary_array_nonempty(
+      return is_attr_array_nonempty(
           &voucher->prior_signed_voucher_request);
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      return check_binary_array_nonempty(&voucher->proximity_registrar_cert);
+      return is_attr_array_nonempty(&voucher->proximity_registrar_cert);
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
       return true;
     default:

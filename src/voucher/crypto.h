@@ -14,7 +14,7 @@
 #include <stdint.h>
 #include <sys/types.h>
 
-#include "list.h"
+#include "vutils.h"
 
 /* The generalized context for a private key */
 typedef void *CRYPTO_KEY;

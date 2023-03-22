@@ -14,7 +14,7 @@
 
 #include "../utils/os.h"
 
-#include "list.h"
+#include "vutils.h"
 
 static void dl_list_init(struct dl_list *list, void *el) {
   list->next = list;
@@ -253,3 +253,65 @@ int push_ptr_list(struct ptr_list *ptr_list, void *const ptr, const int flags) {
 
   return 0;
 }
+
+int copy_binary_array(struct VoucherBinaryArray *const dst,
+                      const struct VoucherBinaryArray *src) {
+  if (dst == NULL) {
+    log_error("dst param is NULL");
+    return -1;
+  }
+
+  if (src == NULL) {
+    log_error("src param is NULL");
+    return -1;
+  }
+  dst->length = 0;
+  if ((dst->array = sys_memdup((uint8_t *)src->array, src->length)) == NULL) {
+    log_errno("sys_memdup");
+    return -1;
+  }
+  dst->length = src->length;
+
+  return 0;
+}
+
+int compare_binary_array(const struct VoucherBinaryArray *src,
+                         const struct VoucherBinaryArray *dst) {
+  if (src == NULL) {
+    log_error("src param is NULL");
+    return -1;
+  }
+
+  if (dst == NULL) {
+    log_error("dst param is NULL");
+    return -1;
+  }
+
+  if (dst->length != src->length) {
+    return 0;
+  }
+
+  if (sys_memcmp(dst->array, src->array, src->length) != 0) {
+    return 0;
+  };
+
+  return 1;
+}
+
+void free_binary_array_content(struct VoucherBinaryArray *arr) {
+  if (arr != NULL) {
+    if (arr->array != NULL) {
+      sys_free(arr->array);
+      arr->array = NULL;
+    }
+    arr->length = 0;
+  }
+}
+
+void free_binary_array(struct VoucherBinaryArray *arr) {
+  if (arr != NULL) {
+    free_binary_array_content(arr);
+    sys_free(arr);
+  }
+}
+

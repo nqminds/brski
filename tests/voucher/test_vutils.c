@@ -19,7 +19,7 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/list.h"
+#include "voucher/vutils.h"
 
 static void test_init_keyvalue_list(void **state) {
   (void)state;
