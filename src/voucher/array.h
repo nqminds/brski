@@ -31,12 +31,41 @@ struct dl_list {
   void *el;
 };
 
-void dl_list_init(struct dl_list *list, void *el);
-void dl_list_add(struct dl_list *list, struct dl_list *item, void *el);
-void dl_list_add_tail(struct dl_list *list, struct dl_list *item, void *el);
-void dl_list_del(struct dl_list *item);
-int dl_list_empty(const struct dl_list *list);
-unsigned int dl_list_len(const struct dl_list *list);
+static inline void dl_list_add(struct dl_list *list, struct dl_list *item, void *element) {
+  item->next = list->next;
+  item->prev = list;
+  list->next->prev = item;
+  list->next = item;
+  list->next->el = element;
+}
+
+static inline void dl_list_add_tail(struct dl_list *list,
+                                    struct dl_list *item, void *element) {
+  dl_list_add(list->prev, item, element);
+}
+
+static inline unsigned int dl_list_len(const struct dl_list *list) {
+  struct dl_list *item;
+  int count = 0;
+  for (item = list->next; item != list; item = item->next)
+    count++;
+  return count;
+}
+
+#define dl_list_init(list, element) do { \
+  (list)->next = list;                   \
+  (list)->prev = list;                   \
+  (list)->el = element;                  \
+} while(0)
+
+#define dl_list_del(item) do {                \
+  (item)->next->prev = (item)->prev;          \
+  (item)->prev->next = (item)->next;          \
+  (item)->next = NULL;                        \
+  (item)->prev = NULL;                        \
+} while(0)
+
+#define dl_list_empty(list) ((list)->next == list)
 
 #define dl_list_entry(item, type, member) ((type *)((void *)item->el))
 

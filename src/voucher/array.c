@@ -16,41 +16,6 @@
 
 #include "array.h"
 
-void dl_list_init(struct dl_list *list, void *el) {
-  list->next = list;
-  list->prev = list;
-  list->el = el;
-}
-
-void dl_list_add(struct dl_list *list, struct dl_list *item, void *el) {
-  item->next = list->next;
-  item->prev = list;
-  list->next->prev = item;
-  list->next = item;
-  list->next->el = el;
-}
-
-void dl_list_add_tail(struct dl_list *list, struct dl_list *item, void *el) {
-  dl_list_add(list->prev, item, el);
-}
-
-void dl_list_del(struct dl_list *item) {
-  item->next->prev = item->prev;
-  item->prev->next = item->next;
-  item->next = NULL;
-  item->prev = NULL;
-}
-
-int dl_list_empty(const struct dl_list *list) { return list->next == list; }
-
-unsigned int dl_list_len(const struct dl_list *list) {
-  struct dl_list *item;
-  int count = 0;
-  for (item = list->next; item != list; item = item->next)
-    count++;
-  return count;
-}
-
 struct BinaryArrayList *init_array_list(void) {
   struct BinaryArrayList *arr_list = NULL;
 
@@ -59,7 +24,7 @@ struct BinaryArrayList *init_array_list(void) {
     return NULL;
   }
 
-  dl_list_init(&arr_list->list, (void *)arr_list);
+  dl_list_init(&arr_list->list, (void*)arr_list);
 
   return arr_list;
 }
