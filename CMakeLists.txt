@@ -63,6 +63,7 @@ set(
   "$ORIGIN" "$ORIGIN/lib" "${BRSKI_full_private_lib_dir}"
   "$ORIGIN/${BRSKI_relative_private_lib_dir}"
 )
+
 option(BUILD_CMOCKA_LIB "Build cmocka lib" ON)
 option(BUILD_ONLY_DOCS "Build only docs" OFF)
 option(BUILD_OPENSSL3_LIB "Build OpenSSL 3" OFF)

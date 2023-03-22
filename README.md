@@ -61,7 +61,7 @@ After succesful compilation the binary will be located in `./build/src` folder.
 
 ## Running
 
-To run the `BRSKI` Registrar and MASA example tools with the configuration file `dev-config.ini` located in `./build` folder use:
+To run the `BRSKI` binary with the configuration file `dev-config.ini` located in `./build` folder use:
 
 ```bash
 ./build/src/brski -c ./build/dev-config.ini
@@ -73,6 +73,28 @@ To enable verbose debug mode use:
 ./build/src/brski -c ./build/dev-config.ini -ddddd
 ```
 
+## Installing
+
+To install the library and the BRSKI binary, and config use:
+```bash
+cmake --build --preset linux --target install
+```
+
+To install in a custom folder one needs to set the install prefix before running the above command with:
+```bash
+cmake -DCMAKE_INSTALL_PREFIX:PATH=/custom_folder_path --preset linux
+```
+
+The cmake installs the following artifacts:
+- `.../bin/brski`
+- `.../lib/libvoucher.a`
+- `.../include/voucher/list.h`
+- `.../include/voucher/voucher_crypto.h`
+- `.../include/voucher/voucher_request.h`
+- `.../include/voucher/voucher.h`
+- `.../etc/brski/config.ini`
+
+alexandru@alexandru12th:~/projects/brski$ 
 ## Testing
 
 To compile the tests use:
