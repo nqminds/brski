@@ -53,7 +53,7 @@ __must_free_binary_array struct BinaryArray * sign_pledge_voucher_request(const 
                             const struct BinaryArray *registrar_tls_cert,
                             const struct BinaryArray *pledge_sign_cert,
                             const struct BinaryArray *pledge_sign_key,
-                            const struct buffer_list *additional_pledge_certs);
+                            const struct BinaryArrayList *additional_pledge_certs);
 ```
 **Parameters**:
 * `created_on` - Time when the pledge is created,
@@ -76,9 +76,9 @@ __must_free_binary_array struct BinaryArray * sign_voucher_request(const struct 
                      const struct BinaryArray *registrar_tls_cert,
                      const struct BinaryArray *registrar_sign_cert,
                      const struct BinaryArray *registrar_sign_key,
-                     const struct buffer_list *pledge_verify_certs,
-                     const struct buffer_list *pledge_verify_store,
-                     const struct buffer_list *additional_registrar_certs);
+                     const struct BinaryArrayList *pledge_verify_certs,
+                     const struct BinaryArrayList *pledge_verify_store,
+                     const struct BinaryArrayList *additional_registrar_certs);
 ```
 **Parameters**:
 * `pledge_voucher_request_cms` - The signed pledge-voucher request CMS structure as binary array (`DER` format),
@@ -100,7 +100,7 @@ Callback function definition to find a pledge serial number in a user defined da
 ```c
 typedef int (*voucher_req_fn)(
     const char *serial_number,
-    const struct buffer_list *additional_registrar_certs, const void *user_ctx,
+    const struct BinaryArrayList *additional_registrar_certs, const void *user_ctx,
     struct BinaryArray *pinned_domain_cert);
 ```
 
@@ -121,11 +121,11 @@ __must_free_binary_array struct BinaryArray *sign_masa_pledge_voucher(const stru
                          const void *user_ctx,
                          const struct BinaryArray *masa_sign_cert,
                          const struct BinaryArray *masa_sign_key,
-                         const struct buffer_list *registrar_verify_certs,
-                         const struct buffer_list *registrar_verify_store,
-                         const struct buffer_list *pledge_verify_certs,
-                         const struct buffer_list *pledge_verify_store,
-                         const struct buffer_list *additional_masa_certs);
+                         const struct BinaryArrayList *registrar_verify_certs,
+                         const struct BinaryArrayList *registrar_verify_store,
+                         const struct BinaryArrayList *pledge_verify_certs,
+                         const struct BinaryArrayList *pledge_verify_store,
+                         const struct BinaryArrayList *additional_masa_certs);
 ```
 **Parameters**:
 * `voucher_request_cms` - The signed pledge voucher request CMS structure as binary array (`DER` format),
@@ -150,10 +150,10 @@ int verify_masa_pledge_voucher(
     const struct BinaryArray *masa_pledge_voucher_cms, const char *serial_number,
     const struct BinaryArray *nonce,
     const struct BinaryArray *registrar_tls_cert,
-    const struct buffer_list *domain_store,
-    const struct buffer_list *pledge_verify_certs,
-    const struct buffer_list *pledge_verify_store,
-    struct buffer_list **pledge_out_certs,
+    const struct BinaryArrayList *domain_store,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    struct BinaryArrayList **pledge_out_certs,
     struct BinaryArray *const pinned_domain_cert);
 ```
 
