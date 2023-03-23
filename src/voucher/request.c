@@ -554,6 +554,8 @@ int verify_masa_pledge_voucher(
       goto verify_masa_pledge_voucher_fail;
     }
 
+    free_binary_array_content(&cert_copy);
+
     if (crypto_verify_cert(registrar_tls_cert->array,
                            registrar_tls_cert->length, intermediate_certs,
                            domain_store) < 0) {

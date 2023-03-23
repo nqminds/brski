@@ -55,7 +55,8 @@ struct BinaryArrayList *create_cert_list(void) {
   assert_non_null(cert);
 
   push_array_list(certs, cert, cert_length, 0);
-
+  
+  sys_free(cert);
   sys_free(key);
 
   free_keyvalue_list(meta.issuer);
@@ -147,6 +148,7 @@ static void test_sign_pledge_voucher_request(void **state) {
   free_keyvalue_list(registrar_tls_meta.subject);
 }
 
+
 struct BinaryArray *
 faulty_create_pledge_voucher_request(char *serial_number,
                                      struct BinaryArray *registrar_tls_cert) {
@@ -231,14 +233,14 @@ static void test_sign_voucher_request(void **state) {
 
   free_binary_array(cms);
 
-  /* Test with the wrong serial number */
+  // Test with the wrong serial number
   cms = sign_voucher_request(pledge_voucher_request_cms, &created_on,
                              "AA:BB:CC:DD:EE:EE", &idevid_issuer,
                              &registrar_tls_cert, &registrar_sign_cert,
                              &registrar_sign_key, NULL, NULL, NULL);
   assert_null(cms);
 
-  /* Test with the wrong registrar certificate */
+  // Test with the wrong registrar certificate
   struct BinaryArray wregistrar_tls_key = {};
   struct BinaryArray wregistrar_tls_cert = {};
   wregistrar_tls_key.length =
@@ -275,6 +277,7 @@ static void test_sign_voucher_request(void **state) {
   free_keyvalue_list(registrar_sign_meta.issuer);
   free_keyvalue_list(registrar_sign_meta.subject);
 }
+
 
 struct BinaryArray *faulty_create_voucher_request(
     char *serial_number, struct BinaryArray *nonce,
@@ -354,6 +357,15 @@ static void test_sign_masa_pledge_voucher(void **state) {
       create_pledge_voucher_request("AA:BB:CC:DD:EE:FF", &nonce,
                                     &registrar_tls_cert);
 
+  struct crypto_cert_meta registrar_sign_meta = create_cert_meta();
+  struct BinaryArray registrar_sign_key = {};
+  struct BinaryArray registrar_sign_cert = {};
+  registrar_sign_key.length =
+      (size_t)crypto_generate_eckey(&registrar_sign_key.array);
+  registrar_sign_cert.length = (size_t)crypto_generate_eccert(
+      &registrar_sign_meta, registrar_sign_key.array, registrar_sign_key.length,
+      &registrar_sign_cert.array);
+
   struct tm created_on = {.tm_year = 73,
                           .tm_mon = 10,
                           .tm_mday = 29,
@@ -364,26 +376,11 @@ static void test_sign_masa_pledge_voucher(void **state) {
   struct BinaryArray idevid_issuer = {.array = idevid_issuer_array,
                                       .length = 6};
 
-  struct crypto_cert_meta registrar_sign_meta = create_cert_meta();
-  struct BinaryArray registrar_sign_key = {};
-  struct BinaryArray registrar_sign_cert = {};
-  registrar_sign_key.length =
-      (size_t)crypto_generate_eckey(&registrar_sign_key.array);
-  registrar_sign_cert.length = (size_t)crypto_generate_eccert(
-      &registrar_sign_meta, registrar_sign_key.array, registrar_sign_key.length,
-      &registrar_sign_cert.array);
-
   struct BinaryArray *voucher_request_cms = sign_voucher_request(
       pledge_voucher_request_cms, &created_on, "AA:BB:CC:DD:EE:FF",
       &idevid_issuer, &registrar_tls_cert, &registrar_sign_cert,
       &registrar_sign_key, NULL, NULL, NULL);
 
-  struct tm expires_on = {.tm_year = 73,
-                          .tm_mon = 10,
-                          .tm_mday = 29,
-                          .tm_hour = 21,
-                          .tm_min = 33,
-                          .tm_sec = 11};
   struct crypto_cert_meta masa_sign_meta = create_cert_meta();
   struct BinaryArray masa_sign_key = {};
   struct BinaryArray masa_sign_cert = {};
@@ -392,7 +389,14 @@ static void test_sign_masa_pledge_voucher(void **state) {
       &masa_sign_meta, masa_sign_key.array, masa_sign_key.length,
       &masa_sign_cert.array);
 
-  /* Pass in the user_ctx the serial number to compare with */
+  struct tm expires_on = {.tm_year = 73,
+                          .tm_mon = 10,
+                          .tm_mday = 29,
+                          .tm_hour = 21,
+                          .tm_min = 33,
+                          .tm_sec = 11};
+
+  // Pass in the user_ctx the serial number to compare with
   const void *user_ctx = (const void *)"AA:BB:CC:DD:EE:FF";
   struct BinaryArray *cms = sign_masa_pledge_voucher(
       voucher_request_cms, &expires_on, voucher_req_fun, user_ctx,
@@ -403,7 +407,7 @@ static void test_sign_masa_pledge_voucher(void **state) {
   free_binary_array(cms);
   free_binary_array(voucher_request_cms);
 
-  /* Missing prior signed voucher request */
+  // Missing prior signed voucher request
   voucher_request_cms =
       faulty_create_voucher_request("AA:BB:CC:DD:EE:FF", &nonce, NULL);
   assert_non_null(voucher_request_cms);
@@ -414,7 +418,7 @@ static void test_sign_masa_pledge_voucher(void **state) {
   assert_null(cms);
   free_binary_array(voucher_request_cms);
 
-  /* Missing serial number */
+  // Missing serial number
   voucher_request_cms =
       faulty_create_voucher_request(NULL, &nonce, pledge_voucher_request_cms);
   assert_non_null(voucher_request_cms);
@@ -424,7 +428,7 @@ static void test_sign_masa_pledge_voucher(void **state) {
   assert_null(cms);
   free_binary_array(voucher_request_cms);
 
-  /* Wrong serial number */
+  // Wrong serial number
   voucher_request_cms = faulty_create_voucher_request(
       "AA:BB:CC:DD:EE:EE", &nonce, pledge_voucher_request_cms);
   assert_non_null(voucher_request_cms);
@@ -540,7 +544,7 @@ static void test_verify_masa_pledge_voucher(void **state) {
       &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
       &registrar_tls_cert.array);
 
-  /* Sign the registrar TLS certificate with the pinned domain private key */
+  // Sign the registrar TLS certificate with the pinned domain private key
   ssize_t signed_registrar_tls_cert_length = crypto_sign_cert(
       test_pinned_domain_key.array, test_pinned_domain_key.length,
       test_pinned_domain_cert.array, test_pinned_domain_cert.length,
@@ -581,7 +585,7 @@ static void test_verify_masa_pledge_voucher(void **state) {
 static int test_group_setup(void **state) {
   (void)state;
 
-  /* Generate ROOT CA for MASA */
+  // Generate ROOT CA for MASA
   test_ca_key.length = crypto_generate_eckey(&test_ca_key.array);
 
   struct crypto_cert_meta ca_meta = {.serial_number = 1,
@@ -601,7 +605,7 @@ static int test_group_setup(void **state) {
   test_ca_cert.length = crypto_generate_eccert(
       &ca_meta, test_ca_key.array, test_ca_key.length, &test_ca_cert.array);
 
-  /* Generate the test pinned domain certificate */
+  // Generate the test pinned domain certificate
   struct crypto_cert_meta pinned_domain_meta = {.serial_number = 12345,
                                                 .not_before = 0,
                                                 .not_after = 1234567,
@@ -631,6 +635,7 @@ static int test_group_setup(void **state) {
   test_domain_store = init_array_list();
   push_array_list(test_domain_store, test_ca_cert.array, test_ca_cert.length,
                   0);
+  free_binary_array_content(&test_ca_cert);
 
   int verified = crypto_verify_cert(test_pinned_domain_cert.array,
                                     test_pinned_domain_cert.length,
@@ -640,7 +645,7 @@ static int test_group_setup(void **state) {
   test_pinned_domain_certs = init_array_list();
   push_array_list(test_pinned_domain_certs, test_pinned_domain_cert.array,
                   test_pinned_domain_cert.length, 0);
-
+  
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);
   free_keyvalue_list(ca_meta.issuer);
@@ -653,11 +658,13 @@ static int test_group_teardown(void **state) {
   (void)state;
 
   free_binary_array_content(&test_pinned_domain_key);
+  free_binary_array_content(&test_pinned_domain_cert);
   free_binary_array_content(&test_ca_key);
   free_array_list(test_pinned_domain_certs);
   free_array_list(test_domain_store);
   return 0;
 }
+
 
 int main(int argc, char *argv[]) {
   (void)argc;
@@ -669,7 +676,8 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_sign_pledge_voucher_request),
       cmocka_unit_test(test_sign_voucher_request),
       cmocka_unit_test(test_sign_masa_pledge_voucher),
-      cmocka_unit_test(test_verify_masa_pledge_voucher)};
+      cmocka_unit_test(test_verify_masa_pledge_voucher)
+    };
 
   return cmocka_run_group_tests(tests, test_group_setup, test_group_teardown);
 }

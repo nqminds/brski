@@ -73,7 +73,12 @@ int push_array_list(struct BinaryArrayList *arr_list, uint8_t *const arr,
     return -1;
   }
 
-  el->arr = arr;
+  if ((el->arr = sys_memdup(arr, length)) == NULL) {
+    log_errno("sys_memdup");
+    free_array_list_el(el);
+    return -1;
+  }
+
   el->length = length;
   el->flags = flags;
 

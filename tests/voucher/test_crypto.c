@@ -217,6 +217,7 @@ static void test_crypto_sign_eccms(void **state) {
 
   assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
                    0);
+  sys_free(cert_in_list);
 
   ssize_t length =
       crypto_sign_eccms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
@@ -300,6 +301,8 @@ static void test_crypto_sign_rsacms(void **state) {
 
   assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
                    0);
+
+  sys_free(cert_in_list);
 
   ssize_t length =
       crypto_sign_rsacms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
@@ -524,9 +527,13 @@ static void test_crypto_verify_cert(void **state) {
   struct BinaryArrayList *ca_certs = init_array_list();
   push_array_list(ca_certs, ca_cert, ca_cert_length, 0);
 
+  sys_free(ca_cert);
+
   struct BinaryArrayList *intermediate_certs = init_array_list();
   push_array_list(intermediate_certs, intermediate_cert,
                   signed_intermediate_cert_length, 0);
+
+  sys_free(intermediate_cert);
 
   int verified =
       crypto_verify_cert(untrusted_cert, signed_untrusted_cert_length,
@@ -588,6 +595,7 @@ static void test_crypto_sign_cms(void **state) {
                    0);
 
   sys_free(key_in_list);
+  sys_free(cert_in_list);
 
   ssize_t length =
       crypto_sign_cms(data, data_length, NULL, 0, NULL, 0, NULL, &cms);
@@ -658,6 +666,7 @@ struct BinaryArrayList *create_cert_list(void) {
 
   push_array_list(certs, cert, cert_length, 0);
 
+  sys_free(cert);
   sys_free(key);
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);

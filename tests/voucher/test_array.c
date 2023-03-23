@@ -36,8 +36,8 @@ static void test_push_array_list(void **state) {
 
   uint8_t buf1[3] = {1, 2, 3};
   uint8_t buf2[4] = {4, 5, 6, 7};
-  assert_int_equal(push_array_list(ll, sys_memdup(buf1, 3), 3, 0xAA), 0);
-  assert_int_equal(push_array_list(ll, sys_memdup(buf2, 4), 4, 0xBB), 0);
+  assert_int_equal(push_array_list(ll, buf1, 3, 0xAA), 0);
+  assert_int_equal(push_array_list(ll, buf2, 4, 0xBB), 0);
 
   struct BinaryArrayList *item =
       dl_list_entry((&ll->list)->next, struct BinaryArrayList, list);

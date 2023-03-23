@@ -691,6 +691,7 @@ static void test_sign_cms_voucher(void **state) {
   push_array_list(certs, cert_in_list, cert_in_list_length, 0);
 
   sys_free(key_in_list);
+  sys_free(cert_in_list);
 
   struct BinaryArray *signed_voucher =
       sign_eccms_voucher(voucher, &cert, &key, certs);
@@ -718,6 +719,7 @@ static void test_sign_cms_voucher(void **state) {
   push_array_list(certs, cert_in_list, cert_in_list_length, 0);
 
   sys_free(key_in_list);
+  sys_free(cert_in_list);
 
   signed_voucher = sign_rsacms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
@@ -762,6 +764,7 @@ struct BinaryArrayList *create_cert_list(void) {
   push_array_list(certs, cert, cert_length, 0);
 
   sys_free(key);
+  sys_free(cert);
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
 

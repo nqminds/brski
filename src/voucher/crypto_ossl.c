@@ -1174,6 +1174,7 @@ static int exatract_cms_certs(CMS_ContentInfo *cms,
       *out_certs = NULL;
       return -1;
     }
+    sys_free(cert);
   }
 
   sk_X509_pop_free(signers, X509_free);
