@@ -4,24 +4,24 @@ add_compile_options(
   $<$<AND:$<C_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-fanalyzer>
 )
 
-add_library(list list.c)
-target_link_libraries(list PRIVATE os log)
+add_library(array array.c)
+target_link_libraries(array PRIVATE os log)
+
+add_library(keyvalue keyvalue.c)
+target_link_libraries(keyvalue PRIVATE array os log)
 
 add_library(serialize serialize.c)
-target_link_libraries(serialize PRIVATE list os)
+target_link_libraries(serialize PRIVATE keyvalue array os)
 target_compile_definitions(serialize PRIVATE _DEFAULT_SOURCE _BSD_SOURCE _XOPEN_SOURCE)
 
-add_library(voucher voucher.c)
 if (USE_VOUCHER_OPENSSL AND (NOT USE_VOUCHER_WOLFSSL))
-    add_library(crypto_openssl crypto_openssl.c)
-    target_link_libraries(crypto_openssl PRIVATE OpenSSL3::Crypto log os)
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE list crypto_openssl serialize os)
+    add_library(voucher crypto_ossl.c voucher.c request.c)
+    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE OpenSSL3::Crypto keyvalue array serialize os log)
 elseif (USE_VOUCHER_WOLFSSL)
-    add_library(crypto_wolfssl crypto_wolfssl.c)
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE list crypto_wolfssl serialize os)
+    add_library(voucher crypto_wssl.c voucher.c request.c)
+    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE keyvalue array serialize os log)
 else ()
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE list serialize os)
+    message(FATAL_ERROR "No crypto library option defined")
 endif ()
 
-add_library(voucher_request voucher_request.c)
-target_link_libraries(voucher_request PRIVATE serialize voucher os)
+set_target_properties(voucher PROPERTIES PUBLIC_HEADER "src/voucher/array.h;src/voucher/voucher.h")

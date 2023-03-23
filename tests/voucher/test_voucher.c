@@ -18,7 +18,8 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/crypto_defs.h"
+#include "voucher/crypto.h"
+#include "voucher/keyvalue.h"
 #include "voucher/voucher.h"
 #include "voucher/voucher_defs.h"
 
@@ -37,8 +38,8 @@ void test_compare_time(const struct tm *tm1, const struct tm *tm2) {
   assert_int_equal(tm1->tm_sec, tm2->tm_sec);
 }
 
-void test_compare_array(const struct VoucherBinaryArray *src,
-                        const struct VoucherBinaryArray *dst) {
+void test_compare_array(const struct BinaryArray *src,
+                        const struct BinaryArray *dst) {
   assert_int_equal(src->length, dst->length);
   assert_memory_equal(src->array, dst->array, src->length);
 }
@@ -121,18 +122,18 @@ static void test_set_attr_array_voucher(void **state) {
   assert_int_equal(set_attr_array_voucher(NULL, ATTR_NONCE, NULL), -1);
   assert_int_equal(set_attr_array_voucher(voucher, -1, NULL), -1);
 
-  struct VoucherBinaryArray arr1 = {.array = NULL, .length = 10};
+  struct BinaryArray arr1 = {.array = NULL, .length = 10};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr1),
                    -1);
 
   uint8_t array2[] = {1, 2, 3, 4};
-  struct VoucherBinaryArray arr2 = {.array = NULL, .length = 0};
+  struct BinaryArray arr2 = {.array = NULL, .length = 0};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr2),
                    -1);
 
-  struct VoucherBinaryArray arr3 = {.array = array2, .length = 4};
+  struct BinaryArray arr3 = {.array = array2, .length = 4};
 
   assert_int_equal(set_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER, &arr3),
                    0);
@@ -160,7 +161,7 @@ static void test_set_attr_voucher(void **state) {
   enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
   char *str_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_value = {.array = array, .length = 5};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -221,7 +222,7 @@ static void test_serialize_voucher(void **state) {
   enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
   char *str_array_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_value = {.array = array, .length = 5};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -269,7 +270,8 @@ static void test_serialize_voucher(void **state) {
   free_voucher(voucher);
 }
 
-static void test_deserialize_voucher(void **state) {
+__attribute__((no_sanitize_address)) static void
+test_deserialize_voucher(void **state) {
   (void)state;
 
   struct tm tm_null = {.tm_year = 0,
@@ -285,9 +287,9 @@ static void test_deserialize_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+  struct BinaryArray array_zero = {.array = NULL, .length = 0};
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_value = {.array = array, .length = 5};
 
   char *json = "{\"ietf-voucher:voucher\":";
   struct Voucher *voucher = deserialize_voucher((uint8_t *)json, strlen(json));
@@ -426,8 +428,8 @@ static void test_clear_attr_voucher(void **state) {
   enum VoucherAssertions enum_value = VOUCHER_ASSERTION_LOGGED;
   char *str_value = "12345";
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
-  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+  struct BinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_zero = {.array = NULL, .length = 0};
   bool bool_value = true;
 
   struct Voucher *voucher = init_voucher();
@@ -587,11 +589,11 @@ static void test_get_attr_array_voucher(void **state) {
   (void)state;
 
   uint8_t array[] = {1, 2, 3, 4, 5};
-  struct VoucherBinaryArray array_value = {.array = array, .length = 5};
-  struct VoucherBinaryArray array_zero = {.array = NULL, .length = 0};
+  struct BinaryArray array_value = {.array = array, .length = 5};
+  struct BinaryArray array_zero = {.array = NULL, .length = 0};
 
   struct Voucher *voucher = init_voucher();
-  const struct VoucherBinaryArray *value =
+  const struct BinaryArray *value =
       get_attr_array_voucher(voucher, ATTR_IDEVID_ISSUER);
   assert_non_null(value);
   test_compare_array(&array_zero, value);
@@ -653,13 +655,13 @@ static void test_sign_cms_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-  struct VoucherBinaryArray cert = {}, key = {};
+  struct BinaryArray cert = {}, key = {};
 
   struct Voucher *voucher = init_voucher();
 
   set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
 
-  struct buffer_list *certs = init_buffer_list();
+  struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
@@ -671,13 +673,11 @@ static void test_sign_cms_voucher(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("issuertest.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuertest.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subjecttest.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
@@ -688,9 +688,13 @@ static void test_sign_cms_voucher(void **state) {
   ssize_t cert_in_list_length = crypto_generate_eccert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
+  push_array_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  sys_free(key_in_list);
+  sys_free(cert_in_list);
+
+  struct BinaryArray *signed_voucher =
+      sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
   free_binary_array(signed_voucher);
 
@@ -699,7 +703,7 @@ static void test_sign_cms_voucher(void **state) {
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
-  free_buffer_list(certs);
+  free_array_list(certs);
 
   key.length = crypto_generate_rsakey(2048, &key.array);
   assert_non_null(key.array);
@@ -711,8 +715,11 @@ static void test_sign_cms_voucher(void **state) {
   cert_in_list_length = crypto_generate_rsacert(
       &meta, key_in_list, key_in_list_length, &cert_in_list);
 
-  certs = init_buffer_list();
-  push_buffer_list(certs, cert_in_list, cert_in_list_length, 0);
+  certs = init_array_list();
+  push_array_list(certs, cert_in_list, cert_in_list_length, 0);
+
+  sys_free(key_in_list);
+  sys_free(cert_in_list);
 
   signed_voucher = sign_rsacms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
@@ -723,7 +730,7 @@ static void test_sign_cms_voucher(void **state) {
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
-  free_buffer_list(certs);
+  free_array_list(certs);
 
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
@@ -731,8 +738,8 @@ static void test_sign_cms_voucher(void **state) {
   free_voucher(voucher);
 }
 
-struct buffer_list *create_cert_list(void) {
-  struct buffer_list *certs = init_buffer_list();
+struct BinaryArrayList *create_cert_list(void) {
+  struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 123456789,
@@ -744,21 +751,23 @@ struct buffer_list *create_cert_list(void) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"),
-                     sys_strdup("cert_list_issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "cert_list_issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("cert_list_subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "cert_list_subject.info");
 
   uint8_t *cert = NULL;
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
   assert_non_null(cert);
 
-  push_buffer_list(certs, cert, cert_length, 0);
+  push_array_list(certs, cert, cert_length, 0);
 
   sys_free(key);
+  sys_free(cert);
+  free_keyvalue_list(meta.issuer);
+  free_keyvalue_list(meta.subject);
+
   return certs;
 }
 
@@ -771,13 +780,13 @@ static void test_verify_cms_voucher(void **state) {
                   .tm_hour = 21,
                   .tm_min = 33,
                   .tm_sec = 9};
-  struct VoucherBinaryArray cert = {}, key = {};
+  struct BinaryArray cert = {}, key = {};
 
   struct Voucher *voucher = init_voucher();
 
   set_attr_voucher(voucher, ATTR_CREATED_ON, &tm);
 
-  struct buffer_list *certs = create_cert_list();
+  struct BinaryArrayList *certs = create_cert_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
                                   .not_before = 0,
                                   .not_after = 1234567,
@@ -789,20 +798,21 @@ static void test_verify_cms_voucher(void **state) {
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
-  push_keyvalue_list(meta.issuer, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.issuer, sys_strdup("CN"), sys_strdup("issuer.info"));
+  push_keyvalue_list(meta.issuer, "C", "IE");
+  push_keyvalue_list(meta.issuer, "CN", "issuer.info");
 
-  push_keyvalue_list(meta.subject, sys_strdup("C"), sys_strdup("IE"));
-  push_keyvalue_list(meta.subject, sys_strdup("CN"),
-                     sys_strdup("subject.info"));
+  push_keyvalue_list(meta.subject, "C", "IE");
+  push_keyvalue_list(meta.subject, "CN", "subject.info");
 
   cert.length =
       crypto_generate_eccert(&meta, key.array, key.length, &cert.array);
 
-  struct VoucherBinaryArray *signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  struct BinaryArray *signed_voucher =
+      sign_eccms_voucher(voucher, &cert, &key, certs);
   assert_non_null(signed_voucher);
 
-  struct Voucher *decoded_voucher = verify_cms_voucher(signed_voucher, NULL, NULL, NULL);
+  struct Voucher *decoded_voucher =
+      verify_cms_voucher(signed_voucher, NULL, NULL, NULL);
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
@@ -816,12 +826,13 @@ static void test_verify_cms_voucher(void **state) {
   assert_non_null(decoded_voucher);
   test_compare_time(&voucher->created_on, &decoded_voucher->created_on);
 
+  free_voucher(voucher);
   free_voucher(decoded_voucher);
   free_binary_array(signed_voucher);
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);
-  free_buffer_list(certs);
+  free_array_list(certs);
 
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);

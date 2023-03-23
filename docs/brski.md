@@ -47,13 +47,13 @@ The API details the functions to allows implementing the below state description
 ### `sign_pledge_voucher_request`
 Signs a pledge voucher request using CMS with a private key (type detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free_binary_array struct VoucherBinaryArray * sign_pledge_voucher_request(const struct tm *created_on,
+__must_free_binary_array struct BinaryArray * sign_pledge_voucher_request(const struct tm *created_on,
                             const char *serial_number,
-                            const struct VoucherBinaryArray *nonce,
-                            const struct VoucherBinaryArray *registrar_tls_cert,
-                            const struct VoucherBinaryArray *pledge_sign_cert,
-                            const struct VoucherBinaryArray *pledge_sign_key,
-                            const struct buffer_list *additional_pledge_certs);
+                            const struct BinaryArray *nonce,
+                            const struct BinaryArray *registrar_tls_cert,
+                            const struct BinaryArray *pledge_sign_cert,
+                            const struct BinaryArray *pledge_sign_key,
+                            const struct BinaryArrayList *additional_pledge_certs);
 ```
 **Parameters**:
 * `created_on` - Time when the pledge is created,
@@ -70,15 +70,15 @@ The signed pledge-voucher CMS structure as bianry array (`DER` format) or `NULL`
 ### `sign_voucher_request`
 Signs a voucher request using CMS with a private key (type detected automatically) and output as binary array (`DER` format).
 ```c
-__must_free_binary_array struct VoucherBinaryArray * sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
+__must_free_binary_array struct BinaryArray * sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
-                     const struct VoucherBinaryArray *idevid_issuer,
-                     const struct VoucherBinaryArray *registrar_tls_cert,
-                     const struct VoucherBinaryArray *registrar_sign_cert,
-                     const struct VoucherBinaryArray *registrar_sign_key,
-                     const struct buffer_list *pledge_verify_certs,
-                     const struct buffer_list *pledge_verify_store,
-                     const struct buffer_list *additional_registrar_certs);
+                     const struct BinaryArray *idevid_issuer,
+                     const struct BinaryArray *registrar_tls_cert,
+                     const struct BinaryArray *registrar_sign_cert,
+                     const struct BinaryArray *registrar_sign_key,
+                     const struct BinaryArrayList *pledge_verify_certs,
+                     const struct BinaryArrayList *pledge_verify_store,
+                     const struct BinaryArrayList *additional_registrar_certs);
 ```
 **Parameters**:
 * `pledge_voucher_request_cms` - The signed pledge-voucher request CMS structure as binary array (`DER` format),
@@ -100,8 +100,8 @@ Callback function definition to find a pledge serial number in a user defined da
 ```c
 typedef int (*voucher_req_fn)(
     const char *serial_number,
-    const struct buffer_list *additional_registrar_certs, const void *user_ctx,
-    struct VoucherBinaryArray *pinned_domain_cert);
+    const struct BinaryArrayList *additional_registrar_certs, const void *user_ctx,
+    struct BinaryArray *pinned_domain_cert);
 ```
 
 **Parameters**:
@@ -116,16 +116,16 @@ typedef int (*voucher_req_fn)(
 Signs a MASA voucher request using CMS with a private key (type detected automatically) and output as binary array (DER format).
 
 ```c
-__must_free_binary_array struct VoucherBinaryArray *sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
+__must_free_binary_array struct BinaryArray *sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,
-                         const struct VoucherBinaryArray *masa_sign_cert,
-                         const struct VoucherBinaryArray *masa_sign_key,
-                         const struct buffer_list *registrar_verify_certs,
-                         const struct buffer_list *registrar_verify_store,
-                         const struct buffer_list *pledge_verify_certs,
-                         const struct buffer_list *pledge_verify_store,
-                         const struct buffer_list *additional_masa_certs);
+                         const struct BinaryArray *masa_sign_cert,
+                         const struct BinaryArray *masa_sign_key,
+                         const struct BinaryArrayList *registrar_verify_certs,
+                         const struct BinaryArrayList *registrar_verify_store,
+                         const struct BinaryArrayList *pledge_verify_certs,
+                         const struct BinaryArrayList *pledge_verify_store,
+                         const struct BinaryArrayList *additional_masa_certs);
 ```
 **Parameters**:
 * `voucher_request_cms` - The signed pledge voucher request CMS structure as binary array (`DER` format),
@@ -147,14 +147,14 @@ The signed CMS structure as binary array (`DER` format) or `NULL` on failure.
 Verifies a MASA pledge voucher and outputs a pinned domain certificate (`DER` format) and the CMS appended list of certificates.
 ```c
 int verify_masa_pledge_voucher(
-    const struct VoucherBinaryArray *masa_pledge_voucher_cms, const char *serial_number,
-    const struct VoucherBinaryArray *nonce,
-    const struct VoucherBinaryArray *registrar_tls_cert,
-    const struct buffer_list *domain_store,
-    const struct buffer_list *pledge_verify_certs,
-    const struct buffer_list *pledge_verify_store,
-    struct buffer_list **pledge_out_certs,
-    struct VoucherBinaryArray *const pinned_domain_cert);
+    const struct BinaryArray *masa_pledge_voucher_cms, const char *serial_number,
+    const struct BinaryArray *nonce,
+    const struct BinaryArray *registrar_tls_cert,
+    const struct BinaryArrayList *domain_store,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    struct BinaryArrayList **pledge_out_certs,
+    struct BinaryArray *const pinned_domain_cert);
 ```
 
 **Parameters**:

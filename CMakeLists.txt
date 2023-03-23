@@ -48,11 +48,6 @@ string(TOLOWER ${PROJECT_NAME} _project_lower)
 include(BrskiInstallLocations)
 
 # Installation options
-# Only overwrite CMAKE_INSTALL_PREFIX if there is no -DCMAKE_INSTALL_PREFIX
-IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  set(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/${_project_lower}-dist" CACHE PATH "Installation path" FORCE)
-ENDIF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-
 # RPATH must be set before defining targets
 # $ORIGIN is so that shared libs can view other shared libs (e.g. libgrpc++ can see libxxx)
 # $ORIGIN/lib is to support where we used to store shared libs
@@ -68,6 +63,7 @@ set(
   "$ORIGIN" "$ORIGIN/lib" "${BRSKI_full_private_lib_dir}"
   "$ORIGIN/${BRSKI_relative_private_lib_dir}"
 )
+
 option(BUILD_CMOCKA_LIB "Build cmocka lib" ON)
 option(BUILD_ONLY_DOCS "Build only docs" OFF)
 option(BUILD_OPENSSL3_LIB "Build OpenSSL 3" OFF)
@@ -77,6 +73,8 @@ option(USE_CPPHTTPLIB_LIB "Build and use the cpp-httplib" OFF)
 
 option(USE_VOUCHER_OPENSSL "Build voucher library with openssl support" OFF)
 option(USE_VOUCHER_WOLFSSL "Build voucher library with wolfssl support" OFF)
+
+option(SANITIZE_ADDRESS "Enable AddressSanitizer for debug builds." OFF)
 
 cmake_dependent_option(CONFIGURE_COVERAGE "Configure for code coverage (requires lcov)" OFF BUILD_TESTING OFF)
 
@@ -226,6 +224,32 @@ if (NOT BUILD_ONLY_DOCS)
         "${PROJECT_SOURCE_DIR}/middlewares_list.c"
         # The _deps/ folder is created by CMake's FetchContent
         "${PROJECT_SOURCE_DIR}/_deps/*"
+    )
+  endif()
+
+  if (SANITIZE_ADDRESS)
+    include(CheckCCompilerFlag)
+
+    set(CMAKE_REQUIRED_LINK_OPTIONS "-fsanitize=address")
+    check_c_compiler_flag("-fsanitize=address" C_COMPILER_SUPPORTS_ASAN)
+    set(CMAKE_REQUIRED_LINK_OPTIONS "")
+
+    if (NOT C_COMPILER_SUPPORTS_ASAN)
+      message(
+        FATAL_ERROR
+        "${CMAKE_C_COMPILER} version ${CMAKE_C_COMPILER_VERSION} does not "
+        "support -fsanitize=address for target "
+        "${CMAKE_SYSTEM_PROCESSOR}-${CMAKE_SYSTEM_NAME}"
+      )
+    endif()
+    add_compile_options(
+      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
+      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
+    )
+
+    add_link_options(
+      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
+      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
     )
   endif()
 

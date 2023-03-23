@@ -62,7 +62,7 @@ ssize_t crypto_generate_rsacert(struct crypto_cert_meta *meta, uint8_t *key,
 
 ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
                           size_t cert_length, uint8_t *key, size_t key_length,
-                          struct buffer_list *certs, uint8_t **cms) {
+                          struct BinaryArrayList *certs, uint8_t **cms) {
   (void)data;
   (void)data_length;
   (void)cert;
@@ -77,7 +77,7 @@ ssize_t crypto_sign_eccms(uint8_t *data, size_t data_length, uint8_t *cert,
 
 ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
                            size_t cert_length, uint8_t *key, size_t key_length,
-                           struct buffer_list *certs, uint8_t **cms) {
+                           struct BinaryArrayList *certs, uint8_t **cms) {
   (void)data;
   (void)data_length;
   (void)cert;

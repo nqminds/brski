@@ -29,6 +29,17 @@
 
 #include "os.h"
 
+void *sys_malloc(size_t s) {
+  void *ptr = malloc(s);
+  if (ptr == NULL) {
+    return NULL;
+  }
+
+  return ptr;
+}
+
+void sys_free(void *p) { free(p); }
+
 void *sys_zalloc(const size_t size) { return sys_calloc(size, 1); }
 
 void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size) {
@@ -43,13 +54,15 @@ void *sys_memdup(const void *const src, const size_t len) {
     return NULL;
   }
 
-  void *r = sys_malloc(len);
+  void *dst = sys_malloc(len);
 
-  if (r != NULL) {
-    sys_memcpy(r, src, len);
+  if (dst == NULL) {
+    return NULL;
   }
 
-  return r;
+  sys_memcpy(dst, src, len);
+
+  return dst;
 }
 
 char *sys_strndup(const char *const s, const size_t length) {

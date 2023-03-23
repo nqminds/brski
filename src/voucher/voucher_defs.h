@@ -7,13 +7,14 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the definition of the voucher structure.
  */
-#ifndef VOUCHER_IMPL_H
-#define VOUCHER_IMPL_H
+#ifndef VOUCHER_DEFS_H
+#define VOUCHER_DEFS_H
 
 #include <stdbool.h>
 #include <stdint.h>
 #include <time.h>
 
+#include "array.h"
 #include "voucher.h"
 
 struct Voucher {
@@ -30,25 +31,25 @@ struct Voucher {
   char *serial_number;
 
   /* ATTR_IDEVID_ISSUER */
-  struct VoucherBinaryArray idevid_issuer;
+  struct BinaryArray idevid_issuer;
 
   /* ATTR_PINNED_DOMAIN_CERT */
-  struct VoucherBinaryArray pinned_domain_cert;
+  struct BinaryArray pinned_domain_cert;
 
   /* ATTR_DOMAIN_CERT_REVOCATION_CHECKS */
   bool domain_cert_revocation_checks;
 
   /* ATTR_NONCE */
-  struct VoucherBinaryArray nonce;
+  struct BinaryArray nonce;
 
   /* ATTR_LAST_RENEWAL_DATE */
   struct tm last_renewal_date;
 
   /* ATTR_PRIOR_SIGNED_VOUCHER_REQUEST */
-  struct VoucherBinaryArray prior_signed_voucher_request;
+  struct BinaryArray prior_signed_voucher_request;
 
   /* ATTR_PROXIMITY_REGISTRAR_CERT */
-  struct VoucherBinaryArray proximity_registrar_cert;
+  struct BinaryArray proximity_registrar_cert;
 };
 
 #define VOUCHER_ROOT_NAME "ietf-voucher:voucher"

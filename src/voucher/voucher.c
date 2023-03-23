@@ -13,8 +13,8 @@
 
 #include "../utils/os.h"
 
-#include "crypto_defs.h"
-#include "list.h"
+#include "array.h"
+#include "crypto.h"
 #include "serialize.h"
 #include "voucher.h"
 #include "voucher_defs.h"
@@ -32,8 +32,7 @@ static bool check_size_str_equal(const char *src, const char *dst,
   }
 }
 
-static bool
-check_binary_array_nonempty(const struct VoucherBinaryArray *value) {
+static bool is_attr_array_nonempty(const struct BinaryArray *value) {
   if (value == NULL) {
     return false;
   }
@@ -43,67 +42,6 @@ check_binary_array_nonempty(const struct VoucherBinaryArray *value) {
   }
 
   return true;
-}
-
-int copy_binary_array(struct VoucherBinaryArray *const dst,
-                      const struct VoucherBinaryArray *src) {
-  if (dst == NULL) {
-    log_error("dst param is NULL");
-    return -1;
-  }
-
-  if (src == NULL) {
-    log_error("src param is NULL");
-    return -1;
-  }
-  dst->length = 0;
-  if ((dst->array = sys_memdup((uint8_t *)src->array, src->length)) == NULL) {
-    log_errno("sys_memdup");
-    return -1;
-  }
-  dst->length = src->length;
-
-  return 0;
-}
-
-int compare_binary_array(const struct VoucherBinaryArray *src,
-                         const struct VoucherBinaryArray *dst) {
-  if (src == NULL) {
-    log_error("src param is NULL");
-    return -1;
-  }
-
-  if (dst == NULL) {
-    log_error("dst param is NULL");
-    return -1;
-  }
-
-  if (dst->length != src->length) {
-    return 0;
-  }
-
-  if (sys_memcmp(dst->array, src->array, src->length) != 0) {
-    return 0;
-  };
-
-  return 1;
-}
-
-void free_binary_array_content(struct VoucherBinaryArray *arr) {
-  if (arr != NULL) {
-    if (arr->array != NULL) {
-      sys_free(arr->array);
-      arr->array = NULL;
-    }
-    arr->length = 0;
-  }
-}
-
-void free_binary_array(struct VoucherBinaryArray *arr) {
-  if (arr != NULL) {
-    free_binary_array_content(arr);
-    sys_free(arr);
-  }
 }
 
 void free_voucher(struct Voucher *voucher) {
@@ -116,6 +54,9 @@ void free_voucher(struct Voucher *voucher) {
     free_binary_array_content(&voucher->idevid_issuer);
     free_binary_array_content(&voucher->pinned_domain_cert);
     free_binary_array_content(&voucher->nonce);
+    free_binary_array_content(&voucher->prior_signed_voucher_request);
+    free_binary_array_content(&voucher->proximity_registrar_cert);
+
     sys_free(voucher);
   }
 }
@@ -276,13 +217,13 @@ int set_attr_str_voucher(struct Voucher *voucher,
 
 int set_attr_array_voucher(struct Voucher *voucher,
                            const enum VoucherAttributes attr,
-                           const struct VoucherBinaryArray *value) {
+                           const struct BinaryArray *value) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return -1;
   }
 
-  if (!check_binary_array_nonempty(value)) {
+  if (!is_attr_array_nonempty(value)) {
     log_error("value is empty");
     return -1;
   }
@@ -328,8 +269,8 @@ set_attr_array_voucher_fail:
 int set_attr_base64_voucher(struct Voucher *voucher,
                             const enum VoucherAttributes attr,
                             const char *value, const size_t length) {
-  struct VoucherBinaryArray binary_array;
-  ssize_t out_length;
+  struct BinaryArray binary_array = {0};
+  ssize_t out_length = 0;
   if ((out_length = serialize_base64str2array((const uint8_t *)value, length,
                                               &binary_array.array)) < 0) {
     log_error("serialize_base64str2array fail");
@@ -339,10 +280,11 @@ int set_attr_base64_voucher(struct Voucher *voucher,
   binary_array.length = out_length;
   if (set_attr_array_voucher(voucher, attr, &binary_array) < 0) {
     log_error("set_attr_voucher fail");
-    sys_free(binary_array.array);
+    free_binary_array_content(&binary_array);
     return -1;
   }
 
+  free_binary_array_content(&binary_array);
   return 0;
 }
 
@@ -357,7 +299,7 @@ int set_attr_voucher(struct Voucher *voucher, const enum VoucherAttributes attr,
   struct tm *time_value;
   int enum_value;
   char *str_value;
-  struct VoucherBinaryArray *array_value;
+  struct BinaryArray *array_value;
   bool bool_value;
 
   switch (attr) {
@@ -380,7 +322,7 @@ int set_attr_voucher(struct Voucher *voucher, const enum VoucherAttributes attr,
     case ATTR_NONCE:
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      array_value = va_arg(args, struct VoucherBinaryArray *);
+      array_value = va_arg(args, struct BinaryArray *);
       res = set_attr_array_voucher(voucher, attr, array_value);
       break;
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
@@ -418,16 +360,15 @@ bool is_attr_voucher_nonempty(const struct Voucher *voucher,
     case ATTR_SERIAL_NUMBER:
       return (voucher->serial_number != NULL);
     case ATTR_IDEVID_ISSUER:
-      return check_binary_array_nonempty(&voucher->idevid_issuer);
+      return is_attr_array_nonempty(&voucher->idevid_issuer);
     case ATTR_PINNED_DOMAIN_CERT:
-      return check_binary_array_nonempty(&voucher->pinned_domain_cert);
+      return is_attr_array_nonempty(&voucher->pinned_domain_cert);
     case ATTR_NONCE:
-      return check_binary_array_nonempty(&voucher->nonce);
+      return is_attr_array_nonempty(&voucher->nonce);
     case ATTR_PRIOR_SIGNED_VOUCHER_REQUEST:
-      return check_binary_array_nonempty(
-          &voucher->prior_signed_voucher_request);
+      return is_attr_array_nonempty(&voucher->prior_signed_voucher_request);
     case ATTR_PROXIMITY_REGISTRAR_CERT:
-      return check_binary_array_nonempty(&voucher->proximity_registrar_cert);
+      return is_attr_array_nonempty(&voucher->proximity_registrar_cert);
     case ATTR_DOMAIN_CERT_REVOCATION_CHECKS:
       return true;
     default:
@@ -552,7 +493,7 @@ const char *const *get_attr_str_voucher(struct Voucher *voucher,
   return (const char *const *)&voucher->serial_number;
 }
 
-const struct VoucherBinaryArray *
+const struct BinaryArray *
 get_attr_array_voucher(struct Voucher *voucher,
                        const enum VoucherAttributes attr) {
   if (voucher == NULL) {
@@ -584,7 +525,7 @@ char *escape_serialize_time(const struct tm *time) {
   }
 
   char *escaped = serialize_escapestr(serialized);
-  if ((escaped = serialize_escapestr(serialized)) == NULL) {
+  if (escaped == NULL) {
     log_error("serialize_escapestr fail");
     sys_free(serialized);
     return NULL;
@@ -593,7 +534,7 @@ char *escape_serialize_time(const struct tm *time) {
   return escaped;
 }
 
-char *escape_serialize_array(const struct VoucherBinaryArray *arr) {
+char *escape_serialize_array(const struct BinaryArray *arr) {
   uint8_t *base64_out = NULL;
   if (serialize_array2base64str(arr->array, arr->length, &base64_out) < 0) {
     log_error("serialize_array2base64str fail");
@@ -676,6 +617,8 @@ voucher_to_keyvalue(const struct Voucher *voucher) {
         free_keyvalue_list(kv_list);
         return NULL;
       }
+      sys_free(key);
+      sys_free(value);
     }
     attr++;
   }
@@ -730,6 +673,8 @@ char *serialize_voucher(const struct Voucher *voucher) {
     free_keyvalue_list(kv_list);
     return NULL;
   }
+  sys_free(key);
+  sys_free(json_child);
 
   char *json = serialize_keyvalue2json(kv_list);
   if (json == NULL) {
@@ -873,15 +818,14 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
     return NULL;
   }
 
-  struct Voucher *voucher = NULL;
+  struct Voucher *voucher = init_voucher();
+  bool found_root = false;
 
   for (int idx = 1; idx < count; idx++) {
     int length = tokens[idx].end - tokens[idx].start;
     /* Find the voucher root key */
     if (strncmp(VOUCHER_ROOT_NAME, (char *)(json + tokens[idx].start),
                 length) == 0) {
-      voucher = init_voucher();
-
       idx++;
       if (idx < count && tokens[idx].type == JSMN_OBJECT) {
         /* Iterate over all the key/value pairs of the voucher root */
@@ -905,6 +849,7 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
             goto deserialize_voucher_fail;
           }
         }
+        found_root = true;
       } else {
         log_error("Malformed voucher json");
         goto deserialize_voucher_fail;
@@ -914,8 +859,10 @@ struct Voucher *deserialize_voucher(const uint8_t *json, const size_t length) {
     }
   }
 
-  if (voucher == NULL) {
-    log_error("Malformed voucher json");
+  if (!found_root) {
+    log_error("Voucher root not found");
+    free_voucher(voucher);
+    return NULL;
   }
 
   return voucher;
@@ -925,10 +872,10 @@ deserialize_voucher_fail:
   return NULL;
 }
 
-struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
-                         const struct VoucherBinaryArray *cert,
-                         const struct VoucherBinaryArray *key,
-                         const struct buffer_list *certs) {
+struct BinaryArray *sign_eccms_voucher(struct Voucher *voucher,
+                                       const struct BinaryArray *cert,
+                                       const struct BinaryArray *key,
+                                       const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -964,7 +911,7 @@ struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -976,10 +923,10 @@ struct VoucherBinaryArray *sign_eccms_voucher(struct Voucher *voucher,
   return out;
 }
 
-struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
-                          const struct VoucherBinaryArray *cert,
-                          const struct VoucherBinaryArray *key,
-                          const struct buffer_list *certs) {
+struct BinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
+                                        const struct BinaryArray *cert,
+                                        const struct BinaryArray *key,
+                                        const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -1014,7 +961,7 @@ struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -1026,10 +973,10 @@ struct VoucherBinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
   return out;
 }
 
-__must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
-                                   const struct VoucherBinaryArray *cert,
-                                   const struct VoucherBinaryArray *key,
-                                   const struct buffer_list *certs) {
+__must_sys_free struct BinaryArray *
+sign_cms_voucher(struct Voucher *voucher, const struct BinaryArray *cert,
+                 const struct BinaryArray *key,
+                 const struct BinaryArrayList *certs) {
   if (voucher == NULL) {
     log_error("voucher param is NULL");
     return NULL;
@@ -1064,7 +1011,7 @@ __must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
   }
   sys_free(serialized);
 
-  struct VoucherBinaryArray *out = sys_malloc(sizeof(struct VoucherBinaryArray));
+  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
   if (out == NULL) {
     log_errno("sys_malloc");
     sys_free(cms);
@@ -1076,18 +1023,18 @@ __must_free struct VoucherBinaryArray *sign_cms_voucher(struct Voucher *voucher,
   return out;
 }
 
-struct Voucher *verify_cms_voucher(const struct VoucherBinaryArray *cms,
-                                   const struct buffer_list *certs,
-                                   const struct buffer_list *store,
-                                   struct buffer_list **out_certs) {
+struct Voucher *verify_cms_voucher(const struct BinaryArray *cms,
+                                   const struct BinaryArrayList *certs,
+                                   const struct BinaryArrayList *store,
+                                   struct BinaryArrayList **out_certs) {
   if (cms == NULL) {
     log_error("cms param is NULL");
     return NULL;
   }
 
   uint8_t *data = NULL;
-  ssize_t data_length =
-      crypto_verify_cms(cms->array, cms->length, certs, store, &data, out_certs);
+  ssize_t data_length = crypto_verify_cms(cms->array, cms->length, certs, store,
+                                          &data, out_certs);
 
   if (data_length < 0) {
     log_error("crypto_verify_cms fail");

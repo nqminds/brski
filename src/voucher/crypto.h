@@ -7,14 +7,14 @@
  * Nquiringminds Ltd SPDX-License-Identifier: MIT
  * @brief File containing the definition of the crypto types.
  */
-#ifndef CRYPTO_DEFS_H
-#define CRYPTO_DEFS_H
+#ifndef VOUCHER_CRYPTO_H
+#define VOUCHER_CRYPTO_H
 
 #include <stddef.h>
 #include <stdint.h>
 #include <sys/types.h>
 
-#include "list.h"
+#include "array.h"
 
 /* The generalized context for a private key */
 typedef void *CRYPTO_KEY;
@@ -62,7 +62,7 @@ enum CRYPTO_CERTIFICATE_TYPE {
  * Caller is responsible for freeing the key buffer
  *
  * @param[in] bits Number of key bits for RSA
- * @param[out] key The output key buffer
+ * @param[out] key The output key buffer (DER format)
  * @return ssize_t the size of the key buffer, -1 on failure
  */
 ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
@@ -73,17 +73,31 @@ ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
  *
  * Caller is responsible for freeing the key buffer
  *
- * @param[out] key The output key buffer
+ * @param[out] key The output key buffer (DER format)
  * @return ssize_t the size of the key buffer, -1 on failure
  */
 ssize_t crypto_generate_eckey(uint8_t **key);
+
+/**
+ * @brief Frees a private key context
+ *
+ * @param[in] ctx The key context
+ */
+void crypto_free_keycontext(CRYPTO_KEY ctx);
+
+#if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
+#define __must_crypto_free_keycontext                                          \
+  __attribute__((malloc(crypto_free_keycontext, 1))) __must_check
+#else
+#define __must_crypto_free_keycontext __must_check
+#endif /* __GNUC__ >= 11 */
 
 /**
  * @brief Maps a private Elliptic Curve key to a key context
  *
  * Caller is responsible for freeing the key context
  *
- * @param[in] key The input key buffer
+ * @param[in] key The input key buffer (DER format)
  * @param[in] length The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
@@ -94,30 +108,34 @@ CRYPTO_KEY crypto_eckey2context(const uint8_t *key, const size_t length);
  *
  * Caller is responsible for freeing the key context
  *
- * @param[in] key The input key buffer
+ * @param[in] key The input key buffer (DER format)
  * @param[in] length The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
 CRYPTO_KEY crypto_rsakey2context(const uint8_t *key, const size_t length);
 
 /**
- * @brief Maps a private key to a key context
+ * @brief Maps a private key buffer to a key context
  * The function tries to detect the key type automatically
  *
  * Caller is responsible for freeing the key context
  *
- * @param[in] key The input key buffer
+ * @param[in] key The input key buffer (DER format)
  * @param[in] length The key buffer length
  * @return CRYPTO_KEY key context, NULL on failure
  */
 CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length);
 
 /**
- * @brief Frees a private key context
+ * @brief Maps a certificate buffer to a certificate context
  *
- * @param[in] ctx The key context
+ * Caller is responsible for freeing the certificate context
+ *
+ * @param[in] key The input certirficate buffer (DER format)
+ * @param[in] length The certificate buffer length
+ * @return CRYPTO_CERT certificate context, NULL on failure
  */
-void crypto_free_keycontext(CRYPTO_KEY ctx);
+CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length);
 
 /**
  * @brief Generate a certificate and self sign with a Elliptic Curve private key
@@ -126,9 +144,9 @@ void crypto_free_keycontext(CRYPTO_KEY ctx);
  * Caller is responsible for freeing the cert buffer
  *
  * @param[in] meta The certificate metadata
- * @param[in] key The Elliptic Curve private/public key buffer
+ * @param[in] key The Elliptic Curve private/public key buffer (DER format)
  * @param[in] key_length The private key buffer length
- * @param[out] cert The output certificate buffer
+ * @param[out] cert The output certificate buffer (DER format)
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
@@ -136,15 +154,15 @@ ssize_t crypto_generate_eccert(const struct crypto_cert_meta *meta,
                                uint8_t **cert);
 
 /**
- * @brief Generate a certificate and self sign with a RSA private key
- * using sha256
+ * @brief Generate a certificate and self signs with a RSA private key (DER
+ * format) using sha256
  *
  * Caller is responsible for freeing the cert buffer
  *
  * @param[in] meta The certificate metadata
- * @param[in] key The RSA private/public key buffer
+ * @param[in] key The RSA private/public key buffer (DER format)
  * @param[in] key_length The private key buffer length
- * @param[out] cert The output certificate buffer
+ * @param[out] cert The output certificate buffer (DER format)
  * @return ssize_t the size of the certificate buffer, -1 on failure
  */
 ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
@@ -152,7 +170,7 @@ ssize_t crypto_generate_rsacert(const struct crypto_cert_meta *meta,
                                 uint8_t **cert);
 
 /**
- * @brief Signs a certificate with a private key.
+ * @brief Signs a certificate buffer with a private key (DER format).
  * The private key type is detected automatically. The signature is sha256.
  *
  * Caller is responsible for freeing the output certificate
@@ -170,97 +188,104 @@ ssize_t crypto_sign_cert(const uint8_t *sign_key, const size_t sign_key_length,
                          const size_t cert_length, uint8_t **cert);
 
 /**
- * @brief Verifies a certificate
+ * @brief Verifies a certificate buffer (DER format)
  *
  * @param[in] cert The certificate buffer (DER format) to be verified
  * @param[in] cert_length The certificate buffer length
- * @param[in] certs The list of certificate buffers to verify the certificate
- * @param[in] store The list of trusted certificate store to verify the
+ * @param[in] certs The list of certificate buffers (DER format) to verify the
  * certificate
+ * @param[in] store The list of trusted certificate store buffers (DER format)
+ * to verify the certificate
  * @return int 0 if certificate is signed by the certs/store, -1 on failure
  */
 int crypto_verify_cert(const uint8_t *cert, const size_t cert_length,
-                       const struct buffer_list *certs,
-                       const struct buffer_list *store);
+                       const struct BinaryArrayList *certs,
+                       const struct BinaryArrayList *store);
 /**
- * @brief Signs a buffer using CMS for an Elliptic Curve private key
+ * @brief Signs a buffer using CMS for an Elliptic Curve private key (DER
+ * format)
  *
- * Caller is responsible for freeing the cms buffer
+ * Caller is responsible for freeing the CMS buffer
  *
  * @param[in] data The data buffer to be signed
  * @param[in] data_length The data buffer length
- * @param[in] cert The certificate buffer for signing
+ * @param[in] cert The certificate buffer (DER format) for signing private key
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The Elliptic Curve private key buffer of the certificate
+ * @param[in] key The signing Elliptic Curve private key buffer (DER format) of
+ * the certificate
  * @param[in] key_length The length of the private key buffer
- * @param[in] certs The list of additional certificate buffers
- * @param[out] cms The output cms buffer
- * @return ssize_t the size of the cms buffer, -1 on failure
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[out] cms The output CMS buffer (DER format)
+ * @return ssize_t the size of the CMS buffer, -1 on failure
  */
 ssize_t crypto_sign_eccms(const uint8_t *data, const size_t data_length,
                           const uint8_t *cert, const size_t cert_length,
                           const uint8_t *key, const size_t key_length,
-                          const struct buffer_list *certs, uint8_t **cms);
+                          const struct BinaryArrayList *certs, uint8_t **cms);
 
 /**
- * @brief Signs a buffer using CMS for a private key.
+ * @brief Signs a buffer using CMS for a private key (DER format).
  * The private key type is detected automatically.
  *
- * Caller is responsible for freeing the cms buffer
+ * Caller is responsible for freeing the CMS buffer
  *
  * @param[in] data The data buffer to be signed
  * @param[in] data_length The data buffer length
- * @param[in] cert The certificate buffer for signing
+ * @param[in] cert The certificate buffer (DER format) for the signing private
+ * key
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The Elliptic Curve private key buffer of the certificate
+ * @param[in] key The signing Elliptic Curve private key buffer (DER format) of
+ * the certificate
  * @param[in] key_length The length of the private key buffer
- * @param[in] certs The list of additional certificate buffers
- * @param[out] cms The output cms buffer
- * @return ssize_t the size of the cms buffer, -1 on failure
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[out] cms The output CMS buffer (DER format)
+ * @return ssize_t the size of the CMS buffer, -1 on failure
  */
 ssize_t crypto_sign_cms(const uint8_t *data, const size_t data_length,
                         const uint8_t *cert, const size_t cert_length,
                         const uint8_t *key, const size_t key_length,
-                        const struct buffer_list *certs, uint8_t **cms);
+                        const struct BinaryArrayList *certs, uint8_t **cms);
 
 /**
- * @brief Signs a buffer using CMS for an RSA private key
+ * @brief Signs a buffer using CMS for an RSA private key (DER format)
  *
- * Caller is responsible for freeing the cms buffer
+ * Caller is responsible for freeing the CMS buffer
  *
  * @param[in] data The data buffer to be signed
  * @param[in] data_length The data buffer length
- * @param[in] cert The certificate buffer for signing
+ * @param[in] cert The certificate buffer (DER format) for the signing private
+ * key
  * @param[in] cert_length The certificate buffer length
- * @param[in] key The RSA private key buffer of the certificate
+ * @param[in] key The RSA private key buffer (DER format) of the certificate
  * @param[in] key_length The length of the private key buffer
- * @param[in] certs The list of additional certificate buffers
- * @param[out] cms The output cms buffer
- * @return ssize_t the size of the cms buffer, -1 on failure
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[out] cms The output CMS buffer (DER format)
+ * @return ssize_t the size of the CMS buffer, -1 on failure
  */
 ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
                            const uint8_t *cert, const size_t cert_length,
                            const uint8_t *key, const size_t key_length,
-                           const struct buffer_list *certs, uint8_t **cms);
+                           const struct BinaryArrayList *certs, uint8_t **cms);
 
 /**
- * @brief Verifies a CMS buffer and extract the data
+ * @brief Verifies a CMS buffer (DER format) and extract the data
  * buffer
  *
  * Caller is responsible for freeing the data buffer and output certs buffer
  *
- * @param[in] cms The cms buffer to be verified
- * @param[in] cms_length The cms buffer length
- * @param[in] certs The list of additional certificate buffers
- * @param[in] store The list of trusted certificate for store
+ * @param[in] cms The CMS buffer (DER format) to be verified
+ * @param[in] cms_length The CMS buffer length
+ * @param[in] certs The list of additional certificate buffers (DER format)
+ * @param[in] store The list of trusted certificate for store (DER format)
  * @param[out] data The output data buffer
- * @param[out] out_certs The list of certs from the cms structure if non NULL
+ * @param[out] out_certs The list of certificate buffers (DER format) from the
+ * CMS structure (NULL for empty)
  * @return ssize_t the size of the data buffer, -1 on failure
  */
 ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
-                          const struct buffer_list *certs,
-                          const struct buffer_list *store, uint8_t **data,
-                          struct buffer_list **out_certs);
+                          const struct BinaryArrayList *certs,
+                          const struct BinaryArrayList *store, uint8_t **data,
+                          struct BinaryArrayList **out_certs);
 
 void x509_to_tmpfile(const uint8_t *cert, const size_t length,
                      const char *filename);

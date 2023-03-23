@@ -13,18 +13,17 @@
 #include <time.h>
 
 #include "../utils/os.h"
+#include "crypto.h"
 #include "serialize.h"
 #include "voucher.h"
-#include "voucher_request.h"
 
-struct VoucherBinaryArray *
-sign_pledge_voucher_request(const struct tm *created_on,
-                            const char *serial_number,
-                            const struct VoucherBinaryArray *nonce,
-                            const struct VoucherBinaryArray *registrar_tls_cert,
-                            const struct VoucherBinaryArray *pledge_sign_cert,
-                            const struct VoucherBinaryArray *pledge_sign_key,
-                            const struct buffer_list *additional_pledge_certs) {
+struct BinaryArray *sign_pledge_voucher_request(
+    const struct tm *created_on, const char *serial_number,
+    const struct BinaryArray *nonce,
+    const struct BinaryArray *registrar_tls_cert,
+    const struct BinaryArray *pledge_sign_cert,
+    const struct BinaryArray *pledge_sign_key,
+    const struct BinaryArrayList *additional_pledge_certs) {
   struct Voucher *voucher = init_voucher();
   if (voucher == NULL) {
     log_error("init_voucher fail");
@@ -86,8 +85,8 @@ sign_pledge_voucher_request(const struct tm *created_on,
     return NULL;
   }
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher, pledge_sign_cert, pledge_sign_key,
-                               additional_pledge_certs);
+  struct BinaryArray *cms = sign_cms_voucher(
+      voucher, pledge_sign_cert, pledge_sign_key, additional_pledge_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     free_voucher(voucher);
@@ -98,16 +97,16 @@ sign_pledge_voucher_request(const struct tm *created_on,
   return cms;
 }
 
-struct VoucherBinaryArray *
-sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms,
+struct BinaryArray *
+sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
                      const struct tm *created_on, const char *serial_number,
-                     const struct VoucherBinaryArray *idevid_issuer,
-                     const struct VoucherBinaryArray *registrar_tls_cert,
-                     const struct VoucherBinaryArray *registrar_sign_cert,
-                     const struct VoucherBinaryArray *registrar_sign_key,
-                     const struct buffer_list *pledge_verify_certs,
-                     const struct buffer_list *pledge_verify_store,
-                     const struct buffer_list *additional_registrar_certs) {
+                     const struct BinaryArray *idevid_issuer,
+                     const struct BinaryArray *registrar_tls_cert,
+                     const struct BinaryArray *registrar_sign_cert,
+                     const struct BinaryArray *registrar_sign_key,
+                     const struct BinaryArrayList *pledge_verify_certs,
+                     const struct BinaryArrayList *pledge_verify_store,
+                     const struct BinaryArrayList *additional_registrar_certs) {
 
   if (serial_number == NULL) {
     log_error("serial_number param in NULL");
@@ -145,9 +144,8 @@ sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms
 
   /* check if the proximity registrar certificat is the same as the registrar
    * certificate */
-  const struct VoucherBinaryArray *proximity_registrar_cert =
-      get_attr_array_voucher(pledge_voucher_request,
-                             ATTR_PROXIMITY_REGISTRAR_CERT);
+  const struct BinaryArray *proximity_registrar_cert = get_attr_array_voucher(
+      pledge_voucher_request, ATTR_PROXIMITY_REGISTRAR_CERT);
 
   if (compare_binary_array(proximity_registrar_cert, registrar_tls_cert) < 1) {
     log_error("proximity cert != registrar cert");
@@ -182,7 +180,7 @@ sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms
   /* This value, if present, is copied from the pledge voucher-request. The
    * registrar voucher-request MAY omit the nonce as per Section 3.1. */
   if (is_attr_voucher_nonempty(pledge_voucher_request, ATTR_NONCE)) {
-    const struct VoucherBinaryArray *nonce =
+    const struct BinaryArray *nonce =
         get_attr_array_voucher(pledge_voucher_request, ATTR_NONCE);
     if (nonce == NULL) {
       log_error("get_attr_array_voucher fail");
@@ -228,8 +226,9 @@ sign_voucher_request(const struct VoucherBinaryArray *pledge_voucher_request_cms
     goto sign_voucher_request_fail;
   }
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(voucher_request, registrar_sign_cert,
-                               registrar_sign_key, additional_registrar_certs);
+  struct BinaryArray *cms =
+      sign_cms_voucher(voucher_request, registrar_sign_cert, registrar_sign_key,
+                       additional_registrar_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_voucher_request_fail;
@@ -245,17 +244,17 @@ sign_voucher_request_fail:
   return NULL;
 }
 
-struct VoucherBinaryArray *
-sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
+struct BinaryArray *
+sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
                          const struct tm *expires_on, const voucher_req_fn cb,
                          const void *user_ctx,
-                         const struct VoucherBinaryArray *masa_sign_cert,
-                         const struct VoucherBinaryArray *masa_sign_key,
-                         const struct buffer_list *registrar_verify_certs,
-                         const struct buffer_list *registrar_verify_store,
-                         const struct buffer_list *pledge_verify_certs,
-                         const struct buffer_list *pledge_verify_store,
-                         const struct buffer_list *additional_masa_certs) {
+                         const struct BinaryArray *masa_sign_cert,
+                         const struct BinaryArray *masa_sign_key,
+                         const struct BinaryArrayList *registrar_verify_certs,
+                         const struct BinaryArrayList *registrar_verify_store,
+                         const struct BinaryArrayList *pledge_verify_certs,
+                         const struct BinaryArrayList *pledge_verify_store,
+                         const struct BinaryArrayList *additional_masa_certs) {
   if (expires_on == NULL) {
     log_error("expires_on param in NULL");
     return NULL;
@@ -266,7 +265,7 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
     return NULL;
   }
 
-  struct buffer_list *registrar_certs = NULL;
+  struct BinaryArrayList *registrar_certs = NULL;
   struct Voucher *voucher_request =
       verify_cms_voucher(voucher_request_cms, registrar_verify_certs,
                          registrar_verify_store, &registrar_certs);
@@ -293,7 +292,7 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
   }
 
   /* Extract the nonce from the voucher request if present */
-  const struct VoucherBinaryArray *nonce = NULL;
+  const struct BinaryArray *nonce = NULL;
   if (is_attr_voucher_nonempty(voucher_request, ATTR_NONCE)) {
     nonce = get_attr_array_voucher(voucher_request, ATTR_NONCE);
     if (nonce == NULL) {
@@ -303,7 +302,7 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
   }
 
   /* Check if prior signed voucher request is present in the voucher request */
-  const struct VoucherBinaryArray *prior_signed_voucher_request = NULL;
+  const struct BinaryArray *prior_signed_voucher_request = NULL;
   if (is_attr_voucher_nonempty(voucher_request,
                                ATTR_PRIOR_SIGNED_VOUCHER_REQUEST)) {
     prior_signed_voucher_request = get_attr_array_voucher(
@@ -370,7 +369,7 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
   }
 
   /* Allocates a pinned domain certificate for a pledge */
-  struct VoucherBinaryArray pinned_domain_cert = {0};
+  struct BinaryArray pinned_domain_cert = {0};
   if (cb((const char *)*pledge_voucher_serial_number, registrar_certs, user_ctx,
          &pinned_domain_cert) < 0) {
     log_error("Failure to allocate pinned domain certificate");
@@ -426,21 +425,22 @@ sign_masa_pledge_voucher(const struct VoucherBinaryArray *voucher_request_cms,
     goto sign_masa_pledge_voucher_fail;
   }
 
-  struct VoucherBinaryArray *cms = sign_cms_voucher(masa_pledge_voucher, masa_sign_cert,
-                               masa_sign_key, additional_masa_certs);
+  struct BinaryArray *cms =
+      sign_cms_voucher(masa_pledge_voucher, masa_sign_cert, masa_sign_key,
+                       additional_masa_certs);
   if (cms == NULL) {
     log_error("sign_cms_voucher fail");
     goto sign_masa_pledge_voucher_fail;
   }
 
-  free_buffer_list(registrar_certs);
+  free_array_list(registrar_certs);
   free_voucher(voucher_request);
   free_voucher(pledge_voucher_request);
   free_voucher(masa_pledge_voucher);
 
   return cms;
 sign_masa_pledge_voucher_fail:
-  free_buffer_list(registrar_certs);
+  free_array_list(registrar_certs);
   free_voucher(voucher_request);
   free_voucher(pledge_voucher_request);
   free_voucher(masa_pledge_voucher);
@@ -448,14 +448,14 @@ sign_masa_pledge_voucher_fail:
 }
 
 int verify_masa_pledge_voucher(
-    const struct VoucherBinaryArray *masa_pledge_voucher_cms, const char *serial_number,
-    const struct VoucherBinaryArray *nonce,
-    const struct VoucherBinaryArray *registrar_tls_cert,
-    const struct buffer_list *domain_store,
-    const struct buffer_list *pledge_verify_certs,
-    const struct buffer_list *pledge_verify_store,
-    struct buffer_list **pledge_out_certs,
-    struct VoucherBinaryArray *const pinned_domain_cert) {
+    const struct BinaryArray *masa_pledge_voucher_cms,
+    const char *serial_number, const struct BinaryArray *nonce,
+    const struct BinaryArray *registrar_tls_cert,
+    const struct BinaryArrayList *domain_store,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    struct BinaryArrayList **pledge_out_certs,
+    struct BinaryArray *const pinned_domain_cert) {
 
   if (serial_number == NULL) {
     log_error("serial_number param is NULL");
@@ -503,7 +503,7 @@ int verify_masa_pledge_voucher(
    * policy; see Section 7.2). */
   if (nonce != NULL) {
     if (is_attr_voucher_nonempty(masa_pledge_voucher, ATTR_NONCE)) {
-      const struct VoucherBinaryArray *masa_nonce =
+      const struct BinaryArray *masa_nonce =
           get_attr_array_voucher(masa_pledge_voucher, ATTR_NONCE);
       if (masa_nonce == NULL) {
         log_error("get_attr_array_voucher fail");
@@ -525,7 +525,7 @@ int verify_masa_pledge_voucher(
    * indicates a failure to enroll in this domain, and the pledge MUST attempt
    * joining with other available Join Proxies. */
   if (is_attr_voucher_nonempty(masa_pledge_voucher, ATTR_PINNED_DOMAIN_CERT)) {
-    const struct VoucherBinaryArray *masa_pinned_domain_cert =
+    const struct BinaryArray *masa_pinned_domain_cert =
         get_attr_array_voucher(masa_pledge_voucher, ATTR_PINNED_DOMAIN_CERT);
     if (masa_pinned_domain_cert == NULL) {
       log_error("get_attr_array_voucher fail");
@@ -540,28 +540,30 @@ int verify_masa_pledge_voucher(
      * pinned-domain-cert trust anchor from the voucher, then the TLS connection
      * is discarded, and the pledge abandons attempts to bootstrap with this
      * discovered registrar.*/
-    struct VoucherBinaryArray cert_copy = {0};
+    struct BinaryArray cert_copy = {0};
     if (copy_binary_array(&cert_copy, masa_pinned_domain_cert) < 0) {
       log_error("copy_binary_array fail");
       goto verify_masa_pledge_voucher_fail;
     }
 
-    struct buffer_list *intermediate_certs = init_buffer_list();
-    if (push_buffer_list(intermediate_certs, cert_copy.array, cert_copy.length,
-                         0) < 0) {
-      log_error("push_buffer_list fail");
-      free_buffer_list(intermediate_certs);
+    struct BinaryArrayList *intermediate_certs = init_array_list();
+    if (push_array_list(intermediate_certs, cert_copy.array, cert_copy.length,
+                        0) < 0) {
+      log_error("push_array_list fail");
+      free_array_list(intermediate_certs);
       goto verify_masa_pledge_voucher_fail;
     }
+
+    free_binary_array_content(&cert_copy);
 
     if (crypto_verify_cert(registrar_tls_cert->array,
                            registrar_tls_cert->length, intermediate_certs,
                            domain_store) < 0) {
       log_error("crypto_verify_cert fail");
-      free_buffer_list(intermediate_certs);
+      free_array_list(intermediate_certs);
       goto verify_masa_pledge_voucher_fail;
     }
-    free_buffer_list(intermediate_certs);
+    free_array_list(intermediate_certs);
 
     if (copy_binary_array(pinned_domain_cert, masa_pinned_domain_cert) < 0) {
       log_error("copy_binary_array fail");

@@ -8,7 +8,7 @@
       "name": "debug test_process",
       "type": "cppdbg",
       "request": "launch",
-      "program": "${workspaceFolder}/build/linux/tests/voucher/test_crypto",
+      "program": "${workspaceFolder}/build/linux/tests/voucher/test_request",
       "args": [],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",

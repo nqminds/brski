@@ -173,14 +173,14 @@ static uint8_t *base64_gen_encode(const uint8_t *src, const size_t len,
   return out;
 }
 
-static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
-                                  size_t *out_len, const uint8_t *table) {
-  uint8_t dtable[256], *out, *pos, block[4], tmp;
+static ssize_t base64_gen_decode(const uint8_t *src, const size_t len,
+                                 const uint8_t *table, uint8_t **out) {
+  uint8_t dtable[256], *pos, block[4], tmp;
   size_t i, count, olen;
   int pad = 0;
   size_t extra_pad;
 
-  *out_len = 0;
+  *out = NULL;
 
   sys_memset(dtable, 0x80, 256);
   for (i = 0; i < sizeof(base64_table) - 1; i++) {
@@ -197,16 +197,16 @@ static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
 
   if (count == 0) {
     log_error("Invalid encoding");
-    return NULL;
+    return -1;
   }
   extra_pad = (4 - count % 4) % 4;
 
   olen = (count + extra_pad) / 4 * 3;
-  pos = out = (uint8_t *)sys_malloc(olen);
-  if (out == NULL) {
+  if ((*out = (uint8_t *)sys_malloc(olen)) == NULL) {
     log_errno("sys_malloc");
-    return NULL;
+    return -1;
   }
+  pos = *out;
 
   count = 0;
   for (i = 0; i < len + extra_pad; i++) {
@@ -241,16 +241,15 @@ static uint8_t *base64_gen_decode(const uint8_t *src, const size_t len,
           pos -= 2;
         } else {
           log_error("Invalid padding");
-          sys_free(out);
-          return NULL;
+          sys_free(*out);
+          return -1;
         }
         break;
       }
     }
   }
 
-  *out_len = pos - out;
-  return out;
+  return (ssize_t)(pos - *out);
 }
 
 ssize_t serialize_array2base64str(const uint8_t *src, const size_t length,
@@ -270,16 +269,12 @@ ssize_t serialize_array2base64str(const uint8_t *src, const size_t length,
 
 ssize_t serialize_base64str2array(const uint8_t *src, const size_t length,
                                   uint8_t **out) {
-  size_t out_len;
-
-  *out = NULL;
-
-  uint8_t *decoded = base64_gen_decode(src, length, &out_len, base64_table);
-  if (decoded == NULL) {
+  ssize_t out_len = base64_gen_decode(src, length, base64_table, out);
+  if (out_len < 0) {
     log_error("base64_gen_decode fail");
     return -1;
   }
-  *out = decoded;
+
   return out_len;
 }
 

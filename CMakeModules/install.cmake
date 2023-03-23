@@ -4,9 +4,14 @@ install(
   RUNTIME
 )
 
-# usually /usr/local/lib/brksi (or /usr/lib/brski for .deb)
+install(
+  TARGETS voucher
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  PUBLIC_HEADER DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}/voucher
+)
+
+# usually /usr/local/lib/brksi
 # BRSKI_private_lib_dir is set in main CMakeLists.txt, as we need it to set RPATH before targets
-# currently only hostapd, so it doesn't conflict with other hostapds
 configure_file(
   "config.ini.in"
   "config.ini"
@@ -28,7 +33,3 @@ install(CODE
       -P ${CMAKE_SOURCE_DIR}/CMakeModules/InstallConfigFile.cmake
   )"
 )
-
-if(BUILD_OPENSSL3_LIB AND LIBCRYPTO_LIB AND LIBOPENSSL3_LIB_PATH)
-  install(DIRECTORY "${LIBOPENSSL3_LIB_PATH}/" DESTINATION ${BRSKI_private_lib_dir})
-endif ()
