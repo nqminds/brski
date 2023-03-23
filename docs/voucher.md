@@ -24,7 +24,7 @@
 
 ## Voucher attributes
 
-The voucher artifact attributes are define by the enum below:
+The voucher artifact attributes are defined by the enum below:
 ```c
 enum VoucherAttributes {
   ATTR_CREATED_ON = 0,
