@@ -22,6 +22,26 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifndef __must_check
+#if defined __has_attribute
+#if __has_attribute(__warn_unused_result__)
+#define __must_check __attribute__((__warn_unused_result__))
+#else
+#define __must_check
+#endif /* __has_attribute(__warn_unused_result__) */
+#else
+#define __must_check
+#endif /* defined __has_attribute */
+#endif /* __has_attribute */
+
+#ifndef __must_sys_free
+#if __GNUC__ >= 11
+#define __must_sys_free __attribute__((malloc(free, 1))) __must_check
+#else
+#define __must_sys_free __must_check
+#endif /* __GNUC__ >= 11 */
+#endif
+
 /**
  * struct dl_list - Doubly-linked list
  */
