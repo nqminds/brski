@@ -29,10 +29,28 @@
       "description": "Default build for Linux",
       "cacheVariables": {
         "USE_CPPHTTPLIB_LIB": true,
-        "BUILD_OPENSSL3_LIB": true,
+        "BUILD_OPENSSL3_LIB": false,
         "BUILD_WOLFSSL_LIB": false,
         "USE_VOUCHER_OPENSSL": true,
         "USE_VOUCHER_WOLFSSL": false,
+        "SANITIZE_ADDRESS": false
+      }
+    },
+    {
+      "name": "linux-openssl",
+      "inherits": "linux",
+      "displayName": "Linux with OpenSSL",
+      "description": "Build OpenSSL",
+      "cacheVariables": {
+        "BUILD_OPENSSL3_LIB": true
+      }
+    },
+    {
+      "name": "linux-sanitize",
+      "inherits": "linux",
+      "displayName": "Linux Sanitize",
+      "description": "Use the address sanitizer",
+      "cacheVariables": {
         "SANITIZE_ADDRESS": true
       }
     }
@@ -45,6 +63,14 @@
     {
       "name": "linux",
       "configurePreset": "linux"
+    },
+    {
+      "name": "linux-openssl",
+      "configurePreset": "linux-openssl"
+    },
+    {
+      "name": "linux-sanitize",
+      "configurePreset": "linux-sanitize"
     }
   ],
   "testPresets": [
@@ -55,6 +81,14 @@
     {
       "name": "linux",
       "configurePreset": "linux"
+    },
+    {
+      "name": "linux-openssl",
+      "configurePreset": "linux-openssl"
+    },
+    {
+      "name": "linux-sanitize",
+      "configurePreset": "linux-sanitize"
     }
   ]
 }

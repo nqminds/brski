@@ -45,12 +45,9 @@
 #define ARRAY_SIZE(s) (sizeof(s) / sizeof(s[0]))
 #endif
 
-/**
- * @brief Frees memory
- *
- * @param p The pointer to the allocated memory
- */
-void sys_free(void *p);
+#ifndef sys_free
+#define sys_free(p) free((p))
+#endif
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang, since
                    // __attribute__((malloc)) accepts no args
@@ -68,30 +65,26 @@ void sys_free(void *p);
  * @see
  * https://gcc.gnu.org/onlinedocs/gcc-11.1.0/gcc/Common-Function-Attributes.html#index-malloc-function-attribute
  */
-#define __must_sys_free __attribute__((malloc(sys_free, 1))) __must_check
+#define __must_sys_free __attribute__((malloc(free, 1))) __must_check
 #else
 #define __must_sys_free __must_check
 #endif /* __GNUC__ >= 11 */
 
-/**
- * @brief Allocate memory
- *
- * Caller is responsible for freeing the returned buffer with sys_free().
- *
- * @param s Number of bytes to allocate
- * @return void* Pointer to allocated memory or %NULL on failure
- */
-void *sys_malloc(size_t s);
+#ifndef sys_malloc
+#define sys_malloc(s) malloc((s))
+#endif
 
 /**
  * @brief Allocate and zero memory
  *
- * Caller is responsible for freeing the returned buffer with sys_free().
+ * Caller is responsible for freeing the returned buffer with os_free().
  *
  * @param size Number of bytes to allocate
  * @return void* Pointer to allocated and zeroed memory or %NULL on failure
  */
-void *sys_zalloc(const size_t size);
+static inline void *sys_zalloc(size_t size) {
+  return calloc(size, 1);
+}
 
 #ifndef sys_realloc
 #define sys_realloc(p, s) realloc(p, s)

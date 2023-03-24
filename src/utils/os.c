@@ -29,19 +29,6 @@
 
 #include "os.h"
 
-void *sys_malloc(size_t s) {
-  void *ptr = malloc(s);
-  if (ptr == NULL) {
-    return NULL;
-  }
-
-  return ptr;
-}
-
-void sys_free(void *p) { free(p); }
-
-void *sys_zalloc(const size_t size) { return sys_calloc(size, 1); }
-
 void *sys_realloc_array(void *ptr, const size_t nmemb, const size_t size) {
   if (size && nmemb > (~(size_t)0) / size) {
     return NULL;

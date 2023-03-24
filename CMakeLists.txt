@@ -41,6 +41,7 @@ endif()
 include(FetchContent)
 include(ExternalProject)
 include(CMakeDependentOption)
+include(GenerateExportHeader)
 
 string(TOLOWER ${CMAKE_HOST_SYSTEM_PROCESSOR} _sys)
 string(TOLOWER ${PROJECT_NAME} _project_lower)
@@ -63,6 +64,9 @@ set(
   "$ORIGIN" "$ORIGIN/lib" "${BRSKI_full_private_lib_dir}"
   "$ORIGIN/${BRSKI_relative_private_lib_dir}"
 )
+
+# currenty doesn't work if on, due to cyclical dependencies
+set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
 
 option(BUILD_CMOCKA_LIB "Build cmocka lib" ON)
 option(BUILD_ONLY_DOCS "Build only docs" OFF)
@@ -132,9 +136,6 @@ else(CMAKE_CROSSCOMPILING)
   # unset so that sqlite.cmake and etc. do not activate this
   unset(target_autoconf_triple)
 endif(CMAKE_CROSSCOMPILING)
-
-# currenty doesn't work if on, due to cyclical dependencies
-set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
 
 # C compiler options
 set(CMAKE_C_STANDARD 11) # we use C11 raw-strings
@@ -243,12 +244,16 @@ if (NOT BUILD_ONLY_DOCS)
       )
     endif()
     add_compile_options(
+      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
+      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
     )
 
     add_link_options(
+      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
+      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
     )
   endif()
