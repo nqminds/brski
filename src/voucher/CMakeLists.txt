@@ -5,11 +5,14 @@ add_compile_options(
 )
 
 if (USE_VOUCHER_OPENSSL AND (NOT USE_VOUCHER_WOLFSSL))
-    add_library(voucher serialize.c keyvalue.c array.c crypto_ossl.c voucher.c request.c)
-    target_link_libraries(voucher PRIVATE OpenSSL3::Crypto os log jsmn::jsmn)
+    add_library(crypto OBJECT crypto_ossl.c)
+    target_link_libraries(crypto PRIVATE OpenSSL3::Crypto os log)
+
+    add_library(voucher serialize.c keyvalue.c array.c voucher.c request.c)
+    target_link_libraries(voucher PRIVATE crypto os jsmn::jsmn log)
 elseif (USE_VOUCHER_WOLFSSL)
     add_library(voucher serialize.c keyvalue.c array.c crypto_wssl.c voucher.c request.c)
-    target_link_libraries(voucher PRIVATE os log jsmn::jsmn)
+    target_link_libraries(voucher PRIVATE os jsmn::jsmn log)
 else ()
     message(FATAL_ERROR "No crypto library option defined")
 endif ()
