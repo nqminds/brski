@@ -4,24 +4,15 @@ add_compile_options(
   $<$<AND:$<C_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-fanalyzer>
 )
 
-add_library(array array.c)
-target_link_libraries(array PRIVATE os log)
-
-add_library(keyvalue keyvalue.c)
-target_link_libraries(keyvalue PRIVATE array os log)
-
-add_library(serialize serialize.c)
-target_link_libraries(serialize PRIVATE keyvalue array os)
-target_compile_definitions(serialize PRIVATE _DEFAULT_SOURCE _BSD_SOURCE _XOPEN_SOURCE)
-
 if (USE_VOUCHER_OPENSSL AND (NOT USE_VOUCHER_WOLFSSL))
-    add_library(voucher crypto_ossl.c voucher.c request.c)
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE OpenSSL3::Crypto keyvalue array serialize os log)
+    add_library(voucher serialize.c keyvalue.c array.c crypto_ossl.c voucher.c request.c)
+    target_link_libraries(voucher PRIVATE OpenSSL3::Crypto os log jsmn::jsmn)
 elseif (USE_VOUCHER_WOLFSSL)
-    add_library(voucher crypto_wssl.c voucher.c request.c)
-    target_link_libraries(voucher PUBLIC jsmn::jsmn PRIVATE keyvalue array serialize os log)
+    add_library(voucher serialize.c keyvalue.c array.c crypto_wssl.c voucher.c request.c)
+    target_link_libraries(voucher PRIVATE os log jsmn::jsmn)
 else ()
     message(FATAL_ERROR "No crypto library option defined")
 endif ()
 
+target_compile_definitions(voucher PRIVATE _DEFAULT_SOURCE _BSD_SOURCE _XOPEN_SOURCE)
 set_target_properties(voucher PROPERTIES PUBLIC_HEADER "src/voucher/array.h;src/voucher/voucher.h")
