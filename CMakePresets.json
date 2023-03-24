@@ -37,6 +37,15 @@
       }
     },
     {
+      "name": "linux-openssl",
+      "inherits": "linux",
+      "displayName": "Linux with OpenSSL",
+      "description": "Build OpenSSL",
+      "cacheVariables": {
+        "BUILD_OPENSSL3_LIB": true
+      }
+    },
+    {
       "name": "linux-sanitize",
       "inherits": "linux",
       "displayName": "Linux Sanitize",
@@ -56,6 +65,10 @@
       "configurePreset": "linux"
     },
     {
+      "name": "linux-openssl",
+      "configurePreset": "linux-openssl"
+    },
+    {
       "name": "linux-sanitize",
       "configurePreset": "linux-sanitize"
     }
@@ -68,6 +81,10 @@
     {
       "name": "linux",
       "configurePreset": "linux"
+    },
+    {
+      "name": "linux-openssl",
+      "configurePreset": "linux-openssl"
     },
     {
       "name": "linux-sanitize",
