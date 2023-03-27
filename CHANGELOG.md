@@ -8,45 +8,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 
-* Todo
+* brski tool to demonstrate the Registrar and MASA functionalities
 
-### 🐛 Fixed
-
-* Todo
-
-### 📦️ Dependencies
-
-* Todo
-
-#### Debian
-
-* Todo
-
-### 🧰 Chore
-
-<details>
-  <summary>Truncated for brevity</summary>
-
-* Todo
-
-</details>
-
-### 📝 Documentation
-
-<details>
-  <summary>Truncated for brevity</summary>
-
-* Todo
-
-</details>
-
-## [x.y.z] - 2023-aa-bb
+## [0.2.0] - 2023-03-27
 ### Added
-- Todo
-
-
-### Changed
-- Todo
-
-### Removed
-- Todo
+* Voucher artifact implementation as per [RFC8366](https://www.rfc-editor.org/info/rfc8366),
+* Pledge-Registrar voucher request implementation with CMS signatures,
+* Registrar-MASA voucher request implementation with CMS signatures,
+* MASA-Pledge voucher request implementation with CMS signatures and
+* CMS signatures dependency on OpenSSL or WolfSSL libraries.
