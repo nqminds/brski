@@ -68,7 +68,6 @@ set(
 # currenty doesn't work if on, due to cyclical dependencies
 set(BUILD_SHARED_LIBS OFF CACHE INTERNAL "Build shared libraries")
 
-option(BUILD_CMOCKA_LIB "Build cmocka lib" OFF)
 option(BUILD_ONLY_DOCS "Build only docs" OFF)
 option(BUILD_OPENSSL3_LIB "Build OpenSSL 3" OFF)
 option(BUILD_WOLFSSL_LIB "Build WolfSSL" OFF)
