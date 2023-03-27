@@ -4,11 +4,6 @@
 # You may wish to alter this file to override the set of languages analyzed,
 # or to provide custom queries or build logic.
 #
-# ******** NOTE ********
-# We have attempted to detect the languages in your repository. Please check
-# the `language` matrix defined below to confirm you have the correct set of
-# supported CodeQL languages.
-#
 name: "CodeQL"
 
 on:
@@ -18,7 +13,7 @@ on:
     # The branches below must be a subset of the branches above
     branches: [ "main" ]
   schedule:
-    - cron: '24 13 * * 4'
+    - cron: '41 10 * * 0'
 
 jobs:
   analyze:
@@ -32,16 +27,25 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: [ 'cpp' ]
-        # CodeQL supports [ 'cpp', 'csharp', 'go', 'java', 'javascript', 'python', 'ruby' ]
-        # Use only 'java' to analyze code written in Java, Kotlin or both
-        # Use only 'javascript' to analyze code written in JavaScript, TypeScript or both
         # Learn more about CodeQL language support at https://aka.ms/codeql-docs/language-support
-
+        language: [ 'cpp' ]
+        cmake-preset: [ 'linux' ]
     steps:
     - name: Checkout repository
       uses: actions/checkout@v3
-
+    - name: Install Dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install devscripts equivs -y # install mk-build-depends
+        sudo mk-build-deps --install --tool='apt-get -o Debug::pkgProblemResolver=yes --no-install-recommends --yes' debian/control
+    - name: Cache CMake build/dl folder
+      uses: actions/cache@v3
+      with:
+        path: ./build/dl
+        key: codeql-analysis-${{ hashFiles( 'lib/*' ) }}
+      # Sometimes the cache step just freezes forever
+      # so put a limit on it so that we can restart it earlier on failure
+      timeout-minutes: 10
     # Initializes the CodeQL tools for scanning.
     - name: Initialize CodeQL
       uses: github/codeql-action/init@v2
@@ -54,23 +58,14 @@ jobs:
         # Details on CodeQL's query packs refer to : https://docs.github.com/en/code-security/code-scanning/automatically-scanning-your-code-for-vulnerabilities-and-errors/configuring-code-scanning#using-queries-in-ql-packs
         # queries: security-extended,security-and-quality
 
+    - name: Configure
+      run: |
+        cmake -B build/ --preset "${{ matrix.cmake-preset }}"
+    - name: Build
+      run: |
+        # can't use --preset "${{ matrix.cmake-preset }}" since we want to specify a custom build dir
+        cmake --build build/ --parallel "$(($(nproc) + 1))"
 
-    # Autobuild attempts to build any compiled languages  (C/C++, C#, Go, or Java).
-    # If this step fails, then you should remove it and run the build manually (see below)
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v2
-
-    # ℹ️ Command-line programs to run using the OS shell.
-    # 📚 See https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#jobsjob_idstepsrun
-
-    #   If the Autobuild fails above, remove it and uncomment the following three lines.
-    #   modify them (or add more) to build your code if your project, please refer to the EXAMPLE below for guidance.
-
-    # - run: |
-    #     echo "Run, Build Application using script"
-    #     ./location_of_script_within_repo/buildscript.sh
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v2
-      with:
-        category: "/language:${{matrix.language}}"

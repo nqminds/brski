@@ -82,9 +82,7 @@
  * @param size Number of bytes to allocate
  * @return void* Pointer to allocated and zeroed memory or %NULL on failure
  */
-static inline void *sys_zalloc(size_t size) {
-  return calloc(size, 1);
-}
+static inline void *sys_zalloc(size_t size) { return calloc(size, 1); }
 
 #ifndef sys_realloc
 #define sys_realloc(p, s) realloc(p, s)

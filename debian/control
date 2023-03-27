@@ -1,0 +1,12 @@
+Source: brski
+Section: net
+Priority: optional
+Maintainer: Alexandru Mereacre <mereacre@nquiringminds.com>
+Build-Depends: debhelper-compat (= 12),
+    git, ca-certificates, cmake (>=3.15.0),
+    libssl-dev,
+    libminini-dev (>=1.2)
+Standards-Version: 4.5.0
+Homepage: https://github.com/nqminds/brski
+Vcs-Browser: https://github.com/nqminds/brski
+Vcs-Git: https://github.com/nqminds/brski.git

@@ -55,7 +55,7 @@ struct BinaryArrayList *create_cert_list(void) {
   assert_non_null(cert);
 
   push_array_list(certs, cert, cert_length, 0);
-  
+
   sys_free(cert);
   sys_free(key);
 
@@ -147,7 +147,6 @@ static void test_sign_pledge_voucher_request(void **state) {
   free_keyvalue_list(registrar_tls_meta.issuer);
   free_keyvalue_list(registrar_tls_meta.subject);
 }
-
 
 struct BinaryArray *
 faulty_create_pledge_voucher_request(char *serial_number,
@@ -277,7 +276,6 @@ static void test_sign_voucher_request(void **state) {
   free_keyvalue_list(registrar_sign_meta.issuer);
   free_keyvalue_list(registrar_sign_meta.subject);
 }
-
 
 struct BinaryArray *faulty_create_voucher_request(
     char *serial_number, struct BinaryArray *nonce,
@@ -645,7 +643,7 @@ static int test_group_setup(void **state) {
   test_pinned_domain_certs = init_array_list();
   push_array_list(test_pinned_domain_certs, test_pinned_domain_cert.array,
                   test_pinned_domain_cert.length, 0);
-  
+
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);
   free_keyvalue_list(ca_meta.issuer);
@@ -665,7 +663,6 @@ static int test_group_teardown(void **state) {
   return 0;
 }
 
-
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -676,8 +673,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_sign_pledge_voucher_request),
       cmocka_unit_test(test_sign_voucher_request),
       cmocka_unit_test(test_sign_masa_pledge_voucher),
-      cmocka_unit_test(test_verify_masa_pledge_voucher)
-    };
+      cmocka_unit_test(test_verify_masa_pledge_voucher)};
 
   return cmocka_run_group_tests(tests, test_group_setup, test_group_teardown);
 }

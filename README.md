@@ -86,11 +86,9 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=/custom_folder_path --preset linux
 ```
 
 The cmake installs the following artifacts:
-- `/../bin/brski`
-- `/../lib/libvoucher.a`
-- `/../include/voucher/array.h`
-- `/../include/voucher/voucher.h`
-- `/../etc/brski/config.ini`
+- `/../lib/libvoucher.a` - voucher static library
+- `/../include/voucher/array.h` - the array helper include file
+- `/../include/voucher/voucher.h` - the voucher API include file
 
 ## Testing
 
