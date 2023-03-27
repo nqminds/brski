@@ -243,16 +243,12 @@ if (NOT BUILD_ONLY_DOCS)
       )
     endif()
     add_compile_options(
-      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fsanitize=address>> # use AddressSanitizer to check addresses
-      $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fsanitize=address>> # use AddressSanitizer to check addresses
     )
 
     add_link_options(
-      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fsanitize=address>> # need to link AddressSantizer lib
-      $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=undefined>>
       $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fsanitize=address>> # todo, maybe combine with the above line
     )
   endif()
