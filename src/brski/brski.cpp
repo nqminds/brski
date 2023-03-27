@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
   }
 
   struct RegistrarContext *context = NULL;
-  if (registrar_start(&config.hconf, &context) < 0) {
+  if (registrar_start(&config.rconf, &context) < 0) {
     fprintf(stderr, "https_start fail");
     return EXIT_FAILURE;
   }
@@ -157,6 +157,8 @@ int main(int argc, char *argv[]) {
   if (config_filename != NULL) {
     sys_free(config_filename);
   }
+
+  free_config_content(&config);
 
   pthread_mutex_destroy(&log_lock);
 

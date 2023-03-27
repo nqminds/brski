@@ -5,13 +5,14 @@
 createdOn = ""
 serialNumber = ""
 nonce = ""
-signCertPath = ""
-signKeyPath = ""
-additionalCerts = ""
+cmsSignCertPath = ""
+cmsSignKeyPath = ""
+cmsAdditionalCertsPath = ""
 
 [registrar]
 bindAddress = "0.0.0.0"
 port = 12345
 tlsCertPath = ""
+tlsKeyPath = ""
 
 [masa]

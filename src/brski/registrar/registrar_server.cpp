@@ -14,9 +14,9 @@ extern "C" {
 #include "../../utils/log.h"
 }
 
-#include "registrar.h"
 #include "registrar_api.h"
 #include "registrar_server.h"
+#include "registrar_config.h"
 
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
   routes.push_back({.path = std::string(PATH_BRSKI_REQUESTVOUCHER),
@@ -60,7 +60,7 @@ void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
                     .handle = get_est_csrattrs});
 }
 
-int registrar_start(struct http_config *config,
+int registrar_start(struct registrar_config *rconf,
                     struct RegistrarContext **context) {
   std::vector<struct RouteTuple> routes;
 
@@ -75,7 +75,7 @@ int registrar_start(struct http_config *config,
 
   setup_registrar_routes(routes);
 
-  return https_start(config, routes, static_cast<void *>(*context),
+  return https_start(&rconf->http, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);
 }
 
