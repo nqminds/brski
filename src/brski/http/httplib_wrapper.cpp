@@ -11,8 +11,8 @@
 #include <httplib.h>
 
 extern "C" {
-#include "../utils/log.h"
-#include "../utils/os.h"
+#include "../../utils/log.h"
+#include "../../utils/os.h"
 }
 
 #include "http.h"

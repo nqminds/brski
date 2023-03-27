@@ -11,7 +11,7 @@
 #include "../http/https_server.h"
 
 extern "C" {
-#include "../utils/log.h"
+#include "../../utils/log.h"
 }
 
 #include "registrar.h"

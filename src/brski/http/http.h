@@ -17,7 +17,7 @@
 #include <string>
 
 extern "C" {
-#include "../utils/os.h"
+#include "../../utils/os.h"
 }
 
 #define MAX_WEB_PATH_LEN 2048

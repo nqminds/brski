@@ -11,8 +11,8 @@
 #include "http.h"
 
 extern "C" {
-#include "../utils/log.h"
-#include "../utils/os.h"
+#include "../../utils/log.h"
+#include "../../utils/os.h"
 }
 
 #ifdef WITH_CPPHTTPLIB_LIB

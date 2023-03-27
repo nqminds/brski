@@ -6,8 +6,8 @@
 #include "registrar/registrar_server.h"
 
 extern "C" {
-#include "utils/log.h"
-#include "utils/os.h"
+#include "../utils/log.h"
+#include "../utils/os.h"
 }
 
 #include "config.h"

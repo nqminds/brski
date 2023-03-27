@@ -15,12 +15,12 @@ install(
 # BRSKI_private_lib_dir is set in main CMakeLists.txt, as we need it to set RPATH before targets
 
 #configure_file(
-#  "config.ini.in"
+#  "${PROJECT_SOURCE_DIR}/src/brski/config.ini.in"
 #  "config.ini"
 #  ESCAPE_QUOTES # values are quoted, so we need to escape quotes
 #  @ONLY # we only use @VAR_NAME@ syntax
 #)
-#configure_file(config.ini.in config.ini.in COPYONLY)
+#configure_file("${PROJECT_SOURCE_DIR}/src/brski/config.ini.in" "${PROJECT_SOURCE_DIR}/src/brski/config.ini.in" COPYONLY)
 
 # /etc/brski/config.ini folder
 # runs configure_file again and install config.ini.in

@@ -32,5 +32,5 @@ foreach(required_var IN ITEMS CMAKE_INSTALL_PREFIX CMAKE_INSTALL_LIBDIR build_di
     endif()
 endforeach()
 
-configure_file("config.ini.in" "${build_dir}/config.ini" ESCAPE_QUOTES @ONLY)
+configure_file("${PROJECT_SOURCE_DIR}/src/brski/config.ini.in" "${build_dir}/config.ini" ESCAPE_QUOTES @ONLY)
 file(INSTALL "${build_dir}/config.ini" DESTINATION "${BRSKI_full_config_dir}")
