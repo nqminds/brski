@@ -44,7 +44,8 @@ void free_registrar_config_content(struct registrar_config *rconf) {
   }
 }
 
-int load_registrar_config(const char *filename, struct registrar_config *rconf) {
+int load_registrar_config(const char *filename,
+                          struct registrar_config *rconf) {
   try {
     char *key = new char[MAX_WEB_PATH_LEN];
 
@@ -57,14 +58,16 @@ int load_registrar_config(const char *filename, struct registrar_config *rconf) 
 
     key = new char[MAX_CONFIG_VALUE_SIZE];
 
-    ini_gets("registrar", "tlsCertPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
+    ini_gets("registrar", "tlsCertPath", "", key, MAX_CONFIG_VALUE_SIZE,
+             filename);
     rconf->tls_cert_path = key;
     if (!strlen(rconf->tls_cert_path)) {
       rconf->tls_cert_path = NULL;
       delete[] key;
     }
 
-    ini_gets("registrar", "tlsKeyPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
+    ini_gets("registrar", "tlsKeyPath", "", key, MAX_CONFIG_VALUE_SIZE,
+             filename);
     rconf->tls_key_path = key;
     if (!strlen(rconf->tls_key_path)) {
       rconf->tls_key_path = NULL;
@@ -119,7 +122,8 @@ int load_pledge_config(const char *filename, struct pledge_config *pconf) {
 
     key = new char[MAX_CONFIG_VALUE_SIZE];
 
-    ini_gets("pledge", "serialNumber", "", key, MAX_CONFIG_VALUE_SIZE, filename);
+    ini_gets("pledge", "serialNumber", "", key, MAX_CONFIG_VALUE_SIZE,
+             filename);
     pconf->serial_number = key;
     if (!strlen(pconf->serial_number)) {
       pconf->serial_number = NULL;
@@ -137,7 +141,8 @@ int load_pledge_config(const char *filename, struct pledge_config *pconf) {
 
     key = new char[MAX_CONFIG_VALUE_SIZE];
 
-    ini_gets("pledge", "cmdSignCertPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
+    ini_gets("pledge", "cmdSignCertPath", "", key, MAX_CONFIG_VALUE_SIZE,
+             filename);
     pconf->sign_cert_path = key;
     if (!strlen(pconf->sign_cert_path)) {
       pconf->sign_cert_path = key;
@@ -146,7 +151,8 @@ int load_pledge_config(const char *filename, struct pledge_config *pconf) {
 
     key = new char[MAX_CONFIG_VALUE_SIZE];
 
-    ini_gets("pledge", "cmsSignKeyPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
+    ini_gets("pledge", "cmsSignKeyPath", "", key, MAX_CONFIG_VALUE_SIZE,
+             filename);
     pconf->sign_key_path = key;
     if (!strlen(pconf->sign_key_path)) {
       pconf->sign_key_path = NULL;
@@ -155,7 +161,8 @@ int load_pledge_config(const char *filename, struct pledge_config *pconf) {
 
     key = new char[MAX_CONFIG_VALUE_SIZE];
 
-    ini_gets("pledge", "cmsAdditionalCertsPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
+    ini_gets("pledge", "cmsAdditionalCertsPath", "", key, MAX_CONFIG_VALUE_SIZE,
+             filename);
     pconf->additional_certs_path = key;
     if (!strlen(pconf->additional_certs_path)) {
       pconf->additional_certs_path = NULL;

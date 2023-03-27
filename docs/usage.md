@@ -1,7 +1,7 @@
 # Voucher Library Usage
 
 ## Example CMakeLists.txt file
-Below is an example `cmake` config file to import the voucher library into a `cmake` project and use it with OpenSSL. The path for the static voucher library file `libvoucher.a` is set by the 
+Below is an example `cmake` config file to import the voucher library into a `cmake` project and use it with OpenSSL. The path for the static voucher library file `libvoucher.a` is set by the
 `LIBVOUCHER_LIBRARY` variable and the voucher library include path is set by `LIBVOUCHER_INCLUDE_PATH` variable.
 
 ```cmake

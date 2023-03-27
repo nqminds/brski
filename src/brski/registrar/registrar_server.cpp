@@ -15,8 +15,8 @@ extern "C" {
 }
 
 #include "registrar_api.h"
-#include "registrar_server.h"
 #include "registrar_config.h"
+#include "registrar_server.h"
 
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
   routes.push_back({.path = std::string(PATH_BRSKI_REQUESTVOUCHER),
