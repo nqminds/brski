@@ -1,10 +1,17 @@
 # Local Testing Config
 # Use `config.ini` for use after running `make install`
-[system]
+
+[pledge]
+createdOn = ""
+serialNumber = ""
+nonce = ""
+signCertPath = ""
+signKeyPath = ""
+additionalCerts = ""
+
 [registrar]
 bindAddress = "0.0.0.0"
 port = 12345
+tlsCertPath = ""
 
 [masa]
-
-[pledge]
