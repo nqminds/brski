@@ -1,5 +1,4 @@
 [![GitHub release (latest stable SemVer)](https://img.shields.io/github/v/release/nqminds/brski?label=stable&logo=github&sort=semver)](https://github.com/nqminds/brski/releases)
-[![Build Passing](https://github.com/nqminds/brski/actions/workflows/codeql.yml/badge.svg)](https://github.com/nqminds/brski/actions/workflows/codeql.yml)
 [![GitHub license](https://img.shields.io/github/license/nqminds/brski)](https://github.com/nqminds/brski/blob/main/LICENSE)
 [![Codecov Code Coverage](https://codecov.io/gh/nqminds/brski/branch/main/graph/badge.svg)](https://codecov.io/gh/nqminds/brski)
 ![CMake](https://img.shields.io/badge/CMake-%23008FBA.svg?logo=cmake&logoColor=white)
