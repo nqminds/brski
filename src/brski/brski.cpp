@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "pledge/pledge_utils.h"
 #include "registrar/registrar_server.h"
 
 extern "C" {
@@ -13,8 +14,8 @@ extern "C" {
 #include "config.h"
 #include "version.h"
 
-#define OPT_STRING ":c:dvh"
-#define USAGE_STRING "\t%s [-c filename] [-d] [-h] [-v] <command>\n"
+#define OPT_STRING ":c:odvh"
+#define USAGE_STRING "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n"
 
 enum COMMAND_ID {
   COMMAND_UNKNOWN = 0,
@@ -30,16 +31,16 @@ struct command_config {
 };
 
 const struct command_config command_list[] = {
-  {"epvr", COMMAND_EXPORT_PVR, "\tepvr\t\tExport the pledge voucher request as base64 CMS"},
+  {"epvr", COMMAND_EXPORT_PVR, "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
   {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
   {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
   {NULL, COMMAND_UNKNOWN, NULL}
 };
 
 const char description_string[] =
-    "NquiringMinds BRSKI Server.\n"
+    "NquiringMinds BRSKI protocol tool.\n"
     "\n"
-    "Creates a https EST server implementing the BRSKI protocol\n";
+    "Show, export and manipulate vouchers. Create registrar and MASA servers.\n";
 
 pthread_mutex_t log_lock;
 
@@ -63,7 +64,7 @@ void sighup_handler(int sig, void *ctx) {
 }
 
 void show_version(void) {
-  fprintf(stdout, "brski server version %s\n", BRSKI_VERSION);
+  fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
 }
 
 void show_help(char *name) {
@@ -78,9 +79,10 @@ void show_help(char *name) {
     idx ++;
   }
   fprintf(stdout, "\nOptions:\n");
-  fprintf(stdout, "\t-c filename\t Path to the config file name\n");
+  fprintf(stdout, "\t-c filename\t Path to the config file\n");
+  fprintf(stdout, "\t-o filename\t Path to the exported file\n");
   fprintf(stdout,
-          "\t-d\t\t Verbosity level (use multiple -dd... to increase)\n");
+          "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
   fprintf(stdout, "\t-h\t\t Show help\n");
   fprintf(stdout, "\t-v\t\t Show app version\n\n");
   fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
@@ -119,7 +121,8 @@ enum COMMAND_ID get_command_id(char *command_label) {
 }
 
 void process_options(int argc, char *argv[], uint8_t *verbosity,
-                     char **config_filename, enum COMMAND_ID *command_id) {
+                     char **config_filename, char **out_filename,
+                     enum COMMAND_ID *command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {
@@ -132,6 +135,9 @@ void process_options(int argc, char *argv[], uint8_t *verbosity,
         exit(EXIT_SUCCESS);
       case 'c':
         *config_filename = strdup(optarg);
+        break;
+      case 'o':
+        *out_filename = strdup(optarg);
         break;
       case 'd':
         (*verbosity)++;
@@ -169,10 +175,10 @@ int main(int argc, char *argv[]) {
 
   uint8_t verbosity = 0;
   uint8_t level = 0;
-  char *config_filename = NULL;
+  char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
-  process_options(argc, argv, &verbosity, &config_filename, &command_id);
+  process_options(argc, argv, &verbosity, &config_filename, &out_filename, &command_id);
 
   if (verbosity > MAX_LOG_LEVELS) {
     level = 0;
@@ -198,12 +204,24 @@ int main(int argc, char *argv[]) {
   }
 
   struct RegistrarContext *context = NULL;
-  if (registrar_start(&config.rconf, &context) < 0) {
-    fprintf(stderr, "https_start fail");
-    return EXIT_FAILURE;
-  }
+  switch(command_id) {
+    case COMMAND_EXPORT_PVR:
+      if (export_voucher_pledge_request(&config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
+        fprintf(stderr, "export_voucher_pledge_request fail");
+        return EXIT_FAILURE;
+      }
+      break;
+    case COMMAND_START_REGISTRAR:
+      if (registrar_start(&config.rconf, &context) < 0) {
+        fprintf(stderr, "https_start fail");
+        return EXIT_FAILURE;
+      }
 
-  registrar_stop(context);
+      registrar_stop(context);
+      break;
+    case COMMAND_START_MASA:
+      break;
+  }
 
   if (config_filename != NULL) {
     sys_free(config_filename);

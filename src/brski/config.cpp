@@ -186,7 +186,7 @@ int load_brski_config(const char *filename, struct brski_config *const config) {
   FILE *fp = fopen(filename, "rb");
 
   if (fp == NULL) {
-    log_errno("Couldn't open %s config file.\n", filename);
+    log_errno("Couldn't open %s config file.", filename);
     return -1;
   }
   fclose(fp);
