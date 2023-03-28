@@ -26,8 +26,8 @@ struct brski_config {
 /**
  * @brief Load the BRSKI configuration structure
  *
- * @param filename The BRSKI configuration file
- * @param config The configuration structure
+ * @param[in] filename The BRSKI configuration file
+ * @param[in] config The configuration structure
  * @return 0 on success, -1 otherwise
  */
 int load_brski_config(const char *filename, struct brski_config *config);
@@ -35,7 +35,7 @@ int load_brski_config(const char *filename, struct brski_config *config);
 /**
  * @brief Free the BRSKI configuration structure content
  *
- * @param config The configuration structure
+ * @param[in] config The configuration structure
  */
-void free_config_content(struct brski_config *config);
+void free_config_content(struct brski_config *const config);
 #endif

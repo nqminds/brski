@@ -14,7 +14,28 @@ extern "C" {
 #include "version.h"
 
 #define OPT_STRING ":c:dvh"
-#define USAGE_STRING "\t%s [-c filename] [-d] [-h] [-v]\n"
+#define USAGE_STRING "\t%s [-c filename] [-d] [-h] [-v] <command>\n"
+
+enum COMMAND_ID {
+  COMMAND_UNKNOWN = 0,
+  COMMAND_EXPORT_PVR,
+  COMMAND_START_REGISTRAR,
+  COMMAND_START_MASA,
+};
+
+struct command_config {
+  const char *const label;
+  enum COMMAND_ID id;
+  const char *info;
+};
+
+const struct command_config command_list[] = {
+  {"epvr", COMMAND_EXPORT_PVR, "\tepvr\t\tExport the pledge voucher request as base64 CMS"},
+  {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
+  {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
+  {NULL, COMMAND_UNKNOWN, NULL}
+};
+
 const char description_string[] =
     "NquiringMinds BRSKI Server.\n"
     "\n"
@@ -42,14 +63,20 @@ void sighup_handler(int sig, void *ctx) {
 }
 
 void show_version(void) {
-  fprintf(stdout, "brkisi server version %s\n", BRSKI_VERSION);
+  fprintf(stdout, "brski server version %s\n", BRSKI_VERSION);
 }
 
 void show_help(char *name) {
   show_version();
   fprintf(stdout, "Usage:\n");
-  fprintf(stdout, USAGE_STRING, basename(name));
+  fprintf(stdout, USAGE_STRING"\n", basename(name));
   fprintf(stdout, "%s", description_string);
+  fprintf(stdout, "\nCommands:\n");
+  int idx = 0;
+  while(command_list[idx].label != NULL) {
+    fprintf(stdout, "%s\n", command_list[idx].info);
+    idx ++;
+  }
   fprintf(stdout, "\nOptions:\n");
   fprintf(stdout, "\t-c filename\t Path to the config file name\n");
   fprintf(stdout,
@@ -57,7 +84,6 @@ void show_help(char *name) {
   fprintf(stdout, "\t-h\t\t Show help\n");
   fprintf(stdout, "\t-v\t\t Show app version\n\n");
   fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
-  exit(EXIT_SUCCESS);
 }
 
 /* Diagnose an error in command-line arguments and
@@ -73,22 +99,37 @@ void log_cmdline_error(const char *format, ...) {
   va_end(argList);
 
   fflush(stderr); /* In case stderr is not line-buffered */
-  exit(EXIT_FAILURE);
+}
+
+enum COMMAND_ID get_command_id(char *command_label) {
+  int idx = 0;
+
+  if (command_label == NULL) {
+    return COMMAND_UNKNOWN;  
+  }
+
+  while(command_list[idx].label != NULL) {
+    if (strcmp(command_list[idx].label, command_label) == 0) {
+      return command_list[idx].id;
+    }
+    idx++;
+  }
+
+  return COMMAND_UNKNOWN;
 }
 
 void process_options(int argc, char *argv[], uint8_t *verbosity,
-                     char **config_filename) {
+                     char **config_filename, enum COMMAND_ID *command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {
     switch (opt) {
       case 'h':
         show_help(argv[0]);
-        break;
+        exit(EXIT_SUCCESS);
       case 'v':
         show_version();
         exit(EXIT_SUCCESS);
-        break;
       case 'c':
         *config_filename = strdup(optarg);
         break;
@@ -97,13 +138,26 @@ void process_options(int argc, char *argv[], uint8_t *verbosity,
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
-        break;
+        exit(EXIT_FAILURE);
       case '?':
         log_cmdline_error("Unrecognized option -%c\n", optopt);
-        break;
+        exit(EXIT_FAILURE);
       default:
         show_help(argv[0]);
+        exit(EXIT_FAILURE);
     }
+  }
+
+  char *command_label = argv[optind];
+
+  if (optind <= 1 && command_label == NULL) {
+    show_help(argv[0]);
+    exit(EXIT_SUCCESS);
+  }
+
+  if ((*command_id = get_command_id(command_label)) == COMMAND_UNKNOWN) {
+    log_cmdline_error("Unrecognized command \"%s\"\n", command_label);
+    exit(EXIT_FAILURE);
   }
 }
 
@@ -116,8 +170,9 @@ int main(int argc, char *argv[]) {
   uint8_t verbosity = 0;
   uint8_t level = 0;
   char *config_filename = NULL;
+  enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
-  process_options(argc, argv, &verbosity, &config_filename);
+  process_options(argc, argv, &verbosity, &config_filename, &command_id);
 
   if (verbosity > MAX_LOG_LEVELS) {
     level = 0;
@@ -125,10 +180,6 @@ int main(int argc, char *argv[]) {
     level = MAX_LOG_LEVELS - 1;
   } else {
     level = MAX_LOG_LEVELS - verbosity;
-  }
-
-  if (optind <= 1) {
-    show_help(argv[0]);
   }
 
   if (pthread_mutex_init(&log_lock, NULL) != 0) {

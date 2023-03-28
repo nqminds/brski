@@ -45,7 +45,7 @@ void free_registrar_config_content(struct registrar_config *rconf) {
 }
 
 int load_registrar_config(const char *filename,
-                          struct registrar_config *rconf) {
+                          struct registrar_config *const rconf) {
   try {
     char *key = new char[MAX_WEB_PATH_LEN];
 
@@ -81,7 +81,7 @@ int load_registrar_config(const char *filename,
   return 0;
 }
 
-void free_pledge_config_content(struct pledge_config *pconf) {
+void free_pledge_config_content(struct pledge_config *const pconf) {
   if (pconf != NULL) {
     if (pconf->created_on != NULL) {
       sys_free(pconf->created_on);
@@ -109,7 +109,7 @@ void free_pledge_config_content(struct pledge_config *pconf) {
   }
 }
 
-int load_pledge_config(const char *filename, struct pledge_config *pconf) {
+int load_pledge_config(const char *filename, struct pledge_config *const pconf) {
   try {
     char *key = new char[CREATED_ON_SIZE];
 
@@ -177,12 +177,12 @@ int load_pledge_config(const char *filename, struct pledge_config *pconf) {
   return 0;
 }
 
-void free_config_content(struct brski_config *config) {
+void free_config_content(struct brski_config *const config) {
   free_pledge_config_content(&config->pconf);
   free_registrar_config_content(&config->rconf);
 }
 
-int load_brski_config(const char *filename, struct brski_config *config) {
+int load_brski_config(const char *filename, struct brski_config *const config) {
   FILE *fp = fopen(filename, "rb");
 
   if (fp == NULL) {
