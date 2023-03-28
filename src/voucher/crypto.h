@@ -59,13 +59,12 @@ enum CRYPTO_CERTIFICATE_TYPE {
  * @brief Generate a private RSA key for a given number of bits
  * The generated key is binary (DER) raw format
  *
- * Caller is responsible for freeing the key buffer
+ * Caller is responsible for freeing the key binary array
  *
  * @param[in] bits Number of key bits for RSA
- * @param[out] key The output key buffer (DER format)
- * @return ssize_t the size of the key buffer, -1 on failure
+ * @return struct BinaryArray * the key binary array, NULL on failure
  */
-ssize_t crypto_generate_rsakey(const int bits, uint8_t **key);
+__must_free_binary_array struct BinaryArray * crypto_generate_rsakey(const int bits);
 
 /**
  * @brief Generate a private Elliptic Curve key of the type prime256v1
@@ -273,8 +272,7 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
  *
  * Caller is responsible for freeing the data buffer and output certs buffer
  *
- * @param[in] cms The CMS buffer (DER format) to be verified
- * @param[in] cms_length The CMS buffer length
+ * @param[in] cms The CMS binary array (DER format) to be verified
  * @param[in] certs The list of additional certificate buffers (DER format)
  * @param[in] store The list of trusted certificate for store (DER format)
  * @param[out] data The output data buffer
@@ -282,11 +280,9 @@ ssize_t crypto_sign_rsacms(const uint8_t *data, const size_t data_length,
  * CMS structure (NULL for empty)
  * @return ssize_t the size of the data buffer, -1 on failure
  */
-ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
+ssize_t crypto_verify_cms(const struct BinaryArray *cms,
                           const struct BinaryArrayList *certs,
                           const struct BinaryArrayList *store, uint8_t **data,
                           struct BinaryArrayList **out_certs);
 
-void x509_to_tmpfile(const uint8_t *cert, const size_t length,
-                     const char *filename);
 #endif

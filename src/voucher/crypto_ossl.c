@@ -108,19 +108,46 @@ static int push_ptr_list(struct ptr_list *ptr_list, void *const ptr,
   return 0;
 }
 
-void cms_to_tmpfile(CMS_ContentInfo *cms, const char *filename) {
+int cms_to_file(CMS_ContentInfo *cms, const char *filename) {
   BIO *out = BIO_new_file(filename, "w");
   if (out == NULL) {
     log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
-    return;
+    return -1;
   }
 
   if (!SMIME_write_CMS(out, cms, NULL, CMS_TEXT)) {
     log_error("SMIME_write_CMS fail with code=%s",
               ERR_reason_error_string(ERR_get_error()));
+    BIO_free(out);
+    return -1;
   }
 
   BIO_free(out);
+  return 0;
+}
+
+int x509_to_file(const uint8_t *cert, const size_t length,
+                     const char *filename) {
+  X509 *x509 = crypto_cert2context(cert, length);
+
+  BIO *out = BIO_new_file(filename, "w");
+  if (out == NULL) {
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+    X509_free(x509);
+    return -1;
+  }
+
+  if (!PEM_write_bio_X509(out, x509)) {
+    log_error("PEM_write_bio_X509 fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
+    BIO_free(out);
+    X509_free(x509);
+    return -1;
+  }
+
+  BIO_free(out);
+  X509_free(x509);
+  return 0;
 }
 
 static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
@@ -223,25 +250,26 @@ static CMS_ContentInfo *derbuf_to_cms(const uint8_t *cms,
   return content;
 }
 
-ssize_t crypto_generate_rsakey(const int bits, uint8_t **key) {
+struct BinaryArray * crypto_generate_rsakey(const int bits) {
   EVP_PKEY_CTX *ctx;
   EVP_PKEY *pkey = NULL;
 
+  struct BinaryArray *key = sys_zalloc(sizeof(struct BinaryArray));
   if (key == NULL) {
-    log_error("key param is NULL");
-    return -1;
+    log_errno("sys_zalloc");
+    return NULL;
   }
-
-  *key = NULL;
 
   if ((ctx = EVP_PKEY_CTX_new_id(EVP_PKEY_RSA, NULL)) == NULL) {
     log_error("EVP_PKEY_CTX_new_id fail with code=%lu", ERR_get_error());
-    return -1;
+    free_binary_array(key);
+    return NULL;
   }
 
   if (!EVP_PKEY_keygen_init(ctx)) {
     log_error("EVP_PKEY_keygen_init fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
+    free_binary_array(key);
     return -1;
   }
 
@@ -249,27 +277,29 @@ ssize_t crypto_generate_rsakey(const int bits, uint8_t **key) {
     log_error("EVP_PKEY_CTX_set_rsa_keygen_bits fail with code=%lu",
               ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
-    return -1;
+    free_binary_array(key);
+    return NULL;
   }
 
   if (!EVP_PKEY_keygen(ctx, &pkey)) {
     log_error("EVP_PKEY_keygen fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
-    return -1;
+    free_binary_array(key);
+    return NULL;
   }
+  EVP_PKEY_CTX_free(ctx);
 
-  ssize_t length = evpkey_to_derbuf(pkey, key);
+  key->length = evpkey_to_derbuf(pkey, &key->array);
 
-  if (length < 0) {
+  if (key->length < 0) {
     log_error("evpkey_to_derbuf fail");
     EVP_PKEY_free(pkey);
-    EVP_PKEY_CTX_free(ctx);
-    return -1;
+    free_binary_array(key);
+    return NULL;
   }
 
   EVP_PKEY_free(pkey);
-  EVP_PKEY_CTX_free(ctx);
-  return length;
+  return key;
 }
 
 ssize_t crypto_generate_eckey(uint8_t **key) {
@@ -384,26 +414,6 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
 
   CRYPTO_CERT ctx = (CRYPTO_CERT)pcert;
   return ctx;
-}
-
-void x509_to_tmpfile(const uint8_t *cert, const size_t length,
-                     const char *filename) {
-  X509 *x509 = crypto_cert2context(cert, length);
-
-  BIO *out = BIO_new_file(filename, "w");
-  if (out == NULL) {
-    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
-    X509_free(x509);
-    return;
-  }
-
-  if (!PEM_write_bio_X509(out, x509)) {
-    log_error("PEM_write_bio_X509 fail with code=%s",
-              ERR_reason_error_string(ERR_get_error()));
-  }
-
-  BIO_free(out);
-  X509_free(x509);
 }
 
 void crypto_free_keycontext(CRYPTO_KEY ctx) {
@@ -1181,7 +1191,7 @@ static int exatract_cms_certs(CMS_ContentInfo *cms,
   return 0;
 }
 
-ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
+ssize_t crypto_verify_cms(const struct BinaryArray *cms,
                           const struct BinaryArrayList *certs,
                           const struct BinaryArrayList *store, uint8_t **data,
                           struct BinaryArrayList **out_certs) {
@@ -1195,7 +1205,7 @@ ssize_t crypto_verify_cms(const uint8_t *cms, const size_t cms_length,
     return -1;
   }
 
-  CMS_ContentInfo *content = derbuf_to_cms(cms, cms_length);
+  CMS_ContentInfo *content = derbuf_to_cms(cms->array, cms->length);
   if (content == NULL) {
     log_error("derbuf_to_cms fail");
     return -1;
