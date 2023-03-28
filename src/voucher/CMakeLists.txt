@@ -1,8 +1,10 @@
-add_compile_options(
-  # Enable GCC static analysis if compiling in Debug mode
-  # (warning, is very slow)
-  $<$<AND:$<C_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-fanalyzer>
-)
+if (C_COMPILER_SUPPORTS_ANALYZER)
+  add_compile_options(
+    # Enable GCC static analysis if compiling in Debug mode
+    # (warning, is very slow)
+    $<$<AND:$<C_COMPILER_ID:GNU>,$<CONFIG:Debug>>:-fanalyzer>
+  )
+endif()
 
 add_library(array OBJECT array.c)
 target_link_libraries(array PRIVATE os log)

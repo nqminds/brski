@@ -150,18 +150,6 @@ int x509_to_file(const uint8_t *cert, const size_t length,
   return 0;
 }
 
-static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
-  *key = NULL;
-
-  int length = i2d_PrivateKey(pkey, key);
-  if (length < 0) {
-    log_error("i2d_PrivateKey fail with code=%lu", ERR_get_error());
-    return -1;
-  }
-
-  return (ssize_t)length;
-}
-
 static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
   /*
   For OpenSSL 0.9.7 and later if *cert is NULL memory will be allocated
@@ -179,6 +167,56 @@ static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
   }
 
   return (ssize_t)length;
+}
+
+static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
+  *key = NULL;
+
+  int length = i2d_PrivateKey(pkey, key);
+  if (length < 0) {
+    log_error("i2d_PrivateKey fail with code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  return (ssize_t)length;
+}
+
+struct BinaryArray *file_to_x509buf(const char *filename) {
+  FILE *fp = fopen(filename, "rb");
+
+  if (fp == NULL) {
+    log_errno("Couldn't open %s file.", filename);
+    return NULL;
+  }
+
+  X509 *x509 = PEM_read_X509(fp, NULL, NULL, NULL);
+  if (x509 == NULL) {
+    log_error("PEM_read_X509 fail with code=%lu", ERR_get_error());
+    fclose(fp);
+    return NULL;
+  }
+  fclose(fp);
+
+  struct BinaryArray *cert = sys_zalloc(sizeof(struct BinaryArray));
+
+  if (cert == NULL) {
+    log_errno("sys_zalloc");
+    X509_free(x509);
+    return NULL;
+  }
+
+  ssize_t length = cert_to_derbuf(x509, &cert->array);
+  if (length < 0) {
+    log_error("cert_to_derbuf fail");
+    X509_free(x509);
+    free_binary_array(cert);
+    return NULL;
+  }
+
+  cert->length = length;
+
+  X509_free(x509);
+  return cert;
 }
 
 static ssize_t bio_to_ptr(const BIO *mem, uint8_t **data) {
@@ -270,7 +308,7 @@ struct BinaryArray * crypto_generate_rsakey(const int bits) {
     log_error("EVP_PKEY_keygen_init fail with code=%lu", ERR_get_error());
     EVP_PKEY_CTX_free(ctx);
     free_binary_array(key);
-    return -1;
+    return NULL;
   }
 
   if (!EVP_PKEY_CTX_set_rsa_keygen_bits(ctx, bits)) {
@@ -289,14 +327,16 @@ struct BinaryArray * crypto_generate_rsakey(const int bits) {
   }
   EVP_PKEY_CTX_free(ctx);
 
-  key->length = evpkey_to_derbuf(pkey, &key->array);
+  ssize_t length = evpkey_to_derbuf(pkey, &key->array);
 
-  if (key->length < 0) {
+  if (length < 0) {
     log_error("evpkey_to_derbuf fail");
     EVP_PKEY_free(pkey);
     free_binary_array(key);
     return NULL;
   }
+
+  key->length = length;
 
   EVP_PKEY_free(pkey);
   return key;

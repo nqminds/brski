@@ -285,4 +285,13 @@ ssize_t crypto_verify_cms(const struct BinaryArray *cms,
                           const struct BinaryArrayList *store, uint8_t **data,
                           struct BinaryArrayList **out_certs);
 
+/**
+ * @brief Convert a x509 PEM file to a x509 DER binary array
+ *
+ * Caller is responsible for freeing the binary array
+ *
+ * @param[in] filename The x509 PEM file
+ * @return struct BinaryArray * the output DER binary array, NULL on failure
+ */
+struct BinaryArray *file_to_x509buf(const char *filename);
 #endif

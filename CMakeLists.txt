@@ -219,6 +219,8 @@ if (NOT BUILD_ONLY_DOCS)
     )
   endif()
 
+  check_c_compiler_flag("-fanalyzer" C_COMPILER_SUPPORTS_ANALYZER)
+
   if (SANITIZE_ADDRESS)
     include(CheckCCompilerFlag)
 

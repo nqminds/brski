@@ -41,7 +41,8 @@
       "displayName": "Linux with OpenSSL",
       "description": "Build OpenSSL",
       "cacheVariables": {
-        "BUILD_OPENSSL3_LIB": true
+        "BUILD_OPENSSL3_LIB": true,
+        "SANITIZE_ADDRESS": false
       }
     },
     {
