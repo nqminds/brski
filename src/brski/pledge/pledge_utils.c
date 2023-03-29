@@ -13,13 +13,11 @@
 
 #include "pledge_config.h"
 
-extern "C" {
 #include "../../utils/log.h"
 #include "../../voucher/array.h"
 #include "../../voucher/crypto.h"
 #include "../../voucher/serialize.h"
 #include "../../voucher/voucher.h"
-}
 
 int export_voucher_pledge_request(const struct pledge_config *pconf,
                                   const char *tls_cert_path,

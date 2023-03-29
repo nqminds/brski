@@ -3,10 +3,10 @@
 #include <string.h>
 #include <unistd.h>
 
-#include "pledge/pledge_utils.h"
 #include "registrar/registrar_server.h"
 
 extern "C" {
+#include "pledge/pledge_utils.h"
 #include "../utils/log.h"
 #include "../utils/os.h"
 }

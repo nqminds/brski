@@ -107,7 +107,7 @@ cmake --build build/ -j4 # or make -j4
 cmake --build build/ --target test -j4 # or 'make test'
 ```
 
-To run each test individually, the test binaries can be located in `./build/tests` folder.
+To run each test individually, the test binaries are located in `./build/preset_name/tests` folder.
 
 
 ## Developer Documentation
