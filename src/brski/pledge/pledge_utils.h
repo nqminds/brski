@@ -17,7 +17,8 @@
  * @brief Export a pledge-voucher request as base64 CMS file
  *
  * @param[in] pconf The pledge configuration structure
- * @param[in] tls_cert_path The path to the registrar certificate file (base64 format)
+ * @param[in] tls_cert_path The path to the registrar certificate file (base64
+ * format)
  * @param[in] out_path The path to the export file
  * @return 0 on success, -1 on failure
  */

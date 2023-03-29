@@ -708,8 +708,8 @@ static void test_sign_cms_voucher(void **state) {
   struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
   assert_non_null(rsa_key);
 
-  cert.length =
-      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert.array);
+  cert.length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length,
+                                        &cert.array);
 
   struct BinaryArray *rsa_key_in_list = crypto_generate_rsakey(2048);
   cert_in_list_length = crypto_generate_rsacert(

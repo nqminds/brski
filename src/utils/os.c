@@ -91,3 +91,22 @@ size_t sys_strnlen_s(const char *const str, const size_t max_len) {
 
   return end - str;
 }
+
+int get_localtime(struct tm *current) {
+  time_t ltime;
+  struct tm *newtime;
+
+  if (current == NULL) {
+    log_error("current is NULL");
+    return -1;
+  }
+
+  time(&ltime);
+  if ((newtime = localtime(&ltime)) == NULL) {
+    log_errno("localtime");
+    return -1;
+  }
+  sys_memcpy(current, newtime, sizeof(struct tm));
+
+  return 0;
+}

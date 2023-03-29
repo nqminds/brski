@@ -14,8 +14,9 @@ extern "C" {
 #include "config.h"
 #include "version.h"
 
-#define OPT_STRING ":c:odvh"
-#define USAGE_STRING "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n"
+#define OPT_STRING ":c:o:dvh"
+#define USAGE_STRING                                                           \
+  "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n"
 
 enum COMMAND_ID {
   COMMAND_UNKNOWN = 0,
@@ -31,16 +32,16 @@ struct command_config {
 };
 
 const struct command_config command_list[] = {
-  {"epvr", COMMAND_EXPORT_PVR, "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
-  {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
-  {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
-  {NULL, COMMAND_UNKNOWN, NULL}
-};
+    {"epvr", COMMAND_EXPORT_PVR,
+     "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
+    {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
+    {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
+    {NULL, COMMAND_UNKNOWN, NULL}};
 
-const char description_string[] =
-    "NquiringMinds BRSKI protocol tool.\n"
-    "\n"
-    "Show, export and manipulate vouchers. Create registrar and MASA servers.\n";
+const char description_string[] = "NquiringMinds BRSKI protocol tool.\n"
+                                  "\n"
+                                  "Show, export and manipulate vouchers. "
+                                  "Create registrar and MASA servers.\n";
 
 pthread_mutex_t log_lock;
 
@@ -70,19 +71,20 @@ void show_version(void) {
 void show_help(char *name) {
   show_version();
   fprintf(stdout, "Usage:\n");
-  fprintf(stdout, USAGE_STRING"\n", basename(name));
+  fprintf(stdout, USAGE_STRING "\n", basename(name));
   fprintf(stdout, "%s", description_string);
   fprintf(stdout, "\nCommands:\n");
   int idx = 0;
-  while(command_list[idx].label != NULL) {
+  while (command_list[idx].label != NULL) {
     fprintf(stdout, "%s\n", command_list[idx].info);
-    idx ++;
+    idx++;
   }
   fprintf(stdout, "\nOptions:\n");
   fprintf(stdout, "\t-c filename\t Path to the config file\n");
   fprintf(stdout, "\t-o filename\t Path to the exported file\n");
-  fprintf(stdout,
-          "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
+  fprintf(
+      stdout,
+      "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
   fprintf(stdout, "\t-h\t\t Show help\n");
   fprintf(stdout, "\t-v\t\t Show app version\n\n");
   fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
@@ -107,10 +109,10 @@ enum COMMAND_ID get_command_id(char *command_label) {
   int idx = 0;
 
   if (command_label == NULL) {
-    return COMMAND_UNKNOWN;  
+    return COMMAND_UNKNOWN;
   }
 
-  while(command_list[idx].label != NULL) {
+  while (command_list[idx].label != NULL) {
     if (strcmp(command_list[idx].label, command_label) == 0) {
       return command_list[idx].id;
     }
@@ -178,7 +180,8 @@ int main(int argc, char *argv[]) {
   char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
-  process_options(argc, argv, &verbosity, &config_filename, &out_filename, &command_id);
+  process_options(argc, argv, &verbosity, &config_filename, &out_filename,
+                  &command_id);
 
   if (verbosity > MAX_LOG_LEVELS) {
     level = 0;
@@ -204,9 +207,11 @@ int main(int argc, char *argv[]) {
   }
 
   struct RegistrarContext *context = NULL;
-  switch(command_id) {
+  switch (command_id) {
     case COMMAND_EXPORT_PVR:
-      if (export_voucher_pledge_request(&config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
+      fprintf(stdout, "Exporting pledge voucher request to %s", out_filename);
+      if (export_voucher_pledge_request(
+              &config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
         fprintf(stderr, "export_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }

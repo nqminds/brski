@@ -108,26 +108,52 @@ static int push_ptr_list(struct ptr_list *ptr_list, void *const ptr,
   return 0;
 }
 
-int cms_to_file(CMS_ContentInfo *cms, const char *filename) {
-  BIO *out = BIO_new_file(filename, "w");
-  if (out == NULL) {
-    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+static CMS_ContentInfo *derbuf_to_cms(const uint8_t *cms,
+                                      const ssize_t cms_length) {
+  CMS_ContentInfo *content = NULL;
+  const unsigned char *pp = (unsigned char *)cms;
+  if (d2i_CMS_ContentInfo(&content, &pp, cms_length) == NULL) {
+    log_error("d2i_CMS_ContentInfo fail with code=%lu", ERR_get_error());
+    return NULL;
+  }
+
+  return content;
+}
+
+int cmsbuf_to_file(const struct BinaryArray *cms, const char *filename) {
+  if (cms == NULL) {
+    log_error("cms is NULL");
     return -1;
   }
 
-  if (!SMIME_write_CMS(out, cms, NULL, CMS_TEXT)) {
-    log_error("SMIME_write_CMS fail with code=%s",
-              ERR_reason_error_string(ERR_get_error()));
+  CMS_ContentInfo *content = derbuf_to_cms(cms->array, cms->length);
+
+  if (content == NULL) {
+    log_error("derbuf_to_cms fail");
+    return -1;
+  }
+
+  BIO *out = BIO_new_file(filename, "w");
+  if (out == NULL) {
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+    CMS_ContentInfo_free(content);
+    return -1;
+  }
+
+  if (!SMIME_write_CMS(out, content, NULL, CMS_TEXT)) {
+    log_error("SMIME_write_CMS fail with code=%lu", ERR_get_error());
     BIO_free(out);
+    CMS_ContentInfo_free(content);
     return -1;
   }
 
   BIO_free(out);
+  CMS_ContentInfo_free(content);
   return 0;
 }
 
 int x509_to_file(const uint8_t *cert, const size_t length,
-                     const char *filename) {
+                 const char *filename) {
   X509 *x509 = crypto_cert2context(cert, length);
 
   BIO *out = BIO_new_file(filename, "w");
@@ -219,6 +245,44 @@ struct BinaryArray *file_to_x509buf(const char *filename) {
   return cert;
 }
 
+struct BinaryArray *file_to_keybuf(const char *filename) {
+  FILE *fp = fopen(filename, "rb");
+
+  if (fp == NULL) {
+    log_errno("Couldn't open %s file.", filename);
+    return NULL;
+  }
+
+  EVP_PKEY *pkey = PEM_read_PrivateKey(fp, NULL, NULL, NULL);
+  if (pkey == NULL) {
+    log_error("PEM_read_PrivateKey fail with code=%lu", ERR_get_error());
+    fclose(fp);
+    return NULL;
+  }
+  fclose(fp);
+
+  struct BinaryArray *key = sys_zalloc(sizeof(struct BinaryArray));
+
+  if (key == NULL) {
+    log_errno("sys_zalloc");
+    EVP_PKEY_free(pkey);
+    return NULL;
+  }
+
+  ssize_t length = evpkey_to_derbuf(pkey, &key->array);
+  if (length < 0) {
+    log_error("evpkey_to_derbuf fail");
+    EVP_PKEY_free(pkey);
+    free_binary_array(key);
+    return NULL;
+  }
+
+  key->length = length;
+
+  EVP_PKEY_free(pkey);
+  return key;
+}
+
 static ssize_t bio_to_ptr(const BIO *mem, uint8_t **data) {
   *data = NULL;
 
@@ -276,19 +340,7 @@ static X509_CRL *derbuf_to_crl(const uint8_t *crl, const size_t length) {
   return crl_cert;
 }
 
-static CMS_ContentInfo *derbuf_to_cms(const uint8_t *cms,
-                                      const ssize_t cms_length) {
-  CMS_ContentInfo *content = NULL;
-  const unsigned char *pp = (unsigned char *)cms;
-  if (d2i_CMS_ContentInfo(&content, &pp, cms_length) == NULL) {
-    log_error("d2i_CMS_ContentInfo fail with code=%lu", ERR_get_error());
-    return NULL;
-  }
-
-  return content;
-}
-
-struct BinaryArray * crypto_generate_rsakey(const int bits) {
+struct BinaryArray *crypto_generate_rsakey(const int bits) {
   EVP_PKEY_CTX *ctx;
   EVP_PKEY *pkey = NULL;
 

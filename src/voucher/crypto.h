@@ -64,7 +64,8 @@ enum CRYPTO_CERTIFICATE_TYPE {
  * @param[in] bits Number of key bits for RSA
  * @return struct BinaryArray * the key binary array, NULL on failure
  */
-__must_free_binary_array struct BinaryArray * crypto_generate_rsakey(const int bits);
+__must_free_binary_array struct BinaryArray *
+crypto_generate_rsakey(const int bits);
 
 /**
  * @brief Generate a private Elliptic Curve key of the type prime256v1
@@ -286,12 +287,31 @@ ssize_t crypto_verify_cms(const struct BinaryArray *cms,
                           struct BinaryArrayList **out_certs);
 
 /**
- * @brief Convert a x509 PEM file to a x509 DER binary array
+ * @brief Convert a x509 PEM file to a DER binary array
  *
  * Caller is responsible for freeing the binary array
  *
- * @param[in] filename The x509 PEM file
+ * @param[in] filename The x509 PEM file path
  * @return struct BinaryArray * the output DER binary array, NULL on failure
  */
 struct BinaryArray *file_to_x509buf(const char *filename);
+
+/**
+ * @brief Convert a key PEM file to a DER binary array
+ *
+ * Caller is responsible for freeing the binary array
+ *
+ * @param[in] filename The key PEM file path
+ * @return struct BinaryArray * the output DER binary array, NULL on failure
+ */
+struct BinaryArray *file_to_keybuf(const char *filename);
+
+/**
+ * @brief Saves a cms binary array to a SMIME file
+ *
+ * @param[in] cms The cms binary array (DER format)
+ * @param[in] filename The output file path
+ * @return struct BinaryArray * the output DER binary array, NULL on failure
+ */
+int cmsbuf_to_file(const struct BinaryArray *cms, const char *filename);
 #endif

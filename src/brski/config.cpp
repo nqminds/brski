@@ -66,6 +66,8 @@ int load_registrar_config(const char *filename,
       delete[] key;
     }
 
+    key = new char[MAX_CONFIG_VALUE_SIZE];
+
     ini_gets("registrar", "tlsKeyPath", "", key, MAX_CONFIG_VALUE_SIZE,
              filename);
     rconf->tls_key_path = key;
@@ -109,7 +111,8 @@ void free_pledge_config_content(struct pledge_config *const pconf) {
   }
 }
 
-int load_pledge_config(const char *filename, struct pledge_config *const pconf) {
+int load_pledge_config(const char *filename,
+                       struct pledge_config *const pconf) {
   try {
     char *key = new char[CREATED_ON_SIZE];
 
@@ -141,7 +144,7 @@ int load_pledge_config(const char *filename, struct pledge_config *const pconf) 
 
     key = new char[MAX_CONFIG_VALUE_SIZE];
 
-    ini_gets("pledge", "cmdSignCertPath", "", key, MAX_CONFIG_VALUE_SIZE,
+    ini_gets("pledge", "cmsSignCertPath", "", key, MAX_CONFIG_VALUE_SIZE,
              filename);
     pconf->sign_cert_path = key;
     if (!strlen(pconf->sign_cert_path)) {

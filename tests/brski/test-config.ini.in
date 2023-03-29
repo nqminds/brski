@@ -5,14 +5,14 @@
 createdOn = "1973-11-29T21:33:09Z"
 serialNumber = "12345"
 nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
-cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.crt"
 cmsSignKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.key"
+cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.crt"
 cmsAdditionalCertsPath = ""
 
 [registrar]
 bindAddress = "0.0.0.0"
 port = 12345
-tlsCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.crt"
 tlsKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.key"
+tlsCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.crt"
 
 [masa]

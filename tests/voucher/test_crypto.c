@@ -103,7 +103,8 @@ static void test_crypto_generate_eccert(void **state) {
   sys_free(key);
 
   struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
-  length = crypto_generate_eccert(&meta, rsa_key->array, rsa_key->length, &cert);
+  length =
+      crypto_generate_eccert(&meta, rsa_key->array, rsa_key->length, &cert);
   assert_true(length < 0);
   assert_null(cert);
   free_binary_array(rsa_key);
@@ -144,7 +145,8 @@ static void test_crypto_generate_rsacert(void **state) {
 
   struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
 
-  length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
+  length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
@@ -168,7 +170,8 @@ static void test_crypto_generate_rsacert(void **state) {
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
-  length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
+  length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
@@ -248,10 +251,11 @@ static void test_crypto_sign_eccms(void **state) {
   cms = NULL;
   struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
   assert_non_null(rsa_key);
-  cert_length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
+  cert_length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
 
-  length = crypto_sign_eccms(data, data_length, cert, cert_length, rsa_key->array,
-                             rsa_key->length, certs, &cms);
+  length = crypto_sign_eccms(data, data_length, cert, cert_length,
+                             rsa_key->array, rsa_key->length, certs, &cms);
   assert_true(length < 0);
   assert_null(cms);
   sys_free(cms);
@@ -287,9 +291,10 @@ static void test_crypto_sign_rsacms(void **state) {
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
-  ssize_t cert_length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
+  ssize_t cert_length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
 
-  struct BinaryArray * rsa_key_in_list = crypto_generate_rsakey(2048);
+  struct BinaryArray *rsa_key_in_list = crypto_generate_rsakey(2048);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_rsacert(
       &meta, rsa_key_in_list->array, rsa_key_in_list->length, &cert_in_list);
@@ -312,15 +317,15 @@ static void test_crypto_sign_rsacms(void **state) {
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, rsa_key->array,
-                              rsa_key->length, NULL, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length,
+                              rsa_key->array, rsa_key->length, NULL, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
 
   cms = NULL;
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, rsa_key->array,
-                              rsa_key->length, certs, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length,
+                              rsa_key->array, rsa_key->length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
@@ -581,7 +586,8 @@ static void test_crypto_sign_cms(void **state) {
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
-  ssize_t cert_length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
+  ssize_t cert_length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
 
   struct BinaryArray *rsa_key_in_list = crypto_generate_rsakey(2048);
   uint8_t *cert_in_list = NULL;
@@ -728,8 +734,8 @@ static void test_crypto_verify_cms(void **state) {
 
   struct BinaryArrayList *out_certs = NULL;
   extracted_data = NULL;
-  extracted_data_legth = crypto_verify_cms(&cms, NULL, NULL,
-                                           &extracted_data, &out_certs);
+  extracted_data_legth =
+      crypto_verify_cms(&cms, NULL, NULL, &extracted_data, &out_certs);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 
