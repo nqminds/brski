@@ -91,6 +91,8 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=/custom_folder_path --preset linux
 ```
 
 The cmake installs the following artifacts:
+- `/../bin/brksi` - `BRSKI` tool
+- `/../etc/brski/config.ini` - `BRSKI` tool config file
 - `/../lib/libvoucher.a` - voucher static library
 - `/../include/voucher/array.h` - the array helper include file
 - `/../include/voucher/voucher.h` - the voucher API include file
@@ -113,3 +115,4 @@ To run each test individually, the test binaries can be located in `./build/test
 1. Voucher artifact [API](./docs/voucher.md).
 2. `BRSKI` voucher request [API](./docs/brski.md).
 3. Array helpers [API](./docs/array.md).
+4. Usage [examples](./docs/usage.md)
