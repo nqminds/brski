@@ -13,6 +13,6 @@ target_include_directories(brski PRIVATE ${PROJECT_BINARY_DIR})
 # This config file is for development, not for `make install` use
 configure_file(
   "${PROJECT_SOURCE_DIR}/src/brski/dev-config.ini.in"
-  "${PROJECT_BINARY_DIR}/dev-config.ini"
+  "${PROJECT_BINARY_DIR}/src/brski/dev-config.ini"
   @ONLY
 )
