@@ -1,4 +1,4 @@
-# Voucher Library Usage
+# BRSKI Usage
 
 ## Voucher Library Usage
 ## Example CMakeLists.txt file
@@ -39,7 +39,7 @@ target_link_libraries(libtest PRIVATE Voucher::Voucher OpenSSL::Crypto)
 
 To export a pledge voucher request to a `CMS` `SMIME` file `out.cms` use the following command `epvr`:
 ```bash
-brski -c config.ini -o out.cms epvr
+$ brski -c config.ini -o out.cms epvr
 ```
 where the example `config.ini` file is defined as follows:
 
