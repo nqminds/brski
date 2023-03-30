@@ -19,34 +19,28 @@
 #include "../../voucher/serialize.h"
 #include "../../voucher/voucher.h"
 
-int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
-                                  const char *tls_cert_path,
-                                  const char *out_path) {
+struct BinaryArray* voucher_pledge_request_to_array(const struct pledge_config *pconf,
+                                  const char *tls_cert_path) {
   if (pconf == NULL) {
     log_error("pconf is NULL");
-    return -1;
+    return NULL;
   }
 
   if (tls_cert_path == NULL) {
     log_error("tls_cert_path is NULL");
-    return -1;
-  }
-
-  if (out_path == NULL) {
-    log_error("out_path is NULL");
-    return -1;
+    return NULL;
   }
 
   struct tm created_on = {0};
   if (pconf->created_on == NULL) {
     if (get_localtime(&created_on) < 0) {
       log_error("get_localtime fail");
-      return -1;
+      return NULL;
     }
   } else {
     if (serialize_str2time(pconf->created_on, &created_on) < 0) {
       log_error("serialize_str2time fail");
-      return -1;
+      return NULL;
     }
   }
 
@@ -55,7 +49,7 @@ int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
     if ((nonce = (struct BinaryArray *)sys_zalloc(
              sizeof(struct BinaryArray))) == NULL) {
       log_errno("sys_zalloc");
-      return -1;
+      return NULL;
     }
     ssize_t length;
     if ((length = serialize_base64str2array(
@@ -63,7 +57,7 @@ int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
              &nonce->array)) < 0) {
       log_errno("serialize_base64str2array fail");
       free_binary_array(nonce);
-      return -1;
+      return NULL;
     } 
     nonce->length = length;
   }
@@ -97,18 +91,12 @@ int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
     goto voucher_pledge_request_to_smimefile_fail;
   }
 
-  if (cmsbuf_to_file(cms, out_path) < 0) {
-    log_error("cmsbuf_to_file fail");
-    goto voucher_pledge_request_to_smimefile_fail;
-  }
-
   free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);
   free_binary_array(pledge_sign_cert);
   free_binary_array(pledge_sign_key);
-  free_binary_array(cms);
 
-  return 0;
+  return cms;
 voucher_pledge_request_to_smimefile_fail:
   free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);
@@ -116,5 +104,53 @@ voucher_pledge_request_to_smimefile_fail:
   free_binary_array(pledge_sign_key);
   free_binary_array(cms);
 
-  return -1;
+  return NULL;
+}
+
+int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
+                                  const char *tls_cert_path,
+                                  const char *out_path) {
+  
+  if (out_path == NULL) {
+    log_error("out_path is NULL");
+    return -1;
+  }
+
+  struct BinaryArray *cms = voucher_pledge_request_to_array(pconf, tls_cert_path);
+
+  if (cms == NULL) {
+    log_error("voucher_pledge_request_to_array fail");
+    return -1;
+  }
+
+  if (cmsbuf_to_file(cms, out_path) < 0) {
+    log_error("cmsbuf_to_file fail");
+    free_binary_array(cms);
+    return -1;
+  }
+
+  free_binary_array(cms);
+
+  return 0;
+}
+
+char * voucher_pledge_request_to_base64(const struct pledge_config *pconf,
+                                  const char *tls_cert_path) {
+  struct BinaryArray *cms = voucher_pledge_request_to_array(pconf, tls_cert_path);
+
+  if (cms == NULL) {
+    log_error("voucher_pledge_request_to_array fail");
+    return NULL;
+  }
+
+  char *base64 = NULL;
+  if (serialize_array2base64str(cms->array, cms->length, (uint8_t **)&base64) < 0) {
+    log_error("serialize_array2base64str fail");
+    free_binary_array(cms);
+    return NULL;
+  }
+
+  free_binary_array(cms);
+
+  return base64;
 }

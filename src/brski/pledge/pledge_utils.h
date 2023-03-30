@@ -14,7 +14,7 @@
 #include "pledge_config.h"
 
 /**
- * @brief Export a pledge-voucher request to base64 SMIME CMS file
+ * @brief Export a pledge-voucher request to SMIME CMS file
  *
  * @param[in] pconf The pledge configuration structure
  * @param[in] tls_cert_path The path to the registrar certificate file (base64
@@ -26,4 +26,16 @@ int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
                                   const char *tls_cert_path,
                                   const char *out_path);
 
+/**
+ * @brief Export a pledge-voucher request to base64 encoded string
+ *
+ * The caller is reponsible for freeing the returned string
+ * 
+ * @param[in] pconf The pledge configuration structure
+ * @param[in] tls_cert_path The path to the registrar certificate file (base64
+ * format)
+ * @return char * the returned base64 encoded string, NULL on failure
+ */
+__must_sys_free char * voucher_pledge_request_to_base64(const struct pledge_config *pconf,
+                                  const char *tls_cert_path);
 #endif
