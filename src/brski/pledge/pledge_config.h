@@ -11,13 +11,15 @@
 #ifndef PLEDGE_CONFIG_H
 #define PLEDGE_CONFIG_H
 
+#include "../../voucher/array.h"
+
 struct pledge_config {
   char *created_on;
   char *serial_number;
   char *nonce;
   char *sign_cert_path;
   char *sign_key_path;
-  char *additional_certs_path;
+  struct BinaryArrayList *additional_cert_paths;
 };
 
 #endif

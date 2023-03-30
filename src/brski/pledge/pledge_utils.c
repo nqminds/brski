@@ -19,6 +19,44 @@
 #include "../../voucher/serialize.h"
 #include "../../voucher/voucher.h"
 
+int load_cert_files(struct BinaryArrayList *cert_paths, struct BinaryArrayList **out) {
+  *out = NULL;
+
+  if (cert_paths == NULL) {
+    return 0;
+  }
+
+  if (!dl_list_len(&cert_paths->list)) {
+    return 0;
+  }
+
+  if ((*out = init_array_list()) == NULL) {
+    log_error("init_array_list fail");
+    return -1;
+  }
+
+  struct BinaryArrayList *cert_path = NULL;
+  dl_list_for_each(cert_path, &cert_paths->list, struct BinaryArrayList, list) {
+    struct BinaryArray *cert = NULL;
+    char *cert_path_str = (char *)cert_path->arr;
+    if ((cert = file_to_x509buf(cert_path_str)) == NULL) {
+      log_error("file_to_x509buf fail");
+      free_array_list(*out);
+      return -1;
+    }
+
+    if (push_array_list(*out, cert->array, cert->length, 0) < 0) {
+      log_error("push_array_list fail");
+      free_binary_array(cert);
+      free_array_list(*out);
+      return -1;
+    }
+    free_binary_array(cert);
+  }
+
+  return 0;
+}
+
 struct BinaryArray* voucher_pledge_request_to_array(const struct pledge_config *pconf,
                                   const char *tls_cert_path) {
   if (pconf == NULL) {
@@ -65,6 +103,7 @@ struct BinaryArray* voucher_pledge_request_to_array(const struct pledge_config *
   struct BinaryArray *registrar_tls_cert = NULL;
   struct BinaryArray *pledge_sign_cert = NULL;
   struct BinaryArray *pledge_sign_key = NULL;
+  struct BinaryArrayList *additional_pledge_certs = NULL;
   struct BinaryArray *cms = NULL;
 
   if ((registrar_tls_cert = file_to_x509buf(tls_cert_path)) == NULL) {
@@ -82,9 +121,14 @@ struct BinaryArray* voucher_pledge_request_to_array(const struct pledge_config *
     goto voucher_pledge_request_to_smimefile_fail;
   }
 
+  if (load_cert_files(pconf->additional_cert_paths, &additional_pledge_certs) < 0) {
+    log_error("load_cert_files");
+    goto voucher_pledge_request_to_smimefile_fail;
+  }
+
   cms = sign_pledge_voucher_request(&created_on, pconf->serial_number, nonce,
                                     registrar_tls_cert, pledge_sign_cert,
-                                    pledge_sign_key, NULL);
+                                    pledge_sign_key, additional_pledge_certs);
 
   if (cms == NULL) {
     log_error("sign_pledge_voucher_request fail");
@@ -95,6 +139,7 @@ struct BinaryArray* voucher_pledge_request_to_array(const struct pledge_config *
   free_binary_array(registrar_tls_cert);
   free_binary_array(pledge_sign_cert);
   free_binary_array(pledge_sign_key);
+  free_array_list(additional_pledge_certs);
 
   return cms;
 voucher_pledge_request_to_smimefile_fail:
@@ -102,6 +147,7 @@ voucher_pledge_request_to_smimefile_fail:
   free_binary_array(registrar_tls_cert);
   free_binary_array(pledge_sign_cert);
   free_binary_array(pledge_sign_key);
+  free_array_list(additional_pledge_certs);
   free_binary_array(cms);
 
   return NULL;

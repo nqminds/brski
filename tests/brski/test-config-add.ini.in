@@ -1,0 +1,19 @@
+# Local Testing Config
+# Use `config.ini` for use after running `make install`
+
+[pledge]
+createdOn = "1973-11-29T21:33:09Z"
+serialNumber = "12345"
+nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
+cmsSignKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.key"
+cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.crt"
+cmsAdditionalCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms-add1.crt"
+cmsAdditionalCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms-add2.crt"
+
+[registrar]
+bindAddress = "0.0.0.0"
+port = 12345
+tlsKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.key"
+tlsCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.crt"
+
+[masa]
