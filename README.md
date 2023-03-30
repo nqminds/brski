@@ -3,13 +3,13 @@
 [![GitHub license](https://img.shields.io/github/license/nqminds/brski)](https://github.com/nqminds/brski/blob/main/LICENSE)
 ![CMake](https://img.shields.io/badge/CMake-%23008FBA.svg?logo=cmake&logoColor=white)
 ![C11](https://img.shields.io/badge/C11-informational.svg?logo=c)
-# Bootstrapping Remote Secure Key Infrastructure (BRSKI) reference implementation
+# Bootstrapping Remote Secure Key Infrastructure - reference implementation
 
 The Bootstrapping Remote Secure Key Infrastructure (BRSKI) protocol provides a solution for secure zero-touch (automated) bootstrap of new (unconfigured) devices that are called "pledges". Pledges have an Initial Device Identifier (IDevID) installed in them at the factory.
 
-For more information on the `BRSKI` protocol, please check the [RFC8995](https://www.rfc-editor.org/rfc/rfc8995.html).
+For more information on the BRSKI protocol, please check the [RFC8995](https://www.rfc-editor.org/rfc/rfc8995.html).
 
-This repo provides a reference implementation for the `BRSKI` protocol in `C` language.
+This repo provides a reference implementation for the BRSKI protocol in `C` language.
 
 ## Features
 1. Voucher artifact implementation as per [RFC8366](https://www.rfc-editor.org/info/rfc8366),
@@ -20,9 +20,9 @@ This repo provides a reference implementation for the `BRSKI` protocol in `C` la
 
 ## Compile & Build
 
-Compiling the `BRSKI` voucher library is done with CMake.
+Compiling the BRSKI voucher library is done with CMake.
 
-If you have CMake v3.22+, you can use the following `cmake-presets` to compile `BRSKI`:
+If you have CMake v3.22+, you can use the following `cmake-presets` to compile BRSKI:
 
 ```bash
 cmake --list-presets # list all available presets
@@ -42,7 +42,7 @@ Configure `cmake` in the `build/` directory by running the following:
 cmake -S . -B build
 ```
 
-The configure stage will download some of the `BRSKI` dependencies, so this may take a while.
+The configure stage will download some of the BRSKI dependencies, so this may take a while.
 
 ### Building
 
@@ -66,7 +66,7 @@ After succesful compilation the binary will be located in `./build/src` folder.
 
 ## Running
 
-To run the `BRSKI` binary with the configuration file `dev-config.ini` located in `./build` folder use:
+To run the BRSKI binary with the configuration file `dev-config.ini` located in `./build` folder use:
 
 ```bash
 ./build/src/brski -c ./build/dev-config.ini
@@ -91,8 +91,8 @@ cmake -DCMAKE_INSTALL_PREFIX:PATH=/custom_folder_path --preset linux
 ```
 
 The cmake installs the following artifacts:
-- `/../bin/brksi` - `BRSKI` tool
-- `/../etc/brski/config.ini` - `BRSKI` tool config file
+- `/../bin/brksi` - BRSKI tool
+- `/../etc/brski/config.ini` - BRSKI tool config file
 - `/../lib/libvoucher.a` - voucher static library
 - `/../include/voucher/array.h` - the array helper include file
 - `/../include/voucher/voucher.h` - the voucher API include file
@@ -113,6 +113,6 @@ To run each test individually, the test binaries are located in `./build/preset_
 ## Developer Documentation
 
 1. Voucher artifact [API](./docs/voucher.md).
-2. `BRSKI` voucher request [API](./docs/brski.md).
+2. BRSKI voucher request [API](./docs/brski.md).
 3. Array helpers [API](./docs/array.md).
 4. Usage [examples](./docs/usage.md)
