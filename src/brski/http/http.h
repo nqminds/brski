@@ -51,7 +51,7 @@ struct RouteTuple {
 };
 
 struct http_config {
-  char bindAddress[MAX_WEB_PATH_LEN];
+  char *bind_address;
   unsigned int port;
 };
 

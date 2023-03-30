@@ -19,13 +19,28 @@
 #include "utils/log.h"
 #include "utils/os.h"
 
-#include "voucher/array.h"
+#include "brski/pledge/pledge_utils.h"
+#include "brski/config.h"
 
+#define TEST_CMS_OUT_PATH "/tmp/test_out.cms"
 
 static void test_export_voucher_pledge_request(void **state) {
   (void)state;
+  struct brski_config config = {0};
+
+  load_brski_config(TEST_CONFIG_INI_PATH, &config);
+  int res = voucher_pledge_request_to_smimefile(&config.pconf, config.rconf.tls_cert_path, TEST_CMS_OUT_PATH);
+  assert_int_equal(res, 0);
+
+  free_config_content(&config);
 }
 
+static int teardown(void **state) {
+  (void)state;
+
+  unlink(TEST_CMS_OUT_PATH);
+  return 0;
+}
 int main(int argc, char *argv[]) {
   (void)argc;
   (void)argv;
@@ -36,5 +51,5 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_export_voucher_pledge_request)
   };
 
-  return cmocka_run_group_tests(tests, NULL, NULL);
+  return cmocka_run_group_tests(tests, NULL, teardown);
 }

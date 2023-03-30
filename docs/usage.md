@@ -37,7 +37,7 @@ target_link_libraries(libtest PRIVATE Voucher::Voucher OpenSSL::Crypto)
 
 ### Exporting a pledge voucher request
 
-To export a pledge voucher request to a `CMS` `SMIME` file `out.cms` use the following command `epvr`:
+To export a pledge voucher request to a `CMS` SMIME file `out.cms` use the command `epvr` as following:
 ```bash
 $ brski -c config.ini -o out.cms epvr
 ```

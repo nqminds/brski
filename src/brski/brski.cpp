@@ -9,9 +9,9 @@ extern "C" {
 #include "pledge/pledge_utils.h"
 #include "../utils/log.h"
 #include "../utils/os.h"
+#include "config.h"
 }
 
-#include "config.h"
 #include "version.h"
 
 #define OPT_STRING ":c:o:dvh"
@@ -210,9 +210,9 @@ int main(int argc, char *argv[]) {
   switch (command_id) {
     case COMMAND_EXPORT_PVR:
       fprintf(stdout, "Exporting pledge voucher request to %s", out_filename);
-      if (export_voucher_pledge_request(
+      if (voucher_pledge_request_to_smimefile(
               &config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
-        fprintf(stderr, "export_voucher_pledge_request fail");
+        fprintf(stderr, "voucher_pledge_request_to_smimefile fail");
         return EXIT_FAILURE;
       }
       break;

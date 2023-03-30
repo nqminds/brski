@@ -11,10 +11,9 @@
 #ifndef REGISTRAR_CONFIG_H
 #define REGISTRAR_CONFIG_H
 
-#include "../http/http.h"
-
 struct registrar_config {
-  struct http_config http;
+  char *bind_address;
+  unsigned int port;
   char *tls_cert_path;
   char *tls_key_path;
 };

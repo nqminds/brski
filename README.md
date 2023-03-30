@@ -115,4 +115,4 @@ To run each test individually, the test binaries are located in `./build/preset_
 1. Voucher artifact [API](./docs/voucher.md).
 2. BRSKI voucher request [API](./docs/brski.md).
 3. Array helpers [API](./docs/array.md).
-4. Usage [examples](./docs/usage.md)
+4. Usage [examples](./docs/usage.md).

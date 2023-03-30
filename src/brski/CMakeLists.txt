@@ -2,7 +2,7 @@ add_subdirectory(http)
 add_subdirectory(pledge)
 add_subdirectory(registrar)
 
-add_library(config config.cpp)
+add_library(config OBJECT config.c)
 target_link_libraries(config PRIVATE MinIni::minIni os log)
 
 add_executable(brski brski.cpp)
