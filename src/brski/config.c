@@ -197,7 +197,7 @@ int load_pledge_config(const char *filename,
     return -1;
   }
 
-  ini_gets("pledge", "cmsAdditionalCertsPath", "", key, MAX_CONFIG_VALUE_SIZE,
+  ini_gets("pledge", "cmsAdditionalCertPath", "", key, MAX_CONFIG_VALUE_SIZE,
            filename);
   pconf->additional_certs_path = key;
   if (!strlen(pconf->additional_certs_path)) {

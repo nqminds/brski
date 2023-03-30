@@ -7,7 +7,7 @@ serialNumber = ""
 nonce = ""
 cmsSignCertPath = ""
 cmsSignKeyPath = ""
-cmsAdditionalCertsPath = ""
+cmsAdditionalCertPath = ""
 
 [registrar]
 bindAddress = "0.0.0.0"

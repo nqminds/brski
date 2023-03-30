@@ -21,6 +21,7 @@ extern "C" {
 enum COMMAND_ID {
   COMMAND_UNKNOWN = 0,
   COMMAND_EXPORT_PVR,
+  COMMAND_PLEDGE_REQUEST,
   COMMAND_START_REGISTRAR,
   COMMAND_START_MASA,
 };
@@ -34,6 +35,7 @@ struct command_config {
 const struct command_config command_list[] = {
     {"epvr", COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
+    {"preq", COMMAND_PLEDGE_REQUEST, "\tpreq\t\tSend a pledge-voucher request to the registrar"},
     {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
     {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
     {NULL, COMMAND_UNKNOWN, NULL}};
