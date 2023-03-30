@@ -47,47 +47,47 @@ void free_registrar_config_content(struct registrar_config *rconf) {
 
 int load_registrar_config(const char *filename,
                           struct registrar_config *const rconf) {
-  char *key = NULL;
+  char *value = NULL;
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_registrar_config_content(rconf);
     return -1;
   }
 
-  ini_gets("registrar", "bindAddress", "0.0.0.0", key, MAX_CONFIG_VALUE_SIZE, filename);
-  rconf->bind_address = key;
+  ini_gets("registrar", "bindAddress", "0.0.0.0", value, MAX_CONFIG_VALUE_SIZE, filename);
+  rconf->bind_address = value;
   if (!strlen(rconf->bind_address)) {
     rconf->bind_address = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
   rconf->port = (unsigned int)ini_getl("registrar", "port", 0, filename);
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_registrar_config_content(rconf);
     return -1;
   }
 
-  ini_gets("registrar", "tlsCertPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
-  rconf->tls_cert_path = key;
+  ini_gets("registrar", "tlsCertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  rconf->tls_cert_path = value;
   if (!strlen(rconf->tls_cert_path)) {
     rconf->tls_cert_path = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_registrar_config_content(rconf);
     return -1;
   }
 
-  ini_gets("registrar", "tlsKeyPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
-  rconf->tls_key_path = key;
+  ini_gets("registrar", "tlsKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  rconf->tls_key_path = value;
   if (!strlen(rconf->tls_key_path)) {
     rconf->tls_key_path = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
   return 0;
@@ -123,86 +123,86 @@ void free_pledge_config_content(struct pledge_config *const pconf) {
 
 int load_pledge_config(const char *filename,
                        struct pledge_config *const pconf) {
-  char *key = NULL;
+  char *value = NULL;
 
-  if ((key = sys_zalloc(CREATED_ON_SIZE)) == NULL) {
+  if ((value = sys_zalloc(CREATED_ON_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
-  ini_gets("pledge", "createdOn", "", key, CREATED_ON_SIZE, filename);
-  pconf->created_on = key;
+  ini_gets("pledge", "createdOn", "", value, CREATED_ON_SIZE, filename);
+  pconf->created_on = value;
   if (!strlen(pconf->created_on)) {
     pconf->created_on = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
-  ini_gets("pledge", "serialNumber", "", key, MAX_CONFIG_VALUE_SIZE, filename);
-  pconf->serial_number = key;
+  ini_gets("pledge", "serialNumber", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  pconf->serial_number = value;
   if (!strlen(pconf->serial_number)) {
     pconf->serial_number = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
 
-  ini_gets("pledge", "nonce", "", key, MAX_CONFIG_VALUE_SIZE, filename);
-  pconf->nonce = key;
+  ini_gets("pledge", "nonce", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  pconf->nonce = value;
   if (!strlen(pconf->nonce)) {
     pconf->nonce = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
-  ini_gets("pledge", "cmsSignCertPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
-  pconf->sign_cert_path = key;
+  ini_gets("pledge", "cmsSignCertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  pconf->sign_cert_path = value;
   if (!strlen(pconf->sign_cert_path)) {
     pconf->sign_cert_path = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
-  ini_gets("pledge", "cmsSignKeyPath", "", key, MAX_CONFIG_VALUE_SIZE, filename);
-  pconf->sign_key_path = key;
+  ini_gets("pledge", "cmsSignKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  pconf->sign_key_path = value;
   if (!strlen(pconf->sign_key_path)) {
     pconf->sign_key_path = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
-  if ((key = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
-  ini_gets("pledge", "cmsAdditionalCertPath", "", key, MAX_CONFIG_VALUE_SIZE,
+  ini_gets("pledge", "cmsAdditionalCertPath", "", value, MAX_CONFIG_VALUE_SIZE,
            filename);
-  pconf->additional_certs_path = key;
+  pconf->additional_certs_path = value;
   if (!strlen(pconf->additional_certs_path)) {
     pconf->additional_certs_path = NULL;
-    sys_free(key);
+    sys_free(value);
   }
 
   return 0;
