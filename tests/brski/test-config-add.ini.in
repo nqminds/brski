@@ -7,8 +7,7 @@ serialNumber = "12345"
 nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
 cmsSignKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.key"
 cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.crt"
-cmsAdditionalCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms-add1.crt"
-cmsAdditionalCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms-add2.crt"
+cmsAdditionalCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-intermediate1.crt"
 
 [registrar]
 bindAddress = "0.0.0.0"

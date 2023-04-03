@@ -311,7 +311,25 @@ struct BinaryArray *file_to_keybuf(const char *filename);
  *
  * @param[in] cms The cms binary array (DER format)
  * @param[in] filename The output file path
- * @return struct BinaryArray * the output DER binary array, NULL on failure
+ * @return 0 on success, -1 on failure
  */
 int cmsbuf_to_file(const struct BinaryArray *cms, const char *filename);
+
+/**
+ * @brief Saves a certificate binary array to a PEM file
+ *
+ * @param[in] cert The certificate binary array (DER format)
+ * @param[in] filename The output file path
+ * @return 0 on success, -1 on failure
+ */
+int certbuf_to_file(const struct BinaryArray *cert, const char *filename);
+
+/**
+ * @brief Saves a private key binary array to a PEM file
+ *
+ * @param[in] cert The private key binary array (DER format)
+ * @param[in] filename The output file path
+ * @return 0 on success, -1 on failure
+ */
+int keybuf_to_file(const struct BinaryArray *key, const char *filename);
 #endif

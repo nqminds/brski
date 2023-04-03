@@ -233,12 +233,6 @@ int load_pledge_config(const char *filename,
     sys_free(value);
   }
 
-  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
-    log_errno("sys_zalloc");
-    free_pledge_config_content(pconf);
-    return -1;
-  }
-
   if (load_config_value_list("pledge", "cmsAdditionalCertPath", filename, &pconf->additional_cert_paths) < 0) {
     log_error("load_config_value_list fail");
     free_pledge_config_content(pconf);

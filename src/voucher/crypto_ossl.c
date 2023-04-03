@@ -152,27 +152,59 @@ int cmsbuf_to_file(const struct BinaryArray *cms, const char *filename) {
   return 0;
 }
 
-int x509_to_file(const uint8_t *cert, const size_t length,
-                 const char *filename) {
-  X509 *x509 = crypto_cert2context(cert, length);
+int certbuf_to_file(const struct BinaryArray *cert, const char *filename) {
+  FILE *fp = fopen(filename, "wb");
 
-  BIO *out = BIO_new_file(filename, "w");
-  if (out == NULL) {
-    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+  if (fp == NULL) {
+    log_errno("Couldn't open %s file.", filename);
+    return -1;
+  }
+
+  X509 *x509 = crypto_cert2context(cert->array, cert->length);
+
+  if (x509 == NULL) {
+    log_error("crypto_cert2context fail");
+    fclose(fp);
+    return -1;
+  }
+
+  if (!PEM_write_X509(fp, x509)) {
+    log_error("PEM_write_X509 fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    fclose(fp);
     X509_free(x509);
     return -1;
   }
 
-  if (!PEM_write_bio_X509(out, x509)) {
-    log_error("PEM_write_bio_X509 fail with code=%s",
-              ERR_reason_error_string(ERR_get_error()));
-    BIO_free(out);
-    X509_free(x509);
-    return -1;
-  }
-
-  BIO_free(out);
+  fclose(fp);
   X509_free(x509);
+  return 0;
+}
+
+int keybuf_to_file(const struct BinaryArray *key, const char *filename) {
+  FILE *fp = fopen(filename, "wb");
+
+  if (fp == NULL) {
+    log_errno("Couldn't open %s file.", filename);
+    return -1;
+  }
+
+  EVP_PKEY *pkey = crypto_key2context(key->array, key->length);
+
+  if (pkey == NULL) {
+    log_error("crypto_key2context fail");
+    fclose(fp);
+    return -1;
+  }
+
+  if (!PEM_write_PrivateKey(fp, pkey, NULL, NULL, 0, 0, NULL)) {
+    log_error("PEM_write_bio_X509 fail with code=%lu", ERR_get_error());
+    fclose(fp);
+    EVP_PKEY_free(pkey);
+    return -1;
+  }
+
+  fclose(fp);
+  EVP_PKEY_free(pkey);
   return 0;
 }
 
@@ -500,7 +532,7 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   X509 *pcert = NULL;
   const unsigned char *pp = (unsigned char *)cert;
   if (d2i_X509(&pcert, &pp, length) == NULL) {
-    log_error("d2i_X509 fail with code=%lu", ERR_get_error());
+    log_error("d2i_X509 fail with code=%s", ERR_reason_error_string(ERR_get_error()));
     return NULL;
   }
 
