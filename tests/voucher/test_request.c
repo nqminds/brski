@@ -71,7 +71,7 @@ static struct crypto_cert_meta create_cert_meta(void) {
                                   .not_after = 1234567,
                                   .issuer = NULL,
                                   .subject = NULL,
-                                  .basic_constraints = NULL};
+                                  .basic_constraints = "CA:false"};
 
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
@@ -106,6 +106,41 @@ create_pledge_voucher_request(char *serial_number, struct BinaryArray *nonce,
       &pledge_sign_meta, pledge_sign_key.array, pledge_sign_key.length,
       &pledge_sign_cert.array);
 
+
+  // Generate the test pinned domain certificate
+  struct crypto_cert_meta intermediate_meta = {.serial_number = 12345,
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
+
+  intermediate_meta.issuer = init_keyvalue_list();
+  intermediate_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(intermediate_meta.subject, "C", "IE");
+  push_keyvalue_list(intermediate_meta.subject, "CN", "pinned-domain-cert");
+
+  struct BinaryArray intermediate_key = {};
+  struct BinaryArray intermediate_cert = {};
+
+  intermediate_key.length =
+      (size_t)crypto_generate_eckey(&intermediate_key.array);
+  intermediate_cert.length = (size_t)crypto_generate_eccert(
+      &intermediate_meta, intermediate_key.array, intermediate_key.length,
+      &intermediate_cert.array);
+
+  
+  ssize_t length = crypto_sign_cert(
+      intermediate_key.array, intermediate_key.length, intermediate_cert.array,
+      intermediate_cert.length, pledge_sign_cert.length,
+      &pledge_sign_cert.array);
+  assert_true(length > 0);
+  assert_non_null(pledge_sign_cert.array);
+  pledge_sign_cert.length = length;
+
+  push_array_list(certs, intermediate_cert.array, intermediate_cert.length, 0);
+
   struct BinaryArray *cms = sign_pledge_voucher_request(
       &created_on, serial_number, nonce, registrar_tls_cert, &pledge_sign_cert,
       &pledge_sign_key, certs);
@@ -114,6 +149,12 @@ create_pledge_voucher_request(char *serial_number, struct BinaryArray *nonce,
   free_binary_array_content(&pledge_sign_cert);
   free_keyvalue_list(pledge_sign_meta.issuer);
   free_keyvalue_list(pledge_sign_meta.subject);
+
+  free_binary_array_content(&intermediate_key);
+  free_binary_array_content(&intermediate_cert);
+  free_keyvalue_list(intermediate_meta.issuer);
+  free_keyvalue_list(intermediate_meta.subject);
+
   free_array_list(certs);
   return cms;
 }
