@@ -17,7 +17,7 @@
 #include <string>
 
 extern "C" {
-#include "../utils/os.h"
+#include "../../utils/os.h"
 }
 
 #define MAX_WEB_PATH_LEN 2048
@@ -51,7 +51,7 @@ struct RouteTuple {
 };
 
 struct http_config {
-  char bindAddress[MAX_WEB_PATH_LEN];
+  char *bind_address;
   unsigned int port;
 };
 

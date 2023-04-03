@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <sys/types.h>
+#include <time.h>
 #include <unistd.h>
 
 #include "log.h"
@@ -171,4 +172,13 @@ size_t sys_strlcpy(char *const dest, const char *const src, const size_t siz);
  * @return size_t Total length of the string
  */
 size_t sys_strnlen_s(const char *const str, const size_t max_len);
+
+/**
+ * @brief Returns the time since Epoch (00:00:00 UTC, January 1, 1970)
+ * using localtime
+ *
+ * @param current The returned time since Epoch as struct tm
+ * @return int 0 on success, -1 on failure
+ */
+int get_localtime(struct tm *current);
 #endif /* OS_H */

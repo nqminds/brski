@@ -24,11 +24,10 @@
 
 static void test_crypto_generate_rsakey(void **state) {
   (void)state;
-  uint8_t *key = NULL;
-  ssize_t length = crypto_generate_rsakey(2048, &key);
+  struct BinaryArray *key = crypto_generate_rsakey(2048);
   assert_non_null(key);
-  assert_true(length > 0);
-  sys_free(key);
+  assert_true(key->length > 0);
+  free_binary_array(key);
 }
 
 static void test_crypto_generate_eckey(void **state) {
@@ -44,15 +43,15 @@ static void test_crypto_generate_eckey(void **state) {
 static void test_crypto_eckey2context(void **state) {
   (void)state;
 
-  uint8_t *key = NULL;
-  ssize_t length = crypto_generate_rsakey(2048, &key);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
 
-  CRYPTO_KEY ctx = crypto_eckey2context(key, length);
+  CRYPTO_KEY ctx = crypto_eckey2context(rsa_key->array, rsa_key->length);
   assert_null(ctx);
   crypto_free_keycontext(ctx);
-  sys_free(key);
+  free_binary_array(rsa_key);
 
-  length = crypto_generate_eckey(&key);
+  uint8_t *key = NULL;
+  ssize_t length = crypto_generate_eckey(&key);
 
   ctx = crypto_eckey2context(key, length);
   assert_non_null(ctx);
@@ -71,12 +70,12 @@ static void test_crypto_rsakey2context(void **state) {
   crypto_free_keycontext(ctx);
   sys_free(key);
 
-  length = crypto_generate_rsakey(2048, &key);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
 
-  ctx = crypto_rsakey2context(key, length);
+  ctx = crypto_rsakey2context(rsa_key->array, rsa_key->length);
   assert_non_null(ctx);
   crypto_free_keycontext(ctx);
-  sys_free(key);
+  free_binary_array(rsa_key);
 }
 
 static void test_crypto_free_keycontext(void **state) { (void)state; }
@@ -103,11 +102,12 @@ static void test_crypto_generate_eccert(void **state) {
   sys_free(cert);
   sys_free(key);
 
-  key_length = crypto_generate_rsakey(2048, &key);
-  length = crypto_generate_eccert(&meta, key, key_length, &cert);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
+  length =
+      crypto_generate_eccert(&meta, rsa_key->array, rsa_key->length, &cert);
   assert_true(length < 0);
   assert_null(cert);
-  sys_free(key);
+  free_binary_array(rsa_key);
 
   key_length = crypto_generate_eckey(&key);
   assert_non_null(key);
@@ -138,28 +138,29 @@ static void test_crypto_generate_rsacert(void **state) {
                                   .not_after = 1234567,
                                   .issuer = NULL,
                                   .subject = NULL};
-  uint8_t *key = NULL;
   uint8_t *cert = NULL;
 
   ssize_t length = crypto_generate_rsacert(&meta, NULL, 0, &cert);
   assert_int_equal(length, -1);
 
-  ssize_t key_length = crypto_generate_rsakey(2048, &key);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
 
-  length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+  length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
-  sys_free(key);
+  free_binary_array(rsa_key);
 
-  key_length = crypto_generate_eckey(&key);
+  uint8_t *key = NULL;
+  ssize_t key_length = crypto_generate_eckey(&key);
   length = crypto_generate_rsacert(&meta, key, key_length, &cert);
   assert_true(length < 0);
   assert_null(cert);
   sys_free(key);
 
-  key_length = crypto_generate_rsakey(2048, &key);
-  assert_non_null(key);
+  rsa_key = crypto_generate_rsakey(2048);
+  assert_non_null(rsa_key);
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
@@ -169,11 +170,12 @@ static void test_crypto_generate_rsacert(void **state) {
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
-  length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+  length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
   assert_true(length > 0);
   assert_non_null(cert);
   sys_free(cert);
-  sys_free(key);
+  free_binary_array(rsa_key);
 
   free_keyvalue_list(meta.issuer);
   free_keyvalue_list(meta.subject);
@@ -247,16 +249,17 @@ static void test_crypto_sign_eccms(void **state) {
   sys_free(cert);
 
   cms = NULL;
-  key_length = crypto_generate_rsakey(2048, &key);
-  assert_non_null(key);
-  cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
+  assert_non_null(rsa_key);
+  cert_length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
 
-  length = crypto_sign_eccms(data, data_length, cert, cert_length, key,
-                             key_length, certs, &cms);
+  length = crypto_sign_eccms(data, data_length, cert, cert_length,
+                             rsa_key->array, rsa_key->length, certs, &cms);
   assert_true(length < 0);
   assert_null(cms);
   sys_free(cms);
-  sys_free(key);
+  free_binary_array(rsa_key);
   sys_free(cert);
 
   free_array_list(certs);
@@ -269,7 +272,6 @@ static void test_crypto_sign_rsacms(void **state) {
   uint8_t data[5] = {1, 2, 3, 4, 5};
   ssize_t data_length = 5;
   uint8_t *cms = NULL;
-  uint8_t *key = NULL;
   uint8_t *cert = NULL;
   struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
@@ -278,8 +280,8 @@ static void test_crypto_sign_rsacms(void **state) {
                                   .issuer = NULL,
                                   .subject = NULL};
 
-  ssize_t key_length = crypto_generate_rsakey(2048, &key);
-  assert_non_null(key);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
+  assert_non_null(rsa_key);
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
@@ -289,15 +291,15 @@ static void test_crypto_sign_rsacms(void **state) {
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
-  ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+  ssize_t cert_length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
 
-  uint8_t *key_in_list = NULL;
-  ssize_t key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
+  struct BinaryArray *rsa_key_in_list = crypto_generate_rsakey(2048);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_rsacert(
-      &meta, key_in_list, key_in_list_length, &cert_in_list);
+      &meta, rsa_key_in_list->array, rsa_key_in_list->length, &cert_in_list);
 
-  sys_free(key_in_list);
+  free_binary_array(rsa_key_in_list);
 
   assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
                    0);
@@ -315,23 +317,25 @@ static void test_crypto_sign_rsacms(void **state) {
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key,
-                              key_length, NULL, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length,
+                              rsa_key->array, rsa_key->length, NULL, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
 
   cms = NULL;
-  length = crypto_sign_rsacms(data, data_length, cert, cert_length, key,
-                              key_length, certs, &cms);
+  length = crypto_sign_rsacms(data, data_length, cert, cert_length,
+                              rsa_key->array, rsa_key->length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
-  sys_free(key);
+  free_binary_array(rsa_key);
   sys_free(cert);
 
   cms = NULL;
-  key_length = crypto_generate_eckey(&key);
+
+  uint8_t *key = NULL;
+  ssize_t key_length = crypto_generate_eckey(&key);
   assert_non_null(key);
   cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
@@ -563,7 +567,6 @@ static void test_crypto_sign_cms(void **state) {
   uint8_t data[5] = {1, 2, 3, 4, 5};
   ssize_t data_length = 5;
   uint8_t *cms = NULL;
-  uint8_t *key = NULL;
   uint8_t *cert = NULL;
   struct BinaryArrayList *certs = init_array_list();
   struct crypto_cert_meta meta = {.serial_number = 12345,
@@ -572,8 +575,8 @@ static void test_crypto_sign_cms(void **state) {
                                   .issuer = NULL,
                                   .subject = NULL};
 
-  ssize_t key_length = crypto_generate_rsakey(2048, &key);
-  assert_non_null(key);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
+  assert_non_null(rsa_key);
   meta.issuer = init_keyvalue_list();
   meta.subject = init_keyvalue_list();
 
@@ -583,18 +586,18 @@ static void test_crypto_sign_cms(void **state) {
   push_keyvalue_list(meta.subject, "C", "IE");
   push_keyvalue_list(meta.subject, "CN", "subjecttest.info");
 
-  ssize_t cert_length = crypto_generate_rsacert(&meta, key, key_length, &cert);
+  ssize_t cert_length =
+      crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length, &cert);
 
-  uint8_t *key_in_list = NULL;
-  ssize_t key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
+  struct BinaryArray *rsa_key_in_list = crypto_generate_rsakey(2048);
   uint8_t *cert_in_list = NULL;
   ssize_t cert_in_list_length = crypto_generate_rsacert(
-      &meta, key_in_list, key_in_list_length, &cert_in_list);
+      &meta, rsa_key_in_list->array, rsa_key_in_list->length, &cert_in_list);
 
   assert_int_equal(push_array_list(certs, cert_in_list, cert_in_list_length, 0),
                    0);
 
-  sys_free(key_in_list);
+  free_binary_array(rsa_key_in_list);
   sys_free(cert_in_list);
 
   ssize_t length =
@@ -608,23 +611,25 @@ static void test_crypto_sign_cms(void **state) {
   assert_true(length < 0);
   assert_null(cms);
 
-  length = crypto_sign_cms(data, data_length, cert, cert_length, key,
-                           key_length, NULL, &cms);
+  length = crypto_sign_cms(data, data_length, cert, cert_length, rsa_key->array,
+                           rsa_key->length, NULL, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
 
   cms = NULL;
-  length = crypto_sign_cms(data, data_length, cert, cert_length, key,
-                           key_length, certs, &cms);
+  length = crypto_sign_cms(data, data_length, cert, cert_length, rsa_key->array,
+                           rsa_key->length, certs, &cms);
   assert_true(length > 0);
   assert_non_null(cms);
   sys_free(cms);
-  sys_free(key);
+  free_binary_array(rsa_key);
   sys_free(cert);
 
   cms = NULL;
-  key_length = crypto_generate_eckey(&key);
+
+  uint8_t *key = NULL;
+  ssize_t key_length = crypto_generate_eckey(&key);
   assert_non_null(key);
   cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
@@ -682,7 +687,7 @@ static void test_crypto_verify_cms(void **state) {
   char *data = "{\"ietf-voucher:voucher\":{\"created-on\":\"1973-11-29T21:33:"
                "09Z\",\"domain-cert-revocation-checks\":false}}";
   ssize_t data_length = strlen(data);
-  uint8_t *cms = NULL;
+  struct BinaryArray cms = {};
   uint8_t *key = NULL;
   uint8_t *cert = NULL;
   struct crypto_cert_meta meta = {.serial_number = 12345,
@@ -704,33 +709,33 @@ static void test_crypto_verify_cms(void **state) {
 
   ssize_t cert_length = crypto_generate_eccert(&meta, key, key_length, &cert);
 
-  ssize_t cms_length =
+  cms.length =
       crypto_sign_eccms((uint8_t *)data, data_length, cert, cert_length, key,
-                        key_length, certs, &cms);
+                        key_length, certs, &cms.array);
 
-  assert_non_null(cms);
+  assert_non_null(cms.array);
 
   uint8_t *extracted_data = NULL;
   ssize_t extracted_data_legth =
-      crypto_verify_cms(cms, cms_length, NULL, NULL, &extracted_data, NULL);
+      crypto_verify_cms(&cms, NULL, NULL, &extracted_data, NULL);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 
   assert_memory_equal(extracted_data, data, extracted_data_legth);
 
-  sys_free(cms);
+  free_binary_array_content(&cms);
 
-  cms_length = crypto_sign_cms((uint8_t *)data, data_length, cert, cert_length,
-                               key, key_length, certs, &cms);
+  cms.length = crypto_sign_cms((uint8_t *)data, data_length, cert, cert_length,
+                               key, key_length, certs, &cms.array);
 
-  assert_non_null(cms);
+  assert_non_null(cms.array);
 
   sys_free(extracted_data);
 
   struct BinaryArrayList *out_certs = NULL;
   extracted_data = NULL;
-  extracted_data_legth = crypto_verify_cms(cms, cms_length, NULL, NULL,
-                                           &extracted_data, &out_certs);
+  extracted_data_legth =
+      crypto_verify_cms(&cms, NULL, NULL, &extracted_data, &out_certs);
   assert_int_equal(extracted_data_legth, data_length);
   assert_non_null(extracted_data);
 
@@ -743,7 +748,7 @@ static void test_crypto_verify_cms(void **state) {
 
   free_array_list(out_certs);
 
-  sys_free(cms);
+  free_binary_array_content(&cms);
   sys_free(extracted_data);
   sys_free(key);
   sys_free(cert);

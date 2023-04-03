@@ -11,11 +11,11 @@
 #include "../http/https_server.h"
 
 extern "C" {
-#include "../utils/log.h"
+#include "../../utils/log.h"
 }
 
-#include "registrar.h"
 #include "registrar_api.h"
+#include "registrar_config.h"
 #include "registrar_server.h"
 
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
@@ -60,7 +60,7 @@ void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
                     .handle = get_est_csrattrs});
 }
 
-int registrar_start(struct http_config *config,
+int registrar_start(struct registrar_config *rconf,
                     struct RegistrarContext **context) {
   std::vector<struct RouteTuple> routes;
 
@@ -74,8 +74,10 @@ int registrar_start(struct http_config *config,
   }
 
   setup_registrar_routes(routes);
+  struct http_config hconf = {.bind_address = rconf->bind_address,
+                              .port = rconf->port};
 
-  return https_start(config, routes, static_cast<void *>(*context),
+  return https_start(&hconf, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);
 }
 

@@ -10,7 +10,8 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
-#include "http/http.h"
+#include "pledge/pledge_config.h"
+#include "registrar/registrar_config.h"
 
 /**
  * @brief The BRSKI configuration structures. Used for configuring the
@@ -18,15 +19,23 @@
  *
  */
 struct brski_config {
-  struct http_config hconf;
+  struct pledge_config pconf;
+  struct registrar_config rconf;
 };
 
 /**
  * @brief Load the BRSKI configuration structure
  *
- * @param filename The BRSKI configuration file
- * @param config The configuration structure
+ * @param[in] filename The BRSKI configuration file
+ * @param[in] config The configuration structure
  * @return 0 on success, -1 otherwise
  */
 int load_brski_config(const char *filename, struct brski_config *config);
+
+/**
+ * @brief Free the BRSKI configuration structure content
+ *
+ * @param[in] config The configuration structure
+ */
+void free_config_content(struct brski_config *const config);
 #endif

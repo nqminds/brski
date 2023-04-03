@@ -71,6 +71,7 @@
         "os.h": "c",
         "x509.h": "c",
         "cms.h": "c",
-        "*.inc": "cpp"
+        "*.inc": "cpp",
+        "array.h": "c"
     }
 }

@@ -705,28 +705,30 @@ static void test_sign_cms_voucher(void **state) {
   free_binary_array_content(&cert);
   free_array_list(certs);
 
-  key.length = crypto_generate_rsakey(2048, &key.array);
-  assert_non_null(key.array);
+  struct BinaryArray *rsa_key = crypto_generate_rsakey(2048);
+  assert_non_null(rsa_key);
 
-  cert.length =
-      crypto_generate_rsacert(&meta, key.array, key.length, &cert.array);
+  cert.length = crypto_generate_rsacert(&meta, rsa_key->array, rsa_key->length,
+                                        &cert.array);
 
-  key_in_list_length = crypto_generate_rsakey(2048, &key_in_list);
+  struct BinaryArray *rsa_key_in_list = crypto_generate_rsakey(2048);
   cert_in_list_length = crypto_generate_rsacert(
-      &meta, key_in_list, key_in_list_length, &cert_in_list);
+      &meta, rsa_key_in_list->array, rsa_key_in_list->length, &cert_in_list);
 
   certs = init_array_list();
   push_array_list(certs, cert_in_list, cert_in_list_length, 0);
 
-  sys_free(key_in_list);
+  free_binary_array(rsa_key_in_list);
   sys_free(cert_in_list);
 
-  signed_voucher = sign_rsacms_voucher(voucher, &cert, &key, certs);
+  signed_voucher = sign_rsacms_voucher(voucher, &cert, rsa_key, certs);
   assert_non_null(signed_voucher);
   free_binary_array(signed_voucher);
 
-  signed_voucher = sign_eccms_voucher(voucher, &cert, &key, certs);
+  signed_voucher = sign_eccms_voucher(voucher, &cert, rsa_key, certs);
   assert_null(signed_voucher);
+
+  free_binary_array(rsa_key);
 
   free_binary_array_content(&key);
   free_binary_array_content(&cert);

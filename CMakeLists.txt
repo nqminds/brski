@@ -196,14 +196,6 @@ configure_file(
   "${PROJECT_BINARY_DIR}/version.h"
 )
 
-# Copy the default configuration file to the build folder
-# This config file is for development, not for `make install` use
-configure_file(
-  "dev-config.ini.in"
-  "${PROJECT_BINARY_DIR}/dev-config.ini"
-  @ONLY
-)
-
 if (NOT BUILD_ONLY_DOCS)
   if (CONFIGURE_COVERAGE)
     include(CodeCoverage)
@@ -226,6 +218,8 @@ if (NOT BUILD_ONLY_DOCS)
         "${PROJECT_SOURCE_DIR}/_deps/*"
     )
   endif()
+
+  check_c_compiler_flag("-fanalyzer" C_COMPILER_SUPPORTS_ANALYZER)
 
   if (SANITIZE_ADDRESS)
     include(CheckCCompilerFlag)

@@ -11,8 +11,8 @@
 #include <httplib.h>
 
 extern "C" {
-#include "../utils/log.h"
-#include "../utils/os.h"
+#include "../../utils/log.h"
+#include "../../utils/os.h"
 }
 
 #include "http.h"
@@ -200,7 +200,7 @@ int httplib_start(struct http_config *config,
     set_exception_handler(server);
 
     *srv_ctx = static_cast<void *>(server);
-    server->listen(config->bindAddress, config->port);
+    server->listen(config->bind_address, config->port);
   } catch (...) {
     log_error("httplib::SSLServer() fail");
     httplib_stop(srv_ctx);

@@ -11,8 +11,8 @@
 #include "http.h"
 
 extern "C" {
-#include "../utils/log.h"
-#include "../utils/os.h"
+#include "../../utils/log.h"
+#include "../../utils/os.h"
 }
 
 #ifdef WITH_CPPHTTPLIB_LIB
@@ -24,7 +24,7 @@ int https_start(struct http_config *config,
                 void **srv_ctx) {
   *srv_ctx = nullptr;
 
-  log_info("Starting the HTTPS server at %s:%d", config->bindAddress,
+  log_info("Starting the HTTPS server at %s:%d", config->bind_address,
            config->port);
 #ifdef WITH_CPPHTTPLIB_LIB
   return httplib_start(config, routes, user_ctx, srv_ctx);

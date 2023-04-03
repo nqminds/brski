@@ -1033,8 +1033,7 @@ struct Voucher *verify_cms_voucher(const struct BinaryArray *cms,
   }
 
   uint8_t *data = NULL;
-  ssize_t data_length = crypto_verify_cms(cms->array, cms->length, certs, store,
-                                          &data, out_certs);
+  ssize_t data_length = crypto_verify_cms(cms, certs, store, &data, out_certs);
 
   if (data_length < 0) {
     log_error("crypto_verify_cms fail");
