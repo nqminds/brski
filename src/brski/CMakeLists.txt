@@ -1,3 +1,12 @@
+add_compile_options(
+  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:C>:-fno-stack-protector>>
+  $<$<CONFIG:Debug>:$<$<COMPILE_LANGUAGE:CXX>:-fno-stack-protector>>
+)
+add_link_options(
+  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:C>:-fno-stack-protector>>
+  $<$<CONFIG:Debug>:$<$<LINK_LANGUAGE:CXX>:-fno-stack-protector>>
+)
+
 add_subdirectory(http)
 add_subdirectory(pledge)
 add_subdirectory(registrar)
