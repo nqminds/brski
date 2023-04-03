@@ -30,7 +30,9 @@
 #define CREATED_ON_SIZE sizeof("9999-12-31T24:59:59Z") + 1
 #define MAX_CONFIG_VALUE_SIZE 2048
 
-int load_config_value_list(const char *section, const char *key, const char *filename, struct BinaryArrayList **value_list) {
+int load_config_value_list(const char *section, const char *key,
+                           const char *filename,
+                           struct BinaryArrayList **value_list) {
   *value_list = NULL;
   int idx = 0;
 
@@ -46,7 +48,8 @@ int load_config_value_list(const char *section, const char *key, const char *fil
     return -1;
   }
 
-  while (ini_getkey(section, idx++, store, MAX_CONFIG_VALUE_SIZE, filename) > 0) {
+  while (ini_getkey(section, idx++, store, MAX_CONFIG_VALUE_SIZE, filename) >
+         0) {
     char *value = NULL;
     if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
       log_errno("sys_zalloc");
@@ -58,7 +61,8 @@ int load_config_value_list(const char *section, const char *key, const char *fil
     ini_gets(section, store, "", value, INI_BUFFERSIZE, filename);
 
     if (strcmp(store, key) == 0 && strlen(value)) {
-      if (push_array_list(*value_list, (uint8_t *const)value, strlen(value) + 1, 0) < 0) {
+      if (push_array_list(*value_list, (uint8_t *const)value, strlen(value) + 1,
+                          0) < 0) {
         sys_free(value);
         sys_free(store);
         free_array_list(*value_list);
@@ -99,7 +103,8 @@ int load_registrar_config(const char *filename,
     return -1;
   }
 
-  ini_gets("registrar", "bindAddress", "0.0.0.0", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("registrar", "bindAddress", "0.0.0.0", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   rconf->bind_address = value;
   if (!strlen(rconf->bind_address)) {
     rconf->bind_address = NULL;
@@ -114,7 +119,8 @@ int load_registrar_config(const char *filename,
     return -1;
   }
 
-  ini_gets("registrar", "tlsCertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("registrar", "tlsCertPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   rconf->tls_cert_path = value;
   if (!strlen(rconf->tls_cert_path)) {
     rconf->tls_cert_path = NULL;
@@ -127,7 +133,8 @@ int load_registrar_config(const char *filename,
     return -1;
   }
 
-  ini_gets("registrar", "tlsKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("registrar", "tlsKeyPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   rconf->tls_key_path = value;
   if (!strlen(rconf->tls_key_path)) {
     rconf->tls_key_path = NULL;
@@ -186,7 +193,8 @@ int load_pledge_config(const char *filename,
     return -1;
   }
 
-  ini_gets("pledge", "serialNumber", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("pledge", "serialNumber", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   pconf->serial_number = value;
   if (!strlen(pconf->serial_number)) {
     pconf->serial_number = NULL;
@@ -198,7 +206,6 @@ int load_pledge_config(const char *filename,
     free_pledge_config_content(pconf);
     return -1;
   }
-
 
   ini_gets("pledge", "nonce", "", value, MAX_CONFIG_VALUE_SIZE, filename);
   pconf->nonce = value;
@@ -213,7 +220,8 @@ int load_pledge_config(const char *filename,
     return -1;
   }
 
-  ini_gets("pledge", "cmsSignCertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("pledge", "cmsSignCertPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   pconf->sign_cert_path = value;
   if (!strlen(pconf->sign_cert_path)) {
     pconf->sign_cert_path = NULL;
@@ -226,14 +234,16 @@ int load_pledge_config(const char *filename,
     return -1;
   }
 
-  ini_gets("pledge", "cmsSignKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("pledge", "cmsSignKeyPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   pconf->sign_key_path = value;
   if (!strlen(pconf->sign_key_path)) {
     pconf->sign_key_path = NULL;
     sys_free(value);
   }
 
-  if (load_config_value_list("pledge", "cmsAdditionalCertPath", filename, &pconf->additional_cert_paths) < 0) {
+  if (load_config_value_list("pledge", "cmsAdditionalCertPath", filename,
+                             &pconf->additional_cert_paths) < 0) {
     log_error("load_config_value_list fail");
     free_pledge_config_content(pconf);
     return -1;

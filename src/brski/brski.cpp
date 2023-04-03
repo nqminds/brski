@@ -6,10 +6,10 @@
 #include "registrar/registrar_server.h"
 
 extern "C" {
-#include "pledge/pledge_utils.h"
 #include "../utils/log.h"
 #include "../utils/os.h"
 #include "config.h"
+#include "pledge/pledge_utils.h"
 }
 
 #include "version.h"
@@ -35,7 +35,8 @@ struct command_config {
 const struct command_config command_list[] = {
     {"epvr", COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
-    {"preq", COMMAND_PLEDGE_REQUEST, "\tpreq\t\tSend a pledge-voucher request to the registrar"},
+    {"preq", COMMAND_PLEDGE_REQUEST,
+     "\tpreq\t\tSend a pledge-voucher request to the registrar"},
     {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
     {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
     {NULL, COMMAND_UNKNOWN, NULL}};

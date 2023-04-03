@@ -74,7 +74,8 @@ int registrar_start(struct registrar_config *rconf,
   }
 
   setup_registrar_routes(routes);
-  struct http_config hconf = {.bind_address = rconf->bind_address, .port = rconf->port};
+  struct http_config hconf = {.bind_address = rconf->bind_address,
+                              .port = rconf->port};
 
   return https_start(&hconf, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);

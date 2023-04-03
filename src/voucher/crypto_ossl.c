@@ -169,7 +169,8 @@ int certbuf_to_file(const struct BinaryArray *cert, const char *filename) {
   }
 
   if (!PEM_write_X509(fp, x509)) {
-    log_error("PEM_write_X509 fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    log_error("PEM_write_X509 fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
     fclose(fp);
     X509_free(x509);
     return -1;
@@ -532,7 +533,8 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   X509 *pcert = NULL;
   const unsigned char *pp = (unsigned char *)cert;
   if (d2i_X509(&pcert, &pp, length) == NULL) {
-    log_error("d2i_X509 fail with code=%s", ERR_reason_error_string(ERR_get_error()));
+    log_error("d2i_X509 fail with code=%s",
+              ERR_reason_error_string(ERR_get_error()));
     return NULL;
   }
 
