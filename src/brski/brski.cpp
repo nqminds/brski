@@ -5,6 +5,7 @@
 #include <libgen.h>
 
 #include "registrar/registrar_server.h"
+#include "pledge/pledge_request.h"
 
 extern "C" {
 #include "../utils/log.h"
@@ -217,6 +218,13 @@ int main(int argc, char *argv[]) {
       if (voucher_pledge_request_to_smimefile(
               &config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
         fprintf(stderr, "voucher_pledge_request_to_smimefile fail");
+        return EXIT_FAILURE;
+      }
+      break;
+    case COMMAND_PLEDGE_REQUEST:
+      fprintf(stdout, "Pledge voucher request to %s:%d", config.rconf.bind_address, config.rconf.port);
+      if (post_voucher_pledge_request(&config.pconf, &config.rconf) < 0) {
+        fprintf(stderr, "post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
       break;
