@@ -71,13 +71,12 @@ int post_brski_enrollstatus(RequestHeader &request_header,
   return 200;
 }
 
-int get_est_cacerts(RequestHeader &request_header,
-                    std::string &request_body,
+int get_est_cacerts(RequestHeader &request_header, std::string &request_body,
                     ResponseHeader &response_header, std::string &response,
                     void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
-  
+
   log_trace("%s", request_body.c_str());
 
   response.assign("get_est_cacerts");
@@ -86,7 +85,7 @@ int get_est_cacerts(RequestHeader &request_header,
 }
 
 int post_est_simpleenroll(RequestHeader &request_header,
-                          std::string &request_body,    
+                          std::string &request_body,
                           ResponseHeader &response_header,
                           std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -113,8 +112,7 @@ int post_est_simplereenroll(RequestHeader &request_header,
   return 503;
 }
 
-int post_est_fullcmc(RequestHeader &request_header,
-                     std::string &request_body,
+int post_est_fullcmc(RequestHeader &request_header, std::string &request_body,
                      ResponseHeader &response_header, std::string &response,
                      void *user_ctx) {
   struct RegistrarContext *context =
@@ -141,8 +139,7 @@ int post_est_serverkeygen(RequestHeader &request_header,
   return 503;
 }
 
-int get_est_csrattrs(RequestHeader &request_header,
-                     std::string &request_body,
+int get_est_csrattrs(RequestHeader &request_header, std::string &request_body,
                      ResponseHeader &response_header, std::string &response,
                      void *user_ctx) {
   struct RegistrarContext *context =

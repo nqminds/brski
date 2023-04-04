@@ -1,11 +1,11 @@
 #include <stdlib.h>
+#include <libgen.h>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 
-#include "registrar/registrar_server.h"
 #include "pledge/pledge_request.h"
+#include "registrar/registrar_server.h"
 
 extern "C" {
 #include "../utils/log.h"
@@ -222,7 +222,8 @@ int main(int argc, char *argv[]) {
       }
       break;
     case COMMAND_PLEDGE_REQUEST:
-      fprintf(stdout, "Pledge voucher request to %s:%d", config.rconf.bind_address, config.rconf.port);
+      fprintf(stdout, "Pledge voucher request to %s:%d",
+              config.rconf.bind_address, config.rconf.port);
       if (post_voucher_pledge_request(&config.pconf, &config.rconf) < 0) {
         fprintf(stderr, "post_voucher_pledge_request fail");
         return EXIT_FAILURE;

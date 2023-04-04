@@ -59,8 +59,8 @@ int httplib_register_routes(httplib::Server *server,
 
           get_request_header(req, request_header);
           std::string body = req.body;
-          int status_code =
-              route.handle(request_header, body, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, body, response_header,
+                                         response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -73,8 +73,8 @@ int httplib_register_routes(httplib::Server *server,
 
           get_request_header(req, request_header);
           std::string body = req.body;
-          int status_code =
-              route.handle(request_header, body, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, body, response_header,
+                                         response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -87,8 +87,8 @@ int httplib_register_routes(httplib::Server *server,
 
           get_request_header(req, request_header);
           std::string body = req.body;
-          int status_code =
-              route.handle(request_header, body, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, body, response_header,
+                                         response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -101,8 +101,8 @@ int httplib_register_routes(httplib::Server *server,
 
           get_request_header(req, request_header);
           std::string body = req.body;
-          int status_code =
-              route.handle(request_header, body, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, body, response_header,
+                                         response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -115,8 +115,8 @@ int httplib_register_routes(httplib::Server *server,
 
           get_request_header(req, request_header);
           std::string body = req.body;
-          int status_code =
-              route.handle(request_header, body, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, body, response_header,
+                                         response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -129,8 +129,8 @@ int httplib_register_routes(httplib::Server *server,
 
           get_request_header(req, request_header);
           std::string body = req.body;
-          int status_code =
-              route.handle(request_header, body, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, body, response_header,
+                                         response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -189,13 +189,16 @@ int httplib_start(struct http_config *config,
 
   try {
     httplib::Server *server;
-    
+
     if (config->tls_cert_path == nullptr || config->tls_key_path == nullptr) {
-      log_info("Starting the HTTP server at %s:%d", config->bind_address, config->port);
+      log_info("Starting the HTTP server at %s:%d", config->bind_address,
+               config->port);
       server = new httplib::Server();
     } else {
-      log_info("Starting the HTTPS server at %s:%d", config->bind_address, config->port);
-      server = new httplib::SSLServer(config->tls_cert_path, config->tls_key_path);
+      log_info("Starting the HTTPS server at %s:%d", config->bind_address,
+               config->port);
+      server =
+          new httplib::SSLServer(config->tls_cert_path, config->tls_key_path);
     }
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
@@ -218,9 +221,11 @@ int httplib_start(struct http_config *config,
   return 0;
 }
 
-int httplib_post_request(const std::string &address, const std::string &path, bool verify, const std::string &body,
-              const std::string &content_type, std::string &response) {
-  httplib::Client cli(address);                
+int httplib_post_request(const std::string &address, const std::string &path,
+                         bool verify, const std::string &body,
+                         const std::string &content_type,
+                         std::string &response) {
+  httplib::Client cli(address);
 
   cli.enable_server_certificate_verification(verify);
 

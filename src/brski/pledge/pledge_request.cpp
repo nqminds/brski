@@ -14,15 +14,16 @@
 
 #include "pledge_config.h"
 
+#include "../http/https_client.h"
 #include "../registrar/registrar_config.h"
 #include "../registrar/registrar_server.h"
-#include "../http/https_client.h"
 
 extern "C" {
 #include "../../utils/log.h"
 }
 
-int post_voucher_pledge_request(struct pledge_config *pconf, struct registrar_config *rconf) {
+int post_voucher_pledge_request(struct pledge_config *pconf,
+                                struct registrar_config *rconf) {
   if (rconf->bind_address == nullptr) {
     log_error("bind_address param is NULL");
     return -1;
@@ -35,6 +36,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf, struct registrar_co
   std::string response;
   log_info("Request pledge voucher from %s", path.c_str());
 
-  int status = https_post_request(address, path, false, body, content_type, response);
+  int status =
+      https_post_request(address, path, false, body, content_type, response);
   return 0;
 }

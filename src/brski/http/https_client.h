@@ -24,8 +24,9 @@
  * @param[out] response The output response string
  * @return int the status code on success, -1 on failure
  */
-int https_post_request(const std::string &address, const std::string &path, bool verify, const std::string &body,
-              const std::string &content_type, std::string &response);
+int https_post_request(const std::string &address, const std::string &path,
+                       bool verify, const std::string &body,
+                       const std::string &content_type, std::string &response);
 
 /**
  * @brief Returns the full address of a HTTPS server

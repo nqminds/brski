@@ -113,8 +113,7 @@ void free_masa_config_content(struct masa_config *mconf) {
   }
 }
 
-int load_masa_config(const char *filename,
-                          struct masa_config *const mconf) {
+int load_masa_config(const char *filename, struct masa_config *const mconf) {
   char *value = NULL;
 
   if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
@@ -139,8 +138,7 @@ int load_masa_config(const char *filename,
     return -1;
   }
 
-  ini_gets("masa", "tlsCertPath", "", value, MAX_CONFIG_VALUE_SIZE,
-           filename);
+  ini_gets("masa", "tlsCertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
   mconf->tls_cert_path = value;
   if (!strlen(mconf->tls_cert_path)) {
     mconf->tls_cert_path = NULL;
@@ -153,8 +151,7 @@ int load_masa_config(const char *filename,
     return -1;
   }
 
-  ini_gets("masa", "tlsKeyPath", "", value, MAX_CONFIG_VALUE_SIZE,
-           filename);
+  ini_gets("masa", "tlsKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
   mconf->tls_key_path = value;
   if (!strlen(mconf->tls_key_path)) {
     mconf->tls_key_path = NULL;

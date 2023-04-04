@@ -11,8 +11,8 @@
 #ifndef PLEDGE_REQUEST_H
 #define PLEDGE_REQUEST_H
 
-#include "pledge_config.h"
 #include "../registrar/registrar_config.h"
+#include "pledge_config.h"
 
 /**
  * @brief Sends a pledge voucher POST request to the registrar
@@ -21,5 +21,6 @@
  * @param[in] rconf The registrar configuration structure
  * @return int 0 on success, -1 on failure
  */
-int post_voucher_pledge_request(struct pledge_config *pconf, struct registrar_config *rconf);
+int post_voucher_pledge_request(struct pledge_config *pconf,
+                                struct registrar_config *rconf);
 #endif

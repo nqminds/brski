@@ -10,9 +10,9 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "masa/masa_config.h"
 #include "pledge/pledge_config.h"
 #include "registrar/registrar_config.h"
-#include "masa/masa_config.h"
 
 /**
  * @brief The BRSKI configuration structures. Used for configuring the
