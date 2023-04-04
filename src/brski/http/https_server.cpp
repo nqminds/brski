@@ -24,8 +24,6 @@ int https_start(struct http_config *config,
                 void **srv_ctx) {
   *srv_ctx = nullptr;
 
-  log_info("Starting the HTTPS server at %s:%d", config->bind_address,
-           config->port);
 #ifdef WITH_CPPHTTPLIB_LIB
   return httplib_start(config, routes, user_ctx, srv_ctx);
 #else
