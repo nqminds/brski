@@ -57,6 +57,9 @@ bindAddress = "0.0.0.0"
 port = 12345
 tlsKeyPath = "/absolute_path_to/registrar-tls.key"
 tlsCertPath = "/absolute_path_to/registrar-tls.crt"
+cmsSignCertPath = ""
+cmsSignKeyPath = ""
+cmsAdditionalCertPath = ""
 ```
 
 The `config.ini` pledge keys used for the export functionality are:

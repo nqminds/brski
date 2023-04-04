@@ -16,3 +16,10 @@ tlsCertPath = ""
 tlsKeyPath = ""
 
 [masa]
+bindAddress = "0.0.0.0"
+port = 12346
+tlsCertPath = ""
+tlsKeyPath = ""
+cmsSignCertPath = ""
+cmsSignKeyPath = ""
+cmsAdditionalCertPath = ""

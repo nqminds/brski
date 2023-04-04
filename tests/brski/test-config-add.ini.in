@@ -16,3 +16,7 @@ tlsKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.key"
 tlsCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.crt"
 
 [masa]
+bindAddress = "0.0.0.0"
+port = 12346
+tlsCertPath = ""
+tlsKeyPath = ""
