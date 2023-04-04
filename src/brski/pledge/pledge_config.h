@@ -17,8 +17,8 @@ struct pledge_config {
   char *created_on;
   char *serial_number;
   char *nonce;
-  char *sign_cert_path;
-  char *sign_key_path;
+  char *cms_sign_cert_path;
+  char *cms_sign_key_path;
   struct BinaryArrayList *additional_cert_paths;
 };
 

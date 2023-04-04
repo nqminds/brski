@@ -158,12 +158,12 @@ void free_pledge_config_content(struct pledge_config *const pconf) {
       sys_free(pconf->nonce);
     }
 
-    if (pconf->sign_cert_path != NULL) {
-      sys_free(pconf->sign_cert_path);
+    if (pconf->cms_sign_cert_path != NULL) {
+      sys_free(pconf->cms_sign_cert_path);
     }
 
-    if (pconf->sign_key_path != NULL) {
-      sys_free(pconf->sign_key_path);
+    if (pconf->cms_sign_key_path != NULL) {
+      sys_free(pconf->cms_sign_key_path);
     }
 
     free_array_list(pconf->additional_cert_paths);
@@ -222,9 +222,9 @@ int load_pledge_config(const char *filename,
 
   ini_gets("pledge", "cmsSignCertPath", "", value, MAX_CONFIG_VALUE_SIZE,
            filename);
-  pconf->sign_cert_path = value;
-  if (!strlen(pconf->sign_cert_path)) {
-    pconf->sign_cert_path = NULL;
+  pconf->cms_sign_cert_path = value;
+  if (!strlen(pconf->cms_sign_cert_path)) {
+    pconf->cms_sign_cert_path = NULL;
     sys_free(value);
   }
 
@@ -236,9 +236,9 @@ int load_pledge_config(const char *filename,
 
   ini_gets("pledge", "cmsSignKeyPath", "", value, MAX_CONFIG_VALUE_SIZE,
            filename);
-  pconf->sign_key_path = value;
-  if (!strlen(pconf->sign_key_path)) {
-    pconf->sign_key_path = NULL;
+  pconf->cms_sign_key_path = value;
+  if (!strlen(pconf->cms_sign_key_path)) {
+    pconf->cms_sign_key_path = NULL;
     sys_free(value);
   }
 

@@ -113,12 +113,12 @@ voucher_pledge_request_to_array(const struct pledge_config *pconf,
     goto voucher_pledge_request_to_smimefile_fail;
   }
 
-  if ((pledge_sign_cert = file_to_x509buf(pconf->sign_cert_path)) == NULL) {
+  if ((pledge_sign_cert = file_to_x509buf(pconf->cms_sign_cert_path)) == NULL) {
     log_error("file_to_x509buf fail");
     goto voucher_pledge_request_to_smimefile_fail;
   }
 
-  if ((pledge_sign_key = file_to_keybuf(pconf->sign_key_path)) == NULL) {
+  if ((pledge_sign_key = file_to_keybuf(pconf->cms_sign_key_path)) == NULL) {
     log_error("file_to_keybuf fail");
     goto voucher_pledge_request_to_smimefile_fail;
   }
