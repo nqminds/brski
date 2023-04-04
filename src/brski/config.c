@@ -242,7 +242,7 @@ int load_pledge_config(const char *filename,
     sys_free(value);
   }
 
-  if (load_config_value_list("pledge", "cmsAdditionalCertPath", filename,
+  if (load_config_value_list("pledge", "cmsAdditionalCertsPath", filename,
                              &pconf->additional_cert_paths) < 0) {
     log_error("load_config_value_list fail");
     free_pledge_config_content(pconf);
