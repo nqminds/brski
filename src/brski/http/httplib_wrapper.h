@@ -11,6 +11,7 @@
 #ifndef HTTPLIB_WRAPPER_H
 #define HTTPLIB_WRAPPER_H
 
+#include <vector>
 #include "http.h"
 
 /**
@@ -32,4 +33,18 @@ int httplib_start(struct http_config *config,
  * @param[in] context The https server context structure
  */
 void httplib_stop(void *srv_ctx);
+
+/**
+ * @brief Sends a POST request to an endpoint
+ *
+ * @param[in] address The https server address
+ * @param[in] path The endpoint route path string
+ * @param[in] verify Enable server certificate verification
+ * @param[in] body The request body string
+ * @param[in] content_type The content typ string
+ * @param[out] response The output response string
+ * @return int the status code on success, -1 on failure
+ */
+int httplib_post_request(const std::string &address, const std::string &path, bool verify, const std::string &body,
+              const std::string &content_type, std::string &response);
 #endif

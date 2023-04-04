@@ -58,8 +58,9 @@ int httplib_register_routes(httplib::Server *server,
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
+          std::string body = req.body;
           int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+              route.handle(request_header, body, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -71,8 +72,9 @@ int httplib_register_routes(httplib::Server *server,
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
+          std::string body = req.body;
           int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+              route.handle(request_header, body, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -84,8 +86,9 @@ int httplib_register_routes(httplib::Server *server,
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
+          std::string body = req.body;
           int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+              route.handle(request_header, body, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -97,8 +100,9 @@ int httplib_register_routes(httplib::Server *server,
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
+          std::string body = req.body;
           int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+              route.handle(request_header, body, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -110,8 +114,9 @@ int httplib_register_routes(httplib::Server *server,
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
+          std::string body = req.body;
           int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+              route.handle(request_header, body, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -123,8 +128,9 @@ int httplib_register_routes(httplib::Server *server,
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
+          std::string body = req.body;
           int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+              route.handle(request_header, body, response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -210,4 +216,21 @@ int httplib_start(struct http_config *config,
   }
 
   return 0;
+}
+
+int httplib_post_request(const std::string &address, const std::string &path, bool verify, const std::string &body,
+              const std::string &content_type, std::string &response) {
+  httplib::Client cli(address);                
+
+  cli.enable_server_certificate_verification(verify);
+
+  if (httplib::Result res = cli.Post(path, body, content_type)) {
+    response = res->body;
+    return res->status;
+  } else {
+    std::string err = to_string(res.error());
+    log_error("httplib::Client fail with \"%s\"", err.c_str());
+
+    return -1;
+  }
 }
