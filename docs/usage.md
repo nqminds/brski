@@ -51,8 +51,8 @@ nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
 cmsSignKeyPath = "/absolute_path_to/pledge-cms.key"
 cmsSignCertPath = "/absolute_path_to/pledge-cms.crt"
 cmsAdditionalCertsPath = ""
-cmsVerifyCerts = ""
-cmsVerifyStore = ""
+cmsVerifyCertsPath = ""
+cmsVerifyStorePath = ""
 
 [registrar]
 bindAddress = "0.0.0.0"
@@ -62,8 +62,8 @@ tlsCertPath = "/absolute_path_to/registrar-tls.crt"
 cmsSignCertPath = ""
 cmsSignKeyPath = ""
 cmsAdditionalCertsPath = ""
-cmsVerifyCerts = ""
-cmsVerifyStore = ""
+cmsVerifyCertsPath = ""
+cmsVerifyStorePath = ""
 ```
 
 The `config.ini` pledge keys used for the export functionality are:
