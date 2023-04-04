@@ -170,8 +170,6 @@ void set_exception_handler(httplib::Server *server) {
 
 void httplib_stop(void *srv_ctx) {
   if (srv_ctx != nullptr) {
-    // httplib::SSLServer *server = static_cast<httplib::SSLServer
-    // *>(context->server);
     httplib::Server *server = static_cast<httplib::Server *>(srv_ctx);
     server->stop();
     delete server;
@@ -184,11 +182,15 @@ int httplib_start(struct http_config *config,
   *srv_ctx = nullptr;
 
   try {
-    const char *cert_path = "";
-    const char *private_key_path = "";
-    // httplib::SSLServer *server = new httplib::SSLServer(cert_path,
-    // private_key_path);
-    httplib::Server *server = new httplib::Server();
+    httplib::Server *server;
+    
+    if (config->tls_cert_path == nullptr || config->tls_key_path == nullptr) {
+      log_info("Starting the HTTP server at %s:%d", config->bind_address, config->port);
+      server = new httplib::Server();
+    } else {
+      log_info("Starting the HTTPS server at %s:%d", config->bind_address, config->port);
+      server = new httplib::SSLServer(config->tls_cert_path, config->tls_key_path);
+    }
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
       log_error("httplib_register_routes fail");

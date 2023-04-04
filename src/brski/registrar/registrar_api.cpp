@@ -22,7 +22,7 @@ int post_brski_requestvoucher(RequestHeader &request_header,
       static_cast<struct RegistrarContext *>(user_ctx);
 
   response.assign("post_brski_requestvoucher");
-  response_header["Content-Type"] = "text/plain";
+  response_header["Content-Type"] = "application/voucher-cms+json";
   return 200;
 }
 
