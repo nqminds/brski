@@ -16,7 +16,7 @@ struct registrar_config {
   unsigned int port;
   char *tls_cert_path;
   char *tls_key_path;
-  struct BinaryArrayList *additional_cert_paths;
+  struct BinaryArrayList *cms_add_certs_paths;
 };
 
 #endif

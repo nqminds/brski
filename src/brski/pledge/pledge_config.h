@@ -19,7 +19,7 @@ struct pledge_config {
   char *nonce;
   char *cms_sign_cert_path;
   char *cms_sign_key_path;
-  struct BinaryArrayList *additional_cert_paths;
+  struct BinaryArrayList *cms_add_certs_paths;
 };
 
 #endif

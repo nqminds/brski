@@ -166,7 +166,7 @@ void free_pledge_config_content(struct pledge_config *const pconf) {
       sys_free(pconf->cms_sign_key_path);
     }
 
-    free_array_list(pconf->additional_cert_paths);
+    free_array_list(pconf->cms_add_certs_paths);
   }
 }
 
@@ -242,8 +242,8 @@ int load_pledge_config(const char *filename,
     sys_free(value);
   }
 
-  if (load_config_value_list("pledge", "cmsAdditionalCertsPath", filename,
-                             &pconf->additional_cert_paths) < 0) {
+  if (load_config_value_list("pledge", "cmsAdditionalCertPath", filename,
+                             &pconf->cms_add_certs_paths) < 0) {
     log_error("load_config_value_list fail");
     free_pledge_config_content(pconf);
     return -1;

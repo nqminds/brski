@@ -123,7 +123,7 @@ voucher_pledge_request_to_array(const struct pledge_config *pconf,
     goto voucher_pledge_request_to_smimefile_fail;
   }
 
-  if (load_cert_files(pconf->additional_cert_paths, &additional_pledge_certs) <
+  if (load_cert_files(pconf->cms_add_certs_paths, &additional_pledge_certs) <
       0) {
     log_error("load_cert_files");
     goto voucher_pledge_request_to_smimefile_fail;
