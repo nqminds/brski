@@ -8,6 +8,7 @@
  * @brief File containing the implementation of the http library wrapper.
  */
 
+#include <openssl/ssl.h>
 #include <httplib.h>
 
 extern "C" {
@@ -44,9 +45,11 @@ void set_response(std::string &response, ResponseHeader &response_header,
   res.status = status_code;
 }
 
-int httplib_register_routes(httplib::Server *server,
+int httplib_register_routes(httplib::SSLServer *server,
                             std::vector<struct RouteTuple> &routes,
                             void *user_ctx) {
+  SSL_CTX *ssl_context = server->ssl_context();
+
   for (auto route : routes) {
     log_debug("Registering route=%s", route.path.c_str());
     switch (route.method) {
@@ -142,7 +145,7 @@ int httplib_register_routes(httplib::Server *server,
   return 0;
 }
 
-void set_error_handler(httplib::Server *server) {
+void set_error_handler(httplib::SSLServer *server) {
   server->set_error_handler(
       [](const httplib::Request &req, httplib::Response &res) {
         char buf[BUFSIZ];
@@ -151,7 +154,7 @@ void set_error_handler(httplib::Server *server) {
       });
 }
 
-void set_exception_handler(httplib::Server *server) {
+void set_exception_handler(httplib::SSLServer *server) {
   server->set_exception_handler([](const httplib::Request &req,
                                    httplib::Response &res,
                                    std::exception_ptr ep) {
@@ -170,7 +173,7 @@ void set_exception_handler(httplib::Server *server) {
 
 void httplib_stop(void *srv_ctx) {
   if (srv_ctx != nullptr) {
-    httplib::Server *server = static_cast<httplib::Server *>(srv_ctx);
+    httplib::SSLServer *server = static_cast<httplib::SSLServer *>(srv_ctx);
     server->stop();
     delete server;
   }
@@ -181,19 +184,14 @@ int httplib_start(struct http_config *config,
                   void **srv_ctx) {
   *srv_ctx = nullptr;
 
-  try {
-    httplib::Server *server;
+  if (config->tls_cert_path == nullptr || config->tls_key_path == nullptr) {
+    log_error("tls_cert_path or tls_key_path is NULL");
+    return -1;
+  }
 
-    if (config->tls_cert_path == nullptr || config->tls_key_path == nullptr) {
-      log_info("Starting the HTTP server at %s:%d", config->bind_address,
-               config->port);
-      server = new httplib::Server();
-    } else {
-      log_info("Starting the HTTPS server at %s:%d", config->bind_address,
-               config->port);
-      server =
-          new httplib::SSLServer(config->tls_cert_path, config->tls_key_path);
-    }
+  try {
+    httplib::SSLServer *server =
+        new httplib::SSLServer(config->tls_cert_path, config->tls_key_path);
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
       log_error("httplib_register_routes fail");
@@ -205,6 +203,9 @@ int httplib_start(struct http_config *config,
     set_exception_handler(server);
 
     *srv_ctx = static_cast<void *>(server);
+
+    log_info("Starting the HTTPS server at %s:%d", config->bind_address, config->port);
+
     server->listen(config->bind_address, config->port);
   } catch (...) {
     log_error("httplib::SSLServer() fail");
