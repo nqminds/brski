@@ -20,8 +20,8 @@
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_requestvoucher(RequestHeader &request_header,
-                              std::string &request_body,
+int post_brski_requestvoucher(const RequestHeader &request_header,
+                              const std::string &request_body,
                               ResponseHeader &response_header,
                               std::string &response, void *context);
 
@@ -30,8 +30,8 @@ int post_brski_requestvoucher(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_voucher_status(RequestHeader &request_header,
-                              std::string &request_body,
+int post_brski_voucher_status(const RequestHeader &request_header,
+                              const std::string &request_body,
                               ResponseHeader &response_header,
                               std::string &response, void *context);
 
@@ -40,8 +40,8 @@ int post_brski_voucher_status(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_requestauditlog(RequestHeader &request_header,
-                               std::string &request_body,
+int post_brski_requestauditlog(const RequestHeader &request_header,
+                               const std::string &request_body,
                                ResponseHeader &response_header,
                                std::string &response, void *context);
 
@@ -50,8 +50,8 @@ int post_brski_requestauditlog(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_enrollstatus(RequestHeader &request_header,
-                            std::string &request_body,
+int post_brski_enrollstatus(const RequestHeader &request_header,
+                            const std::string &request_body,
                             ResponseHeader &response_header,
                             std::string &response, void *context);
 
@@ -60,7 +60,7 @@ int post_brski_enrollstatus(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int get_est_cacerts(RequestHeader &request_header, std::string &request_body,
+int get_est_cacerts(const RequestHeader &request_header, const std::string &request_body,
                     ResponseHeader &response_header, std::string &response,
                     void *context);
 
@@ -69,8 +69,8 @@ int get_est_cacerts(RequestHeader &request_header, std::string &request_body,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_simpleenroll(RequestHeader &request_header,
-                          std::string &request_body,
+int post_est_simpleenroll(const RequestHeader &request_header,
+                          const std::string &request_body,
                           ResponseHeader &response_header,
                           std::string &response, void *context);
 
@@ -79,8 +79,8 @@ int post_est_simpleenroll(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_simplereenroll(RequestHeader &request_header,
-                            std::string &request_body,
+int post_est_simplereenroll(const RequestHeader &request_header,
+                            const std::string &request_body,
                             ResponseHeader &response_header,
                             std::string &response, void *context);
 
@@ -89,7 +89,7 @@ int post_est_simplereenroll(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_fullcmc(RequestHeader &request_header, std::string &request_body,
+int post_est_fullcmc(const RequestHeader &request_header, const std::string &request_body,
                      ResponseHeader &response_header, std::string &response,
                      void *context);
 
@@ -98,8 +98,8 @@ int post_est_fullcmc(RequestHeader &request_header, std::string &request_body,
  *
  * @return int 0 on success, -1 on failure
  */
-int post_est_serverkeygen(RequestHeader &request_header,
-                          std::string &request_body,
+int post_est_serverkeygen(const RequestHeader &request_header,
+                          const std::string &request_body,
                           ResponseHeader &response_header,
                           std::string &response, void *context);
 
@@ -108,7 +108,7 @@ int post_est_serverkeygen(RequestHeader &request_header,
  *
  * @return int 0 on success, -1 on failure
  */
-int get_est_csrattrs(RequestHeader &request_header, std::string &request_body,
+int get_est_csrattrs(const RequestHeader &request_header, const std::string &request_body,
                      ResponseHeader &response_header, std::string &response,
                      void *context);
 

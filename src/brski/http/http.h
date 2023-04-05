@@ -40,7 +40,7 @@ enum HTTP_METHOD {
 typedef std::map<std::string, std::string> RequestHeader;
 typedef std::map<std::string, std::string> ResponseHeader;
 typedef std::function<int(
-    RequestHeader &request_header, std::string &request_body,
+    const RequestHeader &request_header, const std::string &request_body,
     ResponseHeader &response_header, std::string &response, void *user_ctx)>
     RouteHandle;
 
