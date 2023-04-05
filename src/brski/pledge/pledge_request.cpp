@@ -19,6 +19,7 @@
 #include "../registrar/registrar_server.h"
 
 extern "C" {
+#include "../pledge/pledge_utils.h"
 #include "../../utils/log.h"
 }
 
@@ -32,11 +33,28 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   std::string address = get_https_address(rconf->bind_address, rconf->port);
   std::string path = PATH_BRSKI_REQUESTVOUCHER;
   std::string content_type = "application/voucher-cms+json";
-  std::string body = "test";
+
+  char *cms = voucher_pledge_request_to_base64(pconf, rconf->tls_cert_path);
+
+  if (cms == NULL) {
+    log_error("voucher_pledge_request_to_base64 fail");
+    return -1;
+  }
+
+  std::string body = cms;
+
+  sys_free(cms);
+
   std::string response;
   log_info("Request pledge voucher from %s", path.c_str());
 
-  int status =
-      https_post_request(address, path, false, body, content_type, response);
+  int status = https_post_request(address, path, false, body, content_type, response);
+
+  if (status < 0) {
+    log_error("https_post_request fail");
+    return -1;
+  }
+
+  log_debug("post_voucher_pledge_request status %d", status);
   return 0;
 }

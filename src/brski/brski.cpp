@@ -222,7 +222,7 @@ int main(int argc, char *argv[]) {
       }
       break;
     case COMMAND_PLEDGE_REQUEST:
-      fprintf(stdout, "Pledge voucher request to %s:%d",
+      fprintf(stdout, "Pledge voucher request to %s:%d\n",
               config.rconf.bind_address, config.rconf.port);
       if (post_voucher_pledge_request(&config.pconf, &config.rconf) < 0) {
         fprintf(stderr, "post_voucher_pledge_request fail");

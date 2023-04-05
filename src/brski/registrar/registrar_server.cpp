@@ -68,6 +68,7 @@ int registrar_start(struct registrar_config *rconf,
 
   try {
     *context = new RegistrarContext();
+    (*context)->rconf = rconf;
   } catch (...) {
     log_error("failed to allocate RegistrarContext");
     return -1;

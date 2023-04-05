@@ -29,6 +29,7 @@
 #define PATH_EST_CSRATTRS EST_PREFIX_PATH "/csrattrs"
 
 struct RegistrarContext {
+  struct registrar_config *rconf;
   void *srv_ctx;
 };
 
