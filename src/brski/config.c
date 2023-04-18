@@ -110,6 +110,11 @@ void free_masa_config_content(struct masa_config *mconf) {
     mconf->cms_verify_certs_paths = NULL;
     free_array_list(mconf->cms_verify_store_paths);
     mconf->cms_verify_store_paths = NULL;
+
+    if (mconf->idevid_ca_path != NULL) {
+      sys_free(mconf->idevid_ca_path);
+      mconf->idevid_ca_path = NULL;
+    }
   }
 }
 
@@ -205,6 +210,20 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     log_error("load_config_value_list fail");
     free_masa_config_content(mconf);
     return -1;
+  }
+
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_masa_config_content(mconf);
+    return -1;
+  }
+
+  ini_gets("masa", "idevidCAPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
+  mconf->idevid_ca_path = value;
+  if (!strlen(mconf->idevid_ca_path)) {
+    mconf->idevid_ca_path = NULL;
+    sys_free(value);
   }
 
   return 0;

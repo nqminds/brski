@@ -23,6 +23,7 @@ struct masa_config {
   struct BinaryArrayList *cms_add_certs_paths;
   struct BinaryArrayList *cms_verify_certs_paths;
   struct BinaryArrayList *cms_verify_store_paths;
+  char *idevid_ca_path;
 };
 
 #endif

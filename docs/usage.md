@@ -48,8 +48,8 @@ where the example `config.ini` file is defined as follows:
 createdOn = "1973-11-29T21:33:09Z"
 serialNumber = "12345"
 nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
-idevidKeyPath = "/absolute_path_to/idevid.key"
-idevidCertPath = "/absolute_path_to/idevid.crt"
+idevidKeyPath = ""
+idevidCertPath = ""
 cmsSignKeyPath = "/absolute_path_to/pledge-cms.key"
 cmsSignCertPath = "/absolute_path_to/pledge-cms.crt"
 cmsAdditionalCertPath = ""
@@ -73,8 +73,6 @@ The `config.ini` pledge keys used for the export functionality are:
 - `createdOn` (yang time value),
 - `serialNumber`,
 - `nonce` (base64),
-- `idevidKeyPath` (path to private key corresponding to the idevid certificate),
-- `idevidCertPath` (path to idevid certificate),
 - `cmsSignKeyPath` (path to private key to sign the CMS) and
 - `cmsSignCertPath` (path to certificate).
 
