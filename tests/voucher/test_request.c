@@ -713,6 +713,26 @@ static void test_save_certs(void **state) {
       &pledge_cms_meta, pledge_cms_key.array, pledge_cms_key.length,
       &pledge_cms_cert.array);
 
+  struct crypto_cert_meta idev_meta = {.serial_number = 12345,
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
+
+  idev_meta.issuer = init_keyvalue_list();
+  idev_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(idev_meta.subject, "C", "IE");
+  push_keyvalue_list(idev_meta.subject, "CN", "idev-meta");
+
+  struct BinaryArray idev_key = {};
+  struct BinaryArray idev_cert = {};
+  idev_key.length = (size_t)crypto_generate_eckey(&idev_key.array);
+  idev_cert.length = (size_t)crypto_generate_eccert(
+      &idev_meta, idev_key.array, idev_key.length,
+      &idev_cert.array);
+
   struct crypto_cert_meta intermediate1_meta = {.serial_number = 12345,
                                                 .not_before = 0,
                                                 .not_after = 1234567,
@@ -781,6 +801,8 @@ static void test_save_certs(void **state) {
   assert_int_equal(certbuf_to_file(&test_ca_cert, "/tmp/masa-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&pledge_cms_key, "/tmp/pledge-cms.key"), 0);
   assert_int_equal(certbuf_to_file(&pledge_cms_cert, "/tmp/pledge-cms.crt"), 0);
+  assert_int_equal(keybuf_to_file(&idev_key, "/tmp/idevid.key"), 0);
+  assert_int_equal(certbuf_to_file(&idev_cert, "/tmp/idevid.crt"), 0);
   assert_int_equal(
       keybuf_to_file(&intermediate1_key, "/tmp/masa-intermediate1.key"), 0);
   assert_int_equal(
@@ -794,6 +816,11 @@ static void test_save_certs(void **state) {
   free_binary_array_content(&pledge_cms_cert);
   free_keyvalue_list(pledge_cms_meta.issuer);
   free_keyvalue_list(pledge_cms_meta.subject);
+
+  free_binary_array_content(&idev_key);
+  free_binary_array_content(&idev_cert);
+  free_keyvalue_list(idev_meta.issuer);
+  free_keyvalue_list(idev_meta.subject);
 
   free_binary_array_content(&intermediate1_key);
   free_binary_array_content(&intermediate1_cert);

@@ -48,6 +48,9 @@ void set_response(std::string &response, ResponseHeader &response_header,
 int httplib_register_routes(httplib::SSLServer *server,
                             std::vector<struct RouteTuple> &routes,
                             void *user_ctx) {
+  /* 
+    Can use also: SSL_CTX *SSL_get_SSL_CTX(const SSL *ssl);
+  */
   SSL_CTX *ssl_context = server->ssl_context();
 
   for (auto route : routes) {
