@@ -19,11 +19,15 @@ extern "C" {
 #include "httplib_wrapper.h"
 #endif
 
-int https_post_request(const std::string &address, const std::string &path,
+int https_post_request(const std::string &client_key_path,
+                       const std::string &client_cert_path,
+                       const std::string &address, const std::string &path,
                        bool verify, const std::string &body,
                        const std::string &content_type, std::string &response) {
 #ifdef WITH_CPPHTTPLIB_LIB
-  return httplib_post_request(address, path, verify, body, content_type,
+  return httplib_post_request(client_key_path,
+                              client_cert_path,
+                              address, path, verify, body, content_type,
                               response);
 #else
   log_error("No https client defined");

@@ -30,6 +30,16 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
     return -1;
   }
 
+  if (pconf->idevid_key_path == nullptr) {
+    log_error("idevid_key_path param is NULL");
+    return -1;
+  }
+
+  if (pconf->idevid_cert_path == nullptr) {
+    log_error("idevid_cert_path param is NULL");
+    return -1;
+  }
+
   std::string address = get_https_address(rconf->bind_address, rconf->port);
   std::string path = PATH_BRSKI_REQUESTVOUCHER;
   std::string content_type = "application/voucher-cms+json";
@@ -48,7 +58,10 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   std::string response;
   log_info("Request pledge voucher from %s", path.c_str());
 
-  int status = https_post_request(address, path, false, body, content_type, response);
+  int status = https_post_request(pconf->idevid_key_path,
+                                  pconf->idevid_cert_path,
+                                  address, path, false, body,
+                                  content_type, response);
 
   if (status < 0) {
     log_error("https_post_request fail");

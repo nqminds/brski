@@ -25,8 +25,8 @@
 
 static struct BinaryArray test_pinned_domain_key = {};
 static struct BinaryArray test_pinned_domain_cert = {};
-static struct BinaryArray test_ca_key = {};
-static struct BinaryArray test_ca_cert = {};
+static struct BinaryArray idevid_ca_key = {};
+static struct BinaryArray idevid_ca_cert = {};
 static struct BinaryArrayList *test_domain_store = NULL;
 static struct BinaryArrayList *test_pinned_domain_certs = NULL;
 
@@ -622,7 +622,7 @@ static int test_group_setup(void **state) {
   (void)state;
 
   // Generate ROOT CA for MASA
-  test_ca_key.length = crypto_generate_eckey(&test_ca_key.array);
+  idevid_ca_key.length = crypto_generate_eckey(&idevid_ca_key.array);
 
   struct crypto_cert_meta ca_meta = {.serial_number = 1,
                                      .not_before = 0,
@@ -638,8 +638,8 @@ static int test_group_setup(void **state) {
   push_keyvalue_list(ca_meta.subject, "C", "IE");
   push_keyvalue_list(ca_meta.subject, "CN", "catest");
 
-  test_ca_cert.length = crypto_generate_eccert(
-      &ca_meta, test_ca_key.array, test_ca_key.length, &test_ca_cert.array);
+  idevid_ca_cert.length = crypto_generate_eccert(
+      &ca_meta, idevid_ca_key.array, idevid_ca_key.length, &idevid_ca_cert.array);
 
   // Generate the test pinned domain certificate
   struct crypto_cert_meta pinned_domain_meta = {.serial_number = 12345,
@@ -661,15 +661,15 @@ static int test_group_setup(void **state) {
       test_pinned_domain_key.length, &test_pinned_domain_cert.array);
 
   ssize_t signed_pinned_domain_cert_length = crypto_sign_cert(
-      test_ca_key.array, test_ca_key.length, test_ca_cert.array,
-      test_ca_cert.length, test_pinned_domain_cert.length,
+      idevid_ca_key.array, idevid_ca_key.length, idevid_ca_cert.array,
+      idevid_ca_cert.length, test_pinned_domain_cert.length,
       &test_pinned_domain_cert.array);
   assert_true(signed_pinned_domain_cert_length > 0);
   assert_non_null(test_pinned_domain_cert.array);
   test_pinned_domain_cert.length = signed_pinned_domain_cert_length;
 
   test_domain_store = init_array_list();
-  push_array_list(test_domain_store, test_ca_cert.array, test_ca_cert.length,
+  push_array_list(test_domain_store, idevid_ca_cert.array, idevid_ca_cert.length,
                   0);
 
   int verified = crypto_verify_cert(test_pinned_domain_cert.array,
@@ -694,14 +694,13 @@ static int test_group_teardown(void **state) {
 
   free_binary_array_content(&test_pinned_domain_key);
   free_binary_array_content(&test_pinned_domain_cert);
-  free_binary_array_content(&test_ca_key);
-  free_binary_array_content(&test_ca_cert);
+  free_binary_array_content(&idevid_ca_key);
+  free_binary_array_content(&idevid_ca_cert);
   free_array_list(test_pinned_domain_certs);
   free_array_list(test_domain_store);
   return 0;
 }
 
-/*
 static void test_save_certs(void **state) {
   (void)state;
 
@@ -726,12 +725,20 @@ static void test_save_certs(void **state) {
   push_keyvalue_list(idev_meta.subject, "C", "IE");
   push_keyvalue_list(idev_meta.subject, "CN", "idev-meta");
 
-  struct BinaryArray idev_key = {};
-  struct BinaryArray idev_cert = {};
-  idev_key.length = (size_t)crypto_generate_eckey(&idev_key.array);
-  idev_cert.length = (size_t)crypto_generate_eccert(
-      &idev_meta, idev_key.array, idev_key.length,
-      &idev_cert.array);
+  struct BinaryArray idevid_key = {};
+  struct BinaryArray idevid_cert = {};
+  idevid_key.length = (size_t)crypto_generate_eckey(&idevid_key.array);
+  idevid_cert.length = (size_t)crypto_generate_eccert(
+      &idev_meta, idevid_key.array, idevid_key.length,
+      &idevid_cert.array);
+  
+  // Sign idevid_cert with idevid_ca
+  ssize_t length =
+      crypto_sign_cert(idevid_ca_key.array, idevid_ca_key.length,
+                       idevid_ca_cert.array, idevid_ca_cert.length,
+                       idevid_cert.length, &idevid_cert.array);
+  assert_true(length > 0);
+  idevid_cert.length = length;
 
   struct crypto_cert_meta intermediate1_meta = {.serial_number = 12345,
                                                 .not_before = 0,
@@ -777,13 +784,15 @@ static void test_save_certs(void **state) {
       &intermediate2_meta, intermediate2_key.array, intermediate2_key.length,
       &intermediate2_cert.array);
 
-  ssize_t length =
-      crypto_sign_cert(test_ca_key.array, test_ca_key.length,
-                       test_ca_cert.array, test_ca_cert.length,
+  // Sign intermediate2 with idevid_ca
+  length =
+      crypto_sign_cert(idevid_ca_key.array, idevid_ca_key.length,
+                       idevid_ca_cert.array, idevid_ca_cert.length,
                        intermediate2_cert.length, &intermediate2_cert.array);
   assert_true(length > 0);
   intermediate2_cert.length = length;
-
+  
+  // Sign intermediate2 with intermediate1
   length =
       crypto_sign_cert(intermediate2_key.array, intermediate2_key.length,
                        intermediate2_cert.array, intermediate2_cert.length,
@@ -791,18 +800,19 @@ static void test_save_certs(void **state) {
   assert_true(length > 0);
   intermediate1_cert.length = length;
 
+  // Sign pledge_cms with intermediate1
   length = crypto_sign_cert(intermediate1_key.array, intermediate1_key.length,
                             intermediate1_cert.array, intermediate1_cert.length,
                             pledge_cms_cert.length, &pledge_cms_cert.array);
   assert_true(length > 0);
   pledge_cms_cert.length = length;
 
-  assert_int_equal(keybuf_to_file(&test_ca_key, "/tmp/masa-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&test_ca_cert, "/tmp/masa-ca.crt"), 0);
+  assert_int_equal(keybuf_to_file(&idevid_ca_key, "/tmp/idevid-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&idevid_ca_cert, "/tmp/idevid-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&pledge_cms_key, "/tmp/pledge-cms.key"), 0);
   assert_int_equal(certbuf_to_file(&pledge_cms_cert, "/tmp/pledge-cms.crt"), 0);
-  assert_int_equal(keybuf_to_file(&idev_key, "/tmp/idevid.key"), 0);
-  assert_int_equal(certbuf_to_file(&idev_cert, "/tmp/idevid.crt"), 0);
+  assert_int_equal(keybuf_to_file(&idevid_key, "/tmp/idevid.key"), 0);
+  assert_int_equal(certbuf_to_file(&idevid_cert, "/tmp/idevid.crt"), 0);
   assert_int_equal(
       keybuf_to_file(&intermediate1_key, "/tmp/masa-intermediate1.key"), 0);
   assert_int_equal(
@@ -817,8 +827,8 @@ static void test_save_certs(void **state) {
   free_keyvalue_list(pledge_cms_meta.issuer);
   free_keyvalue_list(pledge_cms_meta.subject);
 
-  free_binary_array_content(&idev_key);
-  free_binary_array_content(&idev_cert);
+  free_binary_array_content(&idevid_key);
+  free_binary_array_content(&idevid_cert);
   free_keyvalue_list(idev_meta.issuer);
   free_keyvalue_list(idev_meta.subject);
 
@@ -832,7 +842,6 @@ static void test_save_certs(void **state) {
   free_keyvalue_list(intermediate2_meta.issuer);
   free_keyvalue_list(intermediate2_meta.subject);
 }
-*/
 
 int main(int argc, char *argv[]) {
   (void)argc;
@@ -845,7 +854,7 @@ int main(int argc, char *argv[]) {
       cmocka_unit_test(test_sign_voucher_request),
       cmocka_unit_test(test_sign_masa_pledge_voucher),
       cmocka_unit_test(test_verify_masa_pledge_voucher),
-      /*cmocka_unit_test(test_save_certs)*/};
+      cmocka_unit_test(test_save_certs)};
 
   return cmocka_run_group_tests(tests, test_group_setup, test_group_teardown);
 }

@@ -37,6 +37,8 @@ void httplib_stop(void *srv_ctx);
 /**
  * @brief Sends a POST request to an endpoint
  *
+ * @param[in] client_key_path The https client key path
+ * @param[in] client_cert_path The https client cert path
  * @param[in] address The https server address
  * @param[in] path The endpoint route path string
  * @param[in] verify Enable server certificate verification
@@ -45,7 +47,9 @@ void httplib_stop(void *srv_ctx);
  * @param[out] response The output response string
  * @return int the status code on success, -1 on failure
  */
-int httplib_post_request(const std::string &address, const std::string &path,
+int httplib_post_request(const std::string &client_key_path,
+                         const std::string &client_cert_path,
+                         const std::string &address, const std::string &path,
                          bool verify, const std::string &body,
                          const std::string &content_type,
                          std::string &response);

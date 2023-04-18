@@ -219,11 +219,14 @@ int httplib_start(struct http_config *config,
   return 0;
 }
 
-int httplib_post_request(const std::string &address, const std::string &path,
+int httplib_post_request(const std::string &client_key_path,
+                         const std::string &client_cert_path,
+                         const std::string &address, const std::string &path,
                          bool verify, const std::string &body,
                          const std::string &content_type,
                          std::string &response) {
-  httplib::Client cli(address);
+
+  httplib::Client cli(address, client_cert_path, client_key_path);
 
   cli.enable_server_certificate_verification(verify);
 
