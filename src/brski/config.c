@@ -363,6 +363,16 @@ void free_pledge_config_content(struct pledge_config *const pconf) {
       pconf->nonce = NULL;
     }
 
+    if (pconf->idevid_key_path != NULL) {
+      sys_free(pconf->idevid_key_path);
+      pconf->idevid_key_path = NULL;
+    }
+
+    if (pconf->idevid_cert_path != NULL) {
+      sys_free(pconf->idevid_cert_path);
+      pconf->idevid_cert_path = NULL;
+    }
+
     if (pconf->cms_sign_cert_path != NULL) {
       sys_free(pconf->cms_sign_cert_path);
       pconf->cms_sign_cert_path = NULL;
@@ -423,6 +433,34 @@ int load_pledge_config(const char *filename,
   pconf->nonce = value;
   if (!strlen(pconf->nonce)) {
     pconf->nonce = NULL;
+    sys_free(value);
+  }
+
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_pledge_config_content(pconf);
+    return -1;
+  }
+
+  ini_gets("pledge", "idevidKeyPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
+  pconf->idevid_key_path = value;
+  if (!strlen(pconf->idevid_key_path)) {
+    pconf->idevid_key_path = NULL;
+    sys_free(value);
+  }
+
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_pledge_config_content(pconf);
+    return -1;
+  }
+
+  ini_gets("pledge", "idevidCertPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
+  pconf->idevid_cert_path = value;
+  if (!strlen(pconf->idevid_cert_path)) {
+    pconf->idevid_cert_path = NULL;
     sys_free(value);
   }
 

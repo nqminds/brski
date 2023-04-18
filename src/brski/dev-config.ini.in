@@ -5,6 +5,8 @@
 createdOn = ""
 serialNumber = ""
 nonce = ""
+idevidKeyPath = ""
+idevidCertPath = ""
 cmsSignCertPath = ""
 cmsSignKeyPath = ""
 cmsAdditionalCertPath = ""
