@@ -230,7 +230,7 @@ int main(int argc, char *argv[]) {
       }
       break;
     case COMMAND_START_REGISTRAR:
-      if (registrar_start(&config.rconf, &context) < 0) {
+      if (registrar_start(&config.rconf, &config.mconf, &context) < 0) {
         fprintf(stderr, "https_start fail");
         return EXIT_FAILURE;
       }

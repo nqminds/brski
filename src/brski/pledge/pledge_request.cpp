@@ -40,7 +40,6 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
     return -1;
   }
 
-  std::string address = get_https_address(rconf->bind_address, rconf->port);
   std::string path = PATH_BRSKI_REQUESTVOUCHER;
   std::string content_type = "application/voucher-cms+json";
 
@@ -60,7 +59,8 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
 
   int status = https_post_request(pconf->idevid_key_path,
                                   pconf->idevid_cert_path,
-                                  address, path, false, body,
+                                  rconf->bind_address, rconf->port,
+                                  path, false, body,
                                   content_type, response);
 
   if (status < 0) {

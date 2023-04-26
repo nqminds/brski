@@ -624,22 +624,22 @@ static int test_group_setup(void **state) {
   // Generate ROOT CA for MASA
   idevid_ca_key.length = crypto_generate_eckey(&idevid_ca_key.array);
 
-  struct crypto_cert_meta ca_meta = {.serial_number = 1,
+  struct crypto_cert_meta idevid_ca_meta = {.serial_number = 1,
                                      .not_before = 0,
                                      .not_after = 1234567,
                                      .issuer = NULL,
                                      .subject = NULL,
                                      .basic_constraints = "critical,CA:TRUE"};
 
-  ca_meta.issuer = init_keyvalue_list();
-  ca_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(ca_meta.issuer, "C", "IE");
-  push_keyvalue_list(ca_meta.issuer, "CN", "catest");
-  push_keyvalue_list(ca_meta.subject, "C", "IE");
-  push_keyvalue_list(ca_meta.subject, "CN", "catest");
+  idevid_ca_meta.issuer = init_keyvalue_list();
+  idevid_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(idevid_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(idevid_ca_meta.issuer, "CN", "catest");
+  push_keyvalue_list(idevid_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(idevid_ca_meta.subject, "CN", "catest");
 
   idevid_ca_cert.length = crypto_generate_eccert(
-      &ca_meta, idevid_ca_key.array, idevid_ca_key.length, &idevid_ca_cert.array);
+      &idevid_ca_meta, idevid_ca_key.array, idevid_ca_key.length, &idevid_ca_cert.array);
 
   // Generate the test pinned domain certificate
   struct crypto_cert_meta pinned_domain_meta = {.serial_number = 12345,
@@ -683,8 +683,8 @@ static int test_group_setup(void **state) {
 
   free_keyvalue_list(pinned_domain_meta.issuer);
   free_keyvalue_list(pinned_domain_meta.subject);
-  free_keyvalue_list(ca_meta.issuer);
-  free_keyvalue_list(ca_meta.subject);
+  free_keyvalue_list(idevid_ca_meta.issuer);
+  free_keyvalue_list(idevid_ca_meta.subject);
 
   return 0;
 }

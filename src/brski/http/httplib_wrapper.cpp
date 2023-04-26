@@ -59,6 +59,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_GET:
         server->Get(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
+          X509 *cert = SSL_get_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -72,6 +73,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_POST:
         server->Post(route.path, [=](const httplib::Request &req,
                                      httplib::Response &res) {
+          X509 *cert = SSL_get_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -85,6 +87,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_PUT:
         server->Put(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
+          X509 *cert = SSL_get_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -98,6 +101,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_DELETE:
         server->Delete(route.path, [=](const httplib::Request &req,
                                        httplib::Response &res) {
+          X509 *cert = SSL_get_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -111,6 +115,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_OPTIONS:
         server->Options(route.path, [=](const httplib::Request &req,
                                         httplib::Response &res) {
+          X509 *cert = SSL_get_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -124,6 +129,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_PATCH:
         server->Patch(route.path, [=](const httplib::Request &req,
                                       httplib::Response &res) {
+          X509 *cert = SSL_get_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;          std::string body = req.body;
           ResponseHeader response_header;
@@ -194,7 +200,9 @@ int httplib_start(struct http_config *config,
 
   try {
     httplib::SSLServer *server =
-        new httplib::SSLServer(config->tls_cert_path, config->tls_key_path);
+        new httplib::SSLServer(config->tls_cert_path,
+                               config->tls_key_path,
+                               config->client_ca_cert_file_path);
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
       log_error("httplib_register_routes fail");
@@ -207,7 +215,7 @@ int httplib_start(struct http_config *config,
 
     *srv_ctx = static_cast<void *>(server);
 
-    log_info("Starting the HTTPS server at %s:%d", config->bind_address, config->port);
+    log_info("Starting the HTTPS server at %s:%d with client CA path=%s", config->bind_address, config->port, config->client_ca_cert_file_path);
 
     server->listen(config->bind_address, config->port);
   } catch (...) {
@@ -221,12 +229,13 @@ int httplib_start(struct http_config *config,
 
 int httplib_post_request(const std::string &client_key_path,
                          const std::string &client_cert_path,
-                         const std::string &address, const std::string &path,
+                         const std::string &host, int port,
+                         const std::string &path,
                          bool verify, const std::string &body,
                          const std::string &content_type,
                          std::string &response) {
 
-  httplib::Client cli(address, client_cert_path, client_key_path);
+  httplib::SSLClient cli(host, port, client_cert_path, client_key_path);
 
   cli.enable_server_certificate_verification(verify);
 

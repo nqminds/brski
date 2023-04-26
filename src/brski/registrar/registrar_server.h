@@ -36,11 +36,13 @@ struct RegistrarContext {
 /**
  * @brief Starts the registrar server
  *
- * @param[in] confic The registrar config
+ * @param[in] rconf The registrar config
+ * @param[in] mconf The masa config
  * @param[out] context The registrar context
  * @return int 0 on success, -1 on failure
  */
 int registrar_start(struct registrar_config *rconf,
+                    struct masa_config *mconf,
                     struct RegistrarContext **context);
 
 /**
