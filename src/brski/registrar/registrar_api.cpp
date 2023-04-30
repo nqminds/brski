@@ -13,10 +13,12 @@
 
 extern "C" {
 #include "../../utils/log.h"
+#include "../../voucher/crypto.h"
 }
 
 int post_brski_requestvoucher(const RequestHeader &request_header,
                               const std::string &request_body,
+                              CRYPTO_CERT peer_certificate,
                               ResponseHeader &response_header,
                               std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -25,6 +27,9 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
   log_trace("post_brski_requestvoucher:");
   log_trace("%s", request_body.c_str());
 
+  struct crypto_cert_meta meta = {};
+
+  crypto_getcert_meta(peer_certificate, &meta);
 // __must_free_binary_array struct BinaryArray *
 // sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
 //                      const struct tm *created_on, const char *serial_number,
@@ -43,6 +48,7 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
 
 int post_brski_voucher_status(const RequestHeader &request_header,
                               const std::string &request_body,
+                              CRYPTO_CERT peer_certificate,
                               ResponseHeader &response_header,
                               std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -58,6 +64,7 @@ int post_brski_voucher_status(const RequestHeader &request_header,
 
 int post_brski_requestauditlog(const RequestHeader &request_header,
                                const std::string &request_body,
+                               CRYPTO_CERT peer_certificate,
                                ResponseHeader &response_header,
                                std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -73,6 +80,7 @@ int post_brski_requestauditlog(const RequestHeader &request_header,
 
 int post_brski_enrollstatus(const RequestHeader &request_header,
                             const std::string &request_body,
+                            CRYPTO_CERT peer_certificate,
                             ResponseHeader &response_header,
                             std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -86,7 +94,9 @@ int post_brski_enrollstatus(const RequestHeader &request_header,
   return 200;
 }
 
-int get_est_cacerts(const RequestHeader &request_header, const std::string &request_body,
+int get_est_cacerts(const RequestHeader &request_header,
+                    const std::string &request_body,
+                    CRYPTO_CERT peer_certificate,
                     ResponseHeader &response_header, std::string &response,
                     void *user_ctx) {
   struct RegistrarContext *context =
@@ -102,6 +112,7 @@ int get_est_cacerts(const RequestHeader &request_header, const std::string &requ
 
 int post_est_simpleenroll(const RequestHeader &request_header,
                           const std::string &request_body,
+                          CRYPTO_CERT peer_certificate,
                           ResponseHeader &response_header,
                           std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -117,6 +128,7 @@ int post_est_simpleenroll(const RequestHeader &request_header,
 
 int post_est_simplereenroll(const RequestHeader &request_header,
                             const std::string &request_body,
+                            CRYPTO_CERT peer_certificate,
                             ResponseHeader &response_header,
                             std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -130,8 +142,11 @@ int post_est_simplereenroll(const RequestHeader &request_header,
   return 503;
 }
 
-int post_est_fullcmc(const RequestHeader &request_header, const std::string &request_body,
-                     ResponseHeader &response_header, std::string &response,
+int post_est_fullcmc(const RequestHeader &request_header,
+                     const std::string &request_body,
+                     CRYPTO_CERT peer_certificate,
+                     ResponseHeader &response_header,
+                     std::string &response,
                      void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
@@ -146,6 +161,7 @@ int post_est_fullcmc(const RequestHeader &request_header, const std::string &req
 
 int post_est_serverkeygen(const RequestHeader &request_header,
                           const std::string &request_body,
+                          CRYPTO_CERT peer_certificate,
                           ResponseHeader &response_header,
                           std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
@@ -159,7 +175,9 @@ int post_est_serverkeygen(const RequestHeader &request_header,
   return 503;
 }
 
-int get_est_csrattrs(const RequestHeader &request_header, const std::string &request_body,
+int get_est_csrattrs(const RequestHeader &request_header,
+                     const std::string &request_body,
+                     CRYPTO_CERT peer_certificate,
                      ResponseHeader &response_header, std::string &response,
                      void *user_ctx) {
   struct RegistrarContext *context =

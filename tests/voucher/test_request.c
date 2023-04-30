@@ -724,6 +724,7 @@ static void test_save_certs(void **state) {
   idev_meta.subject = init_keyvalue_list();
   push_keyvalue_list(idev_meta.subject, "C", "IE");
   push_keyvalue_list(idev_meta.subject, "CN", "idev-meta");
+  push_keyvalue_list(idev_meta.subject, "serialNumber", "idev-serial12345");
 
   struct BinaryArray idevid_key = {};
   struct BinaryArray idevid_cert = {};

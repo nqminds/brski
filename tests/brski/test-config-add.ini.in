@@ -3,7 +3,7 @@
 
 [pledge]
 createdOn = "1973-11-29T21:33:09Z"
-serialNumber = "12345"
+serialNumber = "idev-serial12345"
 nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
 idevidKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/idevid.key"
 idevidCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/idevid.crt"

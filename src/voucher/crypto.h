@@ -56,6 +56,15 @@ enum CRYPTO_CERTIFICATE_TYPE {
 };
 
 /**
+ * @brief Parses a certificate
+ *
+ * @param[in] cert The input certificate structure
+ * @param[out] meta The output certificate metadata structrure
+ * @return 0 on success, -1 on failure
+ */
+int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta);
+
+/**
  * @brief Generate a private RSA key for a given number of bits
  * The generated key is binary (DER) raw format
  *

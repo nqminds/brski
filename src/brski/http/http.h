@@ -18,6 +18,7 @@
 
 extern "C" {
 #include "../../utils/os.h"
+#include "../../voucher/crypto.h"
 }
 
 #define MAX_WEB_PATH_LEN 2048
@@ -40,7 +41,9 @@ enum HTTP_METHOD {
 typedef std::map<std::string, std::string> RequestHeader;
 typedef std::map<std::string, std::string> ResponseHeader;
 typedef std::function<int(
-    const RequestHeader &request_header, const std::string &request_body,
+    const RequestHeader &request_header,
+    const std::string &request_body,
+    CRYPTO_CERT peer_certificate,
     ResponseHeader &response_header, std::string &response, void *user_ctx)>
     RouteHandle;
 

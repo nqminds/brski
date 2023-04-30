@@ -547,6 +547,43 @@ void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY_free(pkey);
 }
 
+int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (meta == NULL) {
+    log_error("meta param is NULL");
+    return -1;
+  }
+
+  X509 *x509 = (X509 *) cert;
+  X509_NAME *issuer = X509_get_issuer_name(x509);
+
+  // for (;;) {
+  //     int lastpos = X509_NAME_get_index_by_NID(subj, NID_commonName, lastpos);
+  //     if (lastpos == -1)
+  //         break;
+  //     X509_NAME_ENTRY *e = X509_NAME_get_entry(subj, lastpos);
+  //     /* Do something with e */
+  // }
+
+  for (int i = 0; i < X509_NAME_entry_count(issuer); i++) {
+  	X509_NAME_ENTRY *e = X509_NAME_get_entry(issuer, i);
+  	ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+    unsigned char *str = NULL;
+    if (ASN1_STRING_to_UTF8(&str, d) < 0) {
+      log_error("ASN1_STRING_to_UTF8 code=%lu", ERR_get_error());
+      return -1;
+    }
+    log_trace(">>> %s", str);
+    OPENSSL_free(str);
+  }
+
+  return 0;
+}
+
 static int set_certificate_serialnumber(X509 *x509,
                                         const uint64_t serial_number) {
   ASN1_INTEGER *sn = ASN1_INTEGER_new();
