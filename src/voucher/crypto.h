@@ -28,7 +28,7 @@ struct crypto_cert_meta {
   long not_after;
 
   /*
-    Example key/value pairs:
+    Decoded key/value pairs:
     [C]=US,
     [ST]=State or Province,
     [L]=locality name,
@@ -39,7 +39,6 @@ struct crypto_cert_meta {
     [serialNumber]=1234,
     [SN]=surname,
     [GN]=given name,
-    [GN]=name given
   */
   struct keyvalue_list *issuer;
   struct keyvalue_list *subject;

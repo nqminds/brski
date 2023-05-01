@@ -36,6 +36,24 @@
 #include "crypto.h"
 #include "keyvalue.h"
 
+struct NID_Name {
+  int nid;
+  char *name;
+};
+
+static struct NID_Name NNAMES[10] = {
+  {NID_countryName, "C"},
+  {NID_stateOrProvinceName, "ST"},
+  {NID_localityName, "L"},
+  {NID_organizationName, "O"},
+  {NID_organizationalUnitName, "OU"},
+  {NID_commonName, "CN"},
+  {NID_pkcs9_emailAddress, "emailAddress"},
+  {NID_serialNumber, "serialNumber"},
+  {NID_surname, "SN"},
+  {NID_givenName, "GN"}
+};
+
 struct ptr_list {
   void *ptr;           /**< The pointer (points to heap memory) */
   int flags;           /**< The generic pointer flags */
@@ -547,6 +565,62 @@ void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY_free(pkey);
 }
 
+int get_x509_entry(X509_NAME *name, int nid, char **out) {
+  int pos = -1;
+  X509_NAME_ENTRY *e = NULL;
+
+  *out = NULL;
+
+  /* Iterate through all NID values */
+  /* return the first one */
+  while (e == NULL) {
+    pos = X509_NAME_get_index_by_NID(name, nid, pos);
+    if (pos == -1) {
+      break;
+    }
+    e = X509_NAME_get_entry(name, pos);
+  }
+
+  if (e == NULL) {
+    return 0;
+  }
+
+  ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+  unsigned char *str = NULL;
+  if (ASN1_STRING_to_UTF8(&str, d) < 0) {
+    log_error("ASN1_STRING_to_UTF8 code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  *out = (char *)str;
+
+  return 0;
+}
+
+int get_x509_keyvalue(X509_NAME *name, struct keyvalue_list *list) {
+  int idx = 0;
+  while(idx < (int)ARRAY_SIZE(NNAMES)) {
+    char *str = NULL;
+
+    if (get_x509_entry(name, NNAMES[idx].nid, &str) < 0) {
+      log_error("get_x509_entry fail");
+      return -1;
+    }
+    log_trace(">>> %s %s", NNAMES[idx].name, str);
+    if (str != NULL && push_keyvalue_list(list, NNAMES[idx].name, str) < 0) {
+      log_error("push_keyvalue_list fail");
+      OPENSSL_free(str);
+      return -1;
+    }
+
+    OPENSSL_free(str);
+    idx++;
+  }
+
+  return 0;
+}
+
+
 int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
   if (cert == NULL) {
     log_error("cert param is NULL");
@@ -561,25 +635,28 @@ int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
   X509 *x509 = (X509 *) cert;
   X509_NAME *issuer = X509_get_issuer_name(x509);
 
-  // for (;;) {
-  //     int lastpos = X509_NAME_get_index_by_NID(subj, NID_commonName, lastpos);
-  //     if (lastpos == -1)
-  //         break;
-  //     X509_NAME_ENTRY *e = X509_NAME_get_entry(subj, lastpos);
-  //     /* Do something with e */
-  // }
-
-  for (int i = 0; i < X509_NAME_entry_count(issuer); i++) {
-  	X509_NAME_ENTRY *e = X509_NAME_get_entry(issuer, i);
-  	ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
-    unsigned char *str = NULL;
-    if (ASN1_STRING_to_UTF8(&str, d) < 0) {
-      log_error("ASN1_STRING_to_UTF8 code=%lu", ERR_get_error());
-      return -1;
-    }
-    log_trace(">>> %s", str);
-    OPENSSL_free(str);
+  if (get_x509_keyvalue(issuer, meta->issuer) < 0) {
+    log_error("get_x509_keyvalue fail");
+    return -1;
   }
+
+  X509_NAME *subject = X509_get_issuer_name(x509);
+  if (get_x509_keyvalue(subject, meta->subject) < 0) {
+    log_error("get_x509_keyvalue fail");
+    return -1;
+  }
+
+  // for (int i = 0; i < X509_NAME_entry_count(issuer); i++) {
+  // 	X509_NAME_ENTRY *e = X509_NAME_get_entry(issuer, i);
+  // 	ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+  //   unsigned char *str = NULL;
+  //   if (ASN1_STRING_to_UTF8(&str, d) < 0) {
+  //     log_error("ASN1_STRING_to_UTF8 code=%lu", ERR_get_error());
+  //     return -1;
+  //   }
+  //   log_trace("xxxxx %s", str);
+  //   OPENSSL_free(str);
+  // }
 
   return 0;
 }

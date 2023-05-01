@@ -14,6 +14,18 @@
 extern "C" {
 #include "../../utils/log.h"
 #include "../../voucher/crypto.h"
+#include "../../voucher/keyvalue.h"
+}
+
+char* get_cert_serial(struct crypto_cert_meta *meta) {
+  struct keyvalue_list *el = NULL, *next = NULL;
+  dl_list_for_each_safe(el, next, &(meta->subject)->list, struct keyvalue_list, list) {
+    if (strcmp(el->key, "serialNumber") == 0) {
+      return el->value;      
+    }
+  }
+
+  return NULL;
 }
 
 int post_brski_requestvoucher(const RequestHeader &request_header,
@@ -24,12 +36,25 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 
+  response.assign("post_brski_requestvoucher");
+  response_header["Content-Type"] = "application/voucher-cms+json";
+
   log_trace("post_brski_requestvoucher:");
   log_trace("%s", request_body.c_str());
 
-  struct crypto_cert_meta meta = {};
+  struct crypto_cert_meta idev_meta = {};
+  idev_meta.issuer = init_keyvalue_list();
+  idev_meta.subject = init_keyvalue_list();
 
-  crypto_getcert_meta(peer_certificate, &meta);
+  if (crypto_getcert_meta(peer_certificate, &idev_meta) < 0) {
+    log_error("crypto_getcert_meta");
+    free_keyvalue_list(idev_meta.issuer);
+    free_keyvalue_list(idev_meta.subject);
+    return 400;
+  }
+
+  char *serial_number = get_cert_serial(&idev_meta);
+  log_trace(">>>>>>>> %s", serial_number);
 // __must_free_binary_array struct BinaryArray *
 // sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
 //                      const struct tm *created_on, const char *serial_number,
@@ -41,8 +66,9 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
 //                      const struct BinaryArrayList *pledge_verify_store,
 //                      const struct BinaryArrayList *additional_registrar_certs);
 
-  response.assign("post_brski_requestvoucher");
-  response_header["Content-Type"] = "application/voucher-cms+json";
+  free_keyvalue_list(idev_meta.issuer);
+  free_keyvalue_list(idev_meta.subject);
+
   return 200;
 }
 
