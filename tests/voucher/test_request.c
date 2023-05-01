@@ -634,9 +634,9 @@ static int test_group_setup(void **state) {
   idevid_ca_meta.issuer = init_keyvalue_list();
   idevid_ca_meta.subject = init_keyvalue_list();
   push_keyvalue_list(idevid_ca_meta.issuer, "C", "IE");
-  push_keyvalue_list(idevid_ca_meta.issuer, "CN", "catest");
+  push_keyvalue_list(idevid_ca_meta.issuer, "CN", "idevca");
   push_keyvalue_list(idevid_ca_meta.subject, "C", "IE");
-  push_keyvalue_list(idevid_ca_meta.subject, "CN", "catest");
+  push_keyvalue_list(idevid_ca_meta.subject, "CN", "idevca");
 
   idevid_ca_cert.length = crypto_generate_eccert(
       &idevid_ca_meta, idevid_ca_key.array, idevid_ca_key.length, &idevid_ca_cert.array);
@@ -712,6 +712,27 @@ static void test_save_certs(void **state) {
       &pledge_cms_meta, pledge_cms_key.array, pledge_cms_key.length,
       &pledge_cms_cert.array);
 
+  struct crypto_cert_meta pledge_cms_ca_meta = {.serial_number = 1,
+                                     .not_before = 0,
+                                     .not_after = 1234567,
+                                     .issuer = NULL,
+                                     .subject = NULL,
+                                     .basic_constraints = "critical,CA:TRUE"};
+
+  pledge_cms_ca_meta.issuer = init_keyvalue_list();
+  pledge_cms_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(pledge_cms_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(pledge_cms_ca_meta.issuer, "CN", "pledgecmsca");
+  push_keyvalue_list(pledge_cms_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(pledge_cms_ca_meta.subject, "CN", "pledgecmsca");
+
+  struct BinaryArray pledge_cms_ca_key = {};
+  struct BinaryArray pledge_cms_ca_cert = {};
+  pledge_cms_ca_key.length = (size_t)crypto_generate_eckey(&pledge_cms_ca_key.array);
+  pledge_cms_ca_cert.length = (size_t)crypto_generate_eccert(
+      &pledge_cms_ca_meta, pledge_cms_ca_key.array, pledge_cms_ca_key.length,
+      &pledge_cms_ca_cert.array);
+
   struct crypto_cert_meta idev_meta = {.serial_number = 12345,
                                                 .not_before = 0,
                                                 .not_after = 1234567,
@@ -785,10 +806,10 @@ static void test_save_certs(void **state) {
       &intermediate2_meta, intermediate2_key.array, intermediate2_key.length,
       &intermediate2_cert.array);
 
-  // Sign intermediate2 with idevid_ca
+  // Sign intermediate2 with pledge_cms_ca
   length =
-      crypto_sign_cert(idevid_ca_key.array, idevid_ca_key.length,
-                       idevid_ca_cert.array, idevid_ca_cert.length,
+      crypto_sign_cert(pledge_cms_ca_key.array, pledge_cms_ca_key.length,
+                       pledge_cms_ca_cert.array, pledge_cms_ca_cert.length,
                        intermediate2_cert.length, &intermediate2_cert.array);
   assert_true(length > 0);
   intermediate2_cert.length = length;
@@ -808,6 +829,8 @@ static void test_save_certs(void **state) {
   assert_true(length > 0);
   pledge_cms_cert.length = length;
 
+  assert_int_equal(keybuf_to_file(&pledge_cms_ca_key, "/tmp/pledge-cms-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&pledge_cms_ca_cert, "/tmp/pledge-cms-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&idevid_ca_key, "/tmp/idevid-ca.key"), 0);
   assert_int_equal(certbuf_to_file(&idevid_ca_cert, "/tmp/idevid-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&pledge_cms_key, "/tmp/pledge-cms.key"), 0);
@@ -822,6 +845,11 @@ static void test_save_certs(void **state) {
       keybuf_to_file(&intermediate1_key, "/tmp/masa-intermediate2.key"), 0);
   assert_int_equal(
       certbuf_to_file(&intermediate1_cert, "/tmp/masa-intermediate2.crt"), 0);
+
+  free_binary_array_content(&pledge_cms_ca_key);
+  free_binary_array_content(&pledge_cms_ca_cert);
+  free_keyvalue_list(pledge_cms_ca_meta.issuer);
+  free_keyvalue_list(pledge_cms_ca_meta.subject);
 
   free_binary_array_content(&pledge_cms_key);
   free_binary_array_content(&pledge_cms_cert);

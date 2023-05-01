@@ -60,7 +60,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_GET:
         server->Get(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -76,7 +76,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_POST:
         server->Post(route.path, [=](const httplib::Request &req,
                                      httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -92,7 +92,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_PUT:
         server->Put(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -108,7 +108,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_DELETE:
         server->Delete(route.path, [=](const httplib::Request &req,
                                        httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -124,7 +124,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_OPTIONS:
         server->Options(route.path, [=](const httplib::Request &req,
                                         httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -140,7 +140,7 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_PATCH:
         server->Patch(route.path, [=](const httplib::Request &req,
                                       httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;          std::string body = req.body;
           ResponseHeader response_header;
