@@ -64,6 +64,16 @@ enum CRYPTO_CERTIFICATE_TYPE {
 int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta);
 
 /**
+ * @brief Returns the certificater issuer array
+ *
+ * Caller is responsible for freeing the output array
+ * 
+ * @param[in] cert The input certificate structure
+ * @return struct BinaryArray * the output certificate issuer array, NULL on failure
+ */
+__must_free_binary_array struct BinaryArray * crypto_getcert_issuer(CRYPTO_CERT cert);
+
+/**
  * @brief Generate a private RSA key for a given number of bits
  * The generated key is binary (DER) raw format
  *

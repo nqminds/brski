@@ -39,8 +39,7 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
   response.assign("post_brski_requestvoucher");
   response_header["Content-Type"] = "application/voucher-cms+json";
 
-  log_trace("post_brski_requestvoucher:");
-  log_trace("%s", request_body.c_str());
+  // log_trace("%s", request_body.c_str());
 
   struct crypto_cert_meta idev_meta = {};
   idev_meta.issuer = init_keyvalue_list();
@@ -54,11 +53,21 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
   }
 
   char *serial_number = get_cert_serial(&idev_meta);
-  log_trace(">>>>>>>> %s", serial_number);
+  struct BinaryArray *idevid_issuer = crypto_getcert_issuer(peer_certificate);
+
+  if (idevid_issuer == NULL) {
+    log_error("crypto_getcert_issuer fail");
+    free_keyvalue_list(idev_meta.issuer);
+    free_keyvalue_list(idev_meta.subject);
+    return 400;
+  }
+
+  log_trace("post_brski_requestvoucher: %s %.*s", serial_number, (int)idevid_issuer->length, idevid_issuer->array);
+
 // __must_free_binary_array struct BinaryArray *
 // sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
-//                      const struct tm *created_on, const char *serial_number,
-//                      const struct BinaryArray *idevid_issuer,
+//                      const struct tm *created_on, serial_number,
+//                      idevid_issuer,
 //                      const struct BinaryArray *registrar_tls_cert,
 //                      const struct BinaryArray *registrar_sign_cert,
 //                      const struct BinaryArray *registrar_sign_key,
@@ -66,6 +75,7 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
 //                      const struct BinaryArrayList *pledge_verify_store,
 //                      const struct BinaryArrayList *additional_registrar_certs);
 
+  free_binary_array(idevid_issuer);
   free_keyvalue_list(idev_meta.issuer);
   free_keyvalue_list(idev_meta.subject);
 

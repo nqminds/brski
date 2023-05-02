@@ -77,6 +77,7 @@ int httplib_register_routes(httplib::SSLServer *server,
         server->Post(route.path, [=](const httplib::Request &req,
                                      httplib::Response &res) {
           CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
@@ -228,7 +229,7 @@ int httplib_start(struct http_config *config,
 
     *srv_ctx = static_cast<void *>(server);
 
-    log_info("Starting the HTTPS server at %s:%d with client CA path=%s", config->bind_address, config->port, config->client_ca_cert_file_path);
+    log_info("Starting the HTTPS server at %s:%d", config->bind_address, config->port);
 
     server->listen(config->bind_address, config->port);
   } catch (...) {
