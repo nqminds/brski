@@ -712,26 +712,101 @@ static void test_save_certs(void **state) {
       &pledge_cms_meta, pledge_cms_key.array, pledge_cms_key.length,
       &pledge_cms_cert.array);
 
-  struct crypto_cert_meta pledge_cms_ca_meta = {.serial_number = 1,
+  struct crypto_cert_meta tls_ca_meta = {.serial_number = 1,
                                      .not_before = 0,
                                      .not_after = 1234567,
                                      .issuer = NULL,
                                      .subject = NULL,
                                      .basic_constraints = "critical,CA:TRUE"};
 
-  pledge_cms_ca_meta.issuer = init_keyvalue_list();
-  pledge_cms_ca_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(pledge_cms_ca_meta.issuer, "C", "IE");
-  push_keyvalue_list(pledge_cms_ca_meta.issuer, "CN", "pledgecmsca");
-  push_keyvalue_list(pledge_cms_ca_meta.subject, "C", "IE");
-  push_keyvalue_list(pledge_cms_ca_meta.subject, "CN", "pledgecmsca");
+  tls_ca_meta.issuer = init_keyvalue_list();
+  tls_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(tls_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(tls_ca_meta.issuer, "CN", "tls-ca");
+  push_keyvalue_list(tls_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(tls_ca_meta.subject, "CN", "tls-ca");
 
-  struct BinaryArray pledge_cms_ca_key = {};
-  struct BinaryArray pledge_cms_ca_cert = {};
-  pledge_cms_ca_key.length = (size_t)crypto_generate_eckey(&pledge_cms_ca_key.array);
-  pledge_cms_ca_cert.length = (size_t)crypto_generate_eccert(
-      &pledge_cms_ca_meta, pledge_cms_ca_key.array, pledge_cms_ca_key.length,
-      &pledge_cms_ca_cert.array);
+  struct BinaryArray tls_ca_key = {};
+  struct BinaryArray tls_ca_cert = {};
+  tls_ca_key.length = (size_t)crypto_generate_eckey(&tls_ca_key.array);
+  tls_ca_cert.length = (size_t)crypto_generate_eccert(
+      &tls_ca_meta, tls_ca_key.array, tls_ca_key.length,
+      &tls_ca_cert.array);
+
+  struct crypto_cert_meta registrar_tls_meta = {.serial_number = 12345,
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
+
+  registrar_tls_meta.issuer = init_keyvalue_list();
+  registrar_tls_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(registrar_tls_meta.subject, "C", "IE");
+  push_keyvalue_list(registrar_tls_meta.subject, "CN", "registrar-tls-meta");
+
+  struct BinaryArray registrar_tls_key = {};
+  struct BinaryArray registrar_tls_cert = {};
+  registrar_tls_key.length = (size_t)crypto_generate_eckey(&registrar_tls_key.array);
+  registrar_tls_cert.length = (size_t)crypto_generate_eccert(
+      &registrar_tls_meta, registrar_tls_key.array, registrar_tls_key.length,
+      &registrar_tls_cert.array);
+
+  // Sign registrar_tls with tls_ca
+  ssize_t length = crypto_sign_cert(tls_ca_key.array, tls_ca_key.length,
+                            tls_ca_cert.array, tls_ca_cert.length,
+                            registrar_tls_cert.length, &registrar_tls_cert.array);
+  assert_true(length > 0);
+  registrar_tls_cert.length = length;
+
+  struct crypto_cert_meta masa_tls_meta = {.serial_number = 12345,
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
+
+  masa_tls_meta.issuer = init_keyvalue_list();
+  masa_tls_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(masa_tls_meta.subject, "C", "IE");
+  push_keyvalue_list(masa_tls_meta.subject, "CN", "masa-tls-meta");
+
+  struct BinaryArray masa_tls_key = {};
+  struct BinaryArray masa_tls_cert = {};
+  masa_tls_key.length = (size_t)crypto_generate_eckey(&masa_tls_key.array);
+  masa_tls_cert.length = (size_t)crypto_generate_eccert(
+      &masa_tls_meta, masa_tls_key.array, masa_tls_key.length,
+      &masa_tls_cert.array);
+
+  // Sign masa_tls with tls_ca
+  length = crypto_sign_cert(tls_ca_key.array, tls_ca_key.length,
+                            tls_ca_cert.array, tls_ca_cert.length,
+                            masa_tls_cert.length, &masa_tls_cert.array);
+  assert_true(length > 0);
+  masa_tls_cert.length = length;
+
+  struct crypto_cert_meta cms_ca_meta = {.serial_number = 1,
+                                     .not_before = 0,
+                                     .not_after = 1234567,
+                                     .issuer = NULL,
+                                     .subject = NULL,
+                                     .basic_constraints = "critical,CA:TRUE"};
+
+  cms_ca_meta.issuer = init_keyvalue_list();
+  cms_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(cms_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(cms_ca_meta.issuer, "CN", "cms-ca");
+  push_keyvalue_list(cms_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(cms_ca_meta.subject, "CN", "cms-ca");
+
+  struct BinaryArray cms_ca_key = {};
+  struct BinaryArray cms_ca_cert = {};
+  cms_ca_key.length = (size_t)crypto_generate_eckey(&cms_ca_key.array);
+  cms_ca_cert.length = (size_t)crypto_generate_eccert(
+      &cms_ca_meta, cms_ca_key.array, cms_ca_key.length,
+      &cms_ca_cert.array);
 
   struct crypto_cert_meta idev_meta = {.serial_number = 12345,
                                                 .not_before = 0,
@@ -755,14 +830,14 @@ static void test_save_certs(void **state) {
       &idevid_cert.array);
   
   // Sign idevid_cert with idevid_ca
-  ssize_t length =
+  length =
       crypto_sign_cert(idevid_ca_key.array, idevid_ca_key.length,
                        idevid_ca_cert.array, idevid_ca_cert.length,
                        idevid_cert.length, &idevid_cert.array);
   assert_true(length > 0);
   idevid_cert.length = length;
 
-  struct crypto_cert_meta intermediate1_meta = {.serial_number = 12345,
+  struct crypto_cert_meta int1_cms_meta = {.serial_number = 12345,
                                                 .not_before = 0,
                                                 .not_after = 1234567,
                                                 .issuer = NULL,
@@ -770,21 +845,21 @@ static void test_save_certs(void **state) {
                                                 .basic_constraints =
                                                     "CA:false"};
 
-  intermediate1_meta.issuer = init_keyvalue_list();
-  intermediate1_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(intermediate1_meta.subject, "C", "IE");
-  push_keyvalue_list(intermediate1_meta.subject, "CN", "intermediate1-meta");
+  int1_cms_meta.issuer = init_keyvalue_list();
+  int1_cms_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(int1_cms_meta.subject, "C", "IE");
+  push_keyvalue_list(int1_cms_meta.subject, "CN", "int1-cms");
 
-  struct BinaryArray intermediate1_key = {};
-  struct BinaryArray intermediate1_cert = {};
+  struct BinaryArray int1_cms_key = {};
+  struct BinaryArray int1_cms_cert = {};
 
-  intermediate1_key.length =
-      (size_t)crypto_generate_eckey(&intermediate1_key.array);
-  intermediate1_cert.length = (size_t)crypto_generate_eccert(
-      &intermediate1_meta, intermediate1_key.array, intermediate1_key.length,
-      &intermediate1_cert.array);
+  int1_cms_key.length =
+      (size_t)crypto_generate_eckey(&int1_cms_key.array);
+  int1_cms_cert.length = (size_t)crypto_generate_eccert(
+      &int1_cms_meta, int1_cms_key.array, int1_cms_key.length,
+      &int1_cms_cert.array);
 
-  struct crypto_cert_meta intermediate2_meta = {.serial_number = 12345,
+  struct crypto_cert_meta int2_cms_meta = {.serial_number = 12345,
                                                 .not_before = 0,
                                                 .not_after = 1234567,
                                                 .issuer = NULL,
@@ -792,45 +867,51 @@ static void test_save_certs(void **state) {
                                                 .basic_constraints =
                                                     "CA:false"};
 
-  intermediate2_meta.issuer = init_keyvalue_list();
-  intermediate2_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(intermediate2_meta.subject, "C", "IE");
-  push_keyvalue_list(intermediate2_meta.subject, "CN", "intermediate2-meta");
+  int2_cms_meta.issuer = init_keyvalue_list();
+  int2_cms_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(int2_cms_meta.subject, "C", "IE");
+  push_keyvalue_list(int2_cms_meta.subject, "CN", "int2-cms");
 
-  struct BinaryArray intermediate2_key = {};
-  struct BinaryArray intermediate2_cert = {};
+  struct BinaryArray int2_cms_key = {};
+  struct BinaryArray int2_cms_cert = {};
 
-  intermediate2_key.length =
-      (size_t)crypto_generate_eckey(&intermediate2_key.array);
-  intermediate2_cert.length = (size_t)crypto_generate_eccert(
-      &intermediate2_meta, intermediate2_key.array, intermediate2_key.length,
-      &intermediate2_cert.array);
+  int2_cms_key.length =
+      (size_t)crypto_generate_eckey(&int2_cms_key.array);
+  int2_cms_cert.length = (size_t)crypto_generate_eccert(
+      &int2_cms_meta, int2_cms_key.array, int2_cms_key.length,
+      &int2_cms_cert.array);
 
-  // Sign intermediate2 with pledge_cms_ca
+  // Sign int2_cms with cms_ca
   length =
-      crypto_sign_cert(pledge_cms_ca_key.array, pledge_cms_ca_key.length,
-                       pledge_cms_ca_cert.array, pledge_cms_ca_cert.length,
-                       intermediate2_cert.length, &intermediate2_cert.array);
+      crypto_sign_cert(cms_ca_key.array, cms_ca_key.length,
+                       cms_ca_cert.array,cms_ca_cert.length,
+                       int2_cms_cert.length, &int2_cms_cert.array);
   assert_true(length > 0);
-  intermediate2_cert.length = length;
+  int2_cms_cert.length = length;
   
-  // Sign intermediate2 with intermediate1
+  // Sign int2_cms with int1_cms
   length =
-      crypto_sign_cert(intermediate2_key.array, intermediate2_key.length,
-                       intermediate2_cert.array, intermediate2_cert.length,
-                       intermediate1_cert.length, &intermediate1_cert.array);
+      crypto_sign_cert(int2_cms_key.array, int2_cms_key.length,
+                       int2_cms_cert.array, int2_cms_cert.length,
+                       int1_cms_cert.length, &int1_cms_cert.array);
   assert_true(length > 0);
-  intermediate1_cert.length = length;
+  int1_cms_cert.length = length;
 
-  // Sign pledge_cms with intermediate1
-  length = crypto_sign_cert(intermediate1_key.array, intermediate1_key.length,
-                            intermediate1_cert.array, intermediate1_cert.length,
+  // Sign pledge_cms with int1_cms
+  length = crypto_sign_cert(int1_cms_key.array, int1_cms_key.length,
+                            int1_cms_cert.array, int1_cms_cert.length,
                             pledge_cms_cert.length, &pledge_cms_cert.array);
   assert_true(length > 0);
   pledge_cms_cert.length = length;
 
-  assert_int_equal(keybuf_to_file(&pledge_cms_ca_key, "/tmp/pledge-cms-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&pledge_cms_ca_cert, "/tmp/pledge-cms-ca.crt"), 0);
+  assert_int_equal(keybuf_to_file(&cms_ca_key, "/tmp/tls-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&cms_ca_cert, "/tmp/tls-ca.crt"), 0);
+  assert_int_equal(keybuf_to_file(&registrar_tls_key, "/tmp/registrar-tls.key"), 0);
+  assert_int_equal(certbuf_to_file(&registrar_tls_cert, "/tmp/registrar-tls.crt"), 0);
+  assert_int_equal(keybuf_to_file(&masa_tls_key, "/tmp/masa-tls.key"), 0);
+  assert_int_equal(certbuf_to_file(&masa_tls_cert, "/tmp/masa-tls.crt"), 0);
+  assert_int_equal(keybuf_to_file(&cms_ca_key, "/tmp/cms-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&cms_ca_cert, "/tmp/cms-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&idevid_ca_key, "/tmp/idevid-ca.key"), 0);
   assert_int_equal(certbuf_to_file(&idevid_ca_cert, "/tmp/idevid-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&pledge_cms_key, "/tmp/pledge-cms.key"), 0);
@@ -838,18 +919,33 @@ static void test_save_certs(void **state) {
   assert_int_equal(keybuf_to_file(&idevid_key, "/tmp/idevid.key"), 0);
   assert_int_equal(certbuf_to_file(&idevid_cert, "/tmp/idevid.crt"), 0);
   assert_int_equal(
-      keybuf_to_file(&intermediate1_key, "/tmp/masa-intermediate1.key"), 0);
+      keybuf_to_file(&int1_cms_key, "/tmp/int1-cms.key"), 0);
   assert_int_equal(
-      certbuf_to_file(&intermediate1_cert, "/tmp/masa-intermediate1.crt"), 0);
+      certbuf_to_file(&int1_cms_cert, "/tmp/int1-cms.crt"), 0);
   assert_int_equal(
-      keybuf_to_file(&intermediate1_key, "/tmp/masa-intermediate2.key"), 0);
+      keybuf_to_file(&int2_cms_key, "/tmp/int2-cms.key"), 0);
   assert_int_equal(
-      certbuf_to_file(&intermediate1_cert, "/tmp/masa-intermediate2.crt"), 0);
+      certbuf_to_file(&int2_cms_cert, "/tmp/int2-cms.crt"), 0);
 
-  free_binary_array_content(&pledge_cms_ca_key);
-  free_binary_array_content(&pledge_cms_ca_cert);
-  free_keyvalue_list(pledge_cms_ca_meta.issuer);
-  free_keyvalue_list(pledge_cms_ca_meta.subject);
+  free_binary_array_content(&tls_ca_key);
+  free_binary_array_content(&tls_ca_cert);
+  free_keyvalue_list(tls_ca_meta.issuer);
+  free_keyvalue_list(tls_ca_meta.subject);
+
+  free_binary_array_content(&registrar_tls_key);
+  free_binary_array_content(&registrar_tls_cert);
+  free_keyvalue_list(registrar_tls_meta.issuer);
+  free_keyvalue_list(registrar_tls_meta.subject);
+
+  free_binary_array_content(&masa_tls_key);
+  free_binary_array_content(&masa_tls_cert);
+  free_keyvalue_list(masa_tls_meta.issuer);
+  free_keyvalue_list(masa_tls_meta.subject);
+
+  free_binary_array_content(&cms_ca_key);
+  free_binary_array_content(&cms_ca_cert);
+  free_keyvalue_list(cms_ca_meta.issuer);
+  free_keyvalue_list(cms_ca_meta.subject);
 
   free_binary_array_content(&pledge_cms_key);
   free_binary_array_content(&pledge_cms_cert);
@@ -861,15 +957,15 @@ static void test_save_certs(void **state) {
   free_keyvalue_list(idev_meta.issuer);
   free_keyvalue_list(idev_meta.subject);
 
-  free_binary_array_content(&intermediate1_key);
-  free_binary_array_content(&intermediate1_cert);
-  free_keyvalue_list(intermediate1_meta.issuer);
-  free_keyvalue_list(intermediate1_meta.subject);
+  free_binary_array_content(&int1_cms_key);
+  free_binary_array_content(&int1_cms_cert);
+  free_keyvalue_list(int1_cms_meta.issuer);
+  free_keyvalue_list(int1_cms_meta.subject);
 
-  free_binary_array_content(&intermediate2_key);
-  free_binary_array_content(&intermediate2_cert);
-  free_keyvalue_list(intermediate2_meta.issuer);
-  free_keyvalue_list(intermediate2_meta.subject);
+  free_binary_array_content(&int2_cms_key);
+  free_binary_array_content(&int2_cms_cert);
+  free_keyvalue_list(int2_cms_meta.issuer);
+  free_keyvalue_list(int2_cms_meta.subject);
 }
 
 int main(int argc, char *argv[]) {
