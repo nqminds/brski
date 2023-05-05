@@ -360,6 +360,23 @@ int serialize_str2time(const char *str, const struct tm *tm) {
   return 0;
 }
 
+char *serialize_localtime(void) {
+  struct tm value = {0};
+
+  if (get_localtime(&value) < 0) {
+    log_error("get_localtime fail");
+    return NULL;
+  }
+
+  char *str = NULL;
+  if ((str = serialize_time2str(&value)) == NULL) {
+    log_error("serialize_time2str fail");
+    return NULL;
+  }
+
+  return str;
+}
+
 char *serialize_escapestr(const char *str) {
   if (str == NULL) {
     log_error("str param is NULL");

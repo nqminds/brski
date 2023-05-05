@@ -41,10 +41,9 @@ enum HTTP_METHOD {
 typedef std::map<std::string, std::string> RequestHeader;
 typedef std::map<std::string, std::string> ResponseHeader;
 typedef std::function<int(
-    const RequestHeader &request_header,
-    const std::string &request_body,
-    CRYPTO_CERT peer_certificate,
-    ResponseHeader &response_header, std::string &response, void *user_ctx)>
+    const RequestHeader &request_header, const std::string &request_body,
+    CRYPTO_CERT peer_certificate, ResponseHeader &response_header,
+    std::string &response, void *user_ctx)>
     RouteHandle;
 
 struct RouteTuple {

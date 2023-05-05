@@ -18,45 +18,7 @@
 #include "../../voucher/crypto.h"
 #include "../../voucher/serialize.h"
 #include "../../voucher/voucher.h"
-
-int load_cert_files(struct BinaryArrayList *cert_paths,
-                    struct BinaryArrayList **out) {
-  *out = NULL;
-
-  if (cert_paths == NULL) {
-    return 0;
-  }
-
-  if (!dl_list_len(&cert_paths->list)) {
-    return 0;
-  }
-
-  if ((*out = init_array_list()) == NULL) {
-    log_error("init_array_list fail");
-    return -1;
-  }
-
-  struct BinaryArrayList *cert_path = NULL;
-  dl_list_for_each(cert_path, &cert_paths->list, struct BinaryArrayList, list) {
-    struct BinaryArray *cert = NULL;
-    char *cert_path_str = (char *)cert_path->arr;
-    if ((cert = file_to_x509buf(cert_path_str)) == NULL) {
-      log_error("file_to_x509buf fail");
-      free_array_list(*out);
-      return -1;
-    }
-
-    if (push_array_list(*out, cert->array, cert->length, 0) < 0) {
-      log_error("push_array_list fail");
-      free_binary_array(cert);
-      free_array_list(*out);
-      return -1;
-    }
-    free_binary_array(cert);
-  }
-
-  return 0;
-}
+#include "../config.h"
 
 struct BinaryArray *
 voucher_pledge_request_to_array(const struct pledge_config *pconf,

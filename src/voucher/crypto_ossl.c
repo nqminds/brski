@@ -41,18 +41,16 @@ struct NID_Name {
   char *name;
 };
 
-static struct NID_Name NNAMES[10] = {
-  {NID_countryName, "C"},
-  {NID_stateOrProvinceName, "ST"},
-  {NID_localityName, "L"},
-  {NID_organizationName, "O"},
-  {NID_organizationalUnitName, "OU"},
-  {NID_commonName, "CN"},
-  {NID_pkcs9_emailAddress, "emailAddress"},
-  {NID_serialNumber, "serialNumber"},
-  {NID_surname, "SN"},
-  {NID_givenName, "GN"}
-};
+static struct NID_Name NNAMES[10] = {{NID_countryName, "C"},
+                                     {NID_stateOrProvinceName, "ST"},
+                                     {NID_localityName, "L"},
+                                     {NID_organizationName, "O"},
+                                     {NID_organizationalUnitName, "OU"},
+                                     {NID_commonName, "CN"},
+                                     {NID_pkcs9_emailAddress, "emailAddress"},
+                                     {NID_serialNumber, "serialNumber"},
+                                     {NID_surname, "SN"},
+                                     {NID_givenName, "GN"}};
 
 struct ptr_list {
   void *ptr;           /**< The pointer (points to heap memory) */
@@ -599,7 +597,7 @@ int get_x509_entry(X509_NAME *name, int nid, char **out) {
 
 int get_x509_keyvalue(X509_NAME *name, struct keyvalue_list *list) {
   int idx = 0;
-  while(idx < (int)ARRAY_SIZE(NNAMES)) {
+  while (idx < (int)ARRAY_SIZE(NNAMES)) {
     char *str = NULL;
 
     if (get_x509_entry(name, NNAMES[idx].nid, &str) < 0) {
@@ -620,9 +618,8 @@ int get_x509_keyvalue(X509_NAME *name, struct keyvalue_list *list) {
   return 0;
 }
 
-
 int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
-  X509 *x509 = (X509 *) cert;
+  X509 *x509 = (X509 *)cert;
 
   if (cert == NULL) {
     log_error("cert param is NULL");
@@ -660,8 +657,8 @@ int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
   return 0;
 }
 
-struct BinaryArray * crypto_getcert_issuer(CRYPTO_CERT cert) {
-  X509 *x509 = (X509 *) cert;
+struct BinaryArray *crypto_getcert_issuer(CRYPTO_CERT cert) {
+  X509 *x509 = (X509 *)cert;
   if (cert == NULL) {
     log_error("cert param is NULL");
     return NULL;
@@ -702,7 +699,7 @@ struct BinaryArray * crypto_getcert_issuer(CRYPTO_CERT cert) {
     return NULL;
   }
 
-  issuer_array->length = (size_t) length;
+  issuer_array->length = (size_t)length;
 
   return issuer_array;
 }

@@ -19,8 +19,8 @@
 #include "../registrar/registrar_server.h"
 
 extern "C" {
-#include "../pledge/pledge_utils.h"
 #include "../../utils/log.h"
+#include "../pledge/pledge_utils.h"
 }
 
 int post_voucher_pledge_request(struct pledge_config *pconf,
@@ -57,11 +57,9 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   std::string response;
   log_info("Request pledge voucher from %s", path.c_str());
 
-  int status = https_post_request(pconf->idevid_key_path,
-                                  pconf->idevid_cert_path,
-                                  rconf->bind_address, rconf->port,
-                                  path, false, body,
-                                  content_type, response);
+  int status = https_post_request(
+      pconf->idevid_key_path, pconf->idevid_cert_path, rconf->bind_address,
+      rconf->port, path, false, body, content_type, response);
 
   if (status < 0) {
     log_error("https_post_request fail");

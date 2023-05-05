@@ -8,12 +8,12 @@
  * @brief File containing the implementation of the http library wrapper.
  */
 
-#include <openssl/ssl.h>
 #include <httplib.h>
+#include <openssl/ssl.h>
 
 extern "C" {
-#include "../../utils/os.h"
 #include "../../utils/log.h"
+#include "../../utils/os.h"
 #include "../../voucher/crypto.h"
 }
 
@@ -49,7 +49,7 @@ void set_response(std::string &response, ResponseHeader &response_header,
 int httplib_register_routes(httplib::SSLServer *server,
                             std::vector<struct RouteTuple> &routes,
                             void *user_ctx) {
-  /* 
+  /*
     Can use also: SSL_CTX *SSL_get_SSL_CTX(const SSL *ssl);
   */
   SSL_CTX *ssl_context = server->ssl_context();
@@ -60,97 +60,86 @@ int httplib_register_routes(httplib::SSLServer *server,
       case HTTP_METHOD_GET:
         server->Get(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, req.body,
-                                         cert,
-                                         response_header,
-                                         response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_POST:
         server->Post(route.path, [=](const httplib::Request &req,
                                      httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
 
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, req.body,
-                                         cert,
-                                         response_header,
-                                         response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PUT:
         server->Put(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, req.body,
-                                         cert,
-                                         response_header,
-                                         response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_DELETE:
         server->Delete(route.path, [=](const httplib::Request &req,
                                        httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, req.body,
-                                         cert,
-                                         response_header,
-                                         response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_OPTIONS:
         server->Options(route.path, [=](const httplib::Request &req,
                                         httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, req.body,
-                                         cert,
-                                         response_header,
-                                         response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PATCH:
         server->Patch(route.path, [=](const httplib::Request &req,
                                       httplib::Response &res) {
-          CRYPTO_CERT cert = (X509 *) SSL_get0_peer_certificate(req.ssl);
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
-          std::string response;          std::string body = req.body;
+          std::string response;
+          std::string body = req.body;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code = route.handle(request_header, req.body,
-                                         cert,
-                                         response_header,
-                                         response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -214,8 +203,7 @@ int httplib_start(struct http_config *config,
 
   try {
     httplib::SSLServer *server =
-        new httplib::SSLServer(config->tls_cert_path,
-                               config->tls_key_path,
+        new httplib::SSLServer(config->tls_cert_path, config->tls_key_path,
                                config->client_ca_cert_file_path);
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
@@ -229,7 +217,8 @@ int httplib_start(struct http_config *config,
 
     *srv_ctx = static_cast<void *>(server);
 
-    log_info("Starting the HTTPS server at %s:%d", config->bind_address, config->port);
+    log_info("Starting the HTTPS server at %s:%d", config->bind_address,
+             config->port);
 
     server->listen(config->bind_address, config->port);
   } catch (...) {
@@ -244,8 +233,8 @@ int httplib_start(struct http_config *config,
 int httplib_post_request(const std::string &client_key_path,
                          const std::string &client_cert_path,
                          const std::string &host, int port,
-                         const std::string &path,
-                         bool verify, const std::string &body,
+                         const std::string &path, bool verify,
+                         const std::string &body,
                          const std::string &content_type,
                          std::string &response) {
 

@@ -28,11 +28,6 @@
 #define PATH_EST_SERVERKEYGEN EST_PREFIX_PATH "/serverkeygen"
 #define PATH_EST_CSRATTRS EST_PREFIX_PATH "/csrattrs"
 
-struct RegistrarContext {
-  struct registrar_config *rconf;
-  void *srv_ctx;
-};
-
 /**
  * @brief Starts the registrar server
  *
@@ -41,8 +36,7 @@ struct RegistrarContext {
  * @param[out] context The registrar context
  * @return int 0 on success, -1 on failure
  */
-int registrar_start(struct registrar_config *rconf,
-                    struct masa_config *mconf,
+int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,
                     struct RegistrarContext **context);
 
 /**

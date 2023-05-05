@@ -24,6 +24,7 @@
 #include "../utils/log.h"
 #include "../utils/os.h"
 #include "../voucher/array.h"
+#include "../voucher/crypto.h"
 
 #include "pledge/pledge_config.h"
 
@@ -218,8 +219,7 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     return -1;
   }
 
-  ini_gets("masa", "idevidCAPath", "", value, MAX_CONFIG_VALUE_SIZE,
-           filename);
+  ini_gets("masa", "idevidCAPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
   mconf->idevid_ca_path = value;
   if (!strlen(mconf->idevid_ca_path)) {
     mconf->idevid_ca_path = NULL;
@@ -566,6 +566,45 @@ int load_brski_config(const char *filename, struct brski_config *const config) {
     log_error("load_masa_config fail");
     free_config_content(config);
     return -1;
+  }
+
+  return 0;
+}
+
+int load_cert_files(struct BinaryArrayList *cert_paths,
+                    struct BinaryArrayList **out) {
+  *out = NULL;
+
+  if (cert_paths == NULL) {
+    return 0;
+  }
+
+  if (!dl_list_len(&cert_paths->list)) {
+    return 0;
+  }
+
+  if ((*out = init_array_list()) == NULL) {
+    log_error("init_array_list fail");
+    return -1;
+  }
+
+  struct BinaryArrayList *cert_path = NULL;
+  dl_list_for_each(cert_path, &cert_paths->list, struct BinaryArrayList, list) {
+    struct BinaryArray *cert = NULL;
+    char *cert_path_str = (char *)cert_path->arr;
+    if ((cert = file_to_x509buf(cert_path_str)) == NULL) {
+      log_error("file_to_x509buf fail");
+      free_array_list(*out);
+      return -1;
+    }
+
+    if (push_array_list(*out, cert->array, cert->length, 0) < 0) {
+      log_error("push_array_list fail");
+      free_binary_array(cert);
+      free_array_list(*out);
+      return -1;
+    }
+    free_binary_array(cert);
   }
 
   return 0;

@@ -23,4 +23,9 @@ struct registrar_config {
   struct BinaryArrayList *cms_verify_store_paths;
 };
 
+struct RegistrarContext {
+  struct registrar_config *rconf;
+  void *srv_ctx;
+};
+
 #endif

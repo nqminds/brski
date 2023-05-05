@@ -3,7 +3,7 @@ add_subdirectory(pledge)
 add_subdirectory(registrar)
 
 add_library(config OBJECT config.c)
-target_link_libraries(config PRIVATE MinIni::minIni os log)
+target_link_libraries(config PRIVATE MinIni::minIni os log array crypto)
 
 add_executable(brski brski.cpp)
 target_link_libraries(brski PRIVATE pledge_request pledge_utils registrar_server config log)

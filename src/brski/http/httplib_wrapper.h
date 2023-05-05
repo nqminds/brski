@@ -51,8 +51,8 @@ void httplib_stop(void *srv_ctx);
 int httplib_post_request(const std::string &client_key_path,
                          const std::string &client_cert_path,
                          const std::string &host, int port,
-                         const std::string &path,
-                         bool verify, const std::string &body,
+                         const std::string &path, bool verify,
+                         const std::string &body,
                          const std::string &content_type,
                          std::string &response);
 #endif
