@@ -25,6 +25,7 @@ struct registrar_config {
 
 struct RegistrarContext {
   struct registrar_config *rconf;
+  struct masa_config *mconf;
   void *srv_ctx;
 };
 

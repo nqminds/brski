@@ -34,6 +34,22 @@ char *get_cert_serial(struct crypto_cert_meta *meta) {
   return NULL;
 }
 
+int post_voucher_request(struct BinaryArray *voucher_request_cms,
+                                struct masa_config *rconf) {
+  char *voucher_request_cms_base64 = NULL;
+
+  if (serialize_array2base64str(voucher_request_cms->array,
+                                voucher_request_cms->length,
+                                (uint8_t **)&voucher_request_cms_base64) < 0) {
+    log_error("serialize_array2base64str fail");
+    return -1;
+  }
+
+  sys_free(voucher_request_cms_base64);
+
+  return 0;
+}
+
 int post_brski_requestvoucher(const RequestHeader &request_header,
                               const std::string &request_body,
                               CRYPTO_CERT peer_certificate,
@@ -42,6 +58,8 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
   struct registrar_config *rconf = context->rconf;
+  struct masa_config *mconf = context->mconf;
+
   struct BinaryArray pledge_voucher_request_cms = {};
   struct BinaryArray *idevid_issuer = NULL;
   struct BinaryArray *registrar_tls_cert = NULL;

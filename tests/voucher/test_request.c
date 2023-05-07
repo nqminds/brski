@@ -746,6 +746,27 @@ static void test_save_certs(void **state) {
       &registrar_cms_meta, registrar_cms_key.array, registrar_cms_key.length,
       &registrar_cms_cert.array);
 
+  struct crypto_cert_meta masa_cms_meta = {.serial_number = 1,
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    "CA:false"};
+
+  masa_cms_meta.issuer = init_keyvalue_list();
+  masa_cms_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(masa_cms_meta.subject, "C", "IE");
+  push_keyvalue_list(masa_cms_meta.subject, "CN", "masa-cms-meta");
+
+  struct BinaryArray masa_cms_key = {};
+  struct BinaryArray masa_cms_cert = {};
+  masa_cms_key.length =
+      (size_t)crypto_generate_eckey(&masa_cms_key.array);
+  masa_cms_cert.length = (size_t)crypto_generate_eccert(
+      &masa_cms_meta, masa_cms_key.array, masa_cms_key.length,
+      &masa_cms_cert.array);
+
   struct crypto_cert_meta tls_ca_meta = {.serial_number = 1,
                                          .not_before = 0,
                                          .not_after = 1234567,
@@ -937,6 +958,14 @@ static void test_save_certs(void **state) {
   assert_true(length > 0);
   registrar_cms_cert.length = length;
 
+  // Sign masa_cms with int1_cms
+  length =
+      crypto_sign_cert(int1_cms_key.array, int1_cms_key.length,
+                       int1_cms_cert.array, int1_cms_cert.length,
+                       masa_cms_cert.length, &masa_cms_cert.array);
+  assert_true(length > 0);
+  masa_cms_cert.length = length;
+
   assert_int_equal(keybuf_to_file(&cms_ca_key, "/tmp/tls-ca.key"), 0);
   assert_int_equal(certbuf_to_file(&cms_ca_cert, "/tmp/tls-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&registrar_tls_key, "/tmp/registrar-tls.key"),
@@ -955,6 +984,10 @@ static void test_save_certs(void **state) {
                    0);
   assert_int_equal(
       certbuf_to_file(&registrar_cms_cert, "/tmp/registrar-cms.crt"), 0);
+  assert_int_equal(keybuf_to_file(&masa_cms_key, "/tmp/masa-cms.key"),
+                   0);
+  assert_int_equal(
+      certbuf_to_file(&masa_cms_cert, "/tmp/masa-cms.crt"), 0);
   assert_int_equal(keybuf_to_file(&idevid_key, "/tmp/idevid.key"), 0);
   assert_int_equal(certbuf_to_file(&idevid_cert, "/tmp/idevid.crt"), 0);
   assert_int_equal(keybuf_to_file(&int1_cms_key, "/tmp/int1-cms.key"), 0);
@@ -991,6 +1024,11 @@ static void test_save_certs(void **state) {
   free_binary_array_content(&registrar_cms_cert);
   free_keyvalue_list(registrar_cms_meta.issuer);
   free_keyvalue_list(registrar_cms_meta.subject);
+
+  free_binary_array_content(&masa_cms_key);
+  free_binary_array_content(&masa_cms_cert);
+  free_keyvalue_list(masa_cms_meta.issuer);
+  free_keyvalue_list(masa_cms_meta.subject);
 
   free_binary_array_content(&idevid_key);
   free_binary_array_content(&idevid_cert);
