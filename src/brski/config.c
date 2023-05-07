@@ -213,19 +213,6 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     return -1;
   }
 
-  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
-    log_errno("sys_zalloc");
-    free_masa_config_content(mconf);
-    return -1;
-  }
-
-  ini_gets("masa", "idevidCAPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
-  mconf->idevid_ca_path = value;
-  if (!strlen(mconf->idevid_ca_path)) {
-    mconf->idevid_ca_path = NULL;
-    sys_free(value);
-  }
-
   return 0;
 }
 
@@ -480,6 +467,19 @@ int load_pledge_config(const char *filename,
   pconf->idevid_cert_path = value;
   if (!strlen(pconf->idevid_cert_path)) {
     pconf->idevid_cert_path = NULL;
+    sys_free(value);
+  }
+
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_pledge_config_content(pconf);
+    return -1;
+  }
+
+  ini_gets("pledge", "idevidCAPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  pconf->idevid_ca_path = value;
+  if (!strlen(pconf->idevid_ca_path)) {
+    pconf->idevid_ca_path = NULL;
     sys_free(value);
   }
 
