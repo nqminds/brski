@@ -767,7 +767,7 @@ static void test_save_certs(void **state) {
       &masa_cms_meta, masa_cms_key.array, masa_cms_key.length,
       &masa_cms_cert.array);
 
-  struct crypto_cert_meta tls_ca_meta = {.serial_number = 1,
+  struct crypto_cert_meta masa_tls_ca_meta = {.serial_number = 1,
                                          .not_before = 0,
                                          .not_after = 1234567,
                                          .issuer = NULL,
@@ -775,18 +775,39 @@ static void test_save_certs(void **state) {
                                          .basic_constraints =
                                              "critical,CA:TRUE"};
 
-  tls_ca_meta.issuer = init_keyvalue_list();
-  tls_ca_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(tls_ca_meta.issuer, "C", "IE");
-  push_keyvalue_list(tls_ca_meta.issuer, "CN", "tls-ca");
-  push_keyvalue_list(tls_ca_meta.subject, "C", "IE");
-  push_keyvalue_list(tls_ca_meta.subject, "CN", "tls-ca");
+  masa_tls_ca_meta.issuer = init_keyvalue_list();
+  masa_tls_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(masa_tls_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(masa_tls_ca_meta.issuer, "CN", "masa-tls-ca");
+  push_keyvalue_list(masa_tls_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(masa_tls_ca_meta.subject, "CN", "masa-tls-ca");
 
-  struct BinaryArray tls_ca_key = {};
-  struct BinaryArray tls_ca_cert = {};
-  tls_ca_key.length = (size_t)crypto_generate_eckey(&tls_ca_key.array);
-  tls_ca_cert.length = (size_t)crypto_generate_eccert(
-      &tls_ca_meta, tls_ca_key.array, tls_ca_key.length, &tls_ca_cert.array);
+  struct BinaryArray masa_tls_ca_key = {};
+  struct BinaryArray masa_tls_ca_cert = {};
+  masa_tls_ca_key.length = (size_t)crypto_generate_eckey(&masa_tls_ca_key.array);
+  masa_tls_ca_cert.length = (size_t)crypto_generate_eccert(
+      &masa_tls_ca_meta, masa_tls_ca_key.array, masa_tls_ca_key.length, &masa_tls_ca_cert.array);
+
+  struct crypto_cert_meta registrar_tls_ca_meta = {.serial_number = 1,
+                                         .not_before = 0,
+                                         .not_after = 1234567,
+                                         .issuer = NULL,
+                                         .subject = NULL,
+                                         .basic_constraints =
+                                             "critical,CA:TRUE"};
+
+  registrar_tls_ca_meta.issuer = init_keyvalue_list();
+  registrar_tls_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(registrar_tls_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(registrar_tls_ca_meta.issuer, "CN", "registrar-tls-ca");
+  push_keyvalue_list(registrar_tls_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(registrar_tls_ca_meta.subject, "CN", "registrar-tls-ca");
+
+  struct BinaryArray registrar_tls_ca_key = {};
+  struct BinaryArray registrar_tls_ca_cert = {};
+  registrar_tls_ca_key.length = (size_t)crypto_generate_eckey(&registrar_tls_ca_key.array);
+  registrar_tls_ca_cert.length = (size_t)crypto_generate_eccert(
+      &registrar_tls_ca_meta, registrar_tls_ca_key.array, registrar_tls_ca_key.length, &registrar_tls_ca_cert.array);
 
   struct crypto_cert_meta registrar_tls_meta = {.serial_number = 12345,
                                                 .not_before = 0,
@@ -811,8 +832,8 @@ static void test_save_certs(void **state) {
 
   // Sign registrar_tls with tls_ca
   ssize_t length = crypto_sign_cert(
-      tls_ca_key.array, tls_ca_key.length, tls_ca_cert.array,
-      tls_ca_cert.length, registrar_tls_cert.length, &registrar_tls_cert.array);
+      registrar_tls_ca_key.array, registrar_tls_ca_key.length, registrar_tls_ca_cert.array,
+      registrar_tls_ca_cert.length, registrar_tls_cert.length, &registrar_tls_cert.array);
   assert_true(length > 0);
   registrar_tls_cert.length = length;
 
@@ -836,8 +857,8 @@ static void test_save_certs(void **state) {
                                      masa_tls_key.length, &masa_tls_cert.array);
 
   // Sign masa_tls with tls_ca
-  length = crypto_sign_cert(tls_ca_key.array, tls_ca_key.length,
-                            tls_ca_cert.array, tls_ca_cert.length,
+  length = crypto_sign_cert(masa_tls_ca_key.array, masa_tls_ca_key.length,
+                            masa_tls_ca_cert.array, masa_tls_ca_cert.length,
                             masa_tls_cert.length, &masa_tls_cert.array);
   assert_true(length > 0);
   masa_tls_cert.length = length;
@@ -966,8 +987,10 @@ static void test_save_certs(void **state) {
   assert_true(length > 0);
   masa_cms_cert.length = length;
 
-  assert_int_equal(keybuf_to_file(&cms_ca_key, "/tmp/tls-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&cms_ca_cert, "/tmp/tls-ca.crt"), 0);
+  assert_int_equal(keybuf_to_file(&masa_tls_ca_key, "/tmp/masa-tls-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&masa_tls_ca_cert, "/tmp/masa-tls-ca.crt"), 0);
+  assert_int_equal(keybuf_to_file(&registrar_tls_ca_key, "/tmp/registrar-tls-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&registrar_tls_ca_cert, "/tmp/registrar-tls-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&registrar_tls_key, "/tmp/registrar-tls.key"),
                    0);
   assert_int_equal(
@@ -995,10 +1018,15 @@ static void test_save_certs(void **state) {
   assert_int_equal(keybuf_to_file(&int2_cms_key, "/tmp/int2-cms.key"), 0);
   assert_int_equal(certbuf_to_file(&int2_cms_cert, "/tmp/int2-cms.crt"), 0);
 
-  free_binary_array_content(&tls_ca_key);
-  free_binary_array_content(&tls_ca_cert);
-  free_keyvalue_list(tls_ca_meta.issuer);
-  free_keyvalue_list(tls_ca_meta.subject);
+  free_binary_array_content(&masa_tls_ca_key);
+  free_binary_array_content(&masa_tls_ca_cert);
+  free_keyvalue_list(masa_tls_ca_meta.issuer);
+  free_keyvalue_list(masa_tls_ca_meta.subject);
+
+  free_binary_array_content(&registrar_tls_ca_key);
+  free_binary_array_content(&registrar_tls_ca_cert);
+  free_keyvalue_list(registrar_tls_ca_meta.issuer);
+  free_keyvalue_list(registrar_tls_ca_meta.subject);
 
   free_binary_array_content(&registrar_tls_key);
   free_binary_array_content(&registrar_tls_cert);
