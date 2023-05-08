@@ -19,6 +19,7 @@ struct pledge_config {
   char *nonce;
   char *idevid_cert_path;
   char *idevid_key_path;
+  char *idevid_ca_path;
   char *cms_sign_cert_path;
   char *cms_sign_key_path;
   struct BinaryArrayList *cms_add_certs_paths;

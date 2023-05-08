@@ -15,6 +15,7 @@ extern "C" {
 }
 
 #include "../masa/masa_config.h"
+#include "../pledge/pledge_config.h"
 #include "registrar_api.h"
 #include "registrar_config.h"
 #include "registrar_server.h"
@@ -62,6 +63,7 @@ void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
 }
 
 int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,
+                    struct pledge_config *pconf,
                     struct RegistrarContext **context) {
   std::vector<struct RouteTuple> routes;
 
@@ -82,7 +84,7 @@ int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,
                               .tls_cert_path = rconf->tls_cert_path,
                               .tls_key_path = rconf->tls_key_path,
                               .client_ca_cert_file_path =
-                                  mconf->idevid_ca_path};
+                                  pconf->idevid_ca_path};
 
   return https_start(&hconf, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);

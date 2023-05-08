@@ -9,8 +9,10 @@
  */
 #include <string>
 
+#include "../http/https_client.h"
 #include "../http/http.h"
 #include "registrar_config.h"
+#include "registrar_server.h"
 
 extern "C" {
 #include "../../utils/log.h"
@@ -35,7 +37,8 @@ char *get_cert_serial(struct crypto_cert_meta *meta) {
 }
 
 int post_voucher_request(struct BinaryArray *voucher_request_cms,
-                                struct masa_config *rconf) {
+                                struct masa_config *mconf,
+                                struct registrar_config *rconf) {
   char *voucher_request_cms_base64 = NULL;
 
   if (serialize_array2base64str(voucher_request_cms->array,
@@ -45,7 +48,23 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
     return -1;
   }
 
+  std::string path = PATH_BRSKI_REQUESTVOUCHER;
+  std::string content_type = "application/voucher-cms+json";
+  std::string body = voucher_request_cms_base64;
+
   sys_free(voucher_request_cms_base64);
+
+  std::string response;
+  log_info("Request voucher from MASA %s", path.c_str());
+
+  int status = https_post_request(
+      rconf->tls_key_path, rconf->tls_cert_path, mconf->bind_address,
+      mconf->port, path, true, body, content_type, response);
+
+  if (status < 0) {
+    log_error("https_post_request fail");
+    return -1;
+  }
 
   return 0;
 }
@@ -147,6 +166,11 @@ int post_brski_requestvoucher(const RequestHeader &request_header,
 
   if (voucher_request_cms == NULL) {
     log_error("sign_voucher_request fail");
+    goto post_brski_requestvoucher_fail;
+  }
+
+  if (post_voucher_request(voucher_request_cms, mconf, rconf) < 0) {
+    log_error("post_voucher_request fail");
     goto post_brski_requestvoucher_fail;
   }
 
