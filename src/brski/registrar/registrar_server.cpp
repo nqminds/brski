@@ -15,6 +15,7 @@ extern "C" {
 }
 
 #include "../masa/masa_config.h"
+#include "../masa/masa_api.h"
 #include "../pledge/pledge_config.h"
 #include "registrar_api.h"
 #include "registrar_config.h"
@@ -23,43 +24,19 @@ extern "C" {
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
   routes.push_back({.path = std::string(PATH_BRSKI_REQUESTVOUCHER),
                     .method = HTTP_METHOD_POST,
-                    .handle = post_brski_requestvoucher});
+                    .handle = registrar_requestvoucher});
 
   routes.push_back({.path = std::string(PATH_BRSKI_VOUCHER_STATUS),
                     .method = HTTP_METHOD_POST,
-                    .handle = post_brski_voucher_status});
+                    .handle = registrar_voucher_status});
 
   routes.push_back({.path = std::string(PATH_BRSKI_REQUESTAUDITLOG),
                     .method = HTTP_METHOD_POST,
-                    .handle = post_brski_requestauditlog});
+                    .handle = registrar_requestauditlog});
 
   routes.push_back({.path = std::string(PATH_BRSKI_ENROLLSTATUS),
                     .method = HTTP_METHOD_POST,
-                    .handle = post_brski_enrollstatus});
-
-  routes.push_back({.path = std::string(PATH_EST_CACERTS),
-                    .method = HTTP_METHOD_GET,
-                    .handle = get_est_cacerts});
-
-  routes.push_back({.path = std::string(PATH_EST_SIMPLEENROLL),
-                    .method = HTTP_METHOD_POST,
-                    .handle = post_est_simpleenroll});
-
-  routes.push_back({.path = std::string(PATH_EST_SIMPLEREENROLL),
-                    .method = HTTP_METHOD_POST,
-                    .handle = post_est_simplereenroll});
-
-  routes.push_back({.path = std::string(PATH_EST_FULLCMC),
-                    .method = HTTP_METHOD_POST,
-                    .handle = post_est_fullcmc});
-
-  routes.push_back({.path = std::string(PATH_EST_SERVERKEYGEN),
-                    .method = HTTP_METHOD_POST,
-                    .handle = post_est_serverkeygen});
-
-  routes.push_back({.path = std::string(PATH_EST_CSRATTRS),
-                    .method = HTTP_METHOD_GET,
-                    .handle = get_est_csrattrs});
+                    .handle = registrar_enrollstatus});
 }
 
 int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,

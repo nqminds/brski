@@ -6,6 +6,7 @@
 
 #include "pledge/pledge_request.h"
 #include "registrar/registrar_server.h"
+#include "masa/masa_server.h"
 
 extern "C" {
 #include "../utils/log.h"
@@ -211,7 +212,8 @@ int main(int argc, char *argv[]) {
     return EXIT_FAILURE;
   }
 
-  struct RegistrarContext *context = NULL;
+  struct RegistrarContext *rcontext = NULL;
+  struct MasaContext *mcontext = NULL;
   switch (command_id) {
     case COMMAND_EXPORT_PVR:
       fprintf(stdout, "Exporting pledge voucher request to %s", out_filename);
@@ -230,14 +232,20 @@ int main(int argc, char *argv[]) {
       }
       break;
     case COMMAND_START_REGISTRAR:
-      if (registrar_start(&config.rconf, &config.mconf, &config.pconf, &context) < 0) {
+      if (registrar_start(&config.rconf, &config.mconf, &config.pconf, &rcontext) < 0) {
         fprintf(stderr, "https_start fail");
         return EXIT_FAILURE;
       }
 
-      registrar_stop(context);
+      registrar_stop(rcontext);
       break;
     case COMMAND_START_MASA:
+      if (masa_start(&config.rconf, &config.mconf, &config.pconf, &mcontext) < 0) {
+        fprintf(stderr, "https_start fail");
+        return EXIT_FAILURE;
+      }
+
+      masa_stop(mcontext);
       break;
   }
 

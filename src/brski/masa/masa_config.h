@@ -26,4 +26,10 @@ struct masa_config {
   struct BinaryArrayList *cms_verify_store_paths;
 };
 
+struct MasaContext {
+  struct registrar_config *rconf;
+  struct masa_config *mconf;
+  void *srv_ctx;
+};
+
 #endif

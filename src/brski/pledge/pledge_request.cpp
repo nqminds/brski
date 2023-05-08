@@ -16,7 +16,8 @@
 
 #include "../http/https_client.h"
 #include "../registrar/registrar_config.h"
-#include "../registrar/registrar_server.h"
+#include "../registrar/registrar_api.h"
+#include "../masa/masa_api.h"
 
 extern "C" {
 #include "../../utils/log.h"
