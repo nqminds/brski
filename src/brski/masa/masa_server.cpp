@@ -80,12 +80,11 @@ int masa_start(struct registrar_config *rconf, struct masa_config *mconf,
   }
 
   setup_masa_routes(routes);
-  struct http_config hconf = {.bind_address = rconf->bind_address,
-                              .port = rconf->port,
-                              .tls_cert_path = rconf->tls_cert_path,
-                              .tls_key_path = rconf->tls_key_path,
-                              .client_ca_cert_file_path =
-                                  pconf->idevid_ca_path};
+  struct http_config hconf = {.bind_address = mconf->bind_address,
+                              .port = mconf->port,
+                              .tls_cert_path = mconf->tls_cert_path,
+                              .tls_key_path = mconf->tls_key_path,
+                              .client_ca_cert_file_path = rconf->tls_ca_path};
 
   return https_start(&hconf, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);

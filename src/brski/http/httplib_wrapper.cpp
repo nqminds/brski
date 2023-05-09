@@ -242,6 +242,7 @@ int httplib_post_request(const std::string &client_key_path,
 
   cli.enable_server_certificate_verification(verify);
 
+  log_info("Post request to %s:%d%s", host.c_str(), port, path.c_str());
   if (httplib::Result res = cli.Post(path, body, content_type)) {
     response = res->body;
     return res->status;

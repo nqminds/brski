@@ -433,7 +433,7 @@ static void test_sign_masa_pledge_voucher(void **state) {
                           .tm_sec = 11};
 
   // Pass in the user_ctx the serial number to compare with
-  const void *user_ctx = (const void *)"AA:BB:CC:DD:EE:FF";
+  void *user_ctx = (void *)"AA:BB:CC:DD:EE:FF";
   struct BinaryArray *cms = sign_masa_pledge_voucher(
       voucher_request_cms, &expires_on, voucher_req_fun, user_ctx,
       &masa_sign_cert, &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
@@ -537,7 +537,7 @@ create_masa_pledge_voucher(struct BinaryArray *registrar_tls_cert) {
       &masa_sign_meta, masa_sign_key.array, masa_sign_key.length,
       &masa_sign_cert.array);
 
-  const void *user_ctx = (const void *)"AA:BB:CC:DD:EE:FF";
+  void *user_ctx = (void *)"AA:BB:CC:DD:EE:FF";
   struct BinaryArray *cms = sign_masa_pledge_voucher(
       voucher_request_cms, &expires_on, voucher_req_fun, user_ctx,
       &masa_sign_cert, &masa_sign_key, NULL, NULL, NULL, NULL, NULL);
@@ -705,6 +705,27 @@ static int test_group_teardown(void **state) {
 
 static void test_save_certs(void **state) {
   (void)state;
+
+  struct crypto_cert_meta ldevid_ca_meta = {.serial_number = 1,
+                                         .not_before = 0,
+                                         .not_after = 1234567,
+                                         .issuer = NULL,
+                                         .subject = NULL,
+                                         .basic_constraints =
+                                             "critical,CA:TRUE"};
+
+  ldevid_ca_meta.issuer = init_keyvalue_list();
+  ldevid_ca_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(ldevid_ca_meta.issuer, "C", "IE");
+  push_keyvalue_list(ldevid_ca_meta.issuer, "CN", "ldevid-ca");
+  push_keyvalue_list(ldevid_ca_meta.subject, "C", "IE");
+  push_keyvalue_list(ldevid_ca_meta.subject, "CN", "ldevid-ca");
+
+  struct BinaryArray ldevid_ca_key = {};
+  struct BinaryArray ldevid_ca_cert = {};
+  ldevid_ca_key.length = (size_t)crypto_generate_eckey(&ldevid_ca_key.array);
+  ldevid_ca_cert.length = (size_t)crypto_generate_eccert(
+      &ldevid_ca_meta, ldevid_ca_key.array, ldevid_ca_key.length, &ldevid_ca_cert.array);
 
   struct crypto_cert_meta pledge_cms_meta = {.serial_number = 1,
                                              .not_before = 0,
@@ -1001,6 +1022,8 @@ static void test_save_certs(void **state) {
   assert_int_equal(certbuf_to_file(&cms_ca_cert, "/tmp/cms-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&idevid_ca_key, "/tmp/idevid-ca.key"), 0);
   assert_int_equal(certbuf_to_file(&idevid_ca_cert, "/tmp/idevid-ca.crt"), 0);
+  assert_int_equal(keybuf_to_file(&ldevid_ca_key, "/tmp/ldevid-ca.key"), 0);
+  assert_int_equal(certbuf_to_file(&ldevid_ca_cert, "/tmp/ldevid-ca.crt"), 0);
   assert_int_equal(keybuf_to_file(&pledge_cms_key, "/tmp/pledge-cms.key"), 0);
   assert_int_equal(certbuf_to_file(&pledge_cms_cert, "/tmp/pledge-cms.crt"), 0);
   assert_int_equal(keybuf_to_file(&registrar_cms_key, "/tmp/registrar-cms.key"),
@@ -1017,6 +1040,11 @@ static void test_save_certs(void **state) {
   assert_int_equal(certbuf_to_file(&int1_cms_cert, "/tmp/int1-cms.crt"), 0);
   assert_int_equal(keybuf_to_file(&int2_cms_key, "/tmp/int2-cms.key"), 0);
   assert_int_equal(certbuf_to_file(&int2_cms_cert, "/tmp/int2-cms.crt"), 0);
+
+  free_binary_array_content(&ldevid_ca_key);
+  free_binary_array_content(&ldevid_ca_cert);
+  free_keyvalue_list(ldevid_ca_meta.issuer);
+  free_keyvalue_list(ldevid_ca_meta.subject);
 
   free_binary_array_content(&masa_tls_ca_key);
   free_binary_array_content(&masa_tls_ca_cert);

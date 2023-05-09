@@ -60,7 +60,7 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
 
   int status = https_post_request(
       rconf->tls_key_path, rconf->tls_cert_path, mconf->bind_address,
-      mconf->port, path, true, body, content_type, response);
+      mconf->port, path, false, body, content_type, response);
 
   if (status < 0) {
     log_error("https_post_request fail");
@@ -93,6 +93,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   char *serial_number = NULL;
   const char *cms_str = request_body.c_str();
 
+  log_trace("registrar_requestvoucher:");
   response.assign("registrar_requestvoucher");
   response_header["Content-Type"] = "application/voucher-cms+json";
 
@@ -102,62 +103,59 @@ int registrar_requestvoucher(const RequestHeader &request_header,
 
   if (crypto_getcert_meta(peer_certificate, &idev_meta) < 0) {
     log_error("crypto_getcert_meta");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   serial_number = get_cert_serial(&idev_meta);
 
   if ((idevid_issuer = crypto_getcert_issuer(peer_certificate)) == NULL) {
     log_error("crypto_getcert_issuer fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
-
-  log_trace("post_brski_requestvoucher: %s %.*s", serial_number,
-            (int)idevid_issuer->length, idevid_issuer->array);
 
   if ((pledge_voucher_request_cms.length =
            serialize_base64str2array((const uint8_t *)cms_str, strlen(cms_str),
                                      &pledge_voucher_request_cms.array)) < 0) {
     log_errno("serialize_base64str2array fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if (get_localtime(&created_on) < 0) {
     log_error("get_localtime fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if ((registrar_tls_cert = file_to_x509buf(rconf->tls_cert_path)) == NULL) {
     log_error("file_to_x509buf fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if ((registrar_sign_cert = file_to_x509buf(rconf->cms_sign_cert_path)) ==
       NULL) {
     log_error("file_to_x509buf fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if ((registrar_sign_key = file_to_keybuf(rconf->cms_sign_key_path)) == NULL) {
     log_error("file_to_keybuf fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if (load_cert_files(rconf->cms_verify_certs_paths, &pledge_verify_certs) <
       0) {
     log_error("load_cert_files");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if (load_cert_files(rconf->cms_verify_store_paths, &pledge_store_certs) < 0) {
     log_error("load_cert_files");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if (load_cert_files(rconf->cms_add_certs_paths, &additional_registrar_certs) <
       0) {
     log_error("load_cert_files");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   voucher_request_cms = sign_voucher_request(
@@ -167,12 +165,12 @@ int registrar_requestvoucher(const RequestHeader &request_header,
 
   if (voucher_request_cms == NULL) {
     log_error("sign_voucher_request fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   if (post_voucher_request(voucher_request_cms, mconf, rconf) < 0) {
     log_error("post_voucher_request fail");
-    goto post_brski_requestvoucher_fail;
+    goto registrar_requestvoucher_fail;
   }
 
   free_binary_array(registrar_tls_cert);
@@ -188,7 +186,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   free_binary_array_content(&pledge_voucher_request_cms);
   return 200;
 
-post_brski_requestvoucher_fail:
+registrar_requestvoucher_fail:
   free_binary_array(registrar_tls_cert);
   free_binary_array(registrar_sign_cert);
   free_binary_array(registrar_sign_key);

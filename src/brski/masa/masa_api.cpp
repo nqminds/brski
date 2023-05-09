@@ -12,6 +12,8 @@
 #include "../http/https_client.h"
 #include "../http/http.h"
 
+#include "masa_config.h"
+
 extern "C" {
 #include "../../utils/log.h"
 #include "../../voucher/array.h"
@@ -22,20 +24,110 @@ extern "C" {
 #include "../config.h"
 }
 
+int voucher_req_cb(
+    const char *serial_number,
+    const struct BinaryArrayList *additional_registrar_certs,
+    void *user_ctx, struct BinaryArray *pinned_domain_cert) {
+  struct MasaContext *context =
+      static_cast<struct MasaContext *>(user_ctx);
+
+  /* Need to verify serial_number */
+  /* Need to verify additional_registrar_certs */
+
+  return 0;
+}
+
 int masa_requestvoucher(const RequestHeader &request_header,
                               const std::string &request_body,
                               CRYPTO_CERT peer_certificate,
                               ResponseHeader &response_header,
                              std::string &response, void *user_ctx) {
-  struct RegistrarContext *context =
-      static_cast<struct RegistrarContext *>(user_ctx);
+  struct MasaContext *context =
+      static_cast<struct MasaContext *>(user_ctx);
+  struct registrar_config *rconf = context->rconf;
+  struct masa_config *mconf = context->mconf;
+
+  struct BinaryArray *masa_sign_cert = NULL;
+  struct BinaryArray *masa_sign_key = NULL;
+  struct BinaryArrayList *registrar_verify_certs = NULL;
+  struct BinaryArrayList *registrar_store_certs = NULL;
+  struct BinaryArrayList *pledge_verify_certs = NULL;
+  struct BinaryArrayList *pledge_store_certs = NULL;
+  struct BinaryArrayList *additional_registrar_certs = NULL;
 
   log_trace("masa_requestvoucher:");
-  log_trace("%s", request_body.c_str());
-
+  // log_trace("%s", request_body.c_str());
   response.assign("masa_requestvoucher");
   response_header["Content-Type"] = "text/plain";
+
+  if ((masa_sign_cert = file_to_x509buf(mconf->cms_sign_cert_path)) ==
+      NULL) {
+    log_error("file_to_x509buf fail");
+    goto masa_requestvoucher_fail;
+  }
+
+  if ((masa_sign_key = file_to_keybuf(mconf->cms_sign_key_path)) == NULL) {
+    log_error("file_to_keybuf fail");
+    goto masa_requestvoucher_fail;
+  }
+
+  if (load_cert_files(mconf->cms_verify_certs_paths, &registrar_verify_certs) <
+      0) {
+    log_error("load_cert_files");
+    goto masa_requestvoucher_fail;
+  }
+
+  if (load_cert_files(mconf->cms_verify_store_paths, &registrar_store_certs) < 0) {
+    log_error("load_cert_files");
+    goto masa_requestvoucher_fail;
+  }
+
+  if (load_cert_files(rconf->cms_verify_certs_paths, &pledge_verify_certs) <
+      0) {
+    log_error("load_cert_files");
+    goto masa_requestvoucher_fail;
+  }
+
+  if (load_cert_files(rconf->cms_verify_store_paths, &pledge_store_certs) < 0) {
+    log_error("load_cert_files");
+    goto masa_requestvoucher_fail;
+  }
+
+  if (load_cert_files(mconf->cms_add_certs_paths, &additional_registrar_certs) <
+      0) {
+    log_error("load_cert_files");
+    goto masa_requestvoucher_fail;
+  }
+
+  // struct BinaryArray *
+  // sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
+  //                        const struct tm *expires_on, voucher_req_cb,
+  //                        user_ctx,
+  //                        const struct BinaryArray *masa_sign_cert,
+  //                        const struct BinaryArray *masa_sign_key,
+  //                        const struct BinaryArrayList *registrar_verify_certs,
+  //                        const struct BinaryArrayList *registrar_verify_store,
+  //                        const struct BinaryArrayList *pledge_verify_certs,
+  //                        const struct BinaryArrayList *pledge_verify_store,
+  //                        const struct BinaryArrayList *additional_masa_certs);
+  free_binary_array(masa_sign_cert);
+  free_binary_array(masa_sign_key);
+  free_array_list(registrar_verify_certs);
+  free_array_list(registrar_store_certs);
+  free_array_list(pledge_verify_certs);
+  free_array_list(pledge_store_certs);
+  free_array_list(additional_registrar_certs);
   return 200;
+
+masa_requestvoucher_fail:
+  free_binary_array(masa_sign_cert);
+  free_binary_array(masa_sign_key);
+  free_array_list(registrar_verify_certs);
+  free_array_list(registrar_store_certs);
+  free_array_list(pledge_verify_certs);
+  free_array_list(pledge_store_certs);
+  free_array_list(additional_registrar_certs);
+  return 400;
 }
 
 int masa_voucher_status(const RequestHeader &request_header,
