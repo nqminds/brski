@@ -29,6 +29,8 @@ cmsVerifyStorePath = ""
 [masa]
 bindAddress = "0.0.0.0"
 port = 12346
+ldevidCAKeyPath = ""
+ldevidCACertPath = ""
 tlsKeyPath = ""
 tlsCertPath = ""
 tlsCAPath = ""
