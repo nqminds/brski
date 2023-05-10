@@ -411,9 +411,9 @@ void free_pledge_config_content(struct pledge_config *const pconf) {
       pconf->idevid_cert_path = NULL;
     }
 
-    if (pconf->idevid_ca_path != NULL) {
-      sys_free(pconf->idevid_ca_path);
-      pconf->idevid_ca_path = NULL;
+    if (pconf->idevid_ca_cert_path != NULL) {
+      sys_free(pconf->idevid_ca_cert_path);
+      pconf->idevid_ca_cert_path = NULL;
     }
 
     if (pconf->cms_sign_cert_path != NULL) {
@@ -513,10 +513,10 @@ int load_pledge_config(const char *filename,
     return -1;
   }
 
-  ini_gets("pledge", "idevidCAPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
-  pconf->idevid_ca_path = value;
-  if (!strlen(pconf->idevid_ca_path)) {
-    pconf->idevid_ca_path = NULL;
+  ini_gets("pledge", "idevidCACertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  pconf->idevid_ca_cert_path = value;
+  if (!strlen(pconf->idevid_ca_cert_path)) {
+    pconf->idevid_ca_cert_path = NULL;
     sys_free(value);
   }
 

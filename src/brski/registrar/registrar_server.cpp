@@ -61,7 +61,7 @@ int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,
                               .tls_cert_path = rconf->tls_cert_path,
                               .tls_key_path = rconf->tls_key_path,
                               .client_ca_cert_file_path =
-                                  pconf->idevid_ca_path};
+                                  pconf->idevid_ca_cert_path};
 
   return https_start(&hconf, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);
