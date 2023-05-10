@@ -28,7 +28,7 @@
 
 #include "pledge/pledge_config.h"
 
-#define CREATED_ON_SIZE sizeof("9999-12-31T24:59:59Z") + 1
+#define TIME_ISO_STR_SIZE sizeof("9999-12-31T24:59:59Z") + 1
 #define MAX_CONFIG_VALUE_SIZE 2048
 
 int load_config_value_list(const char *section, const char *key,
@@ -85,6 +85,26 @@ void free_masa_config_content(struct masa_config *mconf) {
       mconf->bind_address = NULL;
     }
 
+    if (mconf->expires_on != NULL) {
+      sys_free(mconf->expires_on);
+      mconf->expires_on = NULL;
+    }
+
+    if (mconf->ldevid_ca_cert_path != NULL) {
+      sys_free(mconf->ldevid_ca_cert_path);
+      mconf->ldevid_ca_cert_path = NULL;
+    }
+
+    if (mconf->ldevid_ca_key_path != NULL) {
+      sys_free(mconf->ldevid_ca_key_path);
+      mconf->ldevid_ca_key_path = NULL;
+    }
+
+    if (mconf->tls_key_path != NULL) {
+      sys_free(mconf->tls_key_path);
+      mconf->tls_key_path = NULL;
+    }
+
     if (mconf->tls_cert_path != NULL) {
       sys_free(mconf->tls_cert_path);
       mconf->tls_cert_path = NULL;
@@ -136,7 +156,46 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     sys_free(value);
   }
 
+  if ((value = sys_zalloc(TIME_ISO_STR_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_masa_config_content(mconf);
+    return -1;
+  }
+
+  ini_gets("masa", "expiresOn", "", value, TIME_ISO_STR_SIZE, filename);
+  mconf->expires_on = value;
+  if (!strlen(mconf->expires_on)) {
+    mconf->expires_on = NULL;
+    sys_free(value);
+  }
+
   mconf->port = (unsigned int)ini_getl("masa", "port", 0, filename);
+
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_masa_config_content(mconf);
+    return -1;
+  }
+
+  ini_gets("masa", "ldevidCACertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  mconf->ldevid_ca_cert_path = value;
+  if (!strlen(mconf->ldevid_ca_cert_path)) {
+    mconf->ldevid_ca_cert_path = NULL;
+    sys_free(value);
+  }
+
+  if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
+    log_errno("sys_zalloc");
+    free_masa_config_content(mconf);
+    return -1;
+  }
+
+  ini_gets("masa", "ldevidCAKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  mconf->ldevid_ca_key_path = value;
+  if (!strlen(mconf->ldevid_ca_key_path)) {
+    mconf->ldevid_ca_key_path = NULL;
+    sys_free(value);
+  }
 
   if ((value = sys_zalloc(MAX_CONFIG_VALUE_SIZE)) == NULL) {
     log_errno("sys_zalloc");
@@ -439,13 +498,13 @@ int load_pledge_config(const char *filename,
                        struct pledge_config *const pconf) {
   char *value = NULL;
 
-  if ((value = sys_zalloc(CREATED_ON_SIZE)) == NULL) {
+  if ((value = sys_zalloc(TIME_ISO_STR_SIZE)) == NULL) {
     log_errno("sys_zalloc");
     free_pledge_config_content(pconf);
     return -1;
   }
 
-  ini_gets("pledge", "createdOn", "", value, CREATED_ON_SIZE, filename);
+  ini_gets("pledge", "createdOn", "", value, TIME_ISO_STR_SIZE, filename);
   pconf->created_on = value;
   if (!strlen(pconf->created_on)) {
     pconf->created_on = NULL;

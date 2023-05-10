@@ -28,6 +28,7 @@ cmsVerifyStorePath = ""
 
 [masa]
 bindAddress = "0.0.0.0"
+expiresOn = ""
 port = 12346
 ldevidCAKeyPath = ""
 ldevidCACertPath = ""

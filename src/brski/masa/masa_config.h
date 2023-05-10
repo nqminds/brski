@@ -15,7 +15,10 @@
 
 struct masa_config {
   char *bind_address;
+  char *expires_on;
   unsigned int port;
+  char *ldevid_ca_cert_path;
+  char *ldevid_ca_key_path;
   char *tls_cert_path;
   char *tls_key_path;
   char *tls_ca_cert_path;
@@ -29,6 +32,8 @@ struct masa_config {
 struct MasaContext {
   struct registrar_config *rconf;
   struct masa_config *mconf;
+  struct BinaryArray *ldevid_ca_cert;
+  struct BinaryArray *ldevid_ca_key;
   void *srv_ctx;
 };
 
