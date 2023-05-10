@@ -84,7 +84,7 @@ int masa_start(struct registrar_config *rconf, struct masa_config *mconf,
                               .port = mconf->port,
                               .tls_cert_path = mconf->tls_cert_path,
                               .tls_key_path = mconf->tls_key_path,
-                              .client_ca_cert_file_path = rconf->tls_ca_path};
+                              .client_ca_cert_path = rconf->tls_ca_cert_path};
 
   return https_start(&hconf, routes, static_cast<void *>(*context),
                      &(*context)->srv_ctx);

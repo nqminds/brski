@@ -204,7 +204,7 @@ int httplib_start(struct http_config *config,
   try {
     httplib::SSLServer *server =
         new httplib::SSLServer(config->tls_cert_path, config->tls_key_path,
-                               config->client_ca_cert_file_path);
+                               config->client_ca_cert_path);
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
       log_error("httplib_register_routes fail");

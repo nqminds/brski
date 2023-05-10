@@ -95,9 +95,9 @@ void free_masa_config_content(struct masa_config *mconf) {
       mconf->tls_key_path = NULL;
     }
 
-    if (mconf->tls_ca_path != NULL) {
-      sys_free(mconf->tls_ca_path);
-      mconf->tls_ca_path = NULL;
+    if (mconf->tls_ca_cert_path != NULL) {
+      sys_free(mconf->tls_ca_cert_path);
+      mconf->tls_ca_cert_path = NULL;
     }
 
     if (mconf->cms_sign_cert_path != NULL) {
@@ -170,10 +170,10 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     return -1;
   }
 
-  ini_gets("masa", "tlsCAPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
-  mconf->tls_ca_path = value;
-  if (!strlen(mconf->tls_ca_path)) {
-    mconf->tls_ca_path = NULL;
+  ini_gets("masa", "tlsCACertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  mconf->tls_ca_cert_path = value;
+  if (!strlen(mconf->tls_ca_cert_path)) {
+    mconf->tls_ca_cert_path = NULL;
     sys_free(value);
   }
 
@@ -246,9 +246,9 @@ void free_registrar_config_content(struct registrar_config *rconf) {
       rconf->tls_key_path = NULL;
     }
 
-    if (rconf->tls_ca_path != NULL) {
-      sys_free(rconf->tls_ca_path);
-      rconf->tls_ca_path = NULL;
+    if (rconf->tls_ca_cert_path != NULL) {
+      sys_free(rconf->tls_ca_cert_path);
+      rconf->tls_ca_cert_path = NULL;
     }
 
     if (rconf->cms_sign_cert_path != NULL) {
@@ -324,11 +324,11 @@ int load_registrar_config(const char *filename,
     return -1;
   }
 
-  ini_gets("registrar", "tlsCAPath", "", value, MAX_CONFIG_VALUE_SIZE,
+  ini_gets("registrar", "tlsCACertPath", "", value, MAX_CONFIG_VALUE_SIZE,
            filename);
-  rconf->tls_ca_path = value;
-  if (!strlen(rconf->tls_ca_path)) {
-    rconf->tls_ca_path = NULL;
+  rconf->tls_ca_cert_path = value;
+  if (!strlen(rconf->tls_ca_cert_path)) {
+    rconf->tls_ca_cert_path = NULL;
     sys_free(value);
   }
 

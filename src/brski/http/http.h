@@ -57,7 +57,7 @@ struct http_config {
   unsigned int port;
   char *tls_cert_path;
   char *tls_key_path;
-  char *client_ca_cert_file_path;
+  char *client_ca_cert_path;
   char *client_ca_cert_dir_path;
   char *private_key_password;
 };
