@@ -599,7 +599,7 @@ sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
 typedef int (*voucher_req_fn)(
     const char *serial_number,
     const struct BinaryArrayList *additional_registrar_certs,
-    const void *user_ctx, struct BinaryArray *pinned_domain_cert);
+    void *user_ctx, struct BinaryArray *pinned_domain_cert);
 
 /**
  * @brief Signs a MASA voucher request using CMS with a private key
@@ -633,7 +633,7 @@ typedef int (*voucher_req_fn)(
  */
 __must_free_binary_array struct BinaryArray *
 sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
-                         const struct tm *expires_on, const voucher_req_fn cb,
+                         const struct tm *expires_on, voucher_req_fn cb,
                          void *user_ctx,
                          const struct BinaryArray *masa_sign_cert,
                          const struct BinaryArray *masa_sign_key,

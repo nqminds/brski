@@ -364,7 +364,7 @@ struct BinaryArray *faulty_create_voucher_request(
 
 int voucher_req_fun(const char *serial_number,
                     const struct BinaryArrayList *additional_registrar_certs,
-                    const void *user_ctx,
+                    void *user_ctx,
                     struct BinaryArray *pinned_domain_cert) {
   (void)serial_number;
   (void)additional_registrar_certs;

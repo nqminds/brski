@@ -246,7 +246,7 @@ sign_voucher_request_fail:
 
 struct BinaryArray *
 sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
-                         const struct tm *expires_on, const voucher_req_fn cb,
+                         const struct tm *expires_on, voucher_req_fn cb,
                          void *user_ctx,
                          const struct BinaryArray *masa_sign_cert,
                          const struct BinaryArray *masa_sign_key,
