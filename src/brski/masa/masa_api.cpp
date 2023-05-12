@@ -31,10 +31,70 @@ int voucher_req_cb(
   struct MasaContext *context =
       static_cast<struct MasaContext *>(user_ctx);
 
-  /* Need to verify serial_number */
-  /* Need to verify additional_registrar_certs */
+  if (context->ldevid_ca_key == NULL) {
+    log_error("ldevid_ca_key is NULL");
+    return -1;
+  }
+
+  if (context->ldevid_ca_cert == NULL) {
+    log_error("ldevid_ca_cert is NULL");
+    return -1;
+  }
+
+  /* Need to verify serial_number using a DB*/
+  /* ... */
+
+  /* Need to verify additional_registrar_certs using a DB*/
+  /* ... */
+
+  /* Need to choose the parameters of the pinned domain 
+     using a DB.
+  */
+  struct crypto_cert_meta pinned_domain_meta = {.serial_number = 1,
+                                             .not_before = 0,
+                                             .not_after = 1234567,
+                                             .issuer = NULL,
+                                             .subject = NULL,
+                                             .basic_constraints = (char *)"CA:false"};
+
+
+  pinned_domain_meta.issuer = init_keyvalue_list();
+  pinned_domain_meta.subject = init_keyvalue_list();
+  push_keyvalue_list(pinned_domain_meta.subject, (char *)"C", (char *)"IE");
+  push_keyvalue_list(pinned_domain_meta.subject, (char *)"CN", (char *)"pinned-domain-meta");
+
+  struct BinaryArray pinned_domain_key = {};
+
+  /* Need to save the pinned domain key in a DB */
+  pinned_domain_key.length = (size_t)crypto_generate_eckey(&pinned_domain_key.array);
+  pinned_domain_cert->length = (size_t)crypto_generate_eccert(
+      &pinned_domain_meta, pinned_domain_key.array, pinned_domain_key.length,
+      &pinned_domain_cert->array);
+
+    // Sign masa_tls with tls_ca
+  ssize_t length = crypto_sign_cert(context->ldevid_ca_key->array, context->ldevid_ca_key->length,
+                            context->ldevid_ca_cert->array, context->ldevid_ca_cert->length,
+                            pinned_domain_cert->length, &pinned_domain_cert->array);
+  if (length < 0) {
+    log_error("crypto_sign_cert fail");
+    goto voucher_req_cb_fail;
+  }
+
+  pinned_domain_cert->length = length;
+
+  free_binary_array_content(&pinned_domain_key);
+  free_keyvalue_list(pinned_domain_meta.issuer);
+  free_keyvalue_list(pinned_domain_meta.subject);
 
   return 0;
+voucher_req_cb_fail:
+
+  free_binary_array_content(&pinned_domain_key);
+  free_binary_array_content(pinned_domain_cert);
+  free_keyvalue_list(pinned_domain_meta.issuer);
+  free_keyvalue_list(pinned_domain_meta.subject);
+
+  return -1;
 }
 
 int masa_requestvoucher(const RequestHeader &request_header,
