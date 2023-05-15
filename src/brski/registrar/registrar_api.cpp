@@ -39,7 +39,8 @@ char *get_cert_serial(struct crypto_cert_meta *meta) {
 
 int post_voucher_request(struct BinaryArray *voucher_request_cms,
                                 struct masa_config *mconf,
-                                struct registrar_config *rconf) {
+                                struct registrar_config *rconf,
+                                std::string &response) {
   char *voucher_request_cms_base64 = NULL;
 
   if (serialize_array2base64str(voucher_request_cms->array,
@@ -54,8 +55,7 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
   std::string body = voucher_request_cms_base64;
 
   sys_free(voucher_request_cms_base64);
-
-  std::string response;
+  
   log_info("Request voucher from MASA %s", path.c_str());
 
   int status = https_post_request(
@@ -94,7 +94,6 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   const char *cms_str = request_body.c_str();
 
   log_trace("registrar_requestvoucher:");
-  response.assign("registrar_requestvoucher");
   response_header["Content-Type"] = "application/voucher-cms+json";
 
   struct crypto_cert_meta idev_meta = {};
@@ -168,7 +167,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     goto registrar_requestvoucher_fail;
   }
 
-  if (post_voucher_request(voucher_request_cms, mconf, rconf) < 0) {
+  if (post_voucher_request(voucher_request_cms, mconf, rconf, response) < 0) {
     log_error("post_voucher_request fail");
     goto registrar_requestvoucher_fail;
   }

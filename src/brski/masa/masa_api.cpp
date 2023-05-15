@@ -116,11 +116,11 @@ int masa_requestvoucher(const RequestHeader &request_header,
   struct BinaryArrayList *pledge_store_certs = NULL;
   struct BinaryArrayList *additional_masa_certs = NULL;
   struct BinaryArray *masa_pledge_voucher = NULL;
+  char *base64 = NULL;
   const char *cms_str = request_body.c_str();
 
   log_trace("masa_requestvoucher:");
   // log_trace("%s", request_body.c_str());
-  response.assign("masa_requestvoucher");
   response_header["Content-Type"] = "text/plain";
 
   struct tm expires_on = {0};
@@ -197,6 +197,15 @@ int masa_requestvoucher(const RequestHeader &request_header,
     goto masa_requestvoucher_fail;
   }
 
+  if (serialize_array2base64str(masa_pledge_voucher->array, masa_pledge_voucher->length, (uint8_t **)&base64) <
+      0) {
+    log_error("serialize_array2base64str fail");
+    goto masa_requestvoucher_fail;
+  }
+
+  response.assign((char *) base64);
+
+  sys_free(base64);
   free_binary_array(context->ldevid_ca_cert);
   free_binary_array(context->ldevid_ca_key);
   free_binary_array(masa_sign_key);

@@ -214,6 +214,7 @@ int main(int argc, char *argv[]) {
 
   struct RegistrarContext *rcontext = NULL;
   struct MasaContext *mcontext = NULL;
+  std::string response;
   switch (command_id) {
     case COMMAND_EXPORT_PVR:
       fprintf(stdout, "Exporting pledge voucher request to %s", out_filename);
@@ -226,10 +227,11 @@ int main(int argc, char *argv[]) {
     case COMMAND_PLEDGE_REQUEST:
       fprintf(stdout, "Pledge voucher request to %s:%d\n",
               config.rconf.bind_address, config.rconf.port);
-      if (post_voucher_pledge_request(&config.pconf, &config.rconf) < 0) {
+      if (post_voucher_pledge_request(&config.pconf, &config.rconf, response) < 0) {
         fprintf(stderr, "post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
+      fprintf(stdout, "%s\n", response.c_str());
       break;
     case COMMAND_START_REGISTRAR:
       if (registrar_start(&config.rconf, &config.mconf, &config.pconf, &rcontext) < 0) {

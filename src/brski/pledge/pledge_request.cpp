@@ -25,7 +25,8 @@ extern "C" {
 }
 
 int post_voucher_pledge_request(struct pledge_config *pconf,
-                                struct registrar_config *rconf) {
+                                struct registrar_config *rconf,
+                                std::string &response) {
   if (rconf->bind_address == nullptr) {
     log_error("bind_address param is NULL");
     return -1;
@@ -55,7 +56,6 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
 
   sys_free(cms);
 
-  std::string response;
   log_info("Request pledge voucher from %s", path.c_str());
 
   int status = https_post_request(
