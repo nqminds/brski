@@ -14,6 +14,10 @@
 #include "pledge/pledge_config.h"
 #include "registrar/registrar_config.h"
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * @brief The BRSKI configuration structures. Used for configuring the
  * server/client/masa
@@ -50,4 +54,9 @@ void free_config_content(struct brski_config *const config);
  */
 int load_cert_files(struct BinaryArrayList *cert_paths,
                     struct BinaryArrayList **out);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

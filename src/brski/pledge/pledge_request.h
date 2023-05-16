@@ -14,6 +14,7 @@
 #include <string>
 
 #include "../registrar/registrar_config.h"
+#include "../masa/masa_config.h"
 #include "pledge_config.h"
 
 /**
@@ -21,10 +22,12 @@
  *
  * @param[in] pconf The pledge configuration structure
  * @param[in] rconf The registrar configuration structure
+ * @param[in] mconf The masa configuration structure
  * @param[out] response The response from the POST request
  * @return int 0 on success, -1 on failure
  */
 int post_voucher_pledge_request(struct pledge_config *pconf,
                                 struct registrar_config *rconf,
+                                struct masa_config *mconf,
                                 std::string &response);
 #endif
