@@ -20,8 +20,13 @@
 #include "../masa/masa_api.h"
 
 extern "C" {
-#include "../../utils/log.h"
 #include "../pledge/pledge_utils.h"
+#include "../../utils/log.h"
+#include "../../voucher/array.h"
+#include "../../voucher/crypto.h"
+#include "../../voucher/keyvalue.h"
+#include "../../voucher/serialize.h"
+#include "../../voucher/voucher.h"
 }
 
 int post_voucher_pledge_request(struct pledge_config *pconf,
@@ -68,5 +73,22 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   }
 
   log_debug("post_voucher_pledge_request status %d", status);
+
+  const char *masa_pledge_voucher_str = response.c_str();
+  struct BinaryArray masa_pledge_voucher_cms = {};
+
+  if ((masa_pledge_voucher_cms.length =
+           serialize_base64str2array((const uint8_t *)masa_pledge_voucher_str,
+                                      strlen(masa_pledge_voucher_str),
+                                     &masa_pledge_voucher_cms.array)) < 0) {
+    log_errno("serialize_base64str2array fail");
+    goto post_voucher_pledge_request_fail;
+  }
+
+  free_binary_array_content(&masa_pledge_voucher_cms);
   return 0;
+
+post_voucher_pledge_request_fail:
+  free_binary_array_content(&masa_pledge_voucher_cms);
+  return -1;
 }
