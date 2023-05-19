@@ -1,8 +1,8 @@
 #include <stdlib.h>
+#include <libgen.h>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
-#include <libgen.h>
 
 #include "registrar/registrar_server.h"
 
