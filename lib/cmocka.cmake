@@ -23,7 +23,7 @@ if (BUILD_ONLY_DOCS OR NOT (CMAKE_PROJECT_NAME STREQUAL PROJECT_NAME AND BUILD_T
 else ()
   include(FetchContent)
 
-  set(CMOCKA_GIT_SHA "8ded122b0b44155b1869418af5d931ee6800389e")
+  set(CMOCKA_GIT_SHA "ecccefdb64ef3ccbc5f4e351328fc087db0f7530")
   FetchContent_Declare(
     cmocka
     # Use upstream in development cmocka version to fix some bugs
@@ -33,9 +33,9 @@ else ()
     # - CHERI PureCap fixes
     #   - Use `__builtin_align_down` to align pointers https://gitlab.com/cmocka/cmocka/-/merge_requests/55
     #   - Remove casts from `uintptr_t` to `uintmax_t` https://gitlab.com/cmocka/cmocka/-/merge_requests/56
-    # - Fix for GCC -Wmaybe-uninitialized warnings
+    # - Fix for GCC -Wmaybe-uninitialized warnings https://gitlab.com/cmocka/cmocka/-/merge_requests/66
     URL "https://gitlab.com/api/v4/projects/aloisklink%2Fcmocka/repository/archive.tar.bz2?sha=${CMOCKA_GIT_SHA}"
-    URL_HASH SHA256=422cb08ea1a2a39babfd9532e8bedacf27a4e0e97bc95fd8ff46e04e0b413a99
+    URL_HASH SHA256=c8eab33c368b5cd0cf8732cdae19a094f1b4efa12112e2816308f506baca65e9
     DOWNLOAD_NAME "cmocka-${CMOCKA_GIT_SHA}.tar.bz2"
     DOWNLOAD_DIR "${EP_DOWNLOAD_DIR}" # if empty string, uses default dir
   )
