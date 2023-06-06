@@ -1,0 +1,32 @@
+on:
+  push: {}
+  pull_request: {}
+
+name: Build
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        cmake-preset:
+          - linux # normal linux tests
+          - linux-openssl # tests compiling OpenSSL
+          - linux-sanitize
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Cache CMake build/dl folder
+        uses: actions/cache@v3
+        with:
+          path: ./build/dl
+          key: ${{ runner.os }}-${{ matrix.cmake-preset }}-${{ hashFiles( 'lib/*' ) }}
+      - name: Configure
+        run: |
+          cmake --preset "${{ matrix.cmake-preset }}"
+      - name: Build
+        run: |
+          cmake --build --preset "${{ matrix.cmake-preset }}"
+      - name: Test
+        run: |
+          ctest --preset "${{ matrix.cmake-preset }}" --output-on-failure
