@@ -21,10 +21,10 @@
  * @return int 0 on success, -1 on failure
  */
 int registrar_requestvoucher(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *context);
+                             const std::string &request_body,
+                             CRYPTO_CERT peer_certificate,
+                             ResponseHeader &response_header,
+                             std::string &response, void *context);
 
 /**
  * @brief Registrar voucher status handler
@@ -32,10 +32,10 @@ int registrar_requestvoucher(const RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int registrar_voucher_status(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *context);
+                             const std::string &request_body,
+                             CRYPTO_CERT peer_certificate,
+                             ResponseHeader &response_header,
+                             std::string &response, void *context);
 
 /**
  * @brief Registrar request audit log handler
@@ -43,10 +43,10 @@ int registrar_voucher_status(const RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int registrar_requestauditlog(const RequestHeader &request_header,
-                               const std::string &request_body,
-                               CRYPTO_CERT peer_certificate,
-                               ResponseHeader &response_header,
-                               std::string &response, void *context);
+                              const std::string &request_body,
+                              CRYPTO_CERT peer_certificate,
+                              ResponseHeader &response_header,
+                              std::string &response, void *context);
 
 /**
  * @brief Registrar enroll status handler
@@ -54,9 +54,9 @@ int registrar_requestauditlog(const RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int registrar_enrollstatus(const RequestHeader &request_header,
-                            const std::string &request_body,
-                            CRYPTO_CERT peer_certificate,
-                            ResponseHeader &response_header,
-                            std::string &response, void *context);
+                           const std::string &request_body,
+                           CRYPTO_CERT peer_certificate,
+                           ResponseHeader &response_header,
+                           std::string &response, void *context);
 
 #endif

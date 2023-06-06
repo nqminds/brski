@@ -24,8 +24,7 @@
  * @return int 0 on success, -1 on failure
  */
 int masa_start(struct registrar_config *rconf, struct masa_config *mconf,
-                    struct pledge_config *pconf,
-                    struct MasaContext **context);
+               struct pledge_config *pconf, struct MasaContext **context);
 
 /**
  * @brief Stops the masa server

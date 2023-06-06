@@ -9,8 +9,8 @@
  */
 #include <string>
 
-#include "../http/https_client.h"
 #include "../http/http.h"
+#include "../http/https_client.h"
 
 #include "masa_config.h"
 
@@ -24,12 +24,10 @@ extern "C" {
 #include "../config.h"
 }
 
-int voucher_req_cb(
-    const char *serial_number,
-    const struct BinaryArrayList *additional_registrar_certs,
-    void *user_ctx, struct BinaryArray *pinned_domain_cert) {
-  struct MasaContext *context =
-      static_cast<struct MasaContext *>(user_ctx);
+int voucher_req_cb(const char *serial_number,
+                   const struct BinaryArrayList *additional_registrar_certs,
+                   void *user_ctx, struct BinaryArray *pinned_domain_cert) {
+  struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
 
   if (context->ldevid_ca_key == NULL) {
     log_error("ldevid_ca_key is NULL");
@@ -47,34 +45,37 @@ int voucher_req_cb(
   /* Need to verify additional_registrar_certs using a DB*/
   /* ... */
 
-  /* Need to choose the parameters of the pinned domain 
+  /* Need to choose the parameters of the pinned domain
      using a DB.
   */
   struct crypto_cert_meta pinned_domain_meta = {.serial_number = 1,
-                                             .not_before = 0,
-                                             .not_after = 1234567,
-                                             .issuer = NULL,
-                                             .subject = NULL,
-                                             .basic_constraints = (char *)"CA:false"};
-
+                                                .not_before = 0,
+                                                .not_after = 1234567,
+                                                .issuer = NULL,
+                                                .subject = NULL,
+                                                .basic_constraints =
+                                                    (char *)"CA:false"};
 
   pinned_domain_meta.issuer = init_keyvalue_list();
   pinned_domain_meta.subject = init_keyvalue_list();
   push_keyvalue_list(pinned_domain_meta.subject, (char *)"C", (char *)"IE");
-  push_keyvalue_list(pinned_domain_meta.subject, (char *)"CN", (char *)"pinned-domain-meta");
+  push_keyvalue_list(pinned_domain_meta.subject, (char *)"CN",
+                     (char *)"pinned-domain-meta");
 
   struct BinaryArray pinned_domain_key = {};
 
   /* Need to save the pinned domain key in a DB */
-  pinned_domain_key.length = (size_t)crypto_generate_eckey(&pinned_domain_key.array);
+  pinned_domain_key.length =
+      (size_t)crypto_generate_eckey(&pinned_domain_key.array);
   pinned_domain_cert->length = (size_t)crypto_generate_eccert(
       &pinned_domain_meta, pinned_domain_key.array, pinned_domain_key.length,
       &pinned_domain_cert->array);
 
-    // Sign masa_tls with tls_ca
-  ssize_t length = crypto_sign_cert(context->ldevid_ca_key->array, context->ldevid_ca_key->length,
-                            context->ldevid_ca_cert->array, context->ldevid_ca_cert->length,
-                            pinned_domain_cert->length, &pinned_domain_cert->array);
+  // Sign masa_tls with tls_ca
+  ssize_t length = crypto_sign_cert(
+      context->ldevid_ca_key->array, context->ldevid_ca_key->length,
+      context->ldevid_ca_cert->array, context->ldevid_ca_cert->length,
+      pinned_domain_cert->length, &pinned_domain_cert->array);
   if (length < 0) {
     log_error("crypto_sign_cert fail");
     goto voucher_req_cb_fail;
@@ -98,12 +99,11 @@ voucher_req_cb_fail:
 }
 
 int masa_requestvoucher(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                             std::string &response, void *user_ctx) {
-  struct MasaContext *context =
-      static_cast<struct MasaContext *>(user_ctx);
+                        const std::string &request_body,
+                        CRYPTO_CERT peer_certificate,
+                        ResponseHeader &response_header, std::string &response,
+                        void *user_ctx) {
+  struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
   struct registrar_config *rconf = context->rconf;
   struct masa_config *mconf = context->mconf;
 
@@ -142,13 +142,13 @@ int masa_requestvoucher(const RequestHeader &request_header,
     goto masa_requestvoucher_fail;
   }
 
-  if ((context->ldevid_ca_key = file_to_keybuf(mconf->ldevid_ca_key_path)) == NULL) {
+  if ((context->ldevid_ca_key = file_to_keybuf(mconf->ldevid_ca_key_path)) ==
+      NULL) {
     log_error("file_to_keybuf fail");
     goto masa_requestvoucher_fail;
   }
 
-  if ((masa_sign_cert = file_to_x509buf(mconf->cms_sign_cert_path)) ==
-      NULL) {
+  if ((masa_sign_cert = file_to_x509buf(mconf->cms_sign_cert_path)) == NULL) {
     log_error("file_to_x509buf fail");
     goto masa_requestvoucher_fail;
   }
@@ -164,7 +164,8 @@ int masa_requestvoucher(const RequestHeader &request_header,
     goto masa_requestvoucher_fail;
   }
 
-  if (load_cert_files(mconf->cms_verify_store_paths, &registrar_store_certs) < 0) {
+  if (load_cert_files(mconf->cms_verify_store_paths, &registrar_store_certs) <
+      0) {
     log_error("load_cert_files");
     goto masa_requestvoucher_fail;
   }
@@ -180,30 +181,30 @@ int masa_requestvoucher(const RequestHeader &request_header,
     goto masa_requestvoucher_fail;
   }
 
-  if (load_cert_files(mconf->cms_add_certs_paths, &additional_masa_certs) <
-      0) {
+  if (load_cert_files(mconf->cms_add_certs_paths, &additional_masa_certs) < 0) {
     log_error("load_cert_files");
     goto masa_requestvoucher_fail;
   }
 
-  masa_pledge_voucher = sign_masa_pledge_voucher(&voucher_request_cms,
-                         &expires_on, voucher_req_cb, user_ctx, masa_sign_cert,
-                         masa_sign_key, registrar_verify_certs,
-                         registrar_store_certs, pledge_verify_certs,
-                         pledge_store_certs, additional_masa_certs);
+  masa_pledge_voucher = sign_masa_pledge_voucher(
+      &voucher_request_cms, &expires_on, voucher_req_cb, user_ctx,
+      masa_sign_cert, masa_sign_key, registrar_verify_certs,
+      registrar_store_certs, pledge_verify_certs, pledge_store_certs,
+      additional_masa_certs);
 
   if (masa_pledge_voucher == NULL) {
     log_error("sign_masa_pledge_voucher fail");
     goto masa_requestvoucher_fail;
   }
 
-  if (serialize_array2base64str(masa_pledge_voucher->array, masa_pledge_voucher->length, (uint8_t **)&base64) <
-      0) {
+  if (serialize_array2base64str(masa_pledge_voucher->array,
+                                masa_pledge_voucher->length,
+                                (uint8_t **)&base64) < 0) {
     log_error("serialize_array2base64str fail");
     goto masa_requestvoucher_fail;
   }
 
-  response.assign((char *) base64);
+  response.assign((char *)base64);
 
   sys_free(base64);
   free_binary_array(context->ldevid_ca_cert);
@@ -235,10 +236,10 @@ masa_requestvoucher_fail:
 }
 
 int masa_voucher_status(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *user_ctx) {
+                        const std::string &request_body,
+                        CRYPTO_CERT peer_certificate,
+                        ResponseHeader &response_header, std::string &response,
+                        void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 
@@ -251,10 +252,10 @@ int masa_voucher_status(const RequestHeader &request_header,
 }
 
 int masa_requestauditlog(const RequestHeader &request_header,
-                               const std::string &request_body,
-                               CRYPTO_CERT peer_certificate,
-                               ResponseHeader &response_header,
-                               std::string &response, void *user_ctx) {
+                         const std::string &request_body,
+                         CRYPTO_CERT peer_certificate,
+                         ResponseHeader &response_header, std::string &response,
+                         void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 
@@ -267,10 +268,10 @@ int masa_requestauditlog(const RequestHeader &request_header,
 }
 
 int masa_enrollstatus(const RequestHeader &request_header,
-                            const std::string &request_body,
-                            CRYPTO_CERT peer_certificate,
-                            ResponseHeader &response_header,
-                            std::string &response, void *user_ctx) {
+                      const std::string &request_body,
+                      CRYPTO_CERT peer_certificate,
+                      ResponseHeader &response_header, std::string &response,
+                      void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 

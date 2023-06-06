@@ -9,11 +9,11 @@
  */
 #include <string>
 
-#include "../http/https_client.h"
 #include "../http/http.h"
-#include "registrar_config.h"
-#include "registrar_api.h"
+#include "../http/https_client.h"
 #include "../masa/masa_api.h"
+#include "registrar_api.h"
+#include "registrar_config.h"
 
 extern "C" {
 #include "../../utils/log.h"
@@ -38,9 +38,9 @@ char *get_cert_serial(struct crypto_cert_meta *meta) {
 }
 
 int post_voucher_request(struct BinaryArray *voucher_request_cms,
-                                struct masa_config *mconf,
-                                struct registrar_config *rconf,
-                                std::string &response) {
+                         struct masa_config *mconf,
+                         struct registrar_config *rconf,
+                         std::string &response) {
   char *voucher_request_cms_base64 = NULL;
 
   if (serialize_array2base64str(voucher_request_cms->array,
@@ -55,12 +55,12 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
   std::string body = voucher_request_cms_base64;
 
   sys_free(voucher_request_cms_base64);
-  
+
   log_info("Request voucher from MASA %s", path.c_str());
 
-  int status = https_post_request(
-      rconf->tls_key_path, rconf->tls_cert_path, mconf->bind_address,
-      mconf->port, path, false, body, content_type, response);
+  int status = https_post_request(rconf->tls_key_path, rconf->tls_cert_path,
+                                  mconf->bind_address, mconf->port, path, false,
+                                  body, content_type, response);
 
   if (status < 0) {
     log_error("https_post_request fail");
@@ -71,10 +71,10 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
 }
 
 int registrar_requestvoucher(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *user_ctx) {
+                             const std::string &request_body,
+                             CRYPTO_CERT peer_certificate,
+                             ResponseHeader &response_header,
+                             std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
   struct registrar_config *rconf = context->rconf;
@@ -201,10 +201,10 @@ registrar_requestvoucher_fail:
 }
 
 int registrar_voucher_status(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *user_ctx) {
+                             const std::string &request_body,
+                             CRYPTO_CERT peer_certificate,
+                             ResponseHeader &response_header,
+                             std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 
@@ -217,10 +217,10 @@ int registrar_voucher_status(const RequestHeader &request_header,
 }
 
 int registrar_requestauditlog(const RequestHeader &request_header,
-                               const std::string &request_body,
-                               CRYPTO_CERT peer_certificate,
-                               ResponseHeader &response_header,
-                               std::string &response, void *user_ctx) {
+                              const std::string &request_body,
+                              CRYPTO_CERT peer_certificate,
+                              ResponseHeader &response_header,
+                              std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 
@@ -233,10 +233,10 @@ int registrar_requestauditlog(const RequestHeader &request_header,
 }
 
 int registrar_enrollstatus(const RequestHeader &request_header,
-                            const std::string &request_body,
-                            CRYPTO_CERT peer_certificate,
-                            ResponseHeader &response_header,
-                            std::string &response, void *user_ctx) {
+                           const std::string &request_body,
+                           CRYPTO_CERT peer_certificate,
+                           ResponseHeader &response_header,
+                           std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
 

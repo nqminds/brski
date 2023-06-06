@@ -4,9 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include "masa/masa_server.h"
 #include "pledge/pledge_request.h"
 #include "registrar/registrar_server.h"
-#include "masa/masa_server.h"
 
 extern "C" {
 #include "../utils/log.h"
@@ -227,14 +227,16 @@ int main(int argc, char *argv[]) {
     case COMMAND_PLEDGE_REQUEST:
       fprintf(stdout, "Pledge voucher request to %s:%d\n",
               config.rconf.bind_address, config.rconf.port);
-      if (post_voucher_pledge_request(&config.pconf, &config.rconf, &config.mconf, response) < 0) {
+      if (post_voucher_pledge_request(&config.pconf, &config.rconf,
+                                      &config.mconf, response) < 0) {
         fprintf(stderr, "post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
       fprintf(stdout, "%s\n", response.c_str());
       break;
     case COMMAND_START_REGISTRAR:
-      if (registrar_start(&config.rconf, &config.mconf, &config.pconf, &rcontext) < 0) {
+      if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
+                          &rcontext) < 0) {
         fprintf(stderr, "https_start fail");
         return EXIT_FAILURE;
       }
@@ -242,7 +244,8 @@ int main(int argc, char *argv[]) {
       registrar_stop(rcontext);
       break;
     case COMMAND_START_MASA:
-      if (masa_start(&config.rconf, &config.mconf, &config.pconf, &mcontext) < 0) {
+      if (masa_start(&config.rconf, &config.mconf, &config.pconf, &mcontext) <
+          0) {
         fprintf(stderr, "https_start fail");
         return EXIT_FAILURE;
       }

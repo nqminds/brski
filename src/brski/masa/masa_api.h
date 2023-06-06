@@ -35,10 +35,10 @@
  * @return int 0 on success, -1 on failure
  */
 int masa_requestvoucher(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *context);
+                        const std::string &request_body,
+                        CRYPTO_CERT peer_certificate,
+                        ResponseHeader &response_header, std::string &response,
+                        void *context);
 
 /**
  * @brief MASA voucher status handler
@@ -46,10 +46,10 @@ int masa_requestvoucher(const RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int masa_voucher_status(const RequestHeader &request_header,
-                              const std::string &request_body,
-                              CRYPTO_CERT peer_certificate,
-                              ResponseHeader &response_header,
-                              std::string &response, void *context);
+                        const std::string &request_body,
+                        CRYPTO_CERT peer_certificate,
+                        ResponseHeader &response_header, std::string &response,
+                        void *context);
 
 /**
  * @brief MASA request audit log handler
@@ -57,10 +57,10 @@ int masa_voucher_status(const RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int masa_requestauditlog(const RequestHeader &request_header,
-                               const std::string &request_body,
-                               CRYPTO_CERT peer_certificate,
-                               ResponseHeader &response_header,
-                               std::string &response, void *context);
+                         const std::string &request_body,
+                         CRYPTO_CERT peer_certificate,
+                         ResponseHeader &response_header, std::string &response,
+                         void *context);
 
 /**
  * @brief MASA enroll status handler
@@ -68,10 +68,10 @@ int masa_requestauditlog(const RequestHeader &request_header,
  * @return int 0 on success, -1 on failure
  */
 int masa_enrollstatus(const RequestHeader &request_header,
-                            const std::string &request_body,
-                            CRYPTO_CERT peer_certificate,
-                            ResponseHeader &response_header,
-                            std::string &response, void *context);
+                      const std::string &request_body,
+                      CRYPTO_CERT peer_certificate,
+                      ResponseHeader &response_header, std::string &response,
+                      void *context);
 
 /**
  * @brief EST CA certs handler

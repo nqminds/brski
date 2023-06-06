@@ -14,8 +14,8 @@ extern "C" {
 #include "../../utils/log.h"
 }
 
-#include "../masa/masa_config.h"
 #include "../masa/masa_api.h"
+#include "../masa/masa_config.h"
 #include "../pledge/pledge_config.h"
 #include "registrar_api.h"
 #include "registrar_config.h"

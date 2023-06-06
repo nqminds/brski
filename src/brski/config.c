@@ -177,7 +177,8 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     return -1;
   }
 
-  ini_gets("masa", "ldevidCACertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("masa", "ldevidCACertPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   mconf->ldevid_ca_cert_path = value;
   if (!strlen(mconf->ldevid_ca_cert_path)) {
     mconf->ldevid_ca_cert_path = NULL;
@@ -190,7 +191,8 @@ int load_masa_config(const char *filename, struct masa_config *const mconf) {
     return -1;
   }
 
-  ini_gets("masa", "ldevidCAKeyPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("masa", "ldevidCAKeyPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   mconf->ldevid_ca_key_path = value;
   if (!strlen(mconf->ldevid_ca_key_path)) {
     mconf->ldevid_ca_key_path = NULL;
@@ -572,7 +574,8 @@ int load_pledge_config(const char *filename,
     return -1;
   }
 
-  ini_gets("pledge", "idevidCACertPath", "", value, MAX_CONFIG_VALUE_SIZE, filename);
+  ini_gets("pledge", "idevidCACertPath", "", value, MAX_CONFIG_VALUE_SIZE,
+           filename);
   pconf->idevid_ca_cert_path = value;
   if (!strlen(pconf->idevid_ca_cert_path)) {
     pconf->idevid_ca_cert_path = NULL;

@@ -13,8 +13,8 @@
 
 #include <string>
 
-#include "../registrar/registrar_config.h"
 #include "../masa/masa_config.h"
+#include "../registrar/registrar_config.h"
 #include "pledge_config.h"
 
 /**

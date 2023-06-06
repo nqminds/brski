@@ -64,8 +64,7 @@ void setup_masa_routes(std::vector<struct RouteTuple> &routes) {
 }
 
 int masa_start(struct registrar_config *rconf, struct masa_config *mconf,
-                    struct pledge_config *pconf,
-                    struct MasaContext **context) {
+               struct pledge_config *pconf, struct MasaContext **context) {
   std::vector<struct RouteTuple> routes;
 
   *context = nullptr;

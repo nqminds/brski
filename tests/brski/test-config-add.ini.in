@@ -40,4 +40,3 @@ cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-cms.crt"
 cmsAdditionalCertPath = ""
 cmsVerifyCertPath = ""
 cmsVerifyStorePath = ""
-
