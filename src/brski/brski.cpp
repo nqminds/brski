@@ -64,17 +64,6 @@ void log_lock_fun(bool lock) {
   }
 }
 
-void sighup_handler(int sig, void *ctx) {
-  (void)sig;
-
-  char *log_filename = (char *)ctx;
-
-  if (log_filename != NULL) {
-    log_close_file();
-    log_open_file(log_filename);
-  }
-}
-
 void show_version(void) {
   std::fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
 }
