@@ -4,6 +4,9 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <string>
+#include <vector>
+
 #include "masa/masa_server.h"
 #include "pledge/pledge_request.h"
 #include "registrar/registrar_server.h"
@@ -74,10 +77,13 @@ void show_version(void) {
   fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
 }
 
-void show_help(char *name) {
+void show_help(const char *name) {
+  const std::string string_name(name);
+  std::vector<char> basename_buffer(string_name.begin(), string_name.end());
+
   show_version();
   fprintf(stdout, "Usage:\n");
-  fprintf(stdout, USAGE_STRING "\n", basename(name));
+  fprintf(stdout, USAGE_STRING "\n", basename(basename_buffer.data()));
   fprintf(stdout, "%s", description_string);
   fprintf(stdout, "\nCommands:\n");
   int idx = 0;
@@ -113,7 +119,7 @@ void log_cmdline_error(const char *format, ...) {
   fflush(stderr); /* In case stderr is not line-buffered */
 }
 
-enum COMMAND_ID get_command_id(char *command_label) {
+enum COMMAND_ID get_command_id(const char *command_label) {
   int idx = 0;
 
   if (command_label == NULL) {
@@ -130,7 +136,7 @@ enum COMMAND_ID get_command_id(char *command_label) {
   return COMMAND_UNKNOWN;
 }
 
-void process_options(int argc, char *argv[], int *quietness,
+void process_options(int argc, char *const argv[], int *quietness,
                      char **config_filename, char **out_filename,
                      enum COMMAND_ID *command_id) {
   int opt;
@@ -167,7 +173,7 @@ void process_options(int argc, char *argv[], int *quietness,
     }
   }
 
-  char *command_label = argv[optind];
+  const char *command_label = argv[optind];
 
   if (optind <= 1 && command_label == NULL) {
     show_help(argv[0]);
