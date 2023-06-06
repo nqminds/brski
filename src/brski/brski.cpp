@@ -130,9 +130,9 @@ enum COMMAND_ID get_command_id(const std::string &command_label) {
   return COMMAND_UNKNOWN;
 }
 
-void process_options(int argc, char *const argv[], int *quietness,
-                     char **config_filename, char **out_filename,
-                     enum COMMAND_ID *command_id) {
+void process_options(int argc, char *const argv[], int &quietness,
+                     std::string &config_filename, std::string &out_filename,
+                     enum COMMAND_ID &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
@@ -144,16 +144,16 @@ void process_options(int argc, char *const argv[], int *quietness,
         show_version();
         std::exit(EXIT_SUCCESS);
       case 'c':
-        *config_filename = strdup(optarg);
+        config_filename.assign(optarg);
         break;
       case 'o':
-        *out_filename = strdup(optarg);
+        out_filename.assign(optarg);
         break;
       case 'd':
-        (*quietness)--;
+        quietness--;
         break;
       case 'q':
-        (*quietness)++;
+        quietness++;
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
@@ -180,7 +180,7 @@ void process_options(int argc, char *const argv[], int *quietness,
     exit(EXIT_FAILURE);
   }
 
-  if ((*command_id = get_command_id(command_label)) == COMMAND_UNKNOWN) {
+  if ((command_id = get_command_id(command_label)) == COMMAND_UNKNOWN) {
     log_cmdline_error("Unrecognized command \"%s\"\n", command_label);
     std::exit(EXIT_FAILURE);
   }
@@ -194,11 +194,11 @@ int main(int argc, char *argv[]) {
 
   int quietness = LOGC_INFO;
   uint8_t log_level = 0;
-  char *config_filename = NULL, *out_filename = NULL;
+  std::string config_filename, out_filename;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
-  process_options(argc, argv, &quietness, &config_filename, &out_filename,
-                  &command_id);
+  process_options(argc, argv, quietness, config_filename, out_filename,
+                  command_id);
 
   // Clamp quietness to valid log levels enum value
   // equivalent to C++17 std::clamp(quietness, 0, MAX_LOG_LEVELS - 1)
@@ -220,7 +220,7 @@ int main(int argc, char *argv[]) {
   /* Set the log level */
   log_set_level(log_level);
 
-  if (load_brski_config(config_filename, &config) < 0) {
+  if (load_brski_config(config_filename.c_str(), &config) < 0) {
     std::fprintf(stderr, "load_config fail\n");
     return EXIT_FAILURE;
   }
@@ -231,9 +231,10 @@ int main(int argc, char *argv[]) {
   switch (command_id) {
     case COMMAND_EXPORT_PVR:
       std::fprintf(stdout, "Exporting pledge voucher request to %s",
-                   out_filename);
-      if (voucher_pledge_request_to_smimefile(
-              &config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
+                   out_filename.c_str());
+      if (voucher_pledge_request_to_smimefile(&config.pconf,
+                                              config.rconf.tls_cert_path,
+                                              out_filename.c_str()) < 0) {
         std::fprintf(stderr, "voucher_pledge_request_to_smimefile fail");
         return EXIT_FAILURE;
       }
@@ -266,10 +267,6 @@ int main(int argc, char *argv[]) {
 
       masa_stop(mcontext);
       break;
-  }
-
-  if (config_filename != NULL) {
-    sys_free(config_filename);
   }
 
   free_config_content(&config);
