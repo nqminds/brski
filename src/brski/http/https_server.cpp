@@ -28,7 +28,6 @@ int https_start(struct http_config *config,
   return httplib_start(config, routes, user_ctx, srv_ctx);
 #else
   log_error("No https server defined");
-  https_free_context(*context);
   return -1;
 #endif
 }
