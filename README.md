@@ -22,7 +22,14 @@ This repo provides a reference implementation for the BRSKI protocol in `C` lang
 
 Compiling the BRSKI voucher library is done with CMake.
 
-If you have CMake v3.22+, you can use the following `cmake-presets` to compile BRSKI:
+### Dependencies
+The BRSKI voucher library requires OpenSSL3. Use `sudo apt install libsqlite3-dev` to install the OpenSSL library on a Linux Debian distro.
+
+The BRSKI CMake config file allows also downloading and compiling the OpenSSL library from source. Change the option `BUILD_OPENSSL3_LIB` to `ON` in `CMakeLists.txt` file to force CMake to donwload and compile the OpenSSL library.
+
+### Configure
+
+If you have CMake v3.22+, you can use the following `cmake-presets` to compile BRSKI voucher libray and demo pledge, registrar, and masa tools:
 
 ```bash
 cmake --list-presets # list all available presets
@@ -31,9 +38,6 @@ cmake --build --preset linux -j4 # build BRSKI for Linux using 4 threads
 ctest --preset linux # test BRSKI for Linux
 ```
 For older versions of CMake, or for manual configuration, please see the next headings for more details.
-
-
-### Configure
 
 Configure `cmake` in the `build/` directory by running the following:
 
@@ -69,14 +73,15 @@ After succesful compilation the binary will be located in `./build/src` folder.
 To run the BRSKI binary with the configuration file `dev-config.ini` located in `./build` folder use:
 
 ```bash
-./build/src/brski -c ./build/dev-config.ini
+./build/src/brski -c ./build/dev-config.ini command
 ```
 
 To enable verbose debug mode use:
 
 ```bash
-./build/src/brski -c ./build/dev-config.ini -ddddd
+./build/src/brski -c ./build/dev-config.ini command -ddddd
 ```
+where `command` is one of the commands to execute. For more details see [examples](./docs/usage.md).
 
 ## Installing
 
