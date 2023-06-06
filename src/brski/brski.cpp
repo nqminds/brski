@@ -187,12 +187,11 @@ void process_options(int argc, char *const argv[], int &quietness,
   }
 }
 
+struct BrskiConfig : public brski_config {
+  virtual ~BrskiConfig() { free_config_content(this); }
+};
+
 int main(int argc, char *argv[]) {
-  struct brski_config config;
-
-  // Init the app config struct
-  memset(&config, 0, sizeof(struct brski_config));
-
   int quietness = LOGC_INFO;
   uint8_t log_level = 0;
   std::string config_filename, out_filename;
@@ -221,6 +220,7 @@ int main(int argc, char *argv[]) {
   /* Set the log level */
   log_set_level(log_level);
 
+  BrskiConfig config;
   if (load_brski_config(config_filename.c_str(), &config) < 0) {
     std::fprintf(stderr, "load_config fail\n");
     return EXIT_FAILURE;
@@ -269,8 +269,6 @@ int main(int argc, char *argv[]) {
       masa_stop(mcontext);
       break;
   }
-
-  free_config_content(&config);
 
   pthread_mutex_destroy(&log_lock);
 
