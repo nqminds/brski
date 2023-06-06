@@ -150,8 +150,8 @@ else()
 endif()
 add_compile_options(
   $<$<COMPILE_LANGUAGE:C>:-Wunused-variable>
-  $<$<COMPILE_LANGUAGE:C>:-Wall>
-  $<$<COMPILE_LANGUAGE:C>:-Wextra>
+  $<$<COMPILE_LANGUAGE:C,CXX>:-Wall>
+  $<$<COMPILE_LANGUAGE:C,CXX>:-Wextra>
 )
 
 set(CMAKE_CXX_STANDARD 11)
