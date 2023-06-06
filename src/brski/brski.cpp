@@ -1,10 +1,10 @@
-#include <stdlib.h>
 #include <libgen.h>
 #include <pthread.h>
 #include <string.h>
 #include <unistd.h>
 
 #include <cstdio>
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -147,10 +147,10 @@ void process_options(int argc, char *const argv[], int *quietness,
     switch (opt) {
       case 'h':
         show_help(argv[0]);
-        exit(EXIT_SUCCESS);
+        std::exit(EXIT_SUCCESS);
       case 'v':
         show_version();
-        exit(EXIT_SUCCESS);
+        std::exit(EXIT_SUCCESS);
       case 'c':
         *config_filename = strdup(optarg);
         break;
@@ -165,13 +165,13 @@ void process_options(int argc, char *const argv[], int *quietness,
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
       case '?':
         log_cmdline_error("Unrecognized option -%c\n", optopt);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
       default:
         show_help(argv[0]);
-        exit(EXIT_FAILURE);
+        std::exit(EXIT_FAILURE);
     }
   }
 
@@ -179,7 +179,7 @@ void process_options(int argc, char *const argv[], int *quietness,
 
   if (optind <= 1 && command_label == NULL) {
     show_help(argv[0]);
-    exit(EXIT_SUCCESS);
+    std::exit(EXIT_SUCCESS);
   }
 
   if (command_label == nullptr) {
@@ -190,7 +190,7 @@ void process_options(int argc, char *const argv[], int *quietness,
 
   if ((*command_id = get_command_id(command_label)) == COMMAND_UNKNOWN) {
     log_cmdline_error("Unrecognized command \"%s\"\n", command_label);
-    exit(EXIT_FAILURE);
+    std::exit(EXIT_FAILURE);
   }
 }
 
