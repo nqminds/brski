@@ -10,6 +10,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * brski tool to demonstrate the Registrar and MASA functionalities
 
+### Removed
+
+* Drop support for compiling brski with CMake v3.14.
+  CMake v3.15 is now the minimum required version of CMake.
+
 ## [0.2.0] - 2023-03-27
 ### Added
 * Voucher artifact implementation as per [RFC8366](https://www.rfc-editor.org/info/rfc8366),

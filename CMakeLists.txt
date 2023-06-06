@@ -1,5 +1,5 @@
-cmake_minimum_required(VERSION 3.14.0) # required for FindSQLite3
-cmake_policy(VERSION 3.14.0...3.24.0)
+cmake_minimum_required(VERSION 3.15.0)
+cmake_policy(VERSION 3.15.0...3.24.0)
 
 project(BRSKI
   VERSION 0.2.0
