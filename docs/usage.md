@@ -47,9 +47,10 @@ where the example `config.ini` file is defined as follows:
 [pledge]
 createdOn = "1973-11-29T21:33:09Z"
 serialNumber = "12345"
-nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
+nonce = "some-nonce-value-in-base64"
 idevidKeyPath = ""
 idevidCertPath = ""
+idevidCACertPath = ""
 cmsSignKeyPath = "/absolute_path_to/pledge-cms.key"
 cmsSignCertPath = "/absolute_path_to/pledge-cms.crt"
 cmsAdditionalCertPath = ""
@@ -57,25 +58,181 @@ cmsVerifyCertPath = ""
 cmsVerifyStorePath = ""
 
 [registrar]
-bindAddress = "0.0.0.0"
-port = 12345
+bindAddress = ""
+port = 0
 tlsKeyPath = "/absolute_path_to/registrar-tls.key"
 tlsCertPath = "/absolute_path_to/registrar-tls.crt"
+tlsCACertPath = ""
 cmsSignCertPath = ""
 cmsSignKeyPath = ""
 cmsAdditionalCertPath = ""
 cmsVerifyCertPath = ""
 cmsVerifyStorePath = ""
+
+[masa]
+bindAddress = ""
+port = 0
+expiresOn = ""
+ldevidCAKeyPath = ""
+ldevidCACertPath = ""
+tlsKeyPath = ""
+tlsCertPath = ""
+tlsCACertPath = ""
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
 ```
 
-The `config.ini` pledge keys used for the export functionality are:
+### Sending a pledge-voucher request to the registrar
 
-- `createdOn` (yang time value),
-- `serialNumber`,
-- `nonce` (base64),
-- `cmsSignKeyPath` (path to private key to sign the CMS) and
-- `cmsSignCertPath` (path to certificate).
+To send a pledge-voucher request to a registrar use the command `preq` as following:
+```bash
+$ brski -c config.ini preq
+```
+where the example `config.ini` file is defined as follows:
 
-The `config.ini` registrar keys used for the export functionality are:
-- `tlsKeyPath` (path to registrar TLS private key) and
-- `tlsCertPath` (path to registrar TLS certificate).
+```ini
+[pledge]
+createdOn = "1973-11-29T21:33:09Z"
+serialNumber = "idev-serial12345"
+nonce = "some-nonce-value-in-base64"
+idevidKeyPath = "/absolute_path_to/idevid.key"
+idevidCertPath = "/absolute_path_to/idevid.crt"
+idevidCACertPath = "/absolute_path_to/idevid-ca.crt"
+cmsSignKeyPath = "/absolute_path_to/pledge-cms.key"
+cmsSignCertPath = "/absolute_path_to/pledge-cms.crt"
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+
+[registrar]
+bindAddress = "https://registrar-address.com"
+port = 12345
+tlsKeyPath = ""
+tlsCertPath = "/absolute_path_to/registrar-tls.crt"
+tlsCACertPath = "/absolute_path_to/registrar-tls-ca.crt"
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+
+[masa]
+bindAddress = ""
+port = 0
+expiresOn = ""
+ldevidCAKeyPath = ""
+ldevidCACertPath = ""
+tlsKeyPath = ""
+tlsCertPath = ""
+tlsCACertPath = ""
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+```
+
+### Starting the registrar
+
+To start the registrar server on port `12345` use the command `registrar` as following:
+```bash
+$ brski -c config.ini registrar
+```
+where the example `config.ini` file is defined as follows:
+
+```ini
+[pledge]
+createdOn = ""
+serialNumber = ""
+nonce = ""
+idevidKeyPath = ""
+idevidCertPath = "/absolute_path_to/idevid.crt"
+idevidCACertPath = "/absolute_path_to/idevid-ca.crt"
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+
+[registrar]
+bindAddress = "127.0.0.1"
+port = 12345
+tlsKeyPath = ""
+tlsCertPath = "/absolute_path_to/registrar-tls.crt"
+tlsCACertPath = "/absolute_path_to/registrar-tls-ca.crt"
+cmsSignKeyPath = "/absolute_path_to/registrar-cms.key"
+cmsSignCertPath = "/absolute_path_to/registrar-cms.crt"
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+
+[masa]
+bindAddress = "https://masa-address.com"
+port = 12346
+expiresOn = ""
+ldevidCAKeyPath = ""
+ldevidCACertPath = "/absolute_path_to/ldevid-ca.crt"
+tlsKeyPath = ""
+tlsCertPath = "/absolute_path_to/masa-tls.crt"
+tlsCACertPath = "/absolute_path_to/masa-tls-ca.crt"
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+```
+
+### Starting the MASA
+
+To start the MASA server on port `12346` use the command `masa` as following:
+```bash
+$ brski -c config.ini masa
+```
+where the example `config.ini` file is defined as follows:
+
+```ini
+[pledge]
+createdOn = ""
+serialNumber = ""
+nonce = ""
+idevidKeyPath = ""
+idevidCertPath = "/absolute_path_to/idevid.crt"
+idevidCACertPath = "/absolute_path_to/idevid-ca.crt"
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+
+[registrar]
+bindAddress = ""
+port = 12345
+tlsKeyPath = ""
+tlsCertPath = "/absolute_path_to/registrar-tls.crt"
+tlsCACertPath = "/absolute_path_to/registrar-tls-ca.crt"
+cmsSignKeyPath = ""
+cmsSignCertPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+
+[masa]
+bindAddress = "127.0.0.1"
+port = 12346
+expiresOn = "1973-11-29T21:33:09Z"
+ldevidCAKeyPath = "/absolute_path_to/ldevid-ca.key"
+ldevidCACertPath = "/absolute_path_to/ldevid-ca.crt"
+tlsKeyPath = "/absolute_path_to/masa-tls.key"
+tlsCertPath = "/absolute_path_to/masa-tls.crt"
+tlsCACertPath = "/absolute_path_to/masa-tls-ca.crt"
+cmsSignKeyPath = "/absolute_path_to/masa-cms.key"
+cmsSignCertPath = "/absolute_path_to/masa-cms.crt"
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
+```
+
+For detailed example of `config.ini` files and certificates pleasce check the `test` folder.
