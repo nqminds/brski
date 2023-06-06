@@ -33,3 +33,17 @@ jobs:
       - name: Install to ${{ runner.temp }}/brski-${{ matrix.cmake-preset }}/
         run: |
           cmake --install "build/${{ matrix.cmake-preset }}" --prefix "${{ runner.temp }}/brski-${{ matrix.cmake-preset }}"
+      - name: Escape invalid chars in artifact name
+        id: escape_preset
+        run: |
+          preset='${{ matrix.cmake-preset }}'
+          # replace `/` with `-`
+          escaped_preset="${preset////-}"
+          echo "::set-output name=ESCAPED_CMAKE_PRESET::${escaped_preset}"
+      - name: Archive Install Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: brski-build-${{ steps.escape_preset.outputs.ESCAPED_CMAKE_PRESET }}
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/brski-${{ matrix.cmake-preset }}/
