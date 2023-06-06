@@ -1,6 +1,5 @@
 #include <libgen.h>
 #include <pthread.h>
-#include <string.h>
 #include <unistd.h>
 
 #include <array>
@@ -22,9 +21,9 @@ extern "C" {
 
 #include "version.h"
 
-#define OPT_STRING ":c:o:dqvh"
-#define USAGE_STRING                                                           \
-  "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n"
+const std::string OPT_STRING = ":c:o:dqvh";
+const std::string USAGE_STRING =
+    "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n";
 
 enum COMMAND_ID {
   COMMAND_UNKNOWN = 0,
@@ -35,9 +34,9 @@ enum COMMAND_ID {
 };
 
 struct command_config {
-  const char *const label;
+  const std::string label;
   enum COMMAND_ID id;
-  const char *info;
+  const std::string info;
 };
 
 const std::array<struct command_config, 4> command_list = {{
@@ -49,10 +48,10 @@ const std::array<struct command_config, 4> command_list = {{
     {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
 }};
 
-const char description_string[] = "NquiringMinds BRSKI protocol tool.\n"
-                                  "\n"
-                                  "Show, export and manipulate vouchers. "
-                                  "Create registrar and MASA servers.\n";
+const std::string description_string = "NquiringMinds BRSKI protocol tool.\n"
+                                       "\n"
+                                       "Show, export and manipulate vouchers. "
+                                       "Create registrar and MASA servers.\n";
 
 pthread_mutex_t log_lock;
 
@@ -85,11 +84,12 @@ void show_help(const char *name) {
 
   show_version();
   std::fprintf(stdout, "Usage:\n");
-  std::fprintf(stdout, USAGE_STRING "\n", basename(basename_buffer.data()));
-  std::fprintf(stdout, "%s", description_string);
+  std::fprintf(stdout, USAGE_STRING.c_str(), basename(basename_buffer.data()));
+  std::fprintf(stdout, "\n");
+  std::fprintf(stdout, "%s", description_string.c_str());
   std::fprintf(stdout, "\nCommands:\n");
   for (const auto &command_config : command_list) {
-    std::fprintf(stdout, "%s\n", command_config.info);
+    std::fprintf(stdout, "%s\n", command_config.info.c_str());
   }
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
@@ -120,9 +120,9 @@ void log_cmdline_error(const char *format, ...) {
   std::fflush(stderr); /* In case stderr is not line-buffered */
 }
 
-enum COMMAND_ID get_command_id(const char *command_label) {
+enum COMMAND_ID get_command_id(const std::string &command_label) {
   for (const auto &command_config : command_list) {
-    if (strcmp(command_config.label, command_label) == 0) {
+    if (command_config.label == command_label) {
       return command_config.id;
     }
   }
@@ -135,7 +135,7 @@ void process_options(int argc, char *const argv[], int *quietness,
                      enum COMMAND_ID *command_id) {
   int opt;
 
-  while ((opt = getopt(argc, argv, OPT_STRING)) != -1) {
+  while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
     switch (opt) {
       case 'h':
         show_help(argv[0]);
