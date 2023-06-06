@@ -97,7 +97,8 @@ static void show_help(const char *name) {
 
 /* Diagnose an error in command-line arguments and
    terminate the process */
-static void log_cmdline_error(const char *format, ...) {
+[[gnu::format(printf, 1, 2)]] static void log_cmdline_error(const char *format,
+                                                            ...) {
   std::va_list argList;
 
   std::fflush(stdout); /* Flush any pending stdout */
