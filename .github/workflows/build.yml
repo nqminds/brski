@@ -1,0 +1,49 @@
+on:
+  push: {}
+  pull_request: {}
+
+name: Build
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        cmake-preset:
+          - linux # normal linux tests
+          - linux-openssl # tests compiling OpenSSL
+          - linux-sanitize
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+      - name: Cache CMake build/dl folder
+        uses: actions/cache@v3
+        with:
+          path: ./build/dl
+          key: ${{ runner.os }}-${{ matrix.cmake-preset }}-${{ hashFiles( 'lib/*' ) }}
+      - name: Configure
+        run: |
+          cmake --preset "${{ matrix.cmake-preset }}"
+      - name: Build
+        run: |
+          cmake --build --preset "${{ matrix.cmake-preset }}"
+      - name: Test
+        run: |
+          ctest --preset "${{ matrix.cmake-preset }}" --output-on-failure
+      - name: Install to ${{ runner.temp }}/brski-${{ matrix.cmake-preset }}/
+        run: |
+          cmake --install "build/${{ matrix.cmake-preset }}" --prefix "${{ runner.temp }}/brski-${{ matrix.cmake-preset }}"
+      - name: Escape invalid chars in artifact name
+        id: escape_preset
+        run: |
+          preset='${{ matrix.cmake-preset }}'
+          # replace `/` with `-`
+          escaped_preset="${preset////-}"
+          echo "::set-output name=ESCAPED_CMAKE_PRESET::${escaped_preset}"
+      - name: Archive Install Output
+        uses: actions/upload-artifact@v3
+        with:
+          name: brski-build-${{ steps.escape_preset.outputs.ESCAPED_CMAKE_PRESET }}
+          retention-days: 7
+          path: |
+            ${{ runner.temp }}/brski-${{ matrix.cmake-preset }}/
