@@ -3,6 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <array>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -39,14 +40,14 @@ struct command_config {
   const char *info;
 };
 
-const struct command_config command_list[] = {
+const std::array<struct command_config, 4> command_list = {{
     {"epvr", COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
     {"preq", COMMAND_PLEDGE_REQUEST,
      "\tpreq\t\tSend a pledge-voucher request to the registrar"},
     {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
     {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
-    {NULL, COMMAND_UNKNOWN, NULL}};
+}};
 
 const char description_string[] = "NquiringMinds BRSKI protocol tool.\n"
                                   "\n"
@@ -87,10 +88,8 @@ void show_help(const char *name) {
   std::fprintf(stdout, USAGE_STRING "\n", basename(basename_buffer.data()));
   std::fprintf(stdout, "%s", description_string);
   std::fprintf(stdout, "\nCommands:\n");
-  int idx = 0;
-  while (command_list[idx].label != NULL) {
-    std::fprintf(stdout, "%s\n", command_list[idx].info);
-    idx++;
+  for (const auto &command_config : command_list) {
+    std::fprintf(stdout, "%s\n", command_config.info);
   }
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
@@ -122,13 +121,9 @@ void log_cmdline_error(const char *format, ...) {
 }
 
 enum COMMAND_ID get_command_id(const char *command_label) {
-  if (command_label == NULL) {
-    return COMMAND_UNKNOWN;
-  }
-
-  for (int idx = 0; command_list[idx].label != NULL; idx++) {
-    if (strcmp(command_list[idx].label, command_label) == 0) {
-      return command_list[idx].id;
+  for (const auto &command_config : command_list) {
+    if (strcmp(command_config.label, command_label) == 0) {
+      return command_config.id;
     }
   }
 
