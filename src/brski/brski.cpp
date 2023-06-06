@@ -18,6 +18,9 @@ extern "C" {
 #include "../utils/os.h"
 #include "config.h"
 #include "pledge/pledge_utils.h"
+
+// declare here, since we pass a pointer to this to C code
+void log_lock_fun(bool lock);
 }
 
 #include "version.h"
