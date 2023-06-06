@@ -17,9 +17,9 @@ extern "C" {
 
 #include "version.h"
 
-#define OPT_STRING ":c:o:dvh"
+#define OPT_STRING ":c:o:dqvh"
 #define USAGE_STRING                                                           \
-  "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n"
+  "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n"
 
 enum COMMAND_ID {
   COMMAND_UNKNOWN = 0,
@@ -91,6 +91,8 @@ void show_help(char *name) {
   fprintf(
       stdout,
       "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
+  fprintf(stdout, "\t-q\t\t Quietness (decreases verbosity) (use twice to hide "
+                  "warnings)\n");
   fprintf(stdout, "\t-h\t\t Show help\n");
   fprintf(stdout, "\t-v\t\t Show app version\n\n");
   fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
@@ -128,7 +130,7 @@ enum COMMAND_ID get_command_id(char *command_label) {
   return COMMAND_UNKNOWN;
 }
 
-void process_options(int argc, char *argv[], uint8_t *verbosity,
+void process_options(int argc, char *argv[], int *quietness,
                      char **config_filename, char **out_filename,
                      enum COMMAND_ID *command_id) {
   int opt;
@@ -148,7 +150,10 @@ void process_options(int argc, char *argv[], uint8_t *verbosity,
         *out_filename = strdup(optarg);
         break;
       case 'd':
-        (*verbosity)++;
+        (*quietness)--;
+        break;
+      case 'q':
+        (*quietness)++;
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
@@ -187,20 +192,22 @@ int main(int argc, char *argv[]) {
   // Init the app config struct
   memset(&config, 0, sizeof(struct brski_config));
 
-  uint8_t verbosity = 0;
-  uint8_t level = 0;
+  int quietness = LOGC_INFO;
+  uint8_t log_level = 0;
   char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
-  process_options(argc, argv, &verbosity, &config_filename, &out_filename,
+  process_options(argc, argv, &quietness, &config_filename, &out_filename,
                   &command_id);
 
-  if (verbosity > MAX_LOG_LEVELS) {
-    level = 0;
-  } else if (!verbosity) {
-    level = MAX_LOG_LEVELS - 1;
+  // Clamp quietness to valid log levels enum value
+  // equivalent to C++17 std::clamp(quietness, 0, MAX_LOG_LEVELS - 1)
+  if (quietness >= MAX_LOG_LEVELS) {
+    log_level = MAX_LOG_LEVELS - 1;
+  } else if (quietness < 0) {
+    log_level = 0;
   } else {
-    level = MAX_LOG_LEVELS - verbosity;
+    log_level = quietness;
   }
 
   if (pthread_mutex_init(&log_lock, NULL) != 0) {
@@ -211,7 +218,7 @@ int main(int argc, char *argv[]) {
   log_set_lock(log_lock_fun);
 
   /* Set the log level */
-  log_set_level(level);
+  log_set_level(log_level);
 
   if (load_brski_config(config_filename, &config) < 0) {
     fprintf(stderr, "load_config fail\n");
