@@ -16,93 +16,47 @@
 #include "../http/http.h"
 
 /**
- * @brief BRSKI request voucher handler
+ * @brief Registrar request voucher handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_requestvoucher(RequestHeader &request_header,
+int registrar_requestvoucher(const RequestHeader &request_header,
+                             const std::string &request_body,
+                             CRYPTO_CERT peer_certificate,
+                             ResponseHeader &response_header,
+                             std::string &response, void *context);
+
+/**
+ * @brief Registrar voucher status handler
+ *
+ * @return int 0 on success, -1 on failure
+ */
+int registrar_voucher_status(const RequestHeader &request_header,
+                             const std::string &request_body,
+                             CRYPTO_CERT peer_certificate,
+                             ResponseHeader &response_header,
+                             std::string &response, void *context);
+
+/**
+ * @brief Registrar request audit log handler
+ *
+ * @return int 0 on success, -1 on failure
+ */
+int registrar_requestauditlog(const RequestHeader &request_header,
+                              const std::string &request_body,
+                              CRYPTO_CERT peer_certificate,
                               ResponseHeader &response_header,
                               std::string &response, void *context);
 
 /**
- * @brief BRSKI voucher status handler
+ * @brief Registrar enroll status handler
  *
  * @return int 0 on success, -1 on failure
  */
-int post_brski_voucher_status(RequestHeader &request_header,
-                              ResponseHeader &response_header,
-                              std::string &response, void *context);
-
-/**
- * @brief BRSKI request audit log handler
- *
- * @return int 0 on success, -1 on failure
- */
-int post_brski_requestauditlog(RequestHeader &request_header,
-                               ResponseHeader &response_header,
-                               std::string &response, void *context);
-
-/**
- * @brief BRSKI enroll status handler
- *
- * @return int 0 on success, -1 on failure
- */
-int post_brski_enrollstatus(RequestHeader &request_header,
-                            ResponseHeader &response_header,
-                            std::string &response, void *context);
-
-/**
- * @brief EST CA certs handler
- *
- * @return int 0 on success, -1 on failure
- */
-int get_est_cacerts(RequestHeader &request_header,
-                    ResponseHeader &response_header, std::string &response,
-                    void *context);
-
-/**
- * @brief EST simple enroll handler
- *
- * @return int 0 on success, -1 on failure
- */
-int post_est_simpleenroll(RequestHeader &request_header,
-                          ResponseHeader &response_header,
-                          std::string &response, void *context);
-
-/**
- * @brief EST simple reenroll handler
- *
- * @return int 0 on success, -1 on failure
- */
-int post_est_simplereenroll(RequestHeader &request_header,
-                            ResponseHeader &response_header,
-                            std::string &response, void *context);
-
-/**
- * @brief EST full cmc handler
- *
- * @return int 0 on success, -1 on failure
- */
-int post_est_fullcmc(RequestHeader &request_header,
-                     ResponseHeader &response_header, std::string &response,
-                     void *context);
-
-/**
- * @brief EST server keygen handler
- *
- * @return int 0 on success, -1 on failure
- */
-int post_est_serverkeygen(RequestHeader &request_header,
-                          ResponseHeader &response_header,
-                          std::string &response, void *context);
-
-/**
- * @brief EST csr attrs handler
- *
- * @return int 0 on success, -1 on failure
- */
-int get_est_csrattrs(RequestHeader &request_header,
-                     ResponseHeader &response_header, std::string &response,
-                     void *context);
+int registrar_enrollstatus(const RequestHeader &request_header,
+                           const std::string &request_body,
+                           CRYPTO_CERT peer_certificate,
+                           ResponseHeader &response_header,
+                           std::string &response, void *context);
 
 #endif

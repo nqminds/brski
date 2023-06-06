@@ -3,16 +3,40 @@
 
 [pledge]
 createdOn = "1973-11-29T21:33:09Z"
-serialNumber = "12345"
+serialNumber = "idev-serial12345"
 nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
+idevidKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/idevid.key"
+idevidCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/idevid.crt"
+idevidCACertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/idevid-ca.crt"
 cmsSignKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.key"
 cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/pledge-cms.crt"
 cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
 
 [registrar]
 bindAddress = "0.0.0.0"
 port = 12345
 tlsKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.key"
 tlsCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls.crt"
+tlsCACertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-tls-ca.crt"
+cmsSignKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-cms.key"
+cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/registrar-cms.crt"
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
 
 [masa]
+bindAddress = "0.0.0.0"
+port = 12346
+expiresOn = "2030-12-30T00:00:00Z"
+ldevidCAKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/ldevid-ca.key"
+ldevidCACertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/ldevid-ca.crt"
+tlsKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-tls.key"
+tlsCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-tls.crt"
+tlsCACertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-tls-ca.crt"
+cmsSignKeyPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-cms.key"
+cmsSignCertPath = "@CMAKE_BINARY_DIR@/tests/brski/brski-test-certs/masa-cms.crt"
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""

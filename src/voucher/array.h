@@ -42,6 +42,10 @@
 #endif /* __GNUC__ >= 11 */
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 /**
  * struct dl_list - Doubly-linked list
  */
@@ -193,5 +197,9 @@ void free_binary_array(struct BinaryArray *arr);
  */
 int compare_binary_array(const struct BinaryArray *src,
                          const struct BinaryArray *dst);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* ARRAY_H */

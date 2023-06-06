@@ -48,15 +48,24 @@ where the example `config.ini` file is defined as follows:
 createdOn = "1973-11-29T21:33:09Z"
 serialNumber = "12345"
 nonce = "QlJTS0kgcHJvdG9jb2wgc2VydmVyL2NsaWVudCBpbXBsZW1lbnRhdGlvbi4="
+idevidKeyPath = ""
+idevidCertPath = ""
 cmsSignKeyPath = "/absolute_path_to/pledge-cms.key"
 cmsSignCertPath = "/absolute_path_to/pledge-cms.crt"
 cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
 
 [registrar]
 bindAddress = "0.0.0.0"
 port = 12345
 tlsKeyPath = "/absolute_path_to/registrar-tls.key"
 tlsCertPath = "/absolute_path_to/registrar-tls.crt"
+cmsSignCertPath = ""
+cmsSignKeyPath = ""
+cmsAdditionalCertPath = ""
+cmsVerifyCertPath = ""
+cmsVerifyStorePath = ""
 ```
 
 The `config.ini` pledge keys used for the export functionality are:

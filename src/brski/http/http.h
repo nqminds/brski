@@ -18,6 +18,7 @@
 
 extern "C" {
 #include "../../utils/os.h"
+#include "../../voucher/crypto.h"
 }
 
 #define MAX_WEB_PATH_LEN 2048
@@ -39,9 +40,10 @@ enum HTTP_METHOD {
 
 typedef std::map<std::string, std::string> RequestHeader;
 typedef std::map<std::string, std::string> ResponseHeader;
-typedef std::function<int(RequestHeader &request_header,
-                          ResponseHeader &response_header,
-                          std::string &response, void *user_ctx)>
+typedef std::function<int(
+    const RequestHeader &request_header, const std::string &request_body,
+    CRYPTO_CERT peer_certificate, ResponseHeader &response_header,
+    std::string &response, void *user_ctx)>
     RouteHandle;
 
 struct RouteTuple {
@@ -53,6 +55,11 @@ struct RouteTuple {
 struct http_config {
   char *bind_address;
   unsigned int port;
+  char *tls_cert_path;
+  char *tls_key_path;
+  char *client_ca_cert_path;
+  char *client_ca_cert_dir_path;
+  char *private_key_password;
 };
 
 #endif

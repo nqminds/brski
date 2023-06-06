@@ -36,6 +36,22 @@
 #include "crypto.h"
 #include "keyvalue.h"
 
+struct NID_Name {
+  int nid;
+  char *name;
+};
+
+static struct NID_Name NNAMES[10] = {{NID_countryName, "C"},
+                                     {NID_stateOrProvinceName, "ST"},
+                                     {NID_localityName, "L"},
+                                     {NID_organizationName, "O"},
+                                     {NID_organizationalUnitName, "OU"},
+                                     {NID_commonName, "CN"},
+                                     {NID_pkcs9_emailAddress, "emailAddress"},
+                                     {NID_serialNumber, "serialNumber"},
+                                     {NID_surname, "SN"},
+                                     {NID_givenName, "GN"}};
+
 struct ptr_list {
   void *ptr;           /**< The pointer (points to heap memory) */
   int flags;           /**< The generic pointer flags */
@@ -545,6 +561,147 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
 void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY *pkey = (EVP_PKEY *)ctx;
   EVP_PKEY_free(pkey);
+}
+
+int get_x509_entry(X509_NAME *name, int nid, char **out) {
+  int pos = -1;
+  X509_NAME_ENTRY *e = NULL;
+
+  *out = NULL;
+
+  /* Iterate through all NID values */
+  /* return the first one */
+  while (e == NULL) {
+    pos = X509_NAME_get_index_by_NID(name, nid, pos);
+    if (pos == -1) {
+      break;
+    }
+    e = X509_NAME_get_entry(name, pos);
+  }
+
+  if (e == NULL) {
+    return 0;
+  }
+
+  ASN1_STRING *d = X509_NAME_ENTRY_get_data(e);
+  unsigned char *str = NULL;
+  if (ASN1_STRING_to_UTF8(&str, d) < 0) {
+    log_error("ASN1_STRING_to_UTF8 code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  *out = (char *)str;
+
+  return 0;
+}
+
+int get_x509_keyvalue(X509_NAME *name, struct keyvalue_list *list) {
+  int idx = 0;
+  while (idx < (int)ARRAY_SIZE(NNAMES)) {
+    char *str = NULL;
+
+    if (get_x509_entry(name, NNAMES[idx].nid, &str) < 0) {
+      log_error("get_x509_entry fail");
+      return -1;
+    }
+
+    if (str != NULL && push_keyvalue_list(list, NNAMES[idx].name, str) < 0) {
+      log_error("push_keyvalue_list fail");
+      OPENSSL_free(str);
+      return -1;
+    }
+
+    OPENSSL_free(str);
+    idx++;
+  }
+
+  return 0;
+}
+
+int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
+  X509 *x509 = (X509 *)cert;
+
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return -1;
+  }
+
+  if (meta == NULL) {
+    log_error("meta param is NULL");
+    return -1;
+  }
+
+  X509_NAME *issuer = X509_get_issuer_name(x509);
+  if (issuer == NULL) {
+    log_error("X509_get_issuer_name fail with code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  if (get_x509_keyvalue(issuer, meta->issuer) < 0) {
+    log_error("get_x509_keyvalue fail");
+    return -1;
+  }
+
+  X509_NAME *subject = X509_get_subject_name(x509);
+
+  if (subject == NULL) {
+    log_error("X509_get_subject_name fail with code=%lu", ERR_get_error());
+    return -1;
+  }
+
+  if (get_x509_keyvalue(subject, meta->subject) < 0) {
+    log_error("get_x509_keyvalue fail");
+    return -1;
+  }
+
+  return 0;
+}
+
+struct BinaryArray *crypto_getcert_issuer(CRYPTO_CERT cert) {
+  X509 *x509 = (X509 *)cert;
+  if (cert == NULL) {
+    log_error("cert param is NULL");
+    return NULL;
+  }
+
+  X509_NAME *issuer = X509_get_issuer_name(x509);
+  if (issuer == NULL) {
+    log_error("X509_get_issuer_name fail with code=%lu", ERR_get_error());
+    return NULL;
+  }
+
+  BIO *mem_data = BIO_new_ex(NULL, BIO_s_mem());
+  if (mem_data == NULL) {
+    log_error("BIO_new_ex fail with code=%lu", ERR_get_error());
+    return NULL;
+  }
+
+  if (X509_NAME_print_ex(mem_data, issuer, 0, XN_FLAG_ONELINE) < 0) {
+    log_error("X509_NAME_print_ex fail with code=%lu", ERR_get_error());
+    BIO_free(mem_data);
+    return NULL;
+  }
+
+  struct BinaryArray *issuer_array = sys_zalloc(sizeof(struct BinaryArray));
+
+  if (issuer_array == NULL) {
+    log_errno("sys_zalloc");
+    BIO_free(mem_data);
+    return NULL;
+  }
+
+  ssize_t length = bio_to_ptr(mem_data, &issuer_array->array);
+  BIO_free(mem_data);
+
+  if (length < 0) {
+    log_error("bio_to_ptr fail");
+    free_binary_array(issuer_array);
+    return NULL;
+  }
+
+  issuer_array->length = (size_t)length;
+
+  return issuer_array;
 }
 
 static int set_certificate_serialnumber(X509 *x509,

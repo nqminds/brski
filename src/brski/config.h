@@ -10,8 +10,13 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "masa/masa_config.h"
 #include "pledge/pledge_config.h"
 #include "registrar/registrar_config.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /**
  * @brief The BRSKI configuration structures. Used for configuring the
@@ -21,6 +26,7 @@
 struct brski_config {
   struct pledge_config pconf;
   struct registrar_config rconf;
+  struct masa_config mconf;
 };
 
 /**
@@ -38,4 +44,19 @@ int load_brski_config(const char *filename, struct brski_config *config);
  * @param[in] config The configuration structure
  */
 void free_config_content(struct brski_config *const config);
+
+/**
+ * @brief Load the certificate files into a binary array list
+ *
+ * @param[in] cert_paths The array of cert paths
+ * @param[out] out The output array list with loaded certificates
+ * @return 0 on success, -1 otherwise
+ */
+int load_cert_files(struct BinaryArrayList *cert_paths,
+                    struct BinaryArrayList **out);
+
+#ifdef __cplusplus
+}
+#endif
+
 #endif

@@ -9,10 +9,12 @@
  */
 
 #include <httplib.h>
+#include <openssl/ssl.h>
 
 extern "C" {
 #include "../../utils/log.h"
 #include "../../utils/os.h"
+#include "../../voucher/crypto.h"
 }
 
 #include "http.h"
@@ -44,87 +46,100 @@ void set_response(std::string &response, ResponseHeader &response_header,
   res.status = status_code;
 }
 
-int httplib_register_routes(httplib::Server *server,
+int httplib_register_routes(httplib::SSLServer *server,
                             std::vector<struct RouteTuple> &routes,
                             void *user_ctx) {
+  /*
+    Can use also: SSL_CTX *SSL_get_SSL_CTX(const SSL *ssl);
+  */
+  SSL_CTX *ssl_context = server->ssl_context();
+
   for (auto route : routes) {
     log_debug("Registering route=%s", route.path.c_str());
     switch (route.method) {
       case HTTP_METHOD_GET:
         server->Get(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_POST:
         server->Post(route.path, [=](const httplib::Request &req,
                                      httplib::Response &res) {
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
+
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PUT:
         server->Put(route.path, [=](const httplib::Request &req,
                                     httplib::Response &res) {
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_DELETE:
         server->Delete(route.path, [=](const httplib::Request &req,
                                        httplib::Response &res) {
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_OPTIONS:
         server->Options(route.path, [=](const httplib::Request &req,
                                         httplib::Response &res) {
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
       case HTTP_METHOD_PATCH:
         server->Patch(route.path, [=](const httplib::Request &req,
                                       httplib::Response &res) {
+          CRYPTO_CERT cert = (X509 *)SSL_get0_peer_certificate(req.ssl);
           RequestHeader request_header;
           std::string response;
+          std::string body = req.body;
           ResponseHeader response_header;
 
           get_request_header(req, request_header);
-          int status_code =
-              route.handle(request_header, response_header, response, user_ctx);
+          int status_code = route.handle(request_header, req.body, cert,
+                                         response_header, response, user_ctx);
           set_response(response, response_header, status_code, res);
         });
         break;
@@ -142,7 +157,7 @@ int httplib_register_routes(httplib::Server *server,
   return 0;
 }
 
-void set_error_handler(httplib::Server *server) {
+void set_error_handler(httplib::SSLServer *server) {
   server->set_error_handler(
       [](const httplib::Request &req, httplib::Response &res) {
         char buf[BUFSIZ];
@@ -151,7 +166,7 @@ void set_error_handler(httplib::Server *server) {
       });
 }
 
-void set_exception_handler(httplib::Server *server) {
+void set_exception_handler(httplib::SSLServer *server) {
   server->set_exception_handler([](const httplib::Request &req,
                                    httplib::Response &res,
                                    std::exception_ptr ep) {
@@ -170,9 +185,7 @@ void set_exception_handler(httplib::Server *server) {
 
 void httplib_stop(void *srv_ctx) {
   if (srv_ctx != nullptr) {
-    // httplib::SSLServer *server = static_cast<httplib::SSLServer
-    // *>(context->server);
-    httplib::Server *server = static_cast<httplib::Server *>(srv_ctx);
+    httplib::SSLServer *server = static_cast<httplib::SSLServer *>(srv_ctx);
     server->stop();
     delete server;
   }
@@ -183,12 +196,15 @@ int httplib_start(struct http_config *config,
                   void **srv_ctx) {
   *srv_ctx = nullptr;
 
+  if (config->tls_cert_path == nullptr || config->tls_key_path == nullptr) {
+    log_error("tls_cert_path or tls_key_path is NULL");
+    return -1;
+  }
+
   try {
-    const char *cert_path = "";
-    const char *private_key_path = "";
-    // httplib::SSLServer *server = new httplib::SSLServer(cert_path,
-    // private_key_path);
-    httplib::Server *server = new httplib::Server();
+    httplib::SSLServer *server =
+        new httplib::SSLServer(config->tls_cert_path, config->tls_key_path,
+                               config->client_ca_cert_path);
 
     if (httplib_register_routes(server, routes, user_ctx) < 0) {
       log_error("httplib_register_routes fail");
@@ -200,6 +216,10 @@ int httplib_start(struct http_config *config,
     set_exception_handler(server);
 
     *srv_ctx = static_cast<void *>(server);
+
+    log_info("Starting the HTTPS server at %s:%d", config->bind_address,
+             config->port);
+
     server->listen(config->bind_address, config->port);
   } catch (...) {
     log_error("httplib::SSLServer() fail");
@@ -208,4 +228,28 @@ int httplib_start(struct http_config *config,
   }
 
   return 0;
+}
+
+int httplib_post_request(const std::string &client_key_path,
+                         const std::string &client_cert_path,
+                         const std::string &host, int port,
+                         const std::string &path, bool verify,
+                         const std::string &body,
+                         const std::string &content_type,
+                         std::string &response) {
+
+  httplib::SSLClient cli(host, port, client_cert_path, client_key_path);
+
+  cli.enable_server_certificate_verification(verify);
+
+  log_info("Post request to %s:%d%s", host.c_str(), port, path.c_str());
+  if (httplib::Result res = cli.Post(path, body, content_type)) {
+    response = res->body;
+    return res->status;
+  } else {
+    std::string err = to_string(res.error());
+    log_error("httplib::Client fail with \"%s\"", err.c_str());
+
+    return -1;
+  }
 }

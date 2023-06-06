@@ -598,8 +598,8 @@ sign_voucher_request(const struct BinaryArray *pledge_voucher_request_cms,
  */
 typedef int (*voucher_req_fn)(
     const char *serial_number,
-    const struct BinaryArrayList *additional_registrar_certs,
-    const void *user_ctx, struct BinaryArray *pinned_domain_cert);
+    const struct BinaryArrayList *additional_registrar_certs, void *user_ctx,
+    struct BinaryArray *pinned_domain_cert);
 
 /**
  * @brief Signs a MASA voucher request using CMS with a private key
@@ -631,17 +631,15 @@ typedef int (*voucher_req_fn)(
  * @return struct BinaryArray* the signed CMS structure as binary array
  * (DER format), NULL on failure
  */
-__must_free_binary_array struct BinaryArray *
-sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
-                         const struct tm *expires_on, const voucher_req_fn cb,
-                         const void *user_ctx,
-                         const struct BinaryArray *masa_sign_cert,
-                         const struct BinaryArray *masa_sign_key,
-                         const struct BinaryArrayList *registrar_verify_certs,
-                         const struct BinaryArrayList *registrar_verify_store,
-                         const struct BinaryArrayList *pledge_verify_certs,
-                         const struct BinaryArrayList *pledge_verify_store,
-                         const struct BinaryArrayList *additional_masa_certs);
+__must_free_binary_array struct BinaryArray *sign_masa_pledge_voucher(
+    const struct BinaryArray *voucher_request_cms, const struct tm *expires_on,
+    voucher_req_fn cb, void *user_ctx, const struct BinaryArray *masa_sign_cert,
+    const struct BinaryArray *masa_sign_key,
+    const struct BinaryArrayList *registrar_verify_certs,
+    const struct BinaryArrayList *registrar_verify_store,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    const struct BinaryArrayList *additional_masa_certs);
 
 /**
  * @brief Verifies a MASA pledge voucher and outputs a pinned domain certificate

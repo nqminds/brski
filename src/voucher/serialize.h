@@ -90,6 +90,16 @@ __must_sys_free char *serialize_time2str(const struct tm *value);
 int serialize_str2time(const char *str, const struct tm *tm);
 
 /**
+ * @brief Encodes the current timestamp to a string using
+ * ISO 8601 date format %Y-%m-%dT%H:%M:%SZ
+ *
+ * Caller is responsible for freeing the string
+ *
+ * @return char * encoded localtime, NULL on failure
+ */
+__must_sys_free char *serialize_localtime(void);
+
+/**
  * @brief Adds "" to a string
  *
  * Caller is responsible for freeing the string

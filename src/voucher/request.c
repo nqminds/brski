@@ -244,17 +244,15 @@ sign_voucher_request_fail:
   return NULL;
 }
 
-struct BinaryArray *
-sign_masa_pledge_voucher(const struct BinaryArray *voucher_request_cms,
-                         const struct tm *expires_on, const voucher_req_fn cb,
-                         const void *user_ctx,
-                         const struct BinaryArray *masa_sign_cert,
-                         const struct BinaryArray *masa_sign_key,
-                         const struct BinaryArrayList *registrar_verify_certs,
-                         const struct BinaryArrayList *registrar_verify_store,
-                         const struct BinaryArrayList *pledge_verify_certs,
-                         const struct BinaryArrayList *pledge_verify_store,
-                         const struct BinaryArrayList *additional_masa_certs) {
+struct BinaryArray *sign_masa_pledge_voucher(
+    const struct BinaryArray *voucher_request_cms, const struct tm *expires_on,
+    voucher_req_fn cb, void *user_ctx, const struct BinaryArray *masa_sign_cert,
+    const struct BinaryArray *masa_sign_key,
+    const struct BinaryArrayList *registrar_verify_certs,
+    const struct BinaryArrayList *registrar_verify_store,
+    const struct BinaryArrayList *pledge_verify_certs,
+    const struct BinaryArrayList *pledge_verify_store,
+    const struct BinaryArrayList *additional_masa_certs) {
   if (expires_on == NULL) {
     log_error("expires_on param in NULL");
     return NULL;
