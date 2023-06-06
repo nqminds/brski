@@ -185,7 +185,7 @@ int main(int argc, char *argv[]) {
   memset(&config, 0, sizeof(struct brski_config));
 
   int quietness = LOGC_INFO;
-  uint8_t level = 0;
+  uint8_t log_level = 0;
   char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
@@ -195,11 +195,11 @@ int main(int argc, char *argv[]) {
   // Clamp quietness to valid log levels enum value
   // equivalent to C++17 std::clamp(quietness, 0, MAX_LOG_LEVELS - 1)
   if (quietness >= MAX_LOG_LEVELS) {
-    level = MAX_LOG_LEVELS - 1;
+    log_level = MAX_LOG_LEVELS - 1;
   } else if (quietness < 0) {
-    level = 0;
+    log_level = 0;
   } else {
-    level = quietness;
+    log_level = quietness;
   }
 
   if (pthread_mutex_init(&log_lock, NULL) != 0) {
@@ -210,7 +210,7 @@ int main(int argc, char *argv[]) {
   log_set_lock(log_lock_fun);
 
   /* Set the log level */
-  log_set_level(level);
+  log_set_level(log_level);
 
   if (load_brski_config(config_filename, &config) < 0) {
     fprintf(stderr, "load_config fail\n");
