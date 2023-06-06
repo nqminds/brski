@@ -15,9 +15,9 @@ extern "C" {
 
 #include "version.h"
 
-#define OPT_STRING ":c:o:dvh"
+#define OPT_STRING ":c:o:dqvh"
 #define USAGE_STRING                                                           \
-  "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n"
+  "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n"
 
 enum COMMAND_ID {
   COMMAND_UNKNOWN = 0,
@@ -89,6 +89,8 @@ void show_help(char *name) {
   fprintf(
       stdout,
       "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
+  fprintf(stdout, "\t-q\t\t Quietness (decreases verbosity) (use twice to hide "
+                  "warnings)\n");
   fprintf(stdout, "\t-h\t\t Show help\n");
   fprintf(stdout, "\t-v\t\t Show app version\n\n");
   fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
@@ -126,7 +128,7 @@ enum COMMAND_ID get_command_id(char *command_label) {
   return COMMAND_UNKNOWN;
 }
 
-void process_options(int argc, char *argv[], uint8_t *verbosity,
+void process_options(int argc, char *argv[], int *verbosity,
                      char **config_filename, char **out_filename,
                      enum COMMAND_ID *command_id) {
   int opt;
@@ -147,6 +149,9 @@ void process_options(int argc, char *argv[], uint8_t *verbosity,
         break;
       case 'd':
         (*verbosity)++;
+        break;
+      case 'q':
+        (*verbosity)--;
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
@@ -179,7 +184,7 @@ int main(int argc, char *argv[]) {
   // Init the app config struct
   memset(&config, 0, sizeof(struct brski_config));
 
-  uint8_t verbosity = 0;
+  int verbosity = 0;
   uint8_t level = 0;
   char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
@@ -189,7 +194,7 @@ int main(int argc, char *argv[]) {
 
   if (verbosity > MAX_LOG_LEVELS) {
     level = 0;
-  } else if (!verbosity) {
+  } else if (verbosity <= 0) {
     level = MAX_LOG_LEVELS - 1;
   } else {
     level = MAX_LOG_LEVELS - verbosity;
