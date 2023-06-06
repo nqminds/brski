@@ -3,6 +3,7 @@
 #include <unistd.h>
 
 #include <array>
+#include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
 #include <string>
@@ -108,7 +109,7 @@ void show_help(const char *name) {
 /* Diagnose an error in command-line arguments and
    terminate the process */
 void log_cmdline_error(const char *format, ...) {
-  va_list argList;
+  std::va_list argList;
 
   std::fflush(stdout); /* Flush any pending stdout */
 
