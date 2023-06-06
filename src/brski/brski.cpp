@@ -26,7 +26,7 @@ const std::string OPT_STRING = ":c:o:dqvh";
 const std::string USAGE_STRING =
     "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n";
 
-enum COMMAND_ID {
+enum class CommandId {
   COMMAND_UNKNOWN = 0,
   COMMAND_EXPORT_PVR,
   COMMAND_PLEDGE_REQUEST,
@@ -36,17 +36,18 @@ enum COMMAND_ID {
 
 struct command_config {
   const std::string label;
-  enum COMMAND_ID id;
+  CommandId id;
   const std::string info;
 };
 
 const std::array<struct command_config, 4> command_list = {{
-    {"epvr", COMMAND_EXPORT_PVR,
+    {"epvr", CommandId::COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
-    {"preq", COMMAND_PLEDGE_REQUEST,
+    {"preq", CommandId::COMMAND_PLEDGE_REQUEST,
      "\tpreq\t\tSend a pledge-voucher request to the registrar"},
-    {"registrar", COMMAND_START_REGISTRAR, "\tregistrar\tStarts the registrar"},
-    {"masa", COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
+    {"registrar", CommandId::COMMAND_START_REGISTRAR,
+     "\tregistrar\tStarts the registrar"},
+    {"masa", CommandId::COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
 }};
 
 const std::string description_string = "NquiringMinds BRSKI protocol tool.\n"
@@ -111,20 +112,19 @@ static void show_help(const char *name) {
   std::fflush(stderr); /* In case stderr is not line-buffered */
 }
 
-static enum COMMAND_ID get_command_id(const std::string &command_label) {
+static CommandId get_command_id(const std::string &command_label) {
   for (const auto &command_config : command_list) {
     if (command_config.label == command_label) {
       return command_config.id;
     }
   }
 
-  return COMMAND_UNKNOWN;
+  return CommandId::COMMAND_UNKNOWN;
 }
 
 static void process_options(int argc, char *const argv[], int &quietness,
                             std::string &config_filename,
-                            std::string &out_filename,
-                            enum COMMAND_ID &command_id) {
+                            std::string &out_filename, CommandId &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
@@ -172,7 +172,8 @@ static void process_options(int argc, char *const argv[], int &quietness,
     exit(EXIT_FAILURE);
   }
 
-  if ((command_id = get_command_id(command_label)) == COMMAND_UNKNOWN) {
+  if ((command_id = get_command_id(command_label)) ==
+      CommandId::COMMAND_UNKNOWN) {
     log_cmdline_error("Unrecognized command \"%s\"\n", command_label);
     std::exit(EXIT_FAILURE);
   }
@@ -186,7 +187,7 @@ int main(int argc, char *argv[]) {
   int quietness = LOGC_INFO;
   uint8_t log_level = 0;
   std::string config_filename, out_filename;
-  enum COMMAND_ID command_id = COMMAND_UNKNOWN;
+  CommandId command_id = CommandId::COMMAND_UNKNOWN;
 
   process_options(argc, argv, quietness, config_filename, out_filename,
                   command_id);
@@ -216,7 +217,7 @@ int main(int argc, char *argv[]) {
   struct MasaContext *mcontext = NULL;
   std::string response;
   switch (command_id) {
-    case COMMAND_EXPORT_PVR:
+    case CommandId::COMMAND_EXPORT_PVR:
       std::fprintf(stdout, "Exporting pledge voucher request to %s",
                    out_filename.c_str());
       if (voucher_pledge_request_to_smimefile(&config.pconf,
@@ -226,7 +227,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
       }
       break;
-    case COMMAND_PLEDGE_REQUEST:
+    case CommandId::COMMAND_PLEDGE_REQUEST:
       std::fprintf(stdout, "Pledge voucher request to %s:%d\n",
                    config.rconf.bind_address, config.rconf.port);
       if (post_voucher_pledge_request(&config.pconf, &config.rconf,
@@ -236,7 +237,7 @@ int main(int argc, char *argv[]) {
       }
       std::fprintf(stdout, "%s\n", response.c_str());
       break;
-    case COMMAND_START_REGISTRAR:
+    case CommandId::COMMAND_START_REGISTRAR:
       if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
                           &rcontext) < 0) {
         std::fprintf(stderr, "https_start fail");
@@ -245,7 +246,7 @@ int main(int argc, char *argv[]) {
 
       registrar_stop(rcontext);
       break;
-    case COMMAND_START_MASA:
+    case CommandId::COMMAND_START_MASA:
       if (masa_start(&config.rconf, &config.mconf, &config.pconf, &mcontext) <
           0) {
         std::fprintf(stderr, "https_start fail");
