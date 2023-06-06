@@ -1,11 +1,11 @@
 #include <libgen.h>
-#include <pthread.h>
 #include <unistd.h>
 
 #include <array>
 #include <cstdarg>
 #include <cstdio>
 #include <cstdlib>
+#include <mutex>
 #include <string>
 #include <vector>
 
@@ -54,13 +54,13 @@ const std::string description_string = "NquiringMinds BRSKI protocol tool.\n"
                                        "Show, export and manipulate vouchers. "
                                        "Create registrar and MASA servers.\n";
 
-pthread_mutex_t log_lock;
+std::mutex log_mutex;
 
 void log_lock_fun(bool lock) {
   if (lock) {
-    pthread_mutex_lock(&log_lock);
+    log_mutex.lock();
   } else {
-    pthread_mutex_unlock(&log_lock);
+    log_mutex.unlock();
   }
 }
 
@@ -210,11 +210,6 @@ int main(int argc, char *argv[]) {
     log_level = quietness;
   }
 
-  if (pthread_mutex_init(&log_lock, NULL) != 0) {
-    std::fprintf(stderr, "mutex init has failed\n");
-    return EXIT_FAILURE;
-  }
-
   log_set_lock(log_lock_fun);
 
   /* Set the log level */
@@ -269,8 +264,6 @@ int main(int argc, char *argv[]) {
       masa_stop(mcontext);
       break;
   }
-
-  pthread_mutex_destroy(&log_lock);
 
   return EXIT_SUCCESS;
 }
