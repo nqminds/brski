@@ -30,3 +30,6 @@ jobs:
       - name: Test
         run: |
           ctest --preset "${{ matrix.cmake-preset }}" --output-on-failure
+      - name: Install to ${{ runner.temp }}/brski-${{ matrix.cmake-preset }}/
+        run: |
+          cmake --install "build/${{ matrix.cmake-preset }}" --prefix "${{ runner.temp }}/brski-${{ matrix.cmake-preset }}"
