@@ -64,11 +64,11 @@ void log_lock_fun(bool lock) {
   }
 }
 
-void show_version(void) {
+static void show_version(void) {
   std::fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
 }
 
-void show_help(const char *name) {
+static void show_help(const char *name) {
   const std::string string_name(name);
   std::vector<char> basename_buffer(string_name.begin(), string_name.end());
 
@@ -97,7 +97,7 @@ void show_help(const char *name) {
 
 /* Diagnose an error in command-line arguments and
    terminate the process */
-void log_cmdline_error(const char *format, ...) {
+static void log_cmdline_error(const char *format, ...) {
   std::va_list argList;
 
   std::fflush(stdout); /* Flush any pending stdout */
@@ -110,7 +110,7 @@ void log_cmdline_error(const char *format, ...) {
   std::fflush(stderr); /* In case stderr is not line-buffered */
 }
 
-enum COMMAND_ID get_command_id(const std::string &command_label) {
+static enum COMMAND_ID get_command_id(const std::string &command_label) {
   for (const auto &command_config : command_list) {
     if (command_config.label == command_label) {
       return command_config.id;
@@ -120,9 +120,10 @@ enum COMMAND_ID get_command_id(const std::string &command_label) {
   return COMMAND_UNKNOWN;
 }
 
-void process_options(int argc, char *const argv[], int &quietness,
-                     std::string &config_filename, std::string &out_filename,
-                     enum COMMAND_ID &command_id) {
+static void process_options(int argc, char *const argv[], int &quietness,
+                            std::string &config_filename,
+                            std::string &out_filename,
+                            enum COMMAND_ID &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
