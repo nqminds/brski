@@ -184,7 +184,7 @@ int main(int argc, char *argv[]) {
   // Init the app config struct
   memset(&config, 0, sizeof(struct brski_config));
 
-  int verbosity = 0;
+  int verbosity = MAX_LOG_LEVELS - LOGC_INFO;
   uint8_t level = 0;
   char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
