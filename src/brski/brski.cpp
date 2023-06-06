@@ -122,17 +122,14 @@ void log_cmdline_error(const char *format, ...) {
 }
 
 enum COMMAND_ID get_command_id(const char *command_label) {
-  int idx = 0;
-
   if (command_label == NULL) {
     return COMMAND_UNKNOWN;
   }
 
-  while (command_list[idx].label != NULL) {
+  for (int idx = 0; command_list[idx].label != NULL; idx++) {
     if (strcmp(command_list[idx].label, command_label) == 0) {
       return command_list[idx].id;
     }
-    idx++;
   }
 
   return COMMAND_UNKNOWN;
