@@ -4,6 +4,7 @@
 #include <string.h>
 #include <unistd.h>
 
+#include <cstdio>
 #include <string>
 #include <vector>
 
@@ -74,7 +75,7 @@ void sighup_handler(int sig, void *ctx) {
 }
 
 void show_version(void) {
-  fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
+  std::fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
 }
 
 void show_help(const char *name) {
@@ -82,26 +83,27 @@ void show_help(const char *name) {
   std::vector<char> basename_buffer(string_name.begin(), string_name.end());
 
   show_version();
-  fprintf(stdout, "Usage:\n");
-  fprintf(stdout, USAGE_STRING "\n", basename(basename_buffer.data()));
-  fprintf(stdout, "%s", description_string);
-  fprintf(stdout, "\nCommands:\n");
+  std::fprintf(stdout, "Usage:\n");
+  std::fprintf(stdout, USAGE_STRING "\n", basename(basename_buffer.data()));
+  std::fprintf(stdout, "%s", description_string);
+  std::fprintf(stdout, "\nCommands:\n");
   int idx = 0;
   while (command_list[idx].label != NULL) {
-    fprintf(stdout, "%s\n", command_list[idx].info);
+    std::fprintf(stdout, "%s\n", command_list[idx].info);
     idx++;
   }
-  fprintf(stdout, "\nOptions:\n");
-  fprintf(stdout, "\t-c filename\t Path to the config file\n");
-  fprintf(stdout, "\t-o filename\t Path to the exported file\n");
-  fprintf(
+  std::fprintf(stdout, "\nOptions:\n");
+  std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
+  std::fprintf(stdout, "\t-o filename\t Path to the exported file\n");
+  std::fprintf(
       stdout,
       "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
-  fprintf(stdout, "\t-q\t\t Quietness (decreases verbosity) (use twice to hide "
-                  "warnings)\n");
-  fprintf(stdout, "\t-h\t\t Show help\n");
-  fprintf(stdout, "\t-v\t\t Show app version\n\n");
-  fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
+  std::fprintf(stdout,
+               "\t-q\t\t Quietness (decreases verbosity) (use twice to hide "
+               "warnings)\n");
+  std::fprintf(stdout, "\t-h\t\t Show help\n");
+  std::fprintf(stdout, "\t-v\t\t Show app version\n\n");
+  std::fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
 }
 
 /* Diagnose an error in command-line arguments and
@@ -109,14 +111,14 @@ void show_help(const char *name) {
 void log_cmdline_error(const char *format, ...) {
   va_list argList;
 
-  fflush(stdout); /* Flush any pending stdout */
+  std::fflush(stdout); /* Flush any pending stdout */
 
-  fprintf(stdout, "Command-line usage error: ");
+  std::fprintf(stdout, "Command-line usage error: ");
   va_start(argList, format);
-  vfprintf(stdout, format, argList);
+  std::vfprintf(stdout, format, argList);
   va_end(argList);
 
-  fflush(stderr); /* In case stderr is not line-buffered */
+  std::fflush(stderr); /* In case stderr is not line-buffered */
 }
 
 enum COMMAND_ID get_command_id(const char *command_label) {
@@ -217,7 +219,7 @@ int main(int argc, char *argv[]) {
   }
 
   if (pthread_mutex_init(&log_lock, NULL) != 0) {
-    fprintf(stderr, "mutex init has failed\n");
+    std::fprintf(stderr, "mutex init has failed\n");
     return EXIT_FAILURE;
   }
 
@@ -227,7 +229,7 @@ int main(int argc, char *argv[]) {
   log_set_level(log_level);
 
   if (load_brski_config(config_filename, &config) < 0) {
-    fprintf(stderr, "load_config fail\n");
+    std::fprintf(stderr, "load_config fail\n");
     return EXIT_FAILURE;
   }
 
@@ -236,27 +238,28 @@ int main(int argc, char *argv[]) {
   std::string response;
   switch (command_id) {
     case COMMAND_EXPORT_PVR:
-      fprintf(stdout, "Exporting pledge voucher request to %s", out_filename);
+      std::fprintf(stdout, "Exporting pledge voucher request to %s",
+                   out_filename);
       if (voucher_pledge_request_to_smimefile(
               &config.pconf, config.rconf.tls_cert_path, out_filename) < 0) {
-        fprintf(stderr, "voucher_pledge_request_to_smimefile fail");
+        std::fprintf(stderr, "voucher_pledge_request_to_smimefile fail");
         return EXIT_FAILURE;
       }
       break;
     case COMMAND_PLEDGE_REQUEST:
-      fprintf(stdout, "Pledge voucher request to %s:%d\n",
-              config.rconf.bind_address, config.rconf.port);
+      std::fprintf(stdout, "Pledge voucher request to %s:%d\n",
+                   config.rconf.bind_address, config.rconf.port);
       if (post_voucher_pledge_request(&config.pconf, &config.rconf,
                                       &config.mconf, response) < 0) {
-        fprintf(stderr, "post_voucher_pledge_request fail");
+        std::fprintf(stderr, "post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
-      fprintf(stdout, "%s\n", response.c_str());
+      std::fprintf(stdout, "%s\n", response.c_str());
       break;
     case COMMAND_START_REGISTRAR:
       if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
                           &rcontext) < 0) {
-        fprintf(stderr, "https_start fail");
+        std::fprintf(stderr, "https_start fail");
         return EXIT_FAILURE;
       }
 
@@ -265,7 +268,7 @@ int main(int argc, char *argv[]) {
     case COMMAND_START_MASA:
       if (masa_start(&config.rconf, &config.mconf, &config.pconf, &mcontext) <
           0) {
-        fprintf(stderr, "https_start fail");
+        std::fprintf(stderr, "https_start fail");
         return EXIT_FAILURE;
       }
 
