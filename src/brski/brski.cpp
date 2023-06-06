@@ -128,7 +128,7 @@ enum COMMAND_ID get_command_id(char *command_label) {
   return COMMAND_UNKNOWN;
 }
 
-void process_options(int argc, char *argv[], int *verbosity,
+void process_options(int argc, char *argv[], int *quietness,
                      char **config_filename, char **out_filename,
                      enum COMMAND_ID *command_id) {
   int opt;
@@ -148,10 +148,10 @@ void process_options(int argc, char *argv[], int *verbosity,
         *out_filename = strdup(optarg);
         break;
       case 'd':
-        (*verbosity)++;
+        (*quietness)--;
         break;
       case 'q':
-        (*verbosity)--;
+        (*quietness)++;
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
@@ -184,20 +184,22 @@ int main(int argc, char *argv[]) {
   // Init the app config struct
   memset(&config, 0, sizeof(struct brski_config));
 
-  int verbosity = MAX_LOG_LEVELS - LOGC_INFO;
+  int quietness = LOGC_INFO;
   uint8_t level = 0;
   char *config_filename = NULL, *out_filename = NULL;
   enum COMMAND_ID command_id = COMMAND_UNKNOWN;
 
-  process_options(argc, argv, &verbosity, &config_filename, &out_filename,
+  process_options(argc, argv, &quietness, &config_filename, &out_filename,
                   &command_id);
 
-  if (verbosity > MAX_LOG_LEVELS) {
-    level = 0;
-  } else if (verbosity <= 0) {
+  // Clamp quietness to valid log levels enum value
+  // equivalent to C++17 std::clamp(quietness, 0, MAX_LOG_LEVELS - 1)
+  if (quietness >= MAX_LOG_LEVELS) {
     level = MAX_LOG_LEVELS - 1;
+  } else if (quietness < 0) {
+    level = 0;
   } else {
-    level = MAX_LOG_LEVELS - verbosity;
+    level = quietness;
   }
 
   if (pthread_mutex_init(&log_lock, NULL) != 0) {
