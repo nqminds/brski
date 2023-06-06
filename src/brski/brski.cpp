@@ -169,6 +169,12 @@ void process_options(int argc, char *argv[], uint8_t *verbosity,
     exit(EXIT_SUCCESS);
   }
 
+  if (command_label == nullptr) {
+    log_cmdline_error("Missing required parameter <command>\n");
+    show_help(argv[0]);
+    exit(EXIT_FAILURE);
+  }
+
   if ((*command_id = get_command_id(command_label)) == COMMAND_UNKNOWN) {
     log_cmdline_error("Unrecognized command \"%s\"\n", command_label);
     exit(EXIT_FAILURE);
