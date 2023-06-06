@@ -1,3 +1,4 @@
+#include <stdexcept>
 #include <array>
 #include <cstdarg>
 #include <cstdio>
@@ -27,8 +28,7 @@ const std::string USAGE_STRING =
     "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n";
 
 enum class CommandId {
-  COMMAND_UNKNOWN = 0,
-  COMMAND_EXPORT_PVR,
+  COMMAND_EXPORT_PVR = 1,
   COMMAND_PLEDGE_REQUEST,
   COMMAND_START_REGISTRAR,
   COMMAND_START_MASA,
@@ -119,7 +119,7 @@ static CommandId get_command_id(const std::string &command_label) {
     }
   }
 
-  return CommandId::COMMAND_UNKNOWN;
+  throw std::invalid_argument("Unrecognized command: \"" + command_label + '"');
 }
 
 static void process_options(int argc, char *const argv[], int &quietness,
@@ -172,9 +172,11 @@ static void process_options(int argc, char *const argv[], int &quietness,
     exit(EXIT_FAILURE);
   }
 
-  if ((command_id = get_command_id(command_label)) ==
-      CommandId::COMMAND_UNKNOWN) {
-    log_cmdline_error("Unrecognized command \"%s\"\n", command_label);
+  try {
+    command_id = get_command_id(command_label);
+  } catch (const std::invalid_argument &ex) {
+    log_cmdline_error("%s\n", ex.what());
+    show_help(argv[0]);
     std::exit(EXIT_FAILURE);
   }
 }
@@ -187,7 +189,7 @@ int main(int argc, char *argv[]) {
   int quietness = LOGC_INFO;
   uint8_t log_level = 0;
   std::string config_filename, out_filename;
-  CommandId command_id = CommandId::COMMAND_UNKNOWN;
+  CommandId command_id;
 
   process_options(argc, argv, quietness, config_filename, out_filename,
                   command_id);
