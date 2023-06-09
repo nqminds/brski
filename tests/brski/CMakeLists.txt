@@ -67,6 +67,28 @@ add_cmocka_test(test_pledge_utils
 target_compile_definitions(test_pledge_utils PRIVATE TEST_CONFIG_INI_PATH="${TEST_CONFIG_INI_PATH}")
 target_compile_definitions(test_pledge_utils PRIVATE TEST_CONFIG_ADD_INI_PATH="${TEST_CONFIG_ADD_INI_PATH}")
 
+# Run BRSKI CLI tests
+if (UNIX)
+  include(AddCTestDaemon)
+
+  add_ctest_daemon(
+    NAME test_masa
+    COMMAND "$<TARGET_FILE:brski>" -c "${TEST_CONFIG_INI_PATH}" -dd masa
+  )
+
+  add_ctest_daemon(
+    NAME test_registrar
+    COMMAND "$<TARGET_FILE:brski>" -c "${TEST_CONFIG_INI_PATH}" -dd registrar
+    FIXTURES_REQUIRED test_masa
+  )
+
+  add_test(
+    NAME test_pledge
+    COMMAND brski -c "${TEST_CONFIG_INI_PATH}" -dd preq
+  )
+  set_tests_properties(test_pledge PROPERTIES FIXTURES_REQUIRED test_registrar)
+endif(UNIX)
+
 #openssl req -x509 -newkey rsa:4096 -sha256 -days 3650 -nodes \
 #  -keyout pledge-cms.key -out pledge-cms.crt -subj "/CN=pledge-cms.com" \
 #  -addext "subjectAltName=DNS:pledge-cms.com,DNS:www.pledge-cms.net,IP:10.0.1.1"
