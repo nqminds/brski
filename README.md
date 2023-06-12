@@ -23,9 +23,12 @@ This repo provides a reference implementation for the BRSKI protocol in `C` lang
 Compiling the BRSKI voucher library is done with CMake.
 
 ### Dependencies
-The BRSKI voucher library requires OpenSSL3. Use `sudo apt install libsqlite3-dev` to install the OpenSSL library on a Linux Debian distro.
 
-The BRSKI CMake config file allows also downloading and compiling the OpenSSL library from source. Change the option `BUILD_OPENSSL3_LIB` to `ON` in `CMakeLists.txt` file to force CMake to donwload and compile the OpenSSL library.
+The BRSKI voucher library requires OpenSSL3. You can either:
+  - Install OpenSSL3 yourself
+    (on Ubuntu 22.04 (Jammy) or Debian 12 (Bookworm) or later, you can just run `sudo apt install libssl-dev`)
+  - The BRSKI CMake config file allows also downloading and compiling the OpenSSL library from source.
+    Change the option `BUILD_OPENSSL3_LIB` to `ON` in `CMakeLists.txt` file to force CMake to download and compile the OpenSSL library.
 
 ### Configure
 
