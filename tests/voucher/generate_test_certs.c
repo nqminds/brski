@@ -396,7 +396,7 @@ static void generate_cms_certs(void **state) {
   assert_true(length > 0);
   int2_cms_cert.length = length;
 
-  // Sign int2_cms with int1_cms
+  // Sign int1_cms with int2_cms
   length = crypto_sign_cert(int2_cms_key.array, int2_cms_key.length,
                             int2_cms_cert.array, int2_cms_cert.length,
                             int1_cms_cert.length, &int1_cms_cert.array);
