@@ -1,16 +1,69 @@
+/**
+ * Generates some example certificates that can be used in the BRSKI tests.
+ */
+
+#define _POSIX_C_SOURCE 1
+
 #include <setjmp.h>
 #include <stdarg.h>
 #include <stddef.h>
 #include <stdint.h>
 #include <cmocka.h>
 
+#include <errno.h>
+
+#include <limits.h> // required for PATH_MAX
+
 #include "utils/log.h"
 #include "voucher/array.h"
 #include "voucher/crypto.h"
 #include "voucher/keyvalue.h"
 
+struct context {
+  /** The folder to store the certs and keys in */
+  const char *output_dir;
+};
+
+/**
+ * Saves the given cert as `<output_dir>/<cert_name>.crt` and
+ * `<output_dir>/<cert_name>.key`.
+ *
+ * @param cert_name - The basename of the cert, without a file extension.
+ * @param context - Contains the output directory to store the certs in.
+ * @param keybuf - Key buffer.
+ * @param certbuf - Certificate buffer.
+ * @retval  0 On success.
+ * @retval -1 On error.
+ */
+static int save_cert(const char *cert_name, const struct context *context,
+                     const struct BinaryArray *keybuf,
+                     const struct BinaryArray *certbuf) {
+  char path[PATH_MAX];
+  int path_len =
+      snprintf(path, PATH_MAX, "%s/%s.key", context->output_dir, cert_name);
+  if (path_len < 0 || path_len >= PATH_MAX) {
+    log_error("Failed to create path to store cert %s", cert_name);
+    return -1;
+  }
+
+  log_trace("Saving certificate key\t\t%s", path);
+  if (keybuf_to_file(keybuf, path) < 0) {
+    log_error("Failed to save key for cert %s at %s", cert_name, path);
+    return -1;
+  }
+
+  log_trace("Saving certificate\t\t%s", path);
+  strcpy(&path[path_len - 3], "crt");
+  if (certbuf_to_file(certbuf, path) < 0) {
+    log_error("Failed to save cert %s at %s", cert_name, path);
+    return -1;
+  }
+
+  return 0;
+}
+
 static void generate_idevid_certs(void **state) {
-  (void)state;
+  struct context *context = *state;
 
   static struct BinaryArray idevid_ca_key = {};
   static struct BinaryArray idevid_ca_cert = {};
@@ -37,8 +90,8 @@ static void generate_idevid_certs(void **state) {
       crypto_generate_eccert(&idevid_ca_meta, idevid_ca_key.array,
                              idevid_ca_key.length, &idevid_ca_cert.array);
 
-  assert_int_equal(keybuf_to_file(&idevid_ca_key, "/tmp/idevid-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&idevid_ca_cert, "/tmp/idevid-ca.crt"), 0);
+  assert_return_code(
+      save_cert("idevid-ca", context, &idevid_ca_key, &idevid_ca_cert), errno);
 
   {
     struct crypto_cert_meta idev_meta = {.serial_number = 12345,
@@ -67,8 +120,8 @@ static void generate_idevid_certs(void **state) {
     assert_true(length > 0);
     idevid_cert.length = length;
 
-    assert_int_equal(keybuf_to_file(&idevid_key, "/tmp/idevid.key"), 0);
-    assert_int_equal(certbuf_to_file(&idevid_cert, "/tmp/idevid.crt"), 0);
+    assert_return_code(save_cert("idevid", context, &idevid_key, &idevid_cert),
+                       errno);
 
     free_binary_array_content(&idevid_key);
     free_binary_array_content(&idevid_cert);
@@ -83,7 +136,7 @@ static void generate_idevid_certs(void **state) {
 }
 
 static void generate_ldevid_ca_cert(void **state) {
-  (void)state;
+  struct context *context = *state;
 
   struct crypto_cert_meta ldevid_ca_meta = {.serial_number = 1,
                                             .not_before = 0,
@@ -107,8 +160,8 @@ static void generate_ldevid_ca_cert(void **state) {
       &ldevid_ca_meta, ldevid_ca_key.array, ldevid_ca_key.length,
       &ldevid_ca_cert.array);
 
-  assert_int_equal(keybuf_to_file(&ldevid_ca_key, "/tmp/ldevid-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&ldevid_ca_cert, "/tmp/ldevid-ca.crt"), 0);
+  assert_return_code(
+      save_cert("ldevid-ca", context, &ldevid_ca_key, &ldevid_ca_cert), errno);
 
   free_binary_array_content(&ldevid_ca_key);
   free_binary_array_content(&ldevid_ca_cert);
@@ -117,7 +170,7 @@ static void generate_ldevid_ca_cert(void **state) {
 }
 
 static void generate_masa_tls_certs(void **state) {
-  (void)state;
+  struct context *context = *state;
 
   struct crypto_cert_meta masa_tls_ca_meta = {.serial_number = 1,
                                               .not_before = 0,
@@ -142,9 +195,9 @@ static void generate_masa_tls_certs(void **state) {
       &masa_tls_ca_meta, masa_tls_ca_key.array, masa_tls_ca_key.length,
       &masa_tls_ca_cert.array);
 
-  assert_int_equal(keybuf_to_file(&masa_tls_ca_key, "/tmp/masa-tls-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&masa_tls_ca_cert, "/tmp/masa-tls-ca.crt"),
-                   0);
+  assert_return_code(
+      save_cert("masa-tls-ca", context, &masa_tls_ca_key, &masa_tls_ca_cert),
+      errno);
 
   {
     struct crypto_cert_meta masa_tls_meta = {.serial_number = 12345,
@@ -173,8 +226,8 @@ static void generate_masa_tls_certs(void **state) {
     assert_true(length > 0);
     masa_tls_cert.length = length;
 
-    assert_int_equal(keybuf_to_file(&masa_tls_key, "/tmp/masa-tls.key"), 0);
-    assert_int_equal(certbuf_to_file(&masa_tls_cert, "/tmp/masa-tls.crt"), 0);
+    assert_return_code(
+        save_cert("masa-tls", context, &masa_tls_key, &masa_tls_cert), errno);
 
     free_binary_array_content(&masa_tls_key);
     free_binary_array_content(&masa_tls_cert);
@@ -189,7 +242,7 @@ static void generate_masa_tls_certs(void **state) {
 }
 
 static void generate_registrar_tls_certs(void **state) {
-  (void)state;
+  struct context *context = *state;
 
   struct crypto_cert_meta registrar_tls_ca_meta = {.serial_number = 1,
                                                    .not_before = 0,
@@ -227,10 +280,9 @@ static void generate_registrar_tls_certs(void **state) {
   push_keyvalue_list(registrar_tls_meta.subject, "C", "IE");
   push_keyvalue_list(registrar_tls_meta.subject, "CN", "registrar-tls-meta");
 
-  assert_int_equal(
-      keybuf_to_file(&registrar_tls_ca_key, "/tmp/registrar-tls-ca.key"), 0);
-  assert_int_equal(
-      certbuf_to_file(&registrar_tls_ca_cert, "/tmp/registrar-tls-ca.crt"), 0);
+  assert_return_code(save_cert("registrar-tls-ca", context,
+                               &registrar_tls_ca_key, &registrar_tls_ca_cert),
+                     errno);
 
   {
     struct BinaryArray registrar_tls_key = {};
@@ -249,10 +301,9 @@ static void generate_registrar_tls_certs(void **state) {
     assert_true(length > 0);
     registrar_tls_cert.length = length;
 
-    assert_int_equal(
-        keybuf_to_file(&registrar_tls_key, "/tmp/registrar-tls.key"), 0);
-    assert_int_equal(
-        certbuf_to_file(&registrar_tls_cert, "/tmp/registrar-tls.crt"), 0);
+    assert_return_code(save_cert("registrar-tls", context, &registrar_tls_key,
+                                 &registrar_tls_cert),
+                       errno);
 
     free_binary_array_content(&registrar_tls_key);
     free_binary_array_content(&registrar_tls_cert);
@@ -293,7 +344,7 @@ static void generate_registrar_tls_certs(void **state) {
  * └──────────┘ └─────────────┘ └────────┘
  */
 static void generate_cms_certs(void **state) {
-  (void)state;
+  struct context *context = *state;
 
   struct crypto_cert_meta cms_ca_meta = {.serial_number = 1,
                                          .not_before = 0,
@@ -316,8 +367,8 @@ static void generate_cms_certs(void **state) {
   cms_ca_cert.length = (size_t)crypto_generate_eccert(
       &cms_ca_meta, cms_ca_key.array, cms_ca_key.length, &cms_ca_cert.array);
 
-  assert_int_equal(keybuf_to_file(&cms_ca_key, "/tmp/cms-ca.key"), 0);
-  assert_int_equal(certbuf_to_file(&cms_ca_cert, "/tmp/cms-ca.crt"), 0);
+  assert_return_code(save_cert("cms-ca", context, &cms_ca_key, &cms_ca_cert),
+                     errno);
 
   {
     struct crypto_cert_meta int2_cms_meta = {.serial_number = 12345,
@@ -347,8 +398,8 @@ static void generate_cms_certs(void **state) {
     assert_true(length > 0);
     int2_cms_cert.length = length;
 
-    assert_int_equal(keybuf_to_file(&int2_cms_key, "/tmp/int2-cms.key"), 0);
-    assert_int_equal(certbuf_to_file(&int2_cms_cert, "/tmp/int2-cms.crt"), 0);
+    assert_return_code(
+        save_cert("int2-cms", context, &int2_cms_key, &int2_cms_cert), errno);
 
     {
       struct crypto_cert_meta int1_cms_meta = {.serial_number = 12345,
@@ -378,8 +429,8 @@ static void generate_cms_certs(void **state) {
       assert_true(length > 0);
       int1_cms_cert.length = length;
 
-      assert_int_equal(keybuf_to_file(&int1_cms_key, "/tmp/int1-cms.key"), 0);
-      assert_int_equal(certbuf_to_file(&int1_cms_cert, "/tmp/int1-cms.crt"), 0);
+      assert_return_code(
+          save_cert("int1-cms", context, &int1_cms_key, &int1_cms_cert), errno);
 
       {
         struct crypto_cert_meta pledge_cms_meta = {.serial_number = 1,
@@ -411,10 +462,9 @@ static void generate_cms_certs(void **state) {
         assert_true(length > 0);
         pledge_cms_cert.length = length;
 
-        assert_int_equal(keybuf_to_file(&pledge_cms_key, "/tmp/pledge-cms.key"),
-                         0);
-        assert_int_equal(
-            certbuf_to_file(&pledge_cms_cert, "/tmp/pledge-cms.crt"), 0);
+        assert_return_code(
+            save_cert("pledge-cms", context, &pledge_cms_key, &pledge_cms_cert),
+            errno);
 
         free_binary_array_content(&pledge_cms_key);
         free_binary_array_content(&pledge_cms_cert);
@@ -453,10 +503,9 @@ static void generate_cms_certs(void **state) {
         assert_true(length > 0);
         registrar_cms_cert.length = length;
 
-        assert_int_equal(
-            keybuf_to_file(&registrar_cms_key, "/tmp/registrar-cms.key"), 0);
-        assert_int_equal(
-            certbuf_to_file(&registrar_cms_cert, "/tmp/registrar-cms.crt"), 0);
+        assert_return_code(save_cert("registrar-cms", context,
+                                     &registrar_cms_key, &registrar_cms_cert),
+                           errno);
 
         free_binary_array_content(&registrar_cms_key);
         free_binary_array_content(&registrar_cms_cert);
@@ -493,9 +542,9 @@ static void generate_cms_certs(void **state) {
         assert_true(length > 0);
         masa_cms_cert.length = length;
 
-        assert_int_equal(keybuf_to_file(&masa_cms_key, "/tmp/masa-cms.key"), 0);
-        assert_int_equal(certbuf_to_file(&masa_cms_cert, "/tmp/masa-cms.crt"),
-                         0);
+        assert_return_code(
+            save_cert("masa-cms", context, &masa_cms_key, &masa_cms_cert),
+            errno);
 
         free_binary_array_content(&masa_cms_key);
         free_binary_array_content(&masa_cms_cert);
@@ -527,12 +576,22 @@ int main(int argc, char *argv[]) {
 
   log_set_quiet(false);
 
+  if (argc != 2) {
+    log_error("generate_test_certs expects a CLI arg for the output folder, "
+              "e.g. generate_test_certs OUTPUT_DIR");
+    return -1;
+  }
+
+  struct context context = {
+      .output_dir = argv[1],
+  };
+
   const struct CMUnitTest tests[] = {
-      cmocka_unit_test(generate_idevid_certs),
-      cmocka_unit_test(generate_ldevid_ca_cert),
-      cmocka_unit_test(generate_masa_tls_certs),
-      cmocka_unit_test(generate_registrar_tls_certs),
-      cmocka_unit_test(generate_cms_certs)};
+      cmocka_unit_test_prestate(generate_idevid_certs, &context),
+      cmocka_unit_test_prestate(generate_ldevid_ca_cert, &context),
+      cmocka_unit_test_prestate(generate_masa_tls_certs, &context),
+      cmocka_unit_test_prestate(generate_registrar_tls_certs, &context),
+      cmocka_unit_test_prestate(generate_cms_certs, &context)};
 
   return cmocka_run_group_tests(tests, NULL, NULL);
 }

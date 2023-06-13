@@ -1,6 +1,7 @@
-add_cmocka_test(generate_test_certs
-  SOURCES generate_test_certs.c
-  LINK_LIBRARIES voucher cmocka::cmocka
+add_executable(generate_test_certs generate_test_certs.c)
+target_link_libraries(generate_test_certs PRIVATE voucher cmocka::cmocka)
+add_test(NAME generate_test_certs
+  COMMAND generate_test_certs "/tmp"
 )
 
 add_cmocka_test(test_array
