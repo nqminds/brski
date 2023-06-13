@@ -72,6 +72,7 @@ option(BUILD_ONLY_DOCS "Build only docs" OFF)
 option(BUILD_OPENSSL3_LIB "Build OpenSSL 3" OFF)
 option(BUILD_WOLFSSL_LIB "Build WolfSSL" OFF)
 option(BUILD_LIB_MININI "Builds minIni library" ON)
+option(BUILD_JSMN "Downloads jsmn (if off, use system JSMN lib)" ON)
 option(USE_CPPHTTPLIB_LIB "Build and use the cpp-httplib" OFF)
 
 option(USE_VOUCHER_OPENSSL "Build voucher library with openssl support" OFF)
