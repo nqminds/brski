@@ -1,3 +1,8 @@
+add_cmocka_test(generate_test_certs
+  SOURCES generate_test_certs.c
+  LINK_LIBRARIES voucher cmocka::cmocka
+)
+
 add_cmocka_test(test_array
   SOURCES test_array.c
   LINK_LIBRARIES array os log cmocka::cmocka
