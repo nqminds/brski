@@ -3,10 +3,34 @@ Section: net
 Priority: optional
 Maintainer: Alexandru Mereacre <mereacre@nquiringminds.com>
 Build-Depends: debhelper-compat (= 12),
-    git, ca-certificates, cmake (>=3.15.0),
-    libssl-dev,
-    libminini-dev (>=1.2)
+    ca-certificates, cmake (>=3.15.0),
+    libssl-dev (>=3.0.0),
+    libminini-dev (>=1.2),
+    libjsmn-dev (>=1.1.0)
 Standards-Version: 4.5.0
 Homepage: https://github.com/nqminds/brski
 Vcs-Browser: https://github.com/nqminds/brski
 Vcs-Git: https://github.com/nqminds/brski.git
+
+Package: brski
+Architecture: any
+Multi-Arch: foreign
+Depends:
+    ${shlibs:Depends},
+    ${misc:Depends},
+Description: BRSKI protocol MASA, registrar, and pledge implementations.
+ The Bootstrapping Remote Secure Key Infrastructure (BRSKI) protocol provides a
+ solution for secure zero-touch (automated) bootstrap of new (unconfigured)
+ devices that are called "pledges".
+ Pledges have an Initial Device Identifier (IDevID) installed in them at the
+ factory.
+ .
+ For more information on the BRSKI protocol, please check the RFC8995.
+
+Package: libvoucher-dev
+Architecture: any
+Multi-Arch: foreign
+Depends:
+    ${shlibs:Depends},
+    ${misc:Depends},
+Description: BRSKI voucher library.
