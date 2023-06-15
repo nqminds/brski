@@ -82,6 +82,13 @@ if (UNIX)
     FIXTURES_REQUIRED test_masa
   )
 
+  # add a tiny delay, just for registrar to start listening on https
+  add_test(NAME wait_for_registrar COMMAND sleep 0.1)
+  set_tests_properties(wait_for_registrar PROPERTIES
+    FIXTURES_SETUP test_registrar
+    DEPENDS test_registrar_start
+  )
+
   add_test(
     NAME test_pledge
     COMMAND brski -c "${TEST_CONFIG_INI_PATH}" -dd preq
