@@ -1,0 +1,2 @@
+# Ignore the build/ directory, as this is where non-build files are stored
+tar-ignore = "build"
