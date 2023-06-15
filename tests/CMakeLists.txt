@@ -11,5 +11,9 @@ include_directories (
   "${PROJECT_SOURCE_DIR}/src"
 )
 
+# Folder to store certificates for tests
+set(BRSKI_TEST_CERTS_DIR "${CMAKE_BINARY_DIR}/tests/brski-test-certs")
+file(MAKE_DIRECTORY "${BRSKI_TEST_CERTS_DIR}")
+
 add_subdirectory(brski)
 add_subdirectory(voucher)

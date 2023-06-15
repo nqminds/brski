@@ -35,6 +35,11 @@ target_link_libraries(libtest PRIVATE Voucher::Voucher OpenSSL::Crypto)
 
 ## BRSKI Tool usage
 
+The BRSKI `generate_test_certs` test creates a `test-config.ini` file
+(located at `${CMAKE_BINARY_DIR}/tests/brski/test-config.ini`),
+which has some pregenerated example certificates for running the MASA,
+registrar, and pledge on localhost.
+
 ### Exporting a pledge voucher request
 
 To export a pledge voucher request to a `CMS` SMIME file `out.cms` use the command `epvr` as following:

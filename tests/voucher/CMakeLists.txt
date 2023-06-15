@@ -1,3 +1,10 @@
+add_executable(generate_test_certs generate_test_certs.c)
+target_link_libraries(generate_test_certs PRIVATE voucher cmocka::cmocka)
+add_test(NAME generate_test_certs
+  COMMAND generate_test_certs "${BRSKI_TEST_CERTS_DIR}"
+)
+set_tests_properties(generate_test_certs PROPERTIES FIXTURES_SETUP test_certs)
+
 add_cmocka_test(test_array
   SOURCES test_array.c
   LINK_LIBRARIES array os log cmocka::cmocka

@@ -86,6 +86,9 @@ To enable verbose debug mode use:
 ```
 where `command` is one of the commands to execute. For more details see [examples](./docs/usage.md).
 
+You can also look at [Running with test examples](#running-with-test-examples)
+for examples that use pregenerated test certificates.
+
 ## Installing
 
 To install the library and the BRSKI binary, and config use:
@@ -117,6 +120,30 @@ cmake --build build/ --target test -j4 # or 'make test'
 
 To run each test individually, the test binaries are located in `./build/preset_name/tests` folder.
 
+### Running with test examples
+
+Additionally, you can manually setup a MASA and registrar server on `localhost`
+using some test certificates.
+
+ 1. Run the tests once using `ctest --preset linux` (or equivalent).
+    This will create some example test certificates using the
+    `generate_test_certs` test.
+ 2. Start the MASA server using:
+    `./build/linux/src/brski/brski -c ./build/linux/tests/brski/test-config.ini masa`
+ 3. Start the registrar server using:
+    `./build/linux/src/brski/brski -c ./build/linux/tests/brski/test-config.ini registrar`
+ 4. Send a pledge request to the registrar server using:
+
+    ```console
+    user@pc:~/brski (main)$ ./build/linux/src/brski/brski -c ./build/linux/tests/brski/test-config.ini preq
+    Pledge voucher request to 127.0.0.1:12345
+    2023-06-13 14:25:17.642  INFO  pledge_request.cpp:68: Request pledge voucher from /.well-known/brski/requestvoucher
+    2023-06-13 14:25:17.645  INFO  httplib_wrapper.cpp:245: Post request to 127.0.0.1:12345/.well-known/brski/requestvoucher
+    MIIBRjCB7aADAgECAgEBMAoGCCqGSM49BAMCMCExCzAJBgNVBAYTAklFMRIwEAYDVQQDDAlsZGV2aWQtY2EwHhcNMjMwNjEzMTMyNTE3WhcNMjMwNjI3MjAyMTI0WjAqMQswCQYDVQQGEwJJRTEbMBkGA1UEAwwScGlubmVkLWRvbWFpbi1tZXRhMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAE7BCjjmrshoAmneAJd8/D2iIPCkBbbcGoSX0fcvoxUAjCNIUyC9mhHAe8pAV2MFiJdngshvaXyhpYHm0iC4Qi36MNMAswCQYDVR0TBAIwADAKBggqhkjOPQQDAgNIADBFAiEA1gT++JfiP522ddkCTKtzOyU8MOFa8+u4owvWPK+O2nkCIG/hDl1nFzDWQMIthyXxOUinL7crA9w2ZCW/6pwnhYX2
+    ```
+
+    If successful, the returned ASN1 `pinned-domain-cert` in the voucher will be
+    printed in base64 to stdout.
 
 ## Developer Documentation
 
