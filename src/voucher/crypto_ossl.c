@@ -780,9 +780,39 @@ static int set_certificate_meta(X509 *x509,
     return -1;
   }
 
-  if (X509_gmtime_adj(X509_getm_notAfter(x509), meta->not_after) == NULL) {
-    log_error("X509_gmtime_adj fail");
-    return -1;
+  if (meta->not_after_absolute) {
+    if (meta->not_after) {
+      log_error("Only not_after_absolute or not_after should be set.");
+      return -1;
+    }
+    ASN1_TIME *notAfter = ASN1_TIME_set(NULL, 0);
+    if (ASN1_TIME_set_string(notAfter, meta->not_after_absolute) != 1) {
+      log_error("ASN1_TIME_set_string failed to set string %s",
+                meta->not_after_absolute);
+      ASN1_STRING_free(notAfter);
+      return -1;
+    }
+
+    if (ASN1_TIME_normalize(notAfter) != 1) {
+      log_error("ASN1_TIME_normalize failed to normalize string %s",
+                meta->not_after_absolute);
+      ASN1_STRING_free(notAfter);
+      return -1;
+    }
+
+    if (X509_set1_notAfter(x509, notAfter) != 1) {
+      log_error("X509_set1_notAfter failed to set string %s",
+                meta->not_after_absolute);
+      ASN1_STRING_free(notAfter);
+      return -1;
+    }
+
+    ASN1_STRING_free(notAfter);
+  } else {
+    if (X509_gmtime_adj(X509_getm_notAfter(x509), meta->not_after) == NULL) {
+      log_error("X509_gmtime_adj fail");
+      return -1;
+    }
   }
 
   if (meta->issuer != NULL) {

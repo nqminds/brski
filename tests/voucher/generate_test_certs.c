@@ -71,13 +71,14 @@ static void generate_idevid_certs(void **state) {
   // Generate ROOT CA for MASA
   idevid_ca_key.length = crypto_generate_eckey(&idevid_ca_key.array);
 
-  struct crypto_cert_meta idevid_ca_meta = {.serial_number = 1,
-                                            .not_before = 0,
-                                            .not_after = 1234567,
-                                            .issuer = NULL,
-                                            .subject = NULL,
-                                            .basic_constraints =
-                                                "critical,CA:TRUE"};
+  struct crypto_cert_meta idevid_ca_meta = {
+      .serial_number = 1,
+      .not_before = 0,
+      // Long-lived pledge CA cert
+      .not_after_absolute = "99991231235959Z",
+      .issuer = NULL,
+      .subject = NULL,
+      .basic_constraints = "critical,CA:TRUE"};
 
   idevid_ca_meta.issuer = init_keyvalue_list();
   idevid_ca_meta.subject = init_keyvalue_list();
@@ -96,7 +97,9 @@ static void generate_idevid_certs(void **state) {
   {
     struct crypto_cert_meta idev_meta = {.serial_number = 12345,
                                          .not_before = 0,
-                                         .not_after = 1234567,
+                                         // Long-lived pledge certificate
+                                         .not_after_absolute =
+                                             "99991231235959Z",
                                          .issuer = NULL,
                                          .subject = NULL,
                                          .basic_constraints = "CA:false"};
