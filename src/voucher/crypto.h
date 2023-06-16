@@ -24,7 +24,19 @@ typedef void *CRYPTO_CERT;
 
 struct crypto_cert_meta {
   uint64_t serial_number;
+  /**
+   * Certificate validity "Not Before" offset.
+   *
+   * This is the number of seconds after the current time for the certificate
+   * to start being valid.
+   */
   long not_before;
+  /**
+   * Certificate validity "Not After" offset.
+   *
+   * This is the number of seconds after the current for the certificate to
+   * stop being valid (aka expire).
+   */
   long not_after;
 
   /*
