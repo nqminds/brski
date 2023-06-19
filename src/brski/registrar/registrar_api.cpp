@@ -228,6 +228,9 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   if (post_voucher_request(voucher_request_cms.get(), mconf, rconf, response) <
       0) {
     log_error("post_voucher_request fail");
+    response.assign(
+        "Voucher request to the MASA server failed. Please contact the "
+        "webmaster of the registrar server if this error persists.");
     return 502;
   }
 
