@@ -100,6 +100,9 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   idev_meta.issuer = init_keyvalue_list();
   idev_meta.subject = init_keyvalue_list();
 
+  // The status_code to return
+  int status_code = 400;
+
   if (crypto_getcert_meta(peer_certificate, &idev_meta) < 0) {
     log_error("crypto_getcert_meta");
     goto registrar_requestvoucher_fail;
@@ -172,18 +175,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     goto registrar_requestvoucher_fail;
   }
 
-  free_binary_array(registrar_tls_cert);
-  free_binary_array(registrar_sign_cert);
-  free_binary_array(registrar_sign_key);
-  free_array_list(pledge_verify_certs);
-  free_array_list(pledge_store_certs);
-  free_array_list(additional_registrar_certs);
-  free_binary_array(voucher_request_cms);
-  free_binary_array(idevid_issuer);
-  free_keyvalue_list(idev_meta.issuer);
-  free_keyvalue_list(idev_meta.subject);
-  free_binary_array_content(&pledge_voucher_request_cms);
-  return 200;
+  status_code = 200;
 
 registrar_requestvoucher_fail:
   free_binary_array(registrar_tls_cert);
@@ -197,7 +189,7 @@ registrar_requestvoucher_fail:
   free_keyvalue_list(idev_meta.issuer);
   free_keyvalue_list(idev_meta.subject);
   free_binary_array_content(&pledge_voucher_request_cms);
-  return 400;
+  return status_code;
 }
 
 int registrar_voucher_status(const RequestHeader &request_header,
