@@ -134,7 +134,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
 
   if (get_localtime(&created_on) < 0) {
     log_error("get_localtime fail");
-    return 400;
+    return 500;
   }
 
   auto registrar_tls_cert =
@@ -144,7 +144,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
       };
   if (registrar_tls_cert == nullptr) {
     log_error("file_to_x509buf fail");
-    return 400;
+    return 500;
   }
 
   auto registrar_sign_cert =
@@ -154,7 +154,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
       };
   if (registrar_sign_cert == nullptr) {
     log_error("file_to_x509buf fail");
-    return 400;
+    return 500;
   }
 
   auto registrar_sign_key =
@@ -164,7 +164,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
       };
   if (registrar_sign_key == nullptr) {
     log_error("file_to_keybuf fail");
-    return 400;
+    return 500;
   }
 
   auto pledge_verify_certs =
@@ -176,7 +176,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     BinaryArrayList *ptr = nullptr;
     if (load_cert_files(rconf->cms_verify_certs_paths, &ptr) < 0) {
       log_error("load_cert_files");
-      return 400;
+      return 500;
     }
     pledge_verify_certs.reset(ptr);
   }
@@ -190,7 +190,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     BinaryArrayList *ptr = nullptr;
     if (load_cert_files(rconf->cms_verify_store_paths, &ptr) < 0) {
       log_error("load_cert_files");
-      return 400;
+      return 500;
     }
     pledge_store_certs.reset(ptr);
   }
@@ -204,7 +204,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     BinaryArrayList *ptr = nullptr;
     if (load_cert_files(rconf->cms_add_certs_paths, &ptr) < 0) {
       log_error("load_cert_files");
-      return 400;
+      return 500;
     }
     additional_registrar_certs.reset(ptr);
   }
@@ -228,7 +228,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   if (post_voucher_request(voucher_request_cms.get(), mconf, rconf, response) <
       0) {
     log_error("post_voucher_request fail");
-    return 400;
+    return 502;
   }
 
   return 200;
