@@ -9,6 +9,7 @@
  */
 #include <functional>
 #include <memory>
+#include <new>
 #include <string>
 
 #include "../http/http.h"
@@ -93,6 +94,9 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     CrypoCertMeta() {
       this->issuer = init_keyvalue_list();
       this->subject = init_keyvalue_list();
+      if (this->issuer == nullptr || this->subject == nullptr) {
+        throw std::bad_alloc();
+      }
     }
     ~CrypoCertMeta() {
       free_keyvalue_list(this->issuer);
