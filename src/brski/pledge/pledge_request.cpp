@@ -100,9 +100,8 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   }
 
   if (pconf->nonce != NULL) {
-    if ((nonce = (struct BinaryArray *)sys_zalloc(
-             sizeof(struct BinaryArray))) == NULL) {
-      log_errno("sys_zalloc");
+    if ((nonce = init_binary_array()) == NULL) {
+      log_errno("init_binary_array");
       goto post_voucher_pledge_request_fail;
     }
     ssize_t length;

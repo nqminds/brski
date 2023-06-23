@@ -48,9 +48,9 @@ voucher_pledge_request_to_array(const struct pledge_config *pconf,
 
   struct BinaryArray *nonce = NULL;
   if (pconf->nonce != NULL) {
-    if ((nonce = (struct BinaryArray *)sys_zalloc(
-             sizeof(struct BinaryArray))) == NULL) {
-      log_errno("sys_zalloc");
+    nonce = init_binary_array();
+    if (nonce == NULL) {
+      log_errno("init_binary_array");
       return NULL;
     }
     ssize_t length;

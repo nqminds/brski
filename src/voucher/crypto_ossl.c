@@ -272,10 +272,9 @@ struct BinaryArray *file_to_x509buf(const char *filename) {
   }
   fclose(fp);
 
-  struct BinaryArray *cert = sys_zalloc(sizeof(struct BinaryArray));
-
+  struct BinaryArray *cert = init_binary_array();
   if (cert == NULL) {
-    log_errno("sys_zalloc");
+    log_errno("init_binary_array");
     X509_free(x509);
     return NULL;
   }
@@ -310,10 +309,9 @@ struct BinaryArray *file_to_keybuf(const char *filename) {
   }
   fclose(fp);
 
-  struct BinaryArray *key = sys_zalloc(sizeof(struct BinaryArray));
-
+  struct BinaryArray *key = init_binary_array();
   if (key == NULL) {
-    log_errno("sys_zalloc");
+    log_errno("init_binary_array");
     EVP_PKEY_free(pkey);
     return NULL;
   }
@@ -393,9 +391,9 @@ struct BinaryArray *crypto_generate_rsakey(const int bits) {
   EVP_PKEY_CTX *ctx;
   EVP_PKEY *pkey = NULL;
 
-  struct BinaryArray *key = sys_zalloc(sizeof(struct BinaryArray));
+  struct BinaryArray *key = init_binary_array();
   if (key == NULL) {
-    log_errno("sys_zalloc");
+    log_errno("init_binary_array");
     return NULL;
   }
 
@@ -682,10 +680,10 @@ struct BinaryArray *crypto_getcert_issuer(CRYPTO_CERT cert) {
     return NULL;
   }
 
-  struct BinaryArray *issuer_array = sys_zalloc(sizeof(struct BinaryArray));
+  struct BinaryArray *issuer_array = init_binary_array();
 
   if (issuer_array == NULL) {
-    log_errno("sys_zalloc");
+    log_errno("init_binary_array");
     BIO_free(mem_data);
     return NULL;
   }
