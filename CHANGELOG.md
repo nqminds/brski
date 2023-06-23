@@ -10,6 +10,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 * brski tool to demonstrate the Registrar and MASA functionalities
 
+#### voucher
+
+* add `init_binary_array()`, which initializes a new empty `struct BinaryArray`.
+
 #### Build
 
 * add `BUILD_JSMN` CMake option. Set this to `OFF` in case you want to use

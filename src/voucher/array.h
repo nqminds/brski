@@ -189,6 +189,14 @@ void free_binary_array(struct BinaryArray *arr);
 #endif /* __GNUC__ >= 11 */
 
 /**
+ * @brief Initializes a new empty binary array.
+ *
+ * @return Initialized binary array that must be deallocated with
+ * free_binary_array(), or `NULL` on failure.
+ */
+__must_free_binary_array struct BinaryArray *init_binary_array(void);
+
+/**
  * @brief Compare two binary arrays
  *
  * @param[in] src The source binary array
