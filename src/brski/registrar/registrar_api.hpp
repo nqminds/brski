@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include "../http/http.h"
+#include "../http/http.hpp"
 
 /**
  * @brief Registrar request voucher handler

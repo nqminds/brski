@@ -9,8 +9,8 @@
  */
 #include <string>
 
-#include "../http/http.h"
-#include "../http/https_client.h"
+#include "../http/http.hpp"
+#include "../http/https_client.hpp"
 
 #include "masa_config.h"
 

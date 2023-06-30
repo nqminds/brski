@@ -9,10 +9,10 @@
  */
 #include <string>
 
-#include "../http/http.h"
-#include "../http/https_client.h"
-#include "../masa/masa_api.h"
-#include "registrar_api.h"
+#include "../http/http.hpp"
+#include "../http/https_client.hpp"
+#include "../masa/masa_api.hpp"
+#include "registrar_api.hpp"
 #include "registrar_config.h"
 
 extern "C" {

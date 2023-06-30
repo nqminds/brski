@@ -17,7 +17,7 @@ extern "C" {
 #include "../../voucher/crypto.h"
 }
 
-#include "http.h"
+#include "http.hpp"
 
 void get_request_header(const httplib::Request &req,
                         RequestHeader &request_header) {

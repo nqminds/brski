@@ -11,7 +11,7 @@
 #ifndef REGISTRAR_SERVER_H
 #define REGISTRAR_SERVER_H
 
-#include "../http/http.h"
+#include "../http/http.hpp"
 #include "registrar_config.h"
 
 /**

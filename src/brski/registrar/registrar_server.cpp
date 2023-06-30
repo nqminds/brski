@@ -7,19 +7,19 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the registrar server.
  */
-#include "../http/http.h"
-#include "../http/https_server.h"
+#include "../http/http.hpp"
+#include "../http/https_server.hpp"
 
 extern "C" {
 #include "../../utils/log.h"
 }
 
-#include "../masa/masa_api.h"
+#include "../masa/masa_api.hpp"
 #include "../masa/masa_config.h"
 #include "../pledge/pledge_config.h"
-#include "registrar_api.h"
+#include "registrar_api.hpp"
 #include "registrar_config.h"
-#include "registrar_server.h"
+#include "registrar_server.hpp"
 
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
   routes.push_back({.path = std::string(PATH_BRSKI_REQUESTVOUCHER),
