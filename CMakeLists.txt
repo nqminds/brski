@@ -166,6 +166,7 @@ set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH};${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Include the libraries
 include(cmocka)
+include(cpr) # need to call `FetchContent_MakeAvailable(cpr)` later
 include(openssl3)
 include(httplib)
 include(minIni)

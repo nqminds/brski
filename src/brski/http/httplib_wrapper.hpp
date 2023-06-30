@@ -34,25 +34,4 @@ int httplib_start(struct http_config *config,
  */
 void httplib_stop(void *srv_ctx);
 
-/**
- * @brief Sends a POST request to an endpoint
- *
- * @param[in] client_key_path The https client key path
- * @param[in] client_cert_path The https client cert path
- * @param[in] host The https server host name
- * @param[in] port The https server port name
- * @param[in] path The endpoint route path string
- * @param[in] verify Enable server certificate verification
- * @param[in] body The request body string
- * @param[in] content_type The content typ string
- * @param[out] response The output response string
- * @return int the status code on success, -1 on failure
- */
-int httplib_post_request(const std::string &client_key_path,
-                         const std::string &client_cert_path,
-                         const std::string &host, int port,
-                         const std::string &path, bool verify,
-                         const std::string &body,
-                         const std::string &content_type,
-                         std::string &response);
 #endif
