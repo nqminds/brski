@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   your system's [jsmn](https://github.com/zserge/jsmn) lib, instead of
   downloading it automatically.
 
+### Changes
+
+#### Build
+
+* C++17 is now required to build the `brski` CLI tool.
+
 ## [0.2.0] - 2023-03-27
 ### Added
 * Voucher artifact implementation as per [RFC8366](https://www.rfc-editor.org/info/rfc8366),
