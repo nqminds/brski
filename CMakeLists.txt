@@ -170,6 +170,8 @@ include(openssl3)
 include(httplib)
 include(minIni)
 include(jsmn)
+set(BUILD_uwebsocket true)
+include(uWebSocket)
 
 # On Linux, creates a Threads::Threads target that points to pthread
 set(THREADS_PREFER_PTHREAD_FLAG TRUE)
