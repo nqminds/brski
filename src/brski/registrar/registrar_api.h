@@ -18,7 +18,11 @@
 /**
  * @brief Registrar request voucher handler
  *
- * @return int 0 on success, -1 on failure
+ * @return The HTTP status code.
+ * @retval 200 OK.
+ * @retval 400 Bad Request (malformed request).
+ * @retval 500 Internal Server Error (e.g. invalid config).
+ * @retval 502 Bad Gateway (e.g. could not send requests to MASA server)
  */
 int registrar_requestvoucher(const RequestHeader &request_header,
                              const std::string &request_body,
@@ -29,7 +33,8 @@ int registrar_requestvoucher(const RequestHeader &request_header,
 /**
  * @brief Registrar voucher status handler
  *
- * @return int 0 on success, -1 on failure
+ * @return The HTTP status code.
+ * @retval 200 OK.
  */
 int registrar_voucher_status(const RequestHeader &request_header,
                              const std::string &request_body,
@@ -40,7 +45,8 @@ int registrar_voucher_status(const RequestHeader &request_header,
 /**
  * @brief Registrar request audit log handler
  *
- * @return int 0 on success, -1 on failure
+ * @return The HTTP status code.
+ * @retval 200 OK.
  */
 int registrar_requestauditlog(const RequestHeader &request_header,
                               const std::string &request_body,
@@ -51,7 +57,8 @@ int registrar_requestauditlog(const RequestHeader &request_header,
 /**
  * @brief Registrar enroll status handler
  *
- * @return int 0 on success, -1 on failure
+ * @return The HTTP status code.
+ * @retval 200 OK.
  */
 int registrar_enrollstatus(const RequestHeader &request_header,
                            const std::string &request_body,
