@@ -6,7 +6,8 @@ Build-Depends: debhelper-compat (= 12),
     ca-certificates, cmake (>=3.15.0),
     libssl-dev (>=3.0.0),
     libminini-dev (>=1.2),
-    libjsmn-dev (>=1.1.0)
+    libjsmn-dev (>=1.1.0),
+    git
 Standards-Version: 4.5.0
 Homepage: https://github.com/nqminds/brski
 Vcs-Browser: https://github.com/nqminds/brski

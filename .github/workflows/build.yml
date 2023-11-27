@@ -81,7 +81,7 @@ jobs:
         timeout-minutes: 10
       - name: Install dependencies
         run: |
-          sudo apt-get update && sudo apt-get install pbuilder debhelper -y
+          sudo apt-get update && sudo apt-get install git pbuilder debhelper -y
       - name: Setup pdebuilderrc for cross-compiling
         env:
           PBUILDER_RC: |
