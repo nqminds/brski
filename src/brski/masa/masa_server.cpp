@@ -7,12 +7,12 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the masa server.
  */
-#include "../http/http.h"
-#include "../http/https_server.h"
+#include "../http/http.hpp"
+#include "../http/https_server.hpp"
 
-#include "masa_api.h"
+#include "masa_api.hpp"
 #include "masa_config.h"
-#include "masa_server.h"
+#include "masa_server.hpp"
 
 extern "C" {
 #include "../../utils/log.h"

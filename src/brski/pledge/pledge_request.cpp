@@ -14,10 +14,10 @@
 
 #include "pledge_config.h"
 
-#include "../http/https_client.h"
-#include "../masa/masa_api.h"
+#include "../http/https_client.hpp"
+#include "../masa/masa_api.hpp"
 #include "../masa/masa_config.h"
-#include "../registrar/registrar_api.h"
+#include "../registrar/registrar_api.hpp"
 #include "../registrar/registrar_config.h"
 
 #include "../config.h"

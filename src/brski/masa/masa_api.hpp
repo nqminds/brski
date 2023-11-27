@@ -13,7 +13,7 @@
 
 #include <vector>
 
-#include "../http/http.h"
+#include "../http/http.hpp"
 
 #define BRSKI_PREFIX_PATH "/.well-known/brski"
 #define PATH_BRSKI_REQUESTVOUCHER BRSKI_PREFIX_PATH "/requestvoucher"

@@ -11,7 +11,7 @@
 #ifndef MASA_SERVER_H
 #define MASA_SERVER_H
 
-#include "../http/http.h"
+#include "../http/http.hpp"
 #include "masa_config.h"
 
 /**

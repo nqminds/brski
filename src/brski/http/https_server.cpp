@@ -7,8 +7,8 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the https server.
  */
-#include "https_server.h"
-#include "http.h"
+#include "https_server.hpp"
+#include "http.hpp"
 
 extern "C" {
 #include "../../utils/log.h"
@@ -16,7 +16,7 @@ extern "C" {
 }
 
 #ifdef WITH_CPPHTTPLIB_LIB
-#include "httplib_wrapper.h"
+#include "httplib_wrapper.hpp"
 #endif
 
 int https_start(struct http_config *config,

@@ -16,7 +16,7 @@ extern "C" {
 }
 
 #ifdef WITH_CPPHTTPLIB_LIB
-#include "httplib_wrapper.h"
+#include "httplib_wrapper.hpp"
 #endif
 
 int https_post_request(const std::string &client_key_path,

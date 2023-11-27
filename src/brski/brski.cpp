@@ -7,9 +7,9 @@
 #include <string>
 #include <vector>
 
-#include "masa/masa_server.h"
-#include "pledge/pledge_request.h"
-#include "registrar/registrar_server.h"
+#include "masa/masa_server.hpp"
+#include "pledge/pledge_request.hpp"
+#include "registrar/registrar_server.hpp"
 
 extern "C" {
 #include "../utils/log.h"
