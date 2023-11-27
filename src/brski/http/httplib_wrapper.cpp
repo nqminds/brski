@@ -160,9 +160,11 @@ int httplib_register_routes(httplib::SSLServer *server,
 void set_error_handler(httplib::SSLServer *server) {
   server->set_error_handler(
       [](const httplib::Request &req, httplib::Response &res) {
-        char buf[BUFSIZ];
-        snprintf(buf, sizeof(buf), HTTP_ERROR_REPLY);
-        res.set_content(buf, "text/plain");
+        if (res.body == "") {
+          res.body = HTTP_ERROR_REPLY; // set default error response
+        }
+        // according to BRSKI spec, all errors must be plain text
+        res.set_header("Content-Type", "text/plain");
       });
 }
 

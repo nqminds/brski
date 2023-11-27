@@ -18,7 +18,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   It can be set to `"99991231235959Z"` for a
   [long-lived pledge certificate][rfc8995#2.6.2].
 
-[rfc8995#2.6.2]: https://www.rfc-editor.org/rfc/rfc8995.html#name-infinite-lifetime-of-idevid
+* add `init_binary_array()`, which initializes a new empty `struct BinaryArray`.
 
 #### Build
 

@@ -23,7 +23,8 @@
  * @param[in] pconf The pledge configuration structure
  * @param[in] rconf The registrar configuration structure
  * @param[in] mconf The masa configuration structure
- * @param[out] response The response from the POST request
+ * @param[out] response The pinned domain certificate in DER format, encoded as
+ * base64.
  * @return int 0 on success, -1 on failure
  */
 int post_voucher_pledge_request(struct pledge_config *pconf,

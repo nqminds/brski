@@ -87,6 +87,16 @@ int push_array_list(struct BinaryArrayList *arr_list, uint8_t *const arr,
   return 0;
 }
 
+struct BinaryArray *init_binary_array(void) {
+  struct BinaryArray *binary_array = sys_malloc(sizeof(struct BinaryArrayList));
+  if (binary_array == NULL) {
+    log_errno("sys_malloc");
+    return NULL;
+  }
+  *binary_array = (struct BinaryArray){.array = NULL, .length = 0};
+  return binary_array;
+}
+
 int copy_binary_array(struct BinaryArray *const dst,
                       const struct BinaryArray *src) {
   if (dst == NULL) {
