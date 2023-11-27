@@ -5,7 +5,7 @@ Maintainer: Alexandru Mereacre <mereacre@nquiringminds.com>
 Build-Depends: debhelper-compat (= 12),
     ca-certificates, cmake (>=3.15.0),
     libssl-dev (>=3.0.0),
-    libminini-dev (>=1.2),
+    libminini-dev (>=1.2), zlib1g-dev,
     libjsmn-dev (>=1.1.0), git (>=2.30.0)
 Standards-Version: 4.5.0
 Homepage: https://github.com/nqminds/brski
