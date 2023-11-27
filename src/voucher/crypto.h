@@ -24,8 +24,35 @@ typedef void *CRYPTO_CERT;
 
 struct crypto_cert_meta {
   uint64_t serial_number;
+  /**
+   * Certificate validity "Not Before" offset.
+   *
+   * This is the number of seconds after the current time for the certificate
+   * to start being valid.
+   */
   long not_before;
+  /**
+   * Certificate validity "Not After" offset.
+   *
+   * This is the number of seconds after the current for the certificate to
+   * stop being valid (aka expire).
+   *
+   * Either this or #not_after_absolute must be set (not both).
+   */
   long not_after;
+  /**
+   * Optional Certificate validity "Not After" string.
+   *
+   * This must be an ASN.1 GENERALIZEDTIME string, e.g. in format
+   * `YYYYMMDDHH[MM[SS[.fff]]]Z`.
+   *
+   * Either this or #not_after must be set (not both).
+
+   * Set to `"99991231235959Z"` for a [long-lived pledge certificate][1]
+   * [1]:
+   https://www.rfc-editor.org/rfc/rfc8995.html#name-infinite-lifetime-of-idevid
+   */
+  const char *not_after_absolute;
 
   /*
     Decoded key/value pairs:

@@ -75,8 +75,12 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
     log_error("https_post_request fail");
     return -1;
   }
-
-  log_debug("post_voucher_pledge_request status %d", status);
+  if (status >= 400) {
+    log_error("post_voucher_pledge_request failed with HTTP code %d and "
+              "response: '%s'",
+              status, response.c_str());
+    return -1;
+  }
 
   const char *masa_pledge_voucher_str = response.c_str();
   struct BinaryArray masa_pledge_voucher_cms = {};
@@ -100,9 +104,8 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   }
 
   if (pconf->nonce != NULL) {
-    if ((nonce = (struct BinaryArray *)sys_zalloc(
-             sizeof(struct BinaryArray))) == NULL) {
-      log_errno("sys_zalloc");
+    if ((nonce = init_binary_array()) == NULL) {
+      log_errno("init_binary_array");
       goto post_voucher_pledge_request_fail;
     }
     ssize_t length;
