@@ -12,6 +12,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 #### voucher
 
+* add `not_after_absolute` field to `struct crypto_cert_meta`.
+  Unlike the existing `not_after` field, which represents an offset from the
+  current time, the `not_after_absolute` field represents an absolute time.
+  It can be set to `"99991231235959Z"` for a
+  [long-lived pledge certificate][rfc8995#2.6.2].
+
 * add `init_binary_array()`, which initializes a new empty `struct BinaryArray`.
 
 #### Build
@@ -19,6 +25,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 * add `BUILD_JSMN` CMake option. Set this to `OFF` in case you want to use
   your system's [jsmn](https://github.com/zserge/jsmn) lib, instead of
   downloading it automatically.
+
+### Changed
+
+#### voucher
+
+**The voucher ABI has breaking changes**.
 
 ## [0.2.0] - 2023-03-27
 ### Added

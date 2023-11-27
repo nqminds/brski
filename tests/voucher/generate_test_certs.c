@@ -19,6 +19,17 @@
 #include "voucher/crypto.h"
 #include "voucher/keyvalue.h"
 
+const long SECONDS_IN_YEAR = 10 * 60 * 60 * 24 * 365;
+
+// Default Root CA certificate "Not After" validity offset
+const long CA_NOT_AFTER = 10 * SECONDS_IN_YEAR;
+// Default Subordinate 1 CA certificate "Not After" validity offset
+const long CA1_NOT_AFTER = 5 * SECONDS_IN_YEAR;
+// Default Subordinate 2 CA certificate "Not After" validity offset
+const long CA2_NOT_AFTER = 2 * SECONDS_IN_YEAR;
+// Default end-entity certificate "Not After" validity offset
+const long END_ENTITY_NOT_AFTER = 13 * SECONDS_IN_YEAR / 12; // 13 months
+
 struct context {
   /** The folder to store the certs and keys in */
   const char *output_dir;
@@ -71,13 +82,14 @@ static void generate_idevid_certs(void **state) {
   // Generate ROOT CA for MASA
   idevid_ca_key.length = crypto_generate_eckey(&idevid_ca_key.array);
 
-  struct crypto_cert_meta idevid_ca_meta = {.serial_number = 1,
-                                            .not_before = 0,
-                                            .not_after = 1234567,
-                                            .issuer = NULL,
-                                            .subject = NULL,
-                                            .basic_constraints =
-                                                "critical,CA:TRUE"};
+  struct crypto_cert_meta idevid_ca_meta = {
+      .serial_number = 1,
+      .not_before = 0,
+      // Long-lived pledge CA cert
+      .not_after_absolute = "99991231235959Z",
+      .issuer = NULL,
+      .subject = NULL,
+      .basic_constraints = "critical,CA:TRUE"};
 
   idevid_ca_meta.issuer = init_keyvalue_list();
   idevid_ca_meta.subject = init_keyvalue_list();
@@ -96,7 +108,9 @@ static void generate_idevid_certs(void **state) {
   {
     struct crypto_cert_meta idev_meta = {.serial_number = 12345,
                                          .not_before = 0,
-                                         .not_after = 1234567,
+                                         // Long-lived pledge certificate
+                                         .not_after_absolute =
+                                             "99991231235959Z",
                                          .issuer = NULL,
                                          .subject = NULL,
                                          .basic_constraints = "CA:false"};
@@ -140,7 +154,7 @@ static void generate_ldevid_ca_cert(void **state) {
 
   struct crypto_cert_meta ldevid_ca_meta = {.serial_number = 1,
                                             .not_before = 0,
-                                            .not_after = 1234567,
+                                            .not_after = CA_NOT_AFTER,
                                             .issuer = NULL,
                                             .subject = NULL,
                                             .basic_constraints =
@@ -174,7 +188,7 @@ static void generate_masa_tls_certs(void **state) {
 
   struct crypto_cert_meta masa_tls_ca_meta = {.serial_number = 1,
                                               .not_before = 0,
-                                              .not_after = 1234567,
+                                              .not_after = CA_NOT_AFTER,
                                               .issuer = NULL,
                                               .subject = NULL,
                                               .basic_constraints =
@@ -202,7 +216,7 @@ static void generate_masa_tls_certs(void **state) {
   {
     struct crypto_cert_meta masa_tls_meta = {.serial_number = 12345,
                                              .not_before = 0,
-                                             .not_after = 1234567,
+                                             .not_after = END_ENTITY_NOT_AFTER,
                                              .issuer = NULL,
                                              .subject = NULL,
                                              .basic_constraints = "CA:false"};
@@ -246,7 +260,7 @@ static void generate_registrar_tls_certs(void **state) {
 
   struct crypto_cert_meta registrar_tls_ca_meta = {.serial_number = 1,
                                                    .not_before = 0,
-                                                   .not_after = 1234567,
+                                                   .not_after = CA_NOT_AFTER,
                                                    .issuer = NULL,
                                                    .subject = NULL,
                                                    .basic_constraints =
@@ -267,13 +281,13 @@ static void generate_registrar_tls_certs(void **state) {
       &registrar_tls_ca_meta, registrar_tls_ca_key.array,
       registrar_tls_ca_key.length, &registrar_tls_ca_cert.array);
 
-  struct crypto_cert_meta registrar_tls_meta = {.serial_number = 12345,
-                                                .not_before = 0,
-                                                .not_after = 1234567,
-                                                .issuer = NULL,
-                                                .subject = NULL,
-                                                .basic_constraints =
-                                                    "CA:false"};
+  struct crypto_cert_meta registrar_tls_meta = {
+      .serial_number = 12345,
+      .not_before = 0,
+      .not_after = END_ENTITY_NOT_AFTER,
+      .issuer = NULL,
+      .subject = NULL,
+      .basic_constraints = "CA:false"};
 
   registrar_tls_meta.issuer = init_keyvalue_list();
   registrar_tls_meta.subject = init_keyvalue_list();
@@ -348,7 +362,7 @@ static void generate_cms_certs(void **state) {
 
   struct crypto_cert_meta cms_ca_meta = {.serial_number = 1,
                                          .not_before = 0,
-                                         .not_after = 1234567,
+                                         .not_after = CA_NOT_AFTER,
                                          .issuer = NULL,
                                          .subject = NULL,
                                          .basic_constraints =
@@ -373,7 +387,7 @@ static void generate_cms_certs(void **state) {
   {
     struct crypto_cert_meta int2_cms_meta = {.serial_number = 12345,
                                              .not_before = 0,
-                                             .not_after = 1234567,
+                                             .not_after = CA1_NOT_AFTER,
                                              .issuer = NULL,
                                              .subject = NULL,
                                              .basic_constraints = "CA:false"};
@@ -404,7 +418,7 @@ static void generate_cms_certs(void **state) {
     {
       struct crypto_cert_meta int1_cms_meta = {.serial_number = 12345,
                                                .not_before = 0,
-                                               .not_after = 1234567,
+                                               .not_after = CA2_NOT_AFTER,
                                                .issuer = NULL,
                                                .subject = NULL,
                                                .basic_constraints = "CA:false"};
@@ -433,13 +447,13 @@ static void generate_cms_certs(void **state) {
           save_cert("int1-cms", context, &int1_cms_key, &int1_cms_cert), errno);
 
       {
-        struct crypto_cert_meta pledge_cms_meta = {.serial_number = 1,
-                                                   .not_before = 0,
-                                                   .not_after = 1234567,
-                                                   .issuer = NULL,
-                                                   .subject = NULL,
-                                                   .basic_constraints =
-                                                       "CA:false"};
+        struct crypto_cert_meta pledge_cms_meta = {
+            .serial_number = 1,
+            .not_before = 0,
+            .not_after = END_ENTITY_NOT_AFTER,
+            .issuer = NULL,
+            .subject = NULL,
+            .basic_constraints = "CA:false"};
 
         pledge_cms_meta.issuer = init_keyvalue_list();
         pledge_cms_meta.subject = init_keyvalue_list();
@@ -473,13 +487,13 @@ static void generate_cms_certs(void **state) {
       }
 
       {
-        struct crypto_cert_meta registrar_cms_meta = {.serial_number = 1,
-                                                      .not_before = 0,
-                                                      .not_after = 1234567,
-                                                      .issuer = NULL,
-                                                      .subject = NULL,
-                                                      .basic_constraints =
-                                                          "CA:false"};
+        struct crypto_cert_meta registrar_cms_meta = {
+            .serial_number = 1,
+            .not_before = 0,
+            .not_after = END_ENTITY_NOT_AFTER,
+            .issuer = NULL,
+            .subject = NULL,
+            .basic_constraints = "CA:false"};
 
         registrar_cms_meta.issuer = init_keyvalue_list();
         registrar_cms_meta.subject = init_keyvalue_list();
@@ -514,13 +528,13 @@ static void generate_cms_certs(void **state) {
       }
 
       {
-        struct crypto_cert_meta masa_cms_meta = {.serial_number = 1,
-                                                 .not_before = 0,
-                                                 .not_after = 1234567,
-                                                 .issuer = NULL,
-                                                 .subject = NULL,
-                                                 .basic_constraints =
-                                                     "CA:false"};
+        struct crypto_cert_meta masa_cms_meta = {
+            .serial_number = 1,
+            .not_before = 0,
+            .not_after = END_ENTITY_NOT_AFTER,
+            .issuer = NULL,
+            .subject = NULL,
+            .basic_constraints = "CA:false"};
 
         masa_cms_meta.issuer = init_keyvalue_list();
         masa_cms_meta.subject = init_keyvalue_list();
