@@ -899,28 +899,25 @@ struct BinaryArray *sign_eccms_voucher(struct Voucher *voucher,
     return NULL;
   }
 
-  uint8_t *cms = NULL;
-  ssize_t cms_length =
-      crypto_sign_eccms((uint8_t *)serialized, strlen(serialized), cert->array,
-                        cert->length, key->array, key->length, certs, &cms);
-
-  if (cms_length < 0) {
-    log_error("crypto_sign_eccms fail");
+  struct BinaryArray *cms = init_binary_array();
+  if (cms == NULL) {
+    log_errno("init_binary_array");
     sys_free(serialized);
     return NULL;
   }
+  ssize_t cms_length = crypto_sign_eccms(
+      (uint8_t *)serialized, strlen(serialized), cert->array, cert->length,
+      key->array, key->length, certs, &cms->array);
+
   sys_free(serialized);
-
-  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
-  if (out == NULL) {
-    log_errno("sys_malloc");
-    sys_free(cms);
+  if (cms_length < 0) {
+    log_error("crypto_sign_eccms fail");
+    free_binary_array(cms);
     return NULL;
+  } else {
+    cms->length = cms_length;
   }
-
-  out->array = cms;
-  out->length = cms_length;
-  return out;
+  return cms;
 }
 
 struct BinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
@@ -949,28 +946,25 @@ struct BinaryArray *sign_rsacms_voucher(struct Voucher *voucher,
     return NULL;
   }
 
-  uint8_t *cms = NULL;
-  ssize_t cms_length =
-      crypto_sign_rsacms((uint8_t *)serialized, strlen(serialized), cert->array,
-                         cert->length, key->array, key->length, certs, &cms);
-
-  if (cms_length < 0) {
-    log_error("crypto_sign_eccms fail");
+  struct BinaryArray *cms = init_binary_array();
+  if (cms == NULL) {
+    log_errno("init_binary_array");
     sys_free(serialized);
     return NULL;
   }
+  ssize_t cms_length = crypto_sign_rsacms(
+      (uint8_t *)serialized, strlen(serialized), cert->array, cert->length,
+      key->array, key->length, certs, &cms->array);
+
   sys_free(serialized);
-
-  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
-  if (out == NULL) {
-    log_errno("sys_malloc");
-    sys_free(cms);
+  if (cms_length < 0) {
+    log_error("crypto_sign_rsacms fail");
+    free_binary_array(cms);
     return NULL;
+  } else {
+    cms->length = cms_length;
   }
-
-  out->array = cms;
-  out->length = cms_length;
-  return out;
+  return cms;
 }
 
 __must_sys_free struct BinaryArray *
@@ -999,28 +993,25 @@ sign_cms_voucher(struct Voucher *voucher, const struct BinaryArray *cert,
     return NULL;
   }
 
-  uint8_t *cms = NULL;
-  ssize_t cms_length =
-      crypto_sign_cms((uint8_t *)serialized, strlen(serialized), cert->array,
-                      cert->length, key->array, key->length, certs, &cms);
-
-  if (cms_length < 0) {
-    log_error("crypto_sign_eccms fail");
+  struct BinaryArray *cms = init_binary_array();
+  if (cms == NULL) {
+    log_errno("init_binary_array");
     sys_free(serialized);
     return NULL;
   }
+  ssize_t cms_length = crypto_sign_cms(
+      (uint8_t *)serialized, strlen(serialized), cert->array, cert->length,
+      key->array, key->length, certs, &cms->array);
+
   sys_free(serialized);
-
-  struct BinaryArray *out = sys_malloc(sizeof(struct BinaryArray));
-  if (out == NULL) {
-    log_errno("sys_malloc");
-    sys_free(cms);
+  if (cms_length < 0) {
+    log_error("crypto_sign_cms fail");
+    free_binary_array(cms);
     return NULL;
+  } else {
+    cms->length = cms_length;
   }
-
-  out->array = cms;
-  out->length = cms_length;
-  return out;
+  return cms;
 }
 
 struct Voucher *verify_cms_voucher(const struct BinaryArray *cms,

@@ -44,7 +44,8 @@ const std::array<struct command_config, 4> command_list = {{
     {"epvr", CommandId::COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
     {"preq", CommandId::COMMAND_PLEDGE_REQUEST,
-     "\tpreq\t\tSend a pledge-voucher request to the registrar"},
+     "\tpreq\t\tSend a pledge-voucher request to the registrar and\n"
+     "\t\t\t return the pinned-domain-cert."},
     {"registrar", CommandId::COMMAND_START_REGISTRAR,
      "\tregistrar\tStarts the registrar"},
     {"masa", CommandId::COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
@@ -217,7 +218,6 @@ int main(int argc, char *argv[]) {
 
   struct RegistrarContext *rcontext = NULL;
   struct MasaContext *mcontext = NULL;
-  std::string response;
   switch (command_id) {
     case CommandId::COMMAND_EXPORT_PVR:
       std::fprintf(stdout, "Exporting pledge voucher request to %s",
@@ -229,9 +229,10 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
       }
       break;
-    case CommandId::COMMAND_PLEDGE_REQUEST:
+    case CommandId::COMMAND_PLEDGE_REQUEST: {
       std::fprintf(stdout, "Pledge voucher request to %s:%d\n",
                    config.rconf.bind_address, config.rconf.port);
+      std::string response;
       if (post_voucher_pledge_request(&config.pconf, &config.rconf,
                                       &config.mconf, response) < 0) {
         std::fprintf(stderr, "post_voucher_pledge_request fail");
@@ -239,6 +240,7 @@ int main(int argc, char *argv[]) {
       }
       std::fprintf(stdout, "%s\n", response.c_str());
       break;
+    }
     case CommandId::COMMAND_START_REGISTRAR:
       if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
                           &rcontext) < 0) {

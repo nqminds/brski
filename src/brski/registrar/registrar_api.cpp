@@ -7,6 +7,9 @@
  * SPDX-License-Identifier: MIT
  * @brief File containing the implementation of the registrar routes.
  */
+#include <functional>
+#include <memory>
+#include <new>
 #include <string>
 
 #include "../http/http.hpp"
@@ -80,15 +83,6 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   struct registrar_config *rconf = context->rconf;
   struct masa_config *mconf = context->mconf;
 
-  struct BinaryArray pledge_voucher_request_cms = {};
-  struct BinaryArray *idevid_issuer = NULL;
-  struct BinaryArray *registrar_tls_cert = NULL;
-  struct BinaryArray *registrar_sign_cert = NULL;
-  struct BinaryArray *registrar_sign_key = NULL;
-  struct BinaryArrayList *pledge_verify_certs = NULL;
-  struct BinaryArrayList *pledge_store_certs = NULL;
-  struct BinaryArrayList *additional_registrar_certs = NULL;
-  struct BinaryArray *voucher_request_cms = NULL;
   struct tm created_on = {0};
   char *serial_number = NULL;
   const char *cms_str = request_body.c_str();
@@ -96,108 +90,151 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   log_trace("registrar_requestvoucher:");
   response_header["Content-Type"] = "application/voucher-cms+json";
 
-  struct crypto_cert_meta idev_meta = {};
-  idev_meta.issuer = init_keyvalue_list();
-  idev_meta.subject = init_keyvalue_list();
+  struct CrypoCertMeta : public crypto_cert_meta {
+    CrypoCertMeta() {
+      this->issuer = init_keyvalue_list();
+      this->subject = init_keyvalue_list();
+      if (this->issuer == nullptr || this->subject == nullptr) {
+        throw std::bad_alloc();
+      }
+    }
+    ~CrypoCertMeta() {
+      free_keyvalue_list(this->issuer);
+      free_keyvalue_list(this->subject);
+    }
+  } idev_meta;
 
   if (crypto_getcert_meta(peer_certificate, &idev_meta) < 0) {
     log_error("crypto_getcert_meta");
-    goto registrar_requestvoucher_fail;
+    return 400;
   }
 
   serial_number = get_cert_serial(&idev_meta);
 
-  if ((idevid_issuer = crypto_getcert_issuer(peer_certificate)) == NULL) {
+  auto idevid_issuer = std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
+      crypto_getcert_issuer(peer_certificate),
+      [](BinaryArray *b) { free_binary_array(b); },
+  };
+  if (idevid_issuer == nullptr) {
     log_error("crypto_getcert_issuer fail");
-    goto registrar_requestvoucher_fail;
+    return 400;
   }
 
-  if ((pledge_voucher_request_cms.length =
+  auto pledge_voucher_request_cms =
+      std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
+          static_cast<BinaryArray *>(std::malloc(sizeof(BinaryArray))),
+          [](BinaryArray *b) { free_binary_array(b); },
+      };
+  if ((pledge_voucher_request_cms->length =
            serialize_base64str2array((const uint8_t *)cms_str, strlen(cms_str),
-                                     &pledge_voucher_request_cms.array)) < 0) {
+                                     &pledge_voucher_request_cms->array)) < 0) {
     log_errno("serialize_base64str2array fail");
-    goto registrar_requestvoucher_fail;
+    return 400;
   }
 
   if (get_localtime(&created_on) < 0) {
     log_error("get_localtime fail");
-    goto registrar_requestvoucher_fail;
+    return 500;
   }
 
-  if ((registrar_tls_cert = file_to_x509buf(rconf->tls_cert_path)) == NULL) {
+  auto registrar_tls_cert =
+      std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
+          file_to_x509buf(rconf->tls_cert_path),
+          [](BinaryArray *b) { free_binary_array(b); },
+      };
+  if (registrar_tls_cert == nullptr) {
     log_error("file_to_x509buf fail");
-    goto registrar_requestvoucher_fail;
+    return 500;
   }
 
-  if ((registrar_sign_cert = file_to_x509buf(rconf->cms_sign_cert_path)) ==
-      NULL) {
+  auto registrar_sign_cert =
+      std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
+          file_to_x509buf(rconf->cms_sign_cert_path),
+          [](BinaryArray *b) { free_binary_array(b); },
+      };
+  if (registrar_sign_cert == nullptr) {
     log_error("file_to_x509buf fail");
-    goto registrar_requestvoucher_fail;
+    return 500;
   }
 
-  if ((registrar_sign_key = file_to_keybuf(rconf->cms_sign_key_path)) == NULL) {
+  auto registrar_sign_key =
+      std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
+          file_to_keybuf(rconf->cms_sign_key_path),
+          [](BinaryArray *b) { free_binary_array(b); },
+      };
+  if (registrar_sign_key == nullptr) {
     log_error("file_to_keybuf fail");
-    goto registrar_requestvoucher_fail;
+    return 500;
   }
 
-  if (load_cert_files(rconf->cms_verify_certs_paths, &pledge_verify_certs) <
-      0) {
-    log_error("load_cert_files");
-    goto registrar_requestvoucher_fail;
+  auto pledge_verify_certs =
+      std::unique_ptr<BinaryArrayList, void (*)(BinaryArrayList *)>{
+          nullptr,
+          [](BinaryArrayList *list) { free_array_list(list); },
+      };
+  {
+    BinaryArrayList *ptr = nullptr;
+    if (load_cert_files(rconf->cms_verify_certs_paths, &ptr) < 0) {
+      log_error("load_cert_files");
+      return 500;
+    }
+    pledge_verify_certs.reset(ptr);
   }
 
-  if (load_cert_files(rconf->cms_verify_store_paths, &pledge_store_certs) < 0) {
-    log_error("load_cert_files");
-    goto registrar_requestvoucher_fail;
+  auto pledge_store_certs =
+      std::unique_ptr<BinaryArrayList, void (*)(BinaryArrayList *)>{
+          nullptr,
+          [](BinaryArrayList *list) { free_array_list(list); },
+      };
+  {
+    BinaryArrayList *ptr = nullptr;
+    if (load_cert_files(rconf->cms_verify_store_paths, &ptr) < 0) {
+      log_error("load_cert_files");
+      return 500;
+    }
+    pledge_store_certs.reset(ptr);
   }
 
-  if (load_cert_files(rconf->cms_add_certs_paths, &additional_registrar_certs) <
-      0) {
-    log_error("load_cert_files");
-    goto registrar_requestvoucher_fail;
+  auto additional_registrar_certs =
+      std::unique_ptr<BinaryArrayList, void (*)(BinaryArrayList *)>{
+          nullptr,
+          [](BinaryArrayList *list) { free_array_list(list); },
+      };
+  {
+    BinaryArrayList *ptr = nullptr;
+    if (load_cert_files(rconf->cms_add_certs_paths, &ptr) < 0) {
+      log_error("load_cert_files");
+      return 500;
+    }
+    additional_registrar_certs.reset(ptr);
   }
 
-  voucher_request_cms = sign_voucher_request(
-      &pledge_voucher_request_cms, &created_on, serial_number, idevid_issuer,
-      registrar_tls_cert, registrar_sign_cert, registrar_sign_key,
-      pledge_verify_certs, pledge_store_certs, additional_registrar_certs);
+  auto voucher_request_cms =
+      std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
+          sign_voucher_request(
+              pledge_voucher_request_cms.get(), &created_on, serial_number,
+              idevid_issuer.get(), registrar_tls_cert.get(),
+              registrar_sign_cert.get(), registrar_sign_key.get(),
+              pledge_verify_certs.get(), pledge_store_certs.get(),
+              additional_registrar_certs.get()),
+          [](BinaryArray *b) { free_binary_array(b); },
+      };
 
-  if (voucher_request_cms == NULL) {
+  if (voucher_request_cms == nullptr) {
     log_error("sign_voucher_request fail");
-    goto registrar_requestvoucher_fail;
+    return 400;
   }
 
-  if (post_voucher_request(voucher_request_cms, mconf, rconf, response) < 0) {
+  if (post_voucher_request(voucher_request_cms.get(), mconf, rconf, response) <
+      0) {
     log_error("post_voucher_request fail");
-    goto registrar_requestvoucher_fail;
+    response.assign(
+        "Voucher request to the MASA server failed. Please contact the "
+        "webmaster of the registrar server if this error persists.");
+    return 502;
   }
 
-  free_binary_array(registrar_tls_cert);
-  free_binary_array(registrar_sign_cert);
-  free_binary_array(registrar_sign_key);
-  free_array_list(pledge_verify_certs);
-  free_array_list(pledge_store_certs);
-  free_array_list(additional_registrar_certs);
-  free_binary_array(voucher_request_cms);
-  free_binary_array(idevid_issuer);
-  free_keyvalue_list(idev_meta.issuer);
-  free_keyvalue_list(idev_meta.subject);
-  free_binary_array_content(&pledge_voucher_request_cms);
   return 200;
-
-registrar_requestvoucher_fail:
-  free_binary_array(registrar_tls_cert);
-  free_binary_array(registrar_sign_cert);
-  free_binary_array(registrar_sign_key);
-  free_array_list(pledge_verify_certs);
-  free_array_list(pledge_store_certs);
-  free_array_list(additional_registrar_certs);
-  free_binary_array(voucher_request_cms);
-  free_binary_array(idevid_issuer);
-  free_keyvalue_list(idev_meta.issuer);
-  free_keyvalue_list(idev_meta.subject);
-  free_binary_array_content(&pledge_voucher_request_cms);
-  return 400;
 }
 
 int registrar_voucher_status(const RequestHeader &request_header,
