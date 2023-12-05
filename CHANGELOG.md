@@ -8,7 +8,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### 🚀 Features
 
-* brski tool to demonstrate the Registrar and MASA functionalities
+* Add the libcurl integration
+
+#### Build
+
+### Changed
+
+## [0.2.1] - 2023-12-05
+
+### 🚀 Features
+
+* Added github CI for debian package release
 
 #### voucher
 
