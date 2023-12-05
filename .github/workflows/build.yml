@@ -1,4 +1,11 @@
 on:
+  release:
+    types:
+      - created
+      - edited # can remove once CI is confirmed working
+      - prereleased
+      - released
+      - published
   push: {}
   pull_request: {}
 
