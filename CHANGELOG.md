@@ -36,11 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   your system's [jsmn](https://github.com/zserge/jsmn) lib, instead of
   downloading it automatically.
 
-### Changed
+### Changes
 
-#### voucher
+#### Build
 
-**The voucher ABI has breaking changes**.
+* C++17 is now required to build the `brski` CLI tool.
 
 ## [0.2.0] - 2023-03-27
 ### Added

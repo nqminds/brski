@@ -155,9 +155,9 @@ add_compile_options(
   $<$<COMPILE_LANGUAGE:C>:-Wextra>
 )
 
-set(CMAKE_CXX_STANDARD 11)
+set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-# use -std=c++11 rather than -std=gnu++11
+# use -std=c++17 rather than -std=gnu++17
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
@@ -166,6 +166,7 @@ set(CMAKE_LIBRARY_PATH "${CMAKE_LIBRARY_PATH};${CMAKE_CURRENT_BINARY_DIR}/lib")
 
 # Include the libraries
 include(cmocka)
+include(cpr) # need to call `FetchContent_MakeAvailable(cpr)` later
 include(openssl3)
 include(httplib)
 include(minIni)
