@@ -8,13 +8,16 @@
  * @brief File containing the implementation of the http library wrapper.
  */
 
-#include <httplib.h>
+#define CPPHTTPLIB_OPENSSL_SUPPORT
+#include "httplib.h"
 #include <openssl/ssl.h>
 
 extern "C" {
 #include "../../utils/log.h"
 #include "../../utils/os.h"
 #include "../../voucher/crypto.h"
+#include "../../voucher/array.h"
+#include "../../voucher/keyvalue.h"
 }
 
 #include "http.hpp"
@@ -238,7 +241,7 @@ int httplib_post_request(const std::string &client_key_path,
                          const std::string &path, bool verify,
                          const std::string &body,
                          const std::string &content_type,
-                         std::string &response) {
+                         struct HttpResponse &http_res) {
 
   httplib::SSLClient cli(host, port, client_cert_path, client_key_path);
 
@@ -246,7 +249,8 @@ int httplib_post_request(const std::string &client_key_path,
 
   log_info("Post request to %s:%d%s", host.c_str(), port, path.c_str());
   if (httplib::Result res = cli.Post(path, body, content_type)) {
-    response = res->body;
+    http_res.peer_certificate = crypto_copycert(cli.server_cert());
+    http_res.response = res->body;
     return res->status;
   } else {
     std::string err = to_string(res.error());

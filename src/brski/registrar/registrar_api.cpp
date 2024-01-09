@@ -61,14 +61,18 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
 
   log_info("Request voucher from MASA %s", path.c_str());
 
+  struct HttpResponse http_res;
   int status = https_post_request(rconf->tls_key_path, rconf->tls_cert_path,
                                   mconf->bind_address, mconf->port, path, false,
-                                  body, content_type, response);
+                                  body, content_type, http_res);
 
   if (status < 0) {
     log_error("https_post_request fail");
     return -1;
+
   }
+
+  response = http_res.response;
 
   return 0;
 }

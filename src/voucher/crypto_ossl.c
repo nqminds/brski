@@ -578,9 +578,37 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   return ctx;
 }
 
+CRYPTO_CERT crypto_copycert(CRYPTO_CERT cert) {
+  X509 *x509;
+  uint8_t *buf = NULL;
+  size_t length;
+
+  if (cert == NULL)
+    return NULL;
+
+  if ((length = cert_to_derbuf(cert, &buf)) == 0)
+    return NULL;
+
+  x509 = crypto_cert2context(buf, length);
+  sys_free(buf);
+  return x509;
+}
+
 void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY *pkey = (EVP_PKEY *)ctx;
+  if (pkey == NULL)
+    return;
+
   EVP_PKEY_free(pkey);
+}
+
+void crypto_free_certcontext(CRYPTO_KEY cert) {
+  X509 *x509 = (X509 *)cert;
+
+  if (x509 == NULL)
+    return;
+
+  X509_free(x509);
 }
 
 int get_x509_entry(X509_NAME *name, int nid, char **out) {

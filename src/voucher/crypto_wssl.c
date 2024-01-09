@@ -17,6 +17,11 @@
 
 #include "crypto_defs.h"
 
+CRYPTO_CERT crypto_copycert(CRYPTO_CERT cert) {
+  (void)cert;
+  return NULL;
+}
+
 ssize_t crypto_generate_rsakey(int bits, uint8_t **key) {
   (void)bits;
   (void)key;
@@ -41,6 +46,7 @@ CRYPTO_KEY crypto_rsakey2context(uint8_t *key, size_t length) {
 }
 
 void crypto_free_keycontext(CRYPTO_KEY ctx) { (void)ctx; }
+void crypto_free_certcontext(CRYPTO_CERT cert) { (void)cert; }
 
 ssize_t crypto_generate_eccert(struct crypto_cert_meta *meta, uint8_t *key,
                                size_t key_length, uint8_t **cert) {

@@ -45,7 +45,7 @@ void httplib_stop(void *srv_ctx);
  * @param[in] verify Enable server certificate verification
  * @param[in] body The request body string
  * @param[in] content_type The content typ string
- * @param[out] response The output response string
+ * @param[out] http_res The output response structure
  * @return int the status code on success, -1 on failure
  */
 int httplib_post_request(const std::string &client_key_path,
@@ -54,5 +54,5 @@ int httplib_post_request(const std::string &client_key_path,
                          const std::string &path, bool verify,
                          const std::string &body,
                          const std::string &content_type,
-                         std::string &response);
+                         struct HttpResponse &http_res);
 #endif

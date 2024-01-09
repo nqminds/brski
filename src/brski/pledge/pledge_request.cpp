@@ -67,9 +67,10 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
 
   log_info("Request pledge voucher from %s", path.c_str());
 
+  struct HttpResponse http_res = {};
   int status = https_post_request(
       pconf->idevid_key_path, pconf->idevid_cert_path, rconf->bind_address,
-      rconf->port, path, false, body, content_type, response);
+      rconf->port, path, false, body, content_type, http_res);
 
   if (status < 0) {
     log_error("https_post_request fail");
@@ -78,11 +79,12 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   if (status >= 400) {
     log_error("post_voucher_pledge_request failed with HTTP code %d and "
               "response: '%s'",
-              status, response.c_str());
+              status, http_res.response.c_str());
+    crypto_free_certcontext(http_res.peer_certificate);
     return -1;
   }
 
-  const char *masa_pledge_voucher_str = response.c_str();
+  const char *masa_pledge_voucher_str = http_res.response.c_str();
   struct BinaryArray masa_pledge_voucher_cms = {};
   struct BinaryArray *nonce = NULL;
   struct BinaryArray *registrar_tls_cert = NULL;
@@ -165,6 +167,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
 
   response.assign(pinned_domain_cert_base64);
 
+  crypto_free_certcontext(http_res.peer_certificate);
   free_binary_array_content(&masa_pledge_voucher_cms);
   free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);
@@ -177,6 +180,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   return 0;
 
 post_voucher_pledge_request_fail:
+  crypto_free_certcontext(http_res.peer_certificate);
   free_binary_array_content(&masa_pledge_voucher_cms);
   free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);

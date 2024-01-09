@@ -9,7 +9,7 @@
       "type": "cppdbg",
       "request": "launch",
       "program": "${workspaceFolder}/build/linux/src/brski/brski",
-      "args": ["-c", "${workspaceFolder}/build/linux/tests/brski/test-config.ini", "-dddddddd", "registrar"],
+      "args": ["-c", "${workspaceFolder}/build/linux/tests/brski/test-config.ini", "-dddddddd", "preq"],
       "stopAtEntry": true,
       "cwd": "${workspaceFolder}",
       "environment": [],

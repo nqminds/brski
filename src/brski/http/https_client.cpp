@@ -24,10 +24,10 @@ int https_post_request(const std::string &client_key_path,
                        const std::string &host, int port,
                        const std::string &path, bool verify,
                        const std::string &body, const std::string &content_type,
-                       std::string &response) {
+                       struct HttpResponse &http_res) {
 #ifdef WITH_CPPHTTPLIB_LIB
   return httplib_post_request(client_key_path, client_cert_path, host, port,
-                              path, verify, body, content_type, response);
+                              path, verify, body, content_type, http_res);
 #else
   log_error("No https client defined");
   return -1;

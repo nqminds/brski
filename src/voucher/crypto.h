@@ -17,10 +17,10 @@
 #include "array.h"
 
 /* The generalized context for a private key */
-typedef void *CRYPTO_KEY;
+typedef void* CRYPTO_KEY;
 
 /* The generalized context for a certificate */
-typedef void *CRYPTO_CERT;
+typedef void* CRYPTO_CERT;
 
 struct crypto_cert_meta {
   uint64_t serial_number;
@@ -82,6 +82,14 @@ enum CRYPTO_CERTIFICATE_TYPE {
 };
 
 /**
+ * @brief Makes a copy of the certificate structire
+ *
+ * @param[in] cert The input certificate structure
+ * @return CRYPTO_CERT certificate context, NULL on failure
+ */
+CRYPTO_CERT crypto_copycert(CRYPTO_CERT cert);
+
+/**
  * @brief Parses a certificate
  *
  * @param[in] cert The input certificate structure
@@ -131,6 +139,13 @@ ssize_t crypto_generate_eckey(uint8_t **key);
  * @param[in] ctx The key context
  */
 void crypto_free_keycontext(CRYPTO_KEY ctx);
+
+/**
+ * @brief Frees a certificate context
+ *
+ * @param[in] ctx The certificate context
+ */
+void crypto_free_certcontext(CRYPTO_KEY cert);
 
 #if __GNUC__ >= 11 // this syntax will throw an error in GCC 10 or Clang
 #define __must_crypto_free_keycontext                                          \
