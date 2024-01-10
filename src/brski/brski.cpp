@@ -23,9 +23,9 @@ void log_lock_fun(bool lock);
 
 #include "version.h"
 
-const std::string OPT_STRING = ":c:o:dqvh";
+const std::string OPT_STRING = ":c:o:dvh";
 const std::string USAGE_STRING =
-    "\t%s [-c filename] [-o filename] [-d | -q] [-h] [-v] <command>\n";
+    "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n";
 
 enum class CommandId {
   COMMAND_EXPORT_PVR = 1,
@@ -88,10 +88,7 @@ static void show_help(const char *name) {
   std::fprintf(stdout, "\t-o filename\t Path to the exported file\n");
   std::fprintf(
       stdout,
-      "\t-d\t\t Verbosity level (use multiple -dd... to increase verbosity)\n");
-  std::fprintf(stdout,
-               "\t-q\t\t Quietness (decreases verbosity) (use twice to hide "
-               "warnings)\n");
+      "\t-d\t\t Make verbose\n");
   std::fprintf(stdout, "\t-h\t\t Show help\n");
   std::fprintf(stdout, "\t-v\t\t Show app version\n\n");
   std::fprintf(stdout, "Copyright Nquiringminds Ltd\n\n");
@@ -123,7 +120,7 @@ static CommandId get_command_id(const std::string &command_label) {
   throw std::invalid_argument("Unrecognized command: \"" + command_label + '"');
 }
 
-static void process_options(int argc, char *const argv[], int &quietness,
+static void process_options(int argc, char *const argv[], int &verbose,
                             std::string &config_filename,
                             std::string &out_filename, CommandId &command_id) {
   int opt;
@@ -143,10 +140,7 @@ static void process_options(int argc, char *const argv[], int &quietness,
         out_filename.assign(optarg);
         break;
       case 'd':
-        quietness--;
-        break;
-      case 'q':
-        quietness++;
+        verbose = 1;
         break;
       case ':':
         log_cmdline_error("Missing argument for -%c\n", optopt);
@@ -187,32 +181,23 @@ struct BrskiConfig : public brski_config {
 };
 
 int main(int argc, char *argv[]) {
-  int quietness = LOGC_INFO;
-  uint8_t log_level = 0;
+  int verbose = 0;
   std::string config_filename, out_filename;
   CommandId command_id;
 
-  process_options(argc, argv, quietness, config_filename, out_filename,
+  process_options(argc, argv, verbose, config_filename, out_filename,
                   command_id);
-
-  // Clamp quietness to valid log levels enum value
-  // equivalent to C++17 std::clamp(quietness, 0, MAX_LOG_LEVELS - 1)
-  if (quietness >= MAX_LOG_LEVELS) {
-    log_level = MAX_LOG_LEVELS - 1;
-  } else if (quietness < 0) {
-    log_level = 0;
-  } else {
-    log_level = quietness;
-  }
 
   log_set_lock(log_lock_fun);
 
   /* Set the log level */
-  log_set_level(log_level);
+  if (!verbose)
+    log_set_quiet(true);
+  else log_set_level(LOGC_TRACE);
 
   BrskiConfig config;
   if (load_brski_config(config_filename.c_str(), &config) < 0) {
-    std::fprintf(stderr, "load_config fail\n");
+    log_error("load_config fail");
     return EXIT_FAILURE;
   }
 
@@ -220,22 +205,22 @@ int main(int argc, char *argv[]) {
   struct MasaContext *mcontext = NULL;
   switch (command_id) {
     case CommandId::COMMAND_EXPORT_PVR:
-      std::fprintf(stdout, "Exporting pledge voucher request to %s",
+      log_info("Exporting pledge voucher request to %s",
                    out_filename.c_str());
       if (voucher_pledge_request_to_smimefile(&config.pconf,
                                               config.rconf.tls_cert_path,
                                               out_filename.c_str()) < 0) {
-        std::fprintf(stderr, "voucher_pledge_request_to_smimefile fail");
+        log_error("voucher_pledge_request_to_smimefile fail");
         return EXIT_FAILURE;
       }
       break;
     case CommandId::COMMAND_PLEDGE_REQUEST: {
-      std::fprintf(stdout, "Pledge voucher request to %s:%d\n",
+      log_info("Pledge voucher request to %s:%d",
                    config.rconf.bind_address, config.rconf.port);
       std::string response;
       if (post_voucher_pledge_request(&config.pconf, &config.rconf,
                                       &config.mconf, response) < 0) {
-        std::fprintf(stderr, "post_voucher_pledge_request fail");
+        log_error("post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
       std::fprintf(stdout, "%s\n", response.c_str());
@@ -244,7 +229,7 @@ int main(int argc, char *argv[]) {
     case CommandId::COMMAND_START_REGISTRAR:
       if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
                           &rcontext) < 0) {
-        std::fprintf(stderr, "https_start fail");
+        log_error("https_start fail");
         return EXIT_FAILURE;
       }
 
@@ -253,7 +238,7 @@ int main(int argc, char *argv[]) {
     case CommandId::COMMAND_START_MASA:
       if (masa_start(&config.rconf, &config.mconf, &config.pconf, &mcontext) <
           0) {
-        std::fprintf(stderr, "https_start fail");
+        log_error("https_start fail");
         return EXIT_FAILURE;
       }
 
