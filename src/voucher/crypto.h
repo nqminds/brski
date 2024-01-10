@@ -90,6 +90,16 @@ enum CRYPTO_CERTIFICATE_TYPE {
 CRYPTO_CERT crypto_copycert(CRYPTO_CERT cert);
 
 /**
+ * @brief Convert a cert context to a DER binary array
+ *
+ * Caller is responsible for freeing the binary array
+ *
+ * @param[in] cert The input certificate structure
+ * @return struct BinaryArray * the output DER binary array, NULL on failure
+ */
+struct BinaryArray* crypto_cert2buf(CRYPTO_CERT cert);
+
+/**
  * @brief Parses a certificate
  *
  * @param[in] cert The input certificate structure

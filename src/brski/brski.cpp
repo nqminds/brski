@@ -203,16 +203,24 @@ int main(int argc, char *argv[]) {
 
   struct RegistrarContext *rcontext = NULL;
   struct MasaContext *mcontext = NULL;
+  struct BinaryArray *cert = NULL;
   switch (command_id) {
     case CommandId::COMMAND_EXPORT_PVR:
       log_info("Exporting pledge voucher request to %s",
                    out_filename.c_str());
-      if (voucher_pledge_request_to_smimefile(&config.pconf,
-                                              config.rconf.tls_cert_path,
+
+      cert = file_to_x509buf(config.rconf.tls_cert_path);
+      if (cert == NULL) {
+        log_error("file_to_x509buf fail");
+        return EXIT_FAILURE; 
+      }
+
+      if (voucher_pledge_request_to_smimefile(&config.pconf, cert,
                                               out_filename.c_str()) < 0) {
         log_error("voucher_pledge_request_to_smimefile fail");
         return EXIT_FAILURE;
       }
+      free_binary_array(cert);
       break;
     case CommandId::COMMAND_PLEDGE_REQUEST: {
       log_info("Pledge voucher request to %s:%d",
