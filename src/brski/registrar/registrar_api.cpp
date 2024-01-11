@@ -288,3 +288,17 @@ int registrar_enrollstatus(const RequestHeader &request_header,
   response_header["Content-Type"] = "text/plain";
   return 200;
 }
+
+int registrar_signcert(const RequestHeader &request_header,
+                           const std::string &request_body,
+                           CRYPTO_CERT peer_certificate,
+                           ResponseHeader &response_header,
+                           std::string &response, void *context)
+{
+  log_trace("registrar_signcert:");
+  log_trace("%s", request_body.c_str());
+
+  response.assign("registrar_enrollstatus");
+  response_header["Content-Type"] = "text/plain";
+  return 200;
+}

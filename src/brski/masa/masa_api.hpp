@@ -21,6 +21,9 @@
 #define PATH_BRSKI_REQUESTAUDITLOG BRSKI_PREFIX_PATH "/requestauditlog"
 #define PATH_BRSKI_ENROLLSTATUS BRSKI_PREFIX_PATH "/enrollstatus"
 
+/* Not part of the standard */
+#define PATH_BRSKI_SIGNCERT BRSKI_PREFIX_PATH "/signcert"
+
 #define EST_PREFIX_PATH "/.well-known/est"
 #define PATH_EST_CACERTS EST_PREFIX_PATH "/cacerts"
 #define PATH_EST_SIMPLEENROLL EST_PREFIX_PATH "/simpleenroll"

@@ -30,6 +30,7 @@ const std::string USAGE_STRING =
 enum class CommandId {
   COMMAND_EXPORT_PVR = 1,
   COMMAND_PLEDGE_REQUEST,
+  COMMAND_SIGN_CERT,
   COMMAND_START_REGISTRAR,
   COMMAND_START_MASA,
 };
@@ -40,12 +41,13 @@ struct command_config {
   const std::string info;
 };
 
-const std::array<struct command_config, 4> command_list = {{
+const std::array<struct command_config, 5> command_list = {{
     {"epvr", CommandId::COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
     {"preq", CommandId::COMMAND_PLEDGE_REQUEST,
      "\tpreq\t\tSend a pledge-voucher request to the registrar and\n"
      "\t\t\t return the pinned-domain-cert."},
+    {"sign", CommandId::COMMAND_SIGN_CERT, "\tsign\t\tSign a certificate\n"},
     {"registrar", CommandId::COMMAND_START_REGISTRAR,
      "\tregistrar\tStarts the registrar"},
     {"masa", CommandId::COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
