@@ -35,6 +35,29 @@ int https_post_request(const std::string &client_key_path,
                        struct HttpResponse &http_res);
 
 /**
+ * @brief Sends a POST request to an endpoint
+ *
+ * @param[in] client_key_path The https client key path
+ * @param[in] client_cert_path The https client cert path
+ * @param[in] ca The certificate authority string (PEM format)
+ * @param[in] host The https server host name
+ * @param[in] port The https server port name
+ * @param[in] path The endpoint route path string
+ * @param[in] body The request body string
+ * @param[in] content_type The content typ string
+ * @param[out] response The output response string
+ * @return int the status code on success, -1 on failure
+ */
+int https_post_request_ca(const std::string &client_key_path,
+                         const std::string &client_cert_path,
+                         const std::string &ca,
+                         const std::string &host, int port,
+                         const std::string &path,
+                         const std::string &body,
+                         const std::string &content_type,
+                         std::string &response);
+
+/**
  * @brief Returns the full address of a HTTPS server
  *
  * @param[in] bind_address The https server bind address string

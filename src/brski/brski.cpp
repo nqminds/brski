@@ -87,6 +87,7 @@ static void show_help(const char *name) {
   }
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
+  std::fprintf(stdout, "\t-i filename\t Path to the imported file\n");
   std::fprintf(stdout, "\t-o filename\t Path to the exported file\n");
   std::fprintf(
       stdout,
@@ -123,7 +124,7 @@ static CommandId get_command_id(const std::string &command_label) {
 }
 
 static void process_options(int argc, char *const argv[], int &verbose,
-                            std::string &config_filename,
+                            std::string &config_filename, std::string &in_filename,
                             std::string &out_filename, CommandId &command_id) {
   int opt;
 
@@ -137,6 +138,9 @@ static void process_options(int argc, char *const argv[], int &verbose,
         std::exit(EXIT_SUCCESS);
       case 'c':
         config_filename.assign(optarg);
+        break;
+      case 'i':
+        in_filename.assign(optarg);
         break;
       case 'o':
         out_filename.assign(optarg);
@@ -182,13 +186,20 @@ struct BrskiConfig : public brski_config {
   virtual ~BrskiConfig() { free_config_content(this); }
 };
 
+void print_cert(const char *cert)
+{
+  std::fprintf(stdout, "-----BEGIN CERTIFICATE-----\n");
+  std::fprintf(stdout, "%s\n", cert);
+  std::fprintf(stdout, "-----END CERTIFICATE-----\n");
+}
+
 int main(int argc, char *argv[]) {
   int verbose = 0;
-  std::string config_filename, out_filename;
+  std::string config_filename, in_filename, out_filename;
   CommandId command_id;
 
-  process_options(argc, argv, verbose, config_filename, out_filename,
-                  command_id);
+  process_options(argc, argv, verbose, config_filename,
+                  in_filename, out_filename, command_id);
 
   log_set_lock(log_lock_fun);
 
@@ -227,15 +238,28 @@ int main(int argc, char *argv[]) {
     case CommandId::COMMAND_PLEDGE_REQUEST: {
       log_info("Pledge voucher request to %s:%d",
                    config.rconf.bind_address, config.rconf.port);
-      std::string response;
+      std::string cert;
       if (post_voucher_pledge_request(&config.pconf, &config.rconf,
-                                      &config.mconf, response) < 0) {
+                                      &config.mconf, cert) < 0) {
         log_error("post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
-      std::fprintf(stdout, "%s\n", response.c_str());
+      print_cert(cert.c_str());
       break;
     }
+
+    case CommandId::COMMAND_SIGN_CERT: {
+      log_info("Sign cert %s:%d", config.rconf.bind_address, config.rconf.port);
+      std::string cert;
+      if (post_sign_cert(&config.pconf, &config.rconf,
+                         &config.mconf, in_filename.c_str(), cert) < 0) {
+        log_error("post_voucher_pledge_request fail");
+        return EXIT_FAILURE;
+      }
+      print_cert(cert.c_str());
+      break;
+    }
+
     case CommandId::COMMAND_START_REGISTRAR:
       if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
                           &rcontext) < 0) {

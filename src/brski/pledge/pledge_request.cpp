@@ -197,3 +197,45 @@ post_voucher_pledge_request_fail:
   free(pinned_domain_cert_base64);
   return -1;
 }
+
+std::string create_cert_string(const std::string &cert)
+{
+  std::string out = "-----BEGIN CERTIFICATE-----\n";
+  out += out + "\n";
+  out += "\n-----END CERTIFICATE-----\n";
+
+  return out;
+}
+
+int post_sign_cert(struct pledge_config *pconf,
+                   struct registrar_config *rconf,
+                   struct masa_config *mconf,
+                   const char *cert_to_sign_path,
+                   std::string &cert_out)
+{
+  std::string pinned_cert, response, ca, body;
+
+  if (post_voucher_pledge_request(pconf, rconf, mconf, pinned_cert) < 0) {
+    log_error("post_voucher_pledge_request fail");
+    return -1;
+  }
+
+  ca = create_cert_string(pinned_cert);
+
+  std::string path = PATH_BRSKI_SIGNCERT;
+  std::string content_type = "application/voucher-cms+json";
+
+  struct BinaryArray *sign_cert = NULL;
+  sign_cert = file_to_x509buf(cert_to_sign_path);
+  if (sign_cert == NULL) {
+    log_error("file_to_x509buf fail");
+    return -1; 
+  }
+
+  int status = https_post_request_ca(pconf->idevid_key_path, pconf->idevid_cert_path,
+        ca, rconf->bind_address, rconf->port, path, body, content_type, response);
+
+  free_binary_array(sign_cert);
+  cert_out = response;
+  return 0;
+}

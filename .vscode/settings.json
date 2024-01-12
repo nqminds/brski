@@ -73,6 +73,8 @@
         "cms.h": "c",
         "*.inc": "cpp",
         "array.h": "c",
-        "log.h": "c"
+        "log.h": "c",
+        "complex": "cpp",
+        "unordered_set": "cpp"
     }
 }
