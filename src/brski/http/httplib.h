@@ -1754,6 +1754,8 @@ public:
   SSL_CTX *ssl_context() const;
 
   X509 *server_cert() const;
+  void enable_host_verification(bool enable);
+
 private:
   bool create_and_connect_socket(Socket &socket, Error &error) override;
   void shutdown_ssl(Socket &socket, bool shutdown_gracefully) override;
@@ -1776,6 +1778,7 @@ private:
 
   SSL_CTX *ctx_;
   X509 *server_cert_ = nullptr;
+  bool verify_host_ = false;
   std::mutex ctx_mutex_;
   std::once_flag initialize_cert_;
 
@@ -8544,6 +8547,8 @@ inline SSL_CTX *SSLClient::ssl_context() const { return ctx_; }
 
 inline X509 *SSLClient::server_cert() const { return server_cert_; }
 
+void SSLClient::enable_host_verification(bool enable) { verify_host_ = enable; }
+
 inline bool SSLClient::create_and_connect_socket(Socket &socket, Error &error) {
   return is_valid() && ClientImpl::create_and_connect_socket(socket, error);
 }
@@ -8682,11 +8687,11 @@ inline bool SSLClient::initialize_ssl(Socket &socket, Error &error) {
             error = Error::SSLServerVerification;
             return false;
           }
-
-          if (!verify_host(server_cert)) {
-            X509_free(server_cert);
-            error = Error::SSLServerVerification;
-            return false;
+          
+          if (verify_host_ && !verify_host(server_cert)) {
+              X509_free(server_cert);
+              error = Error::SSLServerVerification;
+              return false;
           }
           X509_free(server_cert);
         } else server_cert_ = SSL_get1_peer_certificate(ssl2);

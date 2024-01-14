@@ -23,7 +23,7 @@
  * @param[in] pconf The pledge configuration structure
  * @param[in] rconf The registrar configuration structure
  * @param[in] mconf The masa configuration structure
- * @param[out] response The pinned domain certificate in DER format
+ * @param[out] pinned_domain_cert The pinned domain certificate in DER format
  * @return int 0 on success, -1 on failure
  */
 int post_voucher_pledge_request(struct pledge_config *pconf,
@@ -37,15 +37,14 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
  * @param[in] pconf The pledge configuration structure
  * @param[in] rconf The registrar configuration structure
  * @param[in] mconf The masa configuration structure
- * @param[in] cert_to_sign_path The path of the certificate to sing
- * @param[out] cert_out The signed certificate in DER format, encoded as
- * base64.
+ * @param[out] out_cert The signed certificate in DER format
+ * @param[out] out_key The output key in DER format
  * @return int 0 on success, -1 on failure
  */
 int post_sign_cert(struct pledge_config *pconf,
                    struct registrar_config *rconf,
                    struct masa_config *mconf,
-                   const char *cert_to_sign_path,
-                   std::string &response);
+                   struct BinaryArray *out_cert,
+                   struct BinaryArray *out_key);
 
 #endif

@@ -183,45 +183,143 @@ post_voucher_pledge_request_fail:
   return -1;
 }
 
-std::string create_cert_string(const std::string &cert)
+std::string create_cert_string(const char *cert)
 {
   std::string out = "-----BEGIN CERTIFICATE-----\n";
-  out += out + "\n";
-  out += "\n-----END CERTIFICATE-----\n";
+  out += std::string(cert) + "\n";
+  out += "-----END CERTIFICATE-----";
 
   return out;
+}
+
+int generate_sign_cert(struct BinaryArray *scert_cert,
+                       struct BinaryArray *scert_key)
+{
+  struct crypto_cert_meta sign_cert_meta = {.serial_number = 12345,
+                                            .not_before = 0,
+                                            // Long-lived pledge certificate
+                                            .not_after_absolute =
+                                                (char *)"99991231235959Z",
+                                            .issuer = NULL,
+                                            .subject = NULL,
+                                            .basic_constraints = (char *)"CA:false"};
+
+  if ((sign_cert_meta.issuer = init_keyvalue_list()) == NULL) {
+    log_error("init_keyvalue_list fail");
+    return -1;
+  }
+
+  if ((sign_cert_meta.subject = init_keyvalue_list()) == NULL) {
+    log_error("init_keyvalue_list fail");
+    free_keyvalue_list(sign_cert_meta.issuer);
+    return -1;
+  }
+
+  if (push_keyvalue_list(sign_cert_meta.subject, (char *)"C",
+    (char *)"IE") < 0)
+  {
+    log_error("push_keyvalue_list fail");
+    goto generate_sign_cert_err;
+  }
+
+  if (push_keyvalue_list(sign_cert_meta.subject, (char *)"CN",
+    (char *)"sign-cert-meta") < 0)
+  {
+    log_error("push_keyvalue_list fail");
+    goto generate_sign_cert_err;
+  }
+
+  if ((scert_key->length = (size_t)crypto_generate_eckey(&scert_key->array)) < 0) {
+    log_error("crypto_generate_eckey fail");
+    goto generate_sign_cert_err;
+  }
+  
+  if ((scert_cert->length = (size_t)crypto_generate_eccert(
+        &sign_cert_meta, scert_key->array, scert_key->length, &scert_cert->array)) < 0)
+  {
+    free_binary_array_content(scert_key);
+    goto generate_sign_cert_err;
+  }
+
+  free_keyvalue_list(sign_cert_meta.issuer);
+  free_keyvalue_list(sign_cert_meta.subject);
+
+  return 0;
+
+generate_sign_cert_err:
+  free_keyvalue_list(sign_cert_meta.issuer);
+  free_keyvalue_list(sign_cert_meta.subject);
+
+  return -1;
 }
 
 int post_sign_cert(struct pledge_config *pconf,
                    struct registrar_config *rconf,
                    struct masa_config *mconf,
-                   const char *cert_to_sign_path,
-                   std::string &cert_out)
+                   struct BinaryArray *out_cert,
+                   struct BinaryArray *out_key)
 {
   std::string pinned_cert, response, ca, body;
   struct BinaryArray pinned_domain_cert = {};
+  int status;
+  char *pki_str = NULL;
+  std::string path = PATH_BRSKI_SIGNCERT;
+  std::string content_type = "application/voucher-cms+json";
+  std::string registrar_ca_cert;
 
-  if (post_voucher_pledge_request(pconf, rconf, mconf, &pinned_domain_cert) < 0) {
-    log_error("post_voucher_pledge_request fail");
+  if (generate_sign_cert(out_cert, out_key) < 0) {
+    log_error("generate_sign_cert");
     return -1;
   }
 
-  // ca = create_cert_string(&pinned_domain_cert);
+  if (post_voucher_pledge_request(pconf, rconf, mconf, &pinned_domain_cert) < 0) {
+    log_error("post_voucher_pledge_request fail");
+    goto post_sign_cert_err;
+  }
 
-  // std::string path = PATH_BRSKI_SIGNCERT;
-  // std::string content_type = "application/voucher-cms+json";
+  if (serialize_array2base64str(pinned_domain_cert.array,
+                                pinned_domain_cert.length,
+                                (uint8_t **)&pki_str) < 0) {
+    log_error("serialize_array2base64str fail");
+    goto post_sign_cert_err;
+  }
 
-  // struct BinaryArray *sign_cert = NULL;
-  // sign_cert = file_to_x509buf(cert_to_sign_path);
-  // if (sign_cert == NULL) {
-  //   log_error("file_to_x509buf fail");
-  //   return -1; 
-  // }
+  registrar_ca_cert = create_cert_string(pki_str);
+  sys_free(pki_str);
 
-  // int status = https_post_request_ca(pconf->idevid_key_path, pconf->idevid_cert_path,
-  //       ca, rconf->bind_address, rconf->port, path, body, content_type, response);
+  if (serialize_array2base64str(out_cert->array,
+                                out_cert->length,
+                                (uint8_t **)&pki_str) < 0) {
+    log_error("serialize_array2base64str fail");
+    goto post_sign_cert_err;
+  }
+  body = pki_str;
+  sys_free(pki_str);
+
+  status = https_post_request_ca(pconf->idevid_key_path, pconf->idevid_cert_path,
+        registrar_ca_cert, rconf->bind_address, rconf->port, path, body,
+        content_type, response);
+
+  if (status < 0) {
+    log_error("https_post_request fail");
+    goto post_sign_cert_err;
+  }
+
+  if (status >= 400) {
+    log_error("post_voucher_pledge_request_ca failed with HTTP code %d and "
+              "response: '%s'",
+              status, response.c_str());
+    goto post_sign_cert_err;
+  }
 
   // free_binary_array(sign_cert);
   // cert_out = response;
+  free_binary_array_content(&pinned_domain_cert);
   return 0;
+
+post_sign_cert_err:
+  free_binary_array_content(out_cert);
+  free_binary_array_content(out_key);
+  free_binary_array_content(&pinned_domain_cert);
+  return -1;
 }

@@ -194,6 +194,17 @@ void print_cert(const char *cert, int prefix)
     std::fprintf(stdout, "-----END CERTIFICATE-----\n");
 }
 
+void print_key(const char *key, int prefix)
+{
+  if (prefix)
+    std::fprintf(stdout, "-----BEGIN PRIVATE KEY-----\n");
+
+  std::fprintf(stdout, "%s\n", key);
+
+  if (prefix)
+    std::fprintf(stdout, "-----END PRIVATE KEY-----\n");
+}
+
 int main(int argc, char *argv[]) {
   int verbose = 0;
   std::string config_filename, in_filename, out_filename;
@@ -285,13 +296,50 @@ int main(int argc, char *argv[]) {
 
     case CommandId::COMMAND_SIGN_CERT: {
       log_info("Sign cert %s:%d", config.rconf.bind_address, config.rconf.port);
-      std::string cert_str;
+      struct BinaryArray out_cert = {};
+      struct BinaryArray out_key = {};
+
       if (post_sign_cert(&config.pconf, &config.rconf,
-                         &config.mconf, in_filename.c_str(), cert_str) < 0) {
+                         &config.mconf, &out_cert, &out_key) < 0) {
         log_error("post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
-      print_cert(cert_str.c_str(), 0);
+
+      if (out_filename.empty()) {
+        char *pki_str = NULL;
+
+        if (serialize_array2base64str(out_cert.array,
+                                      out_cert.length,
+                                      (uint8_t **)&pki_str) < 0) {
+          log_error("serialize_array2base64str fail");
+          return EXIT_FAILURE;
+        }
+        print_cert(pki_str, 0);
+        sys_free(pki_str);
+
+        if (serialize_array2base64str(out_key.array,
+                                      out_key.length,
+                                      (uint8_t **)&pki_str) < 0) {
+          log_error("serialize_array2base64str fail");
+          return EXIT_FAILURE;
+        }
+        print_cert(pki_str, 0);
+        sys_free(pki_str);
+      } else {
+        snprintf(outf, 255, "%s.crt", out_filename.c_str());
+        if (certbuf_to_file(&out_cert, outf) < 0) {
+          log_error("certbuf_to_file fail");
+          return EXIT_FAILURE;
+        }
+        snprintf(outf, 255, "%s.key", out_filename.c_str());
+        if (keybuf_to_file(&out_key, outf) < 0) {
+          log_error("certbuf_to_file fail");
+          return EXIT_FAILURE;
+        }
+      }
+
+      free_binary_array_content(&out_cert);
+      free_binary_array_content(&out_key);
       break;
     }
 
