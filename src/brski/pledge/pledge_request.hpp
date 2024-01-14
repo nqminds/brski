@@ -32,7 +32,8 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
                                 struct BinaryArray *pinned_domain_cert);
 
 /**
- * @brief Signs a certificate after sending a pledge voucher POST request to the registrar
+ * @brief Signs a certificate after sending a pledge voucher POST request to the
+ * registrar
  *
  * @param[in] pconf The pledge configuration structure
  * @param[in] rconf The registrar configuration structure
@@ -41,10 +42,8 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
  * @param[out] out_key The output key in DER format
  * @return int 0 on success, -1 on failure
  */
-int post_sign_cert(struct pledge_config *pconf,
-                   struct registrar_config *rconf,
-                   struct masa_config *mconf,
-                   struct BinaryArray *out_cert,
+int post_sign_cert(struct pledge_config *pconf, struct registrar_config *rconf,
+                   struct masa_config *mconf, struct BinaryArray *out_cert,
                    struct BinaryArray *out_key);
 
 #endif

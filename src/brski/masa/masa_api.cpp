@@ -340,11 +340,9 @@ int get_est_csrattrs(const RequestHeader &request_header,
 }
 
 int masa_signcert(const RequestHeader &request_header,
-                          const std::string &request_body,
-                          CRYPTO_CERT peer_certificate,
-                          ResponseHeader &response_header,
-                          std::string &response, void *user_ctx)
-{
+                  const std::string &request_body, CRYPTO_CERT peer_certificate,
+                  ResponseHeader &response_header, std::string &response,
+                  void *user_ctx) {
   struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
   struct registrar_config *rconf = context->rconf;
   struct masa_config *mconf = context->mconf;
@@ -359,10 +357,10 @@ int masa_signcert(const RequestHeader &request_header,
   response_header["Content-Type"] = "text/plain";
 
   log_trace("masa_signcert:");
-  
+
   if ((length = serialize_base64str2array((const uint8_t *)cert_str,
-      strlen(cert_str), &cert_to_sign.array)) < 0)
-  {
+                                          strlen(cert_str),
+                                          &cert_to_sign.array)) < 0) {
     log_errno("serialize_base64str2array fail");
     goto masa_signcert_err;
   }
@@ -380,9 +378,9 @@ int masa_signcert(const RequestHeader &request_header,
     goto masa_signcert_err;
   }
 
-  length = crypto_sign_cert(
-      ldevid_ca_key->array, ldevid_ca_key->length, ldevid_ca_cert->array,
-      ldevid_ca_cert->length, cert_to_sign.length, &cert_to_sign.array);
+  length = crypto_sign_cert(ldevid_ca_key->array, ldevid_ca_key->length,
+                            ldevid_ca_cert->array, ldevid_ca_cert->length,
+                            cert_to_sign.length, &cert_to_sign.array);
   if (length < 0) {
     log_error("file_to_x509buf fail");
     goto masa_signcert_err;
@@ -391,8 +389,7 @@ int masa_signcert(const RequestHeader &request_header,
   cert_str = NULL;
 
   if (serialize_array2base64str(cert_to_sign.array, cert_to_sign.length,
-                                (uint8_t **)&cert_str) < 0)
-  {
+                                (uint8_t **)&cert_str) < 0) {
     log_error("serialize_array2base64str fail");
     goto masa_signcert_err;
   }

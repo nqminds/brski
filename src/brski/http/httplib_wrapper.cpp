@@ -9,14 +9,14 @@
  */
 
 #define CPPHTTPLIB_OPENSSL_SUPPORT
-#include "httplib.h"
 #include <openssl/ssl.h>
+#include "httplib.h"
 
 extern "C" {
 #include "../../utils/log.h"
 #include "../../utils/os.h"
-#include "../../voucher/crypto.h"
 #include "../../voucher/array.h"
+#include "../../voucher/crypto.h"
 #include "../../voucher/keyvalue.h"
 }
 
@@ -262,13 +262,12 @@ int httplib_post_request(const std::string &client_key_path,
 }
 
 int httplib_post_request_ca(const std::string &client_key_path,
-                         const std::string &client_cert_path,
-                         const std::string &ca,
-                         const std::string &host, int port,
-                         const std::string &path,
-                         const std::string &body,
-                         const std::string &content_type,
-                         std::string &response) {
+                            const std::string &client_cert_path,
+                            const std::string &ca, const std::string &host,
+                            int port, const std::string &path,
+                            const std::string &body,
+                            const std::string &content_type,
+                            std::string &response) {
 
   httplib::SSLClient cli(host, port, client_cert_path, client_key_path);
 

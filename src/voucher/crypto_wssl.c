@@ -96,8 +96,7 @@ ssize_t crypto_sign_rsacms(uint8_t *data, size_t data_length, uint8_t *cert,
   return -1;
 }
 
-struct BinaryArray* crypto_cert2buf(CRYPTO_CERT cert)
-{
+struct BinaryArray *crypto_cert2buf(CRYPTO_CERT cert) {
   (void)cert;
 
   return NULL;

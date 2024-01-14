@@ -110,9 +110,9 @@ voucher_pledge_request_to_smimefile_fail:
   return NULL;
 }
 
-int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
-                                        const struct BinaryArray *registrar_tls_cert,
-                                        const char *filename) {
+int voucher_pledge_request_to_smimefile(
+    const struct pledge_config *pconf,
+    const struct BinaryArray *registrar_tls_cert, const char *filename) {
 
   struct BinaryArray *cms =
       voucher_pledge_request_to_array(pconf, registrar_tls_cert);
@@ -133,8 +133,9 @@ int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
   return 0;
 }
 
-char *voucher_pledge_request_to_base64(const struct pledge_config *pconf,
-                                       const struct BinaryArray *registrar_tls_cert) {
+char *
+voucher_pledge_request_to_base64(const struct pledge_config *pconf,
+                                 const struct BinaryArray *registrar_tls_cert) {
   struct BinaryArray *cms =
       voucher_pledge_request_to_array(pconf, registrar_tls_cert);
 

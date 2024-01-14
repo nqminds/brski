@@ -17,10 +17,10 @@
 #include "array.h"
 
 /* The generalized context for a private key */
-typedef void* CRYPTO_KEY;
+typedef void *CRYPTO_KEY;
 
 /* The generalized context for a certificate */
-typedef void* CRYPTO_CERT;
+typedef void *CRYPTO_CERT;
 
 struct crypto_cert_meta {
   uint64_t serial_number;
@@ -97,7 +97,7 @@ CRYPTO_CERT crypto_copycert(CRYPTO_CERT cert);
  * @param[in] cert The input certificate structure
  * @return struct BinaryArray * the output DER binary array, NULL on failure
  */
-struct BinaryArray* crypto_cert2buf(CRYPTO_CERT cert);
+struct BinaryArray *crypto_cert2buf(CRYPTO_CERT cert);
 
 /**
  * @brief Parses a certificate

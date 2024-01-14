@@ -71,11 +71,10 @@ int httplib_post_request(const std::string &client_key_path,
  * @return int the status code on success, -1 on failure
  */
 int httplib_post_request_ca(const std::string &client_key_path,
-                         const std::string &client_cert_path,
-                         const std::string &ca,
-                         const std::string &host, int port,
-                         const std::string &path,
-                         const std::string &body,
-                         const std::string &content_type,
-                         std::string &response);
+                            const std::string &client_cert_path,
+                            const std::string &ca, const std::string &host,
+                            int port, const std::string &path,
+                            const std::string &body,
+                            const std::string &content_type,
+                            std::string &response);
 #endif

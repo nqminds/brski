@@ -21,9 +21,9 @@
  * @param[in] out_path The path to the export file
  * @return 0 on success, -1 on failure
  */
-int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
-                                        const struct BinaryArray *registrar_tls_cert,
-                                        const char *out_path);
+int voucher_pledge_request_to_smimefile(
+    const struct pledge_config *pconf,
+    const struct BinaryArray *registrar_tls_cert, const char *out_path);
 
 /**
  * @brief Export a pledge-voucher request to base64 encoded string

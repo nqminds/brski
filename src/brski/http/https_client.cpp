@@ -35,17 +35,15 @@ int https_post_request(const std::string &client_key_path,
 }
 
 int https_post_request_ca(const std::string &client_key_path,
-                         const std::string &client_cert_path,
-                         const std::string &ca,
-                         const std::string &host, int port,
-                         const std::string &path,
-                         const std::string &body,
-                         const std::string &content_type,
-                         std::string &response)
-{
+                          const std::string &client_cert_path,
+                          const std::string &ca, const std::string &host,
+                          int port, const std::string &path,
+                          const std::string &body,
+                          const std::string &content_type,
+                          std::string &response) {
 #ifdef WITH_CPPHTTPLIB_LIB
-  return httplib_post_request_ca(client_key_path, client_cert_path, ca,
-                              host, port, path, body, content_type, response);
+  return httplib_post_request_ca(client_key_path, client_cert_path, ca, host,
+                                 port, path, body, content_type, response);
 #else
   log_error("No https client defined");
   return -1;

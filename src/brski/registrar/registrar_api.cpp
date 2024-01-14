@@ -305,13 +305,12 @@ int registrar_enrollstatus(const RequestHeader &request_header,
 }
 
 int registrar_signcert(const RequestHeader &request_header,
-                           const std::string &request_body,
-                           CRYPTO_CERT peer_certificate,
-                           ResponseHeader &response_header,
-                           std::string &response, void *user_ctx)
-{
+                       const std::string &request_body,
+                       CRYPTO_CERT peer_certificate,
+                       ResponseHeader &response_header, std::string &response,
+                       void *user_ctx) {
   struct RegistrarContext *context =
-  static_cast<struct RegistrarContext *>(user_ctx);
+      static_cast<struct RegistrarContext *>(user_ctx);
   struct registrar_config *rconf = context->rconf;
   struct masa_config *mconf = context->mconf;
 

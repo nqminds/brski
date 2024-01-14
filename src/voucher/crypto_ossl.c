@@ -260,8 +260,7 @@ static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
   return (ssize_t)length;
 }
 
-struct BinaryArray* crypto_cert2buf(CRYPTO_CERT cert)
-{
+struct BinaryArray *crypto_cert2buf(CRYPTO_CERT cert) {
   struct BinaryArray *out = NULL;
 
   if (cert == NULL)

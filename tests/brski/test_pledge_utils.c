@@ -32,8 +32,8 @@ static void test_voucher_pledge_request_to_smimefile(void **state) {
 
   load_brski_config(TEST_CONFIG_INI_PATH, &config);
   struct BinaryArray *cert = file_to_x509buf(config.rconf.tls_cert_path);
-  int res = voucher_pledge_request_to_smimefile(
-      &config.pconf, cert, TEST_CMS_OUT_PATH);
+  int res = voucher_pledge_request_to_smimefile(&config.pconf, cert,
+                                                TEST_CMS_OUT_PATH);
   free_config_content(&config);
   free_binary_array(cert);
   assert_int_equal(res, 0);
@@ -45,7 +45,8 @@ static void test_voucher_pledge_request_to_smimefile_add(void **state) {
 
   load_brski_config(TEST_CONFIG_ADD_INI_PATH, &config);
   struct BinaryArray *cert = file_to_x509buf(config.rconf.tls_cert_path);
-  int res = voucher_pledge_request_to_smimefile(&config.pconf, cert, TEST_CMS_OUT_ADD_PATH);
+  int res = voucher_pledge_request_to_smimefile(&config.pconf, cert,
+                                                TEST_CMS_OUT_ADD_PATH);
   free_config_content(&config);
   free_binary_array(cert);
   assert_int_equal(res, 0);
