@@ -115,6 +115,13 @@ int registrar_requestvoucher(const RequestHeader &request_header,
 
   serial_number = get_cert_serial(&idev_meta);
 
+  if (serial_number == NULL) {
+    log_error("Empty serial number");
+    return 400;
+  }
+
+  log_info("Pledge cert serial number: %s", serial_number);
+
   auto idevid_issuer = std::unique_ptr<BinaryArray, void (*)(BinaryArray *)>{
       crypto_getcert_issuer(peer_certificate),
       [](BinaryArray *b) { free_binary_array(b); },
