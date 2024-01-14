@@ -8,13 +8,16 @@
  * @brief File containing the implementation of the http library wrapper.
  */
 
-#include <httplib.h>
+#define CPPHTTPLIB_OPENSSL_SUPPORT
 #include <openssl/ssl.h>
+#include "httplib.h"
 
 extern "C" {
 #include "../../utils/log.h"
 #include "../../utils/os.h"
+#include "../../voucher/array.h"
 #include "../../voucher/crypto.h"
+#include "../../voucher/keyvalue.h"
 }
 
 #include "http.hpp"
@@ -238,11 +241,39 @@ int httplib_post_request(const std::string &client_key_path,
                          const std::string &path, bool verify,
                          const std::string &body,
                          const std::string &content_type,
-                         std::string &response) {
+                         struct HttpResponse &http_res) {
 
   httplib::SSLClient cli(host, port, client_cert_path, client_key_path);
 
   cli.enable_server_certificate_verification(verify);
+  cli.enable_host_verification(false);
+
+  log_info("Post request to %s:%d%s", host.c_str(), port, path.c_str());
+  if (httplib::Result res = cli.Post(path, body, content_type)) {
+    http_res.peer_certificate = crypto_copycert(cli.server_cert());
+    http_res.response = res->body;
+    return res->status;
+  } else {
+    std::string err = to_string(res.error());
+    log_error("httplib::Client fail with \"%s\"", err.c_str());
+
+    return -1;
+  }
+}
+
+int httplib_post_request_ca(const std::string &client_key_path,
+                            const std::string &client_cert_path,
+                            const std::string &ca, const std::string &host,
+                            int port, const std::string &path,
+                            const std::string &body,
+                            const std::string &content_type,
+                            std::string &response) {
+
+  httplib::SSLClient cli(host, port, client_cert_path, client_key_path);
+
+  cli.enable_server_certificate_verification(true);
+  cli.enable_host_verification(false);
+  cli.load_ca_cert_store(ca.c_str(), ca.length());
 
   log_info("Post request to %s:%d%s", host.c_str(), port, path.c_str());
   if (httplib::Result res = cli.Post(path, body, content_type)) {

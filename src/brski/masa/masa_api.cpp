@@ -39,6 +39,7 @@ int voucher_req_cb(const char *serial_number,
     return -1;
   }
 
+  log_info("Pledge cert serial number: %s", serial_number);
   /* Need to verify serial_number using a DB*/
   /* ... */
 
@@ -48,54 +49,14 @@ int voucher_req_cb(const char *serial_number,
   /* Need to choose the parameters of the pinned domain
      using a DB.
   */
-  struct crypto_cert_meta pinned_domain_meta = {.serial_number = 1,
-                                                .not_before = 0,
-                                                .not_after = 1234567,
-                                                .issuer = NULL,
-                                                .subject = NULL,
-                                                .basic_constraints =
-                                                    (char *)"CA:false"};
 
-  pinned_domain_meta.issuer = init_keyvalue_list();
-  pinned_domain_meta.subject = init_keyvalue_list();
-  push_keyvalue_list(pinned_domain_meta.subject, (char *)"C", (char *)"IE");
-  push_keyvalue_list(pinned_domain_meta.subject, (char *)"CN",
-                     (char *)"pinned-domain-meta");
-
-  struct BinaryArray pinned_domain_key = {};
-
-  /* Need to save the pinned domain key in a DB */
-  pinned_domain_key.length =
-      (size_t)crypto_generate_eckey(&pinned_domain_key.array);
-  pinned_domain_cert->length = (size_t)crypto_generate_eccert(
-      &pinned_domain_meta, pinned_domain_key.array, pinned_domain_key.length,
-      &pinned_domain_cert->array);
-
-  // Sign masa_tls with tls_ca
-  ssize_t length = crypto_sign_cert(
-      context->ldevid_ca_key->array, context->ldevid_ca_key->length,
-      context->ldevid_ca_cert->array, context->ldevid_ca_cert->length,
-      pinned_domain_cert->length, &pinned_domain_cert->array);
-  if (length < 0) {
-    log_error("crypto_sign_cert fail");
-    goto voucher_req_cb_fail;
+  /* For now copy only the ldevid certificate */
+  if (copy_binary_array(pinned_domain_cert, context->ldevid_ca_cert) < 0) {
+    log_error("copy_binary_array fail");
+    return -1;
   }
 
-  pinned_domain_cert->length = length;
-
-  free_binary_array_content(&pinned_domain_key);
-  free_keyvalue_list(pinned_domain_meta.issuer);
-  free_keyvalue_list(pinned_domain_meta.subject);
-
   return 0;
-voucher_req_cb_fail:
-
-  free_binary_array_content(&pinned_domain_key);
-  free_binary_array_content(pinned_domain_cert);
-  free_keyvalue_list(pinned_domain_meta.issuer);
-  free_keyvalue_list(pinned_domain_meta.subject);
-
-  return -1;
 }
 
 int masa_requestvoucher(const RequestHeader &request_header,
@@ -120,7 +81,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
   const char *cms_str = request_body.c_str();
 
   log_trace("masa_requestvoucher:");
-  // log_trace("%s", request_body.c_str());
   response_header["Content-Type"] = "text/plain";
 
   struct tm expires_on = {0};
@@ -377,4 +337,74 @@ int get_est_csrattrs(const RequestHeader &request_header,
   response.assign("get_est_csrattrs");
   response_header["Content-Type"] = "text/plain";
   return 503;
+}
+
+int masa_signcert(const RequestHeader &request_header,
+                  const std::string &request_body, CRYPTO_CERT peer_certificate,
+                  ResponseHeader &response_header, std::string &response,
+                  void *user_ctx) {
+  struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
+  struct registrar_config *rconf = context->rconf;
+  struct masa_config *mconf = context->mconf;
+
+  struct BinaryArray cert_to_sign = {};
+  struct BinaryArray *ldevid_ca_cert = NULL;
+  struct BinaryArray *ldevid_ca_key = NULL;
+  ssize_t length;
+
+  char *cert_str = (char *)request_body.c_str();
+
+  response_header["Content-Type"] = "text/plain";
+
+  log_trace("masa_signcert:");
+
+  if ((length = serialize_base64str2array((const uint8_t *)cert_str,
+                                          strlen(cert_str),
+                                          &cert_to_sign.array)) < 0) {
+    log_errno("serialize_base64str2array fail");
+    goto masa_signcert_err;
+  }
+  cert_to_sign.length = length;
+
+  /* Here check the registrar */
+
+  if ((ldevid_ca_cert = file_to_x509buf(mconf->ldevid_ca_cert_path)) == NULL) {
+    log_error("file_to_x509buf fail");
+    goto masa_signcert_err;
+  }
+
+  if ((ldevid_ca_key = file_to_keybuf(mconf->ldevid_ca_key_path)) == NULL) {
+    log_error("file_to_keybuf fail");
+    goto masa_signcert_err;
+  }
+
+  length = crypto_sign_cert(ldevid_ca_key->array, ldevid_ca_key->length,
+                            ldevid_ca_cert->array, ldevid_ca_cert->length,
+                            cert_to_sign.length, &cert_to_sign.array);
+  if (length < 0) {
+    log_error("file_to_x509buf fail");
+    goto masa_signcert_err;
+  }
+  cert_to_sign.length = length;
+  cert_str = NULL;
+
+  if (serialize_array2base64str(cert_to_sign.array, cert_to_sign.length,
+                                (uint8_t **)&cert_str) < 0) {
+    log_error("serialize_array2base64str fail");
+    goto masa_signcert_err;
+  }
+
+  response.assign((char *)cert_str);
+
+  sys_free(cert_str);
+  free_binary_array_content(&cert_to_sign);
+  free_binary_array(ldevid_ca_cert);
+  free_binary_array(ldevid_ca_key);
+  return 200;
+
+masa_signcert_err:
+  free_binary_array_content(&cert_to_sign);
+  free_binary_array(ldevid_ca_cert);
+  free_binary_array(ldevid_ca_key);
+  return 400;
 }

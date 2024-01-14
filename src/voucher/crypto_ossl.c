@@ -229,16 +229,15 @@ int keybuf_to_file(const struct BinaryArray *key, const char *filename) {
   return 0;
 }
 
-static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **cert) {
+static ssize_t cert_to_derbuf(const X509 *x509, uint8_t **out) {
   /*
   For OpenSSL 0.9.7 and later if *cert is NULL memory will be allocated
   for a buffer and the encoded data written to it. In this case *cert is
   not incremented and it points to the start of the data just written.
   */
+  *out = NULL;
 
-  *cert = NULL;
-
-  int length = i2d_X509(x509, cert);
+  int length = i2d_X509(x509, out);
   if (length < 0) {
     log_error("i2d_X509 fail with code=%s",
               ERR_reason_error_string(ERR_get_error()));
@@ -259,6 +258,29 @@ static ssize_t evpkey_to_derbuf(const EVP_PKEY *pkey, uint8_t **key) {
   }
 
   return (ssize_t)length;
+}
+
+struct BinaryArray *crypto_cert2buf(CRYPTO_CERT cert) {
+  struct BinaryArray *out = NULL;
+
+  if (cert == NULL)
+    return NULL;
+
+  if ((out = init_binary_array()) == NULL) {
+    log_errno("init_binary_array");
+    return NULL;
+  }
+
+  ssize_t length = cert_to_derbuf((X509 *)cert, &out->array);
+  if (length < 0) {
+    log_error("cert_to_derbuf fail");
+    free_binary_array(out);
+    return NULL;
+  }
+
+  out->length = length;
+
+  return out;
 }
 
 struct BinaryArray *file_to_x509buf(const char *filename) {
@@ -578,9 +600,37 @@ CRYPTO_CERT crypto_cert2context(const uint8_t *cert, const size_t length) {
   return ctx;
 }
 
+CRYPTO_CERT crypto_copycert(CRYPTO_CERT cert) {
+  X509 *x509;
+  uint8_t *buf = NULL;
+  size_t length;
+
+  if (cert == NULL)
+    return NULL;
+
+  if ((length = cert_to_derbuf(cert, &buf)) == 0)
+    return NULL;
+
+  x509 = crypto_cert2context(buf, length);
+  sys_free(buf);
+  return x509;
+}
+
 void crypto_free_keycontext(CRYPTO_KEY ctx) {
   EVP_PKEY *pkey = (EVP_PKEY *)ctx;
+  if (pkey == NULL)
+    return;
+
   EVP_PKEY_free(pkey);
+}
+
+void crypto_free_certcontext(CRYPTO_KEY cert) {
+  X509 *x509 = (X509 *)cert;
+
+  if (x509 == NULL)
+    return;
+
+  X509_free(x509);
 }
 
 int get_x509_entry(X509_NAME *name, int nid, char **out) {
@@ -1520,7 +1570,7 @@ static int exatract_cms_certs(CMS_ContentInfo *cms,
   for (int idx = 0; idx < length; idx++) {
     const X509 *signer = sk_X509_value(signers, idx);
     uint8_t *cert = NULL;
-    ssize_t cert_length = cert_to_derbuf(signer, &cert);
+    ssize_t cert_length = cert_to_derbuf((CRYPTO_CERT)signer, &cert);
     if (cert_length < 0) {
       log_error("cert_to_derbuf fail");
       free_array_list(*out_certs);

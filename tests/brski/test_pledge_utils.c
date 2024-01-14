@@ -18,6 +18,7 @@
 
 #include "utils/log.h"
 #include "utils/os.h"
+#include "voucher/crypto.h"
 
 #include "brski/config.h"
 #include "brski/pledge/pledge_utils.h"
@@ -30,9 +31,11 @@ static void test_voucher_pledge_request_to_smimefile(void **state) {
   struct brski_config config = {0};
 
   load_brski_config(TEST_CONFIG_INI_PATH, &config);
-  int res = voucher_pledge_request_to_smimefile(
-      &config.pconf, config.rconf.tls_cert_path, TEST_CMS_OUT_PATH);
+  struct BinaryArray *cert = file_to_x509buf(config.rconf.tls_cert_path);
+  int res = voucher_pledge_request_to_smimefile(&config.pconf, cert,
+                                                TEST_CMS_OUT_PATH);
   free_config_content(&config);
+  free_binary_array(cert);
   assert_int_equal(res, 0);
 }
 
@@ -41,9 +44,11 @@ static void test_voucher_pledge_request_to_smimefile_add(void **state) {
   struct brski_config config = {0};
 
   load_brski_config(TEST_CONFIG_ADD_INI_PATH, &config);
-  int res = voucher_pledge_request_to_smimefile(
-      &config.pconf, config.rconf.tls_cert_path, TEST_CMS_OUT_ADD_PATH);
+  struct BinaryArray *cert = file_to_x509buf(config.rconf.tls_cert_path);
+  int res = voucher_pledge_request_to_smimefile(&config.pconf, cert,
+                                                TEST_CMS_OUT_ADD_PATH);
   free_config_content(&config);
+  free_binary_array(cert);
   assert_int_equal(res, 0);
 }
 

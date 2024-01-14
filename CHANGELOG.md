@@ -14,6 +14,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.2.2] - 2024-1-14
+
+### 🚀 Features
+
+* Added BRSKI flow with registrar certificate check
+
+#### voucher
+
+* add sign cert REST API for registrar and MASA. The certificate
+  is signgned with the ldevid.
+
+#### Build
+
+### Changed
+
+#### voucher
+
+**The voucher ABI has breaking changes**.
+
 ## [0.2.1] - 2023-12-05
 
 ### 🚀 Features

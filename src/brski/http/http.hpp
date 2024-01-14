@@ -52,6 +52,11 @@ struct RouteTuple {
   RouteHandle handle;
 };
 
+struct HttpResponse {
+  std::string response;
+  CRYPTO_CERT peer_certificate;
+};
+
 struct http_config {
   char *bind_address;
   unsigned int port;
