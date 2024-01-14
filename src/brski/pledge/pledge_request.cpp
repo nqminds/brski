@@ -223,7 +223,7 @@ int generate_sign_cert(struct BinaryArray *scert_cert,
   }
 
   if (push_keyvalue_list(sign_cert_meta.subject, (char *)"CN",
-    (char *)"sign-cert-meta") < 0)
+    (char *)"pledge-domain-cert") < 0)
   {
     log_error("push_keyvalue_list fail");
     goto generate_sign_cert_err;
@@ -266,6 +266,7 @@ int post_sign_cert(struct pledge_config *pconf,
   std::string path = PATH_BRSKI_SIGNCERT;
   std::string content_type = "application/voucher-cms+json";
   std::string registrar_ca_cert;
+  ssize_t length;
 
   if (generate_sign_cert(out_cert, out_key) < 0) {
     log_error("generate_sign_cert");
@@ -312,8 +313,17 @@ int post_sign_cert(struct pledge_config *pconf,
     goto post_sign_cert_err;
   }
 
-  // free_binary_array(sign_cert);
-  // cert_out = response;
+  free_binary_array_content(out_cert);
+  pki_str = (char *)response.c_str();
+
+  if ((length = serialize_base64str2array((const uint8_t *)pki_str,
+      strlen(pki_str), &out_cert->array)) < 0)
+  {
+    log_errno("serialize_base64str2array fail");
+    goto post_sign_cert_err;
+  }
+  out_cert->length = length;
+
   free_binary_array_content(&pinned_domain_cert);
   return 0;
 

@@ -77,6 +77,22 @@ int masa_enrollstatus(const RequestHeader &request_header,
                       void *context);
 
 /**
+ * @brief RMASA sign certificate
+ * Not part of the specification.
+ *
+ * @return The HTTP status code.
+ * @retval 200 OK.
+ * @retval 400 Bad Request (malformed request).
+ * @retval 500 Internal Server Error.
+ * @retval 502 Bad Gateway
+ */
+int masa_signcert(const RequestHeader &request_header,
+                          const std::string &request_body,
+                          CRYPTO_CERT peer_certificate,
+                          ResponseHeader &response_header,
+                          std::string &response, void *context);
+
+/**
  * @brief EST CA certs handler
  *
  * @return int 0 on success, -1 on failure
@@ -141,5 +157,4 @@ int get_est_csrattrs(const RequestHeader &request_header,
                      CRYPTO_CERT peer_certificate,
                      ResponseHeader &response_header, std::string &response,
                      void *context);
-
 #endif

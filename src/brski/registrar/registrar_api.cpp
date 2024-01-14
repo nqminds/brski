@@ -69,9 +69,17 @@ int post_voucher_request(struct BinaryArray *voucher_request_cms,
   if (status < 0) {
     log_error("https_post_request fail");
     return -1;
-
   }
 
+  if (status >= 400) {
+    log_error("https_post_request failed with HTTP code %d and "
+              "response: '%s'",
+              status, http_res.response.c_str());
+    crypto_free_certcontext(http_res.peer_certificate);
+    return 400;
+  }
+
+  crypto_free_certcontext(http_res.peer_certificate);
   response = http_res.response;
 
   return 0;
@@ -300,13 +308,42 @@ int registrar_signcert(const RequestHeader &request_header,
                            const std::string &request_body,
                            CRYPTO_CERT peer_certificate,
                            ResponseHeader &response_header,
-                           std::string &response, void *context)
+                           std::string &response, void *user_ctx)
 {
-  log_trace("registrar_signcert:");
-  const char *cert_str = request_body.c_str();
-  log_trace("%s", cert_str);
+  struct RegistrarContext *context =
+  static_cast<struct RegistrarContext *>(user_ctx);
+  struct registrar_config *rconf = context->rconf;
+  struct masa_config *mconf = context->mconf;
 
-  response.assign("registrar_signcert");
-  response_header["Content-Type"] = "text/plain";
+  log_trace("registrar_signcert:");
+
+  std::string path = PATH_BRSKI_SIGNCERT;
+  std::string content_type = "text/plain";
+  std::string body = request_body;
+
+  log_info("Request sign cert from MASA %s", path.c_str());
+
+  struct HttpResponse http_res;
+  int status = https_post_request(rconf->tls_key_path, rconf->tls_cert_path,
+                                  mconf->bind_address, mconf->port, path, false,
+                                  body, content_type, http_res);
+
+  if (status < 0) {
+    log_error("https_post_request fail");
+    return 400;
+  }
+
+  if (status >= 400) {
+    log_error("https_post_request failed with HTTP code %d and "
+              "response: '%s'",
+              status, http_res.response.c_str());
+    crypto_free_certcontext(http_res.peer_certificate);
+    return 400;
+  }
+
+  crypto_free_certcontext(http_res.peer_certificate);
+  response = http_res.response;
+
+  response_header["Content-Type"] = content_type;
   return 200;
 }

@@ -276,8 +276,8 @@ int set_attr_base64_voucher(struct Voucher *voucher,
     log_error("serialize_base64str2array fail");
     return -1;
   }
-
   binary_array.length = out_length;
+
   if (set_attr_array_voucher(voucher, attr, &binary_array) < 0) {
     log_error("set_attr_voucher fail");
     free_binary_array_content(&binary_array);
