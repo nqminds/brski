@@ -35,7 +35,7 @@ extern "C" {
 int post_voucher_pledge_request(struct pledge_config *pconf,
                                 struct registrar_config *rconf,
                                 struct masa_config *mconf,
-                                std::string &response) {
+                                struct BinaryArray *pinned_domain_cert) {
   int status;
   struct HttpResponse http_res = {};
   struct BinaryArray *registrar_tls_cert = NULL;
@@ -120,8 +120,6 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   struct BinaryArray *nonce = NULL;
   struct BinaryArrayList *masa_verify_certs = NULL;
   struct BinaryArrayList *masa_store_certs = NULL;
-  struct BinaryArray pinned_domain_cert = {};
-  char *pinned_domain_cert_base64 = NULL;
 
   int result;
 
@@ -162,29 +160,18 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   result = verify_masa_pledge_voucher(
       &masa_pledge_voucher_cms, pconf->serial_number, nonce, registrar_tls_cert,
       NULL, masa_verify_certs, masa_store_certs, NULL,
-      &pinned_domain_cert);
+      pinned_domain_cert);
 
   if (result < 0) {
     log_error("verify_masa_pledge_voucher fail");
     goto post_voucher_pledge_request_fail;
   }
 
-  if (serialize_array2base64str(pinned_domain_cert.array,
-                                pinned_domain_cert.length,
-                                (uint8_t **)&pinned_domain_cert_base64) < 0) {
-    log_error("serialize_array2base64str fail");
-    goto post_voucher_pledge_request_fail;
-  }
-
-  response.assign(pinned_domain_cert_base64);
-
   free_binary_array_content(&masa_pledge_voucher_cms);
   free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);
   free_array_list(masa_verify_certs);
   free_array_list(masa_store_certs);
-  free_binary_array_content(&pinned_domain_cert);
-  free(pinned_domain_cert_base64);
   return 0;
 
 post_voucher_pledge_request_fail:
@@ -193,8 +180,6 @@ post_voucher_pledge_request_fail:
   free_binary_array(registrar_tls_cert);
   free_array_list(masa_verify_certs);
   free_array_list(masa_store_certs);
-  free_binary_array_content(&pinned_domain_cert);
-  free(pinned_domain_cert_base64);
   return -1;
 }
 
@@ -214,28 +199,29 @@ int post_sign_cert(struct pledge_config *pconf,
                    std::string &cert_out)
 {
   std::string pinned_cert, response, ca, body;
+  struct BinaryArray pinned_domain_cert = {};
 
-  if (post_voucher_pledge_request(pconf, rconf, mconf, pinned_cert) < 0) {
+  if (post_voucher_pledge_request(pconf, rconf, mconf, &pinned_domain_cert) < 0) {
     log_error("post_voucher_pledge_request fail");
     return -1;
   }
 
-  ca = create_cert_string(pinned_cert);
+  // ca = create_cert_string(&pinned_domain_cert);
 
-  std::string path = PATH_BRSKI_SIGNCERT;
-  std::string content_type = "application/voucher-cms+json";
+  // std::string path = PATH_BRSKI_SIGNCERT;
+  // std::string content_type = "application/voucher-cms+json";
 
-  struct BinaryArray *sign_cert = NULL;
-  sign_cert = file_to_x509buf(cert_to_sign_path);
-  if (sign_cert == NULL) {
-    log_error("file_to_x509buf fail");
-    return -1; 
-  }
+  // struct BinaryArray *sign_cert = NULL;
+  // sign_cert = file_to_x509buf(cert_to_sign_path);
+  // if (sign_cert == NULL) {
+  //   log_error("file_to_x509buf fail");
+  //   return -1; 
+  // }
 
-  int status = https_post_request_ca(pconf->idevid_key_path, pconf->idevid_cert_path,
-        ca, rconf->bind_address, rconf->port, path, body, content_type, response);
+  // int status = https_post_request_ca(pconf->idevid_key_path, pconf->idevid_cert_path,
+  //       ca, rconf->bind_address, rconf->port, path, body, content_type, response);
 
-  free_binary_array(sign_cert);
-  cert_out = response;
+  // free_binary_array(sign_cert);
+  // cert_out = response;
   return 0;
 }

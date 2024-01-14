@@ -23,14 +23,13 @@
  * @param[in] pconf The pledge configuration structure
  * @param[in] rconf The registrar configuration structure
  * @param[in] mconf The masa configuration structure
- * @param[out] response The pinned domain certificate in DER format, encoded as
- * base64.
+ * @param[out] response The pinned domain certificate in DER format
  * @return int 0 on success, -1 on failure
  */
 int post_voucher_pledge_request(struct pledge_config *pconf,
                                 struct registrar_config *rconf,
                                 struct masa_config *mconf,
-                                std::string &response);
+                                struct BinaryArray *pinned_domain_cert);
 
 /**
  * @brief Signs a certificate after sending a pledge voucher POST request to the registrar

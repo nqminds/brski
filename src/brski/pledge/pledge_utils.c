@@ -112,12 +112,7 @@ voucher_pledge_request_to_smimefile_fail:
 
 int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
                                         const struct BinaryArray *registrar_tls_cert,
-                                        const char *out_path) {
-
-  if (out_path == NULL) {
-    log_error("out_path is NULL");
-    return -1;
-  }
+                                        const char *filename) {
 
   struct BinaryArray *cms =
       voucher_pledge_request_to_array(pconf, registrar_tls_cert);
@@ -127,7 +122,7 @@ int voucher_pledge_request_to_smimefile(const struct pledge_config *pconf,
     return -1;
   }
 
-  if (cmsbuf_to_file(cms, out_path) < 0) {
+  if (cmsbuf_to_file(cms, filename) < 0) {
     log_error("cmsbuf_to_file fail");
     free_binary_array(cms);
     return -1;

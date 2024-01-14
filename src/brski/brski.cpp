@@ -16,6 +16,7 @@ extern "C" {
 #include "../utils/os.h"
 #include "config.h"
 #include "pledge/pledge_utils.h"
+#include "../voucher/serialize.h"
 
 // declare here, since we pass a pointer to this to C code
 void log_lock_fun(bool lock);
@@ -87,8 +88,7 @@ static void show_help(const char *name) {
   }
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
-  std::fprintf(stdout, "\t-i filename\t Path to the imported file\n");
-  std::fprintf(stdout, "\t-o filename\t Path to the exported file\n");
+  std::fprintf(stdout, "\t-o filename\t The output file\n");
   std::fprintf(
       stdout,
       "\t-d\t\t Make verbose\n");
@@ -124,8 +124,8 @@ static CommandId get_command_id(const std::string &command_label) {
 }
 
 static void process_options(int argc, char *const argv[], int &verbose,
-                            std::string &config_filename, std::string &in_filename,
-                            std::string &out_filename, CommandId &command_id) {
+                            std::string &config_filename, std::string &out_filename,
+                            CommandId &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
@@ -138,9 +138,6 @@ static void process_options(int argc, char *const argv[], int &verbose,
         std::exit(EXIT_SUCCESS);
       case 'c':
         config_filename.assign(optarg);
-        break;
-      case 'i':
-        in_filename.assign(optarg);
         break;
       case 'o':
         out_filename.assign(optarg);
@@ -186,20 +183,25 @@ struct BrskiConfig : public brski_config {
   virtual ~BrskiConfig() { free_config_content(this); }
 };
 
-void print_cert(const char *cert)
+void print_cert(const char *cert, int prefix)
 {
-  std::fprintf(stdout, "-----BEGIN CERTIFICATE-----\n");
+  if (prefix)
+    std::fprintf(stdout, "-----BEGIN CERTIFICATE-----\n");
+
   std::fprintf(stdout, "%s\n", cert);
-  std::fprintf(stdout, "-----END CERTIFICATE-----\n");
+
+  if (prefix)
+    std::fprintf(stdout, "-----END CERTIFICATE-----\n");
 }
 
 int main(int argc, char *argv[]) {
   int verbose = 0;
   std::string config_filename, in_filename, out_filename;
   CommandId command_id;
+  char outf[255];
 
   process_options(argc, argv, verbose, config_filename,
-                  in_filename, out_filename, command_id);
+                  out_filename, command_id);
 
   log_set_lock(log_lock_fun);
 
@@ -216,47 +218,80 @@ int main(int argc, char *argv[]) {
 
   struct RegistrarContext *rcontext = NULL;
   struct MasaContext *mcontext = NULL;
-  struct BinaryArray *cert = NULL;
+  struct BinaryArray *tls_cert = NULL;
   switch (command_id) {
     case CommandId::COMMAND_EXPORT_PVR:
       log_info("Exporting pledge voucher request to %s",
                    out_filename.c_str());
 
-      cert = file_to_x509buf(config.rconf.tls_cert_path);
-      if (cert == NULL) {
+      tls_cert = file_to_x509buf(config.rconf.tls_cert_path);
+      if (tls_cert == NULL) {
         log_error("file_to_x509buf fail");
         return EXIT_FAILURE; 
       }
 
-      if (voucher_pledge_request_to_smimefile(&config.pconf, cert,
-                                              out_filename.c_str()) < 0) {
-        log_error("voucher_pledge_request_to_smimefile fail");
-        return EXIT_FAILURE;
+      if (out_filename.empty()) {
+        char *base64 = voucher_pledge_request_to_base64(&config.pconf, tls_cert);
+        if (base64 == NULL) {
+          log_error("voucher_pledge_request_to_base64 fail");
+          free_binary_array(tls_cert);
+          return EXIT_FAILURE;
+        }
+        std::fprintf(stdout, "%s\n", base64);
+        sys_free(base64);
+        free_binary_array(tls_cert);
+      } else {
+        snprintf(outf, 255, "%s.smime", out_filename.c_str());
+
+        if (voucher_pledge_request_to_smimefile(&config.pconf, tls_cert, outf) < 0) {
+          log_error("voucher_pledge_request_to_smimefile fail");
+          return EXIT_FAILURE;
+        }
+        free_binary_array(tls_cert);
       }
-      free_binary_array(cert);
       break;
     case CommandId::COMMAND_PLEDGE_REQUEST: {
+      struct BinaryArray pinned_domain_cert = {};
+
       log_info("Pledge voucher request to %s:%d",
                    config.rconf.bind_address, config.rconf.port);
-      std::string cert;
       if (post_voucher_pledge_request(&config.pconf, &config.rconf,
-                                      &config.mconf, cert) < 0) {
+                                      &config.mconf, &pinned_domain_cert) < 0) {
         log_error("post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
-      print_cert(cert.c_str());
+
+      if (out_filename.empty()) {
+        char *cert_str = NULL;
+
+        if (serialize_array2base64str(pinned_domain_cert.array,
+                                      pinned_domain_cert.length,
+                                      (uint8_t **)&cert_str) < 0) {
+          log_error("serialize_array2base64str fail");
+          return EXIT_FAILURE;
+        }
+        print_cert(cert_str, 0);
+        sys_free(cert_str);
+      } else {
+        snprintf(outf, 255, "%s.crt", out_filename.c_str());
+        if (certbuf_to_file(&pinned_domain_cert, outf) < 0) {
+          log_error("certbuf_to_file fail");
+          return EXIT_FAILURE;
+        }
+      }
+      free_binary_array_content(&pinned_domain_cert);
       break;
     }
 
     case CommandId::COMMAND_SIGN_CERT: {
       log_info("Sign cert %s:%d", config.rconf.bind_address, config.rconf.port);
-      std::string cert;
+      std::string cert_str;
       if (post_sign_cert(&config.pconf, &config.rconf,
-                         &config.mconf, in_filename.c_str(), cert) < 0) {
+                         &config.mconf, in_filename.c_str(), cert_str) < 0) {
         log_error("post_voucher_pledge_request fail");
         return EXIT_FAILURE;
       }
-      print_cert(cert.c_str());
+      print_cert(cert_str.c_str(), 0);
       break;
     }
 

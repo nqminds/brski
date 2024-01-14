@@ -39,6 +39,7 @@ int voucher_req_cb(const char *serial_number,
     return -1;
   }
 
+  log_info("Pledge cert serial number: %s", serial_number);
   /* Need to verify serial_number using a DB*/
   /* ... */
 
