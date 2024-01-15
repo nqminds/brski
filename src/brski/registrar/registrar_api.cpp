@@ -305,10 +305,10 @@ int registrar_enrollstatus(const RequestHeader &request_header,
 }
 
 int registrar_est_simpleenroll(const RequestHeader &request_header,
-                       const std::string &request_body,
-                       CRYPTO_CERT peer_certificate,
-                       ResponseHeader &response_header, std::string &response,
-                       void *user_ctx) {
+                               const std::string &request_body,
+                               CRYPTO_CERT peer_certificate,
+                               ResponseHeader &response_header,
+                               std::string &response, void *user_ctx) {
   struct RegistrarContext *context =
       static_cast<struct RegistrarContext *>(user_ctx);
   struct registrar_config *rconf = context->rconf;
