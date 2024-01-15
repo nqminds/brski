@@ -29,11 +29,6 @@ int voucher_req_cb(const char *serial_number,
                    void *user_ctx, struct BinaryArray *pinned_domain_cert) {
   struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
 
-  if (context->ldevid_ca_key == NULL) {
-    log_error("ldevid_ca_key is NULL");
-    return -1;
-  }
-
   if (context->ldevid_ca_cert == NULL) {
     log_error("ldevid_ca_cert is NULL");
     return -1;
@@ -102,12 +97,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
     goto masa_requestvoucher_fail;
   }
 
-  if ((context->ldevid_ca_key = file_to_keybuf(mconf->ldevid_ca_key_path)) ==
-      NULL) {
-    log_error("file_to_keybuf fail");
-    goto masa_requestvoucher_fail;
-  }
-
   if ((masa_sign_cert = file_to_x509buf(mconf->cms_sign_cert_path)) == NULL) {
     log_error("file_to_x509buf fail");
     goto masa_requestvoucher_fail;
@@ -168,7 +157,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
 
   sys_free(base64);
   free_binary_array(context->ldevid_ca_cert);
-  free_binary_array(context->ldevid_ca_key);
   free_binary_array(masa_sign_key);
   free_binary_array(masa_sign_cert);
   free_array_list(registrar_verify_certs);
@@ -182,7 +170,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
 
 masa_requestvoucher_fail:
   free_binary_array(context->ldevid_ca_cert);
-  free_binary_array(context->ldevid_ca_key);
   free_binary_array(masa_sign_cert);
   free_binary_array(masa_sign_key);
   free_array_list(registrar_verify_certs);

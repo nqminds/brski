@@ -33,7 +33,6 @@ struct MasaContext {
   struct registrar_config *rconf;
   struct masa_config *mconf;
   struct BinaryArray *ldevid_ca_cert;
-  struct BinaryArray *ldevid_ca_key;
   void *srv_ctx;
 };
 
