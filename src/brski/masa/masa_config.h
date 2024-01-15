@@ -18,7 +18,6 @@ struct masa_config {
   char *expires_on;
   unsigned int port;
   char *ldevid_ca_cert_path;
-  char *ldevid_ca_key_path;
   char *tls_cert_path;
   char *tls_key_path;
   char *tls_ca_cert_path;

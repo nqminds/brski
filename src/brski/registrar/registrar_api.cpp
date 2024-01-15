@@ -314,35 +314,64 @@ int registrar_signcert(const RequestHeader &request_header,
   struct registrar_config *rconf = context->rconf;
   struct masa_config *mconf = context->mconf;
 
+  struct BinaryArray cert_to_sign = {};
+  struct BinaryArray *tls_ca_key = NULL;
+  struct BinaryArray *tls_ca_cert = NULL;
+  ssize_t length;
+
   log_trace("registrar_signcert:");
 
-  std::string path = PATH_BRSKI_SIGNCERT;
-  std::string content_type = "text/plain";
-  std::string body = request_body;
+  char *cert_str = (char *)request_body.c_str();
 
-  log_info("Request sign cert from MASA %s", path.c_str());
+  response_header["Content-Type"] = "text/plain";
 
-  struct HttpResponse http_res;
-  int status = https_post_request(rconf->tls_key_path, rconf->tls_cert_path,
-                                  mconf->bind_address, mconf->port, path, false,
-                                  body, content_type, http_res);
+  if ((length = serialize_base64str2array((const uint8_t *)cert_str,
+                                          strlen(cert_str),
+                                          &cert_to_sign.array)) < 0) {
+    log_errno("serialize_base64str2array fail");
+    goto registrar_signcert_err;
+  }
+  cert_to_sign.length = length;
 
-  if (status < 0) {
-    log_error("https_post_request fail");
-    return 400;
+  /* Here check the idevid */
+
+  if ((tls_ca_cert = file_to_x509buf(rconf->tls_ca_cert_path)) == NULL) {
+    log_error("file_to_x509buf fail");
+    goto registrar_signcert_err;
   }
 
-  if (status >= 400) {
-    log_error("https_post_request failed with HTTP code %d and "
-              "response: '%s'",
-              status, http_res.response.c_str());
-    crypto_free_certcontext(http_res.peer_certificate);
-    return 400;
+  if ((tls_ca_key = file_to_keybuf(rconf->tls_ca_key_path)) == NULL) {
+    log_error("file_to_keybuf fail");
+    goto registrar_signcert_err;
   }
 
-  crypto_free_certcontext(http_res.peer_certificate);
-  response = http_res.response;
+  length = crypto_sign_cert(tls_ca_key->array, tls_ca_key->length,
+                            tls_ca_cert->array, tls_ca_cert->length,
+                            cert_to_sign.length, &cert_to_sign.array);
+  if (length < 0) {
+    log_error("file_to_x509buf fail");
+    goto registrar_signcert_err;
+  }
+  cert_to_sign.length = length;
+  cert_str = NULL;
 
-  response_header["Content-Type"] = content_type;
+  if (serialize_array2base64str(cert_to_sign.array, cert_to_sign.length,
+                                (uint8_t **)&cert_str) < 0) {
+    log_error("serialize_array2base64str fail");
+    goto registrar_signcert_err;
+  }
+
+  response.assign((char *)cert_str);
+
+  sys_free(cert_str);
+  free_binary_array_content(&cert_to_sign);
+  free_binary_array(tls_ca_cert);
+  free_binary_array(tls_ca_key);
   return 200;
+
+registrar_signcert_err:
+  free_binary_array_content(&cert_to_sign);
+  free_binary_array(tls_ca_cert);
+  free_binary_array(tls_ca_key);
+  return 400;
 }

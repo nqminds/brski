@@ -38,10 +38,6 @@ void setup_masa_routes(std::vector<struct RouteTuple> &routes) {
                     .method = HTTP_METHOD_POST,
                     .handle = masa_enrollstatus});
 
-  routes.push_back({.path = std::string(PATH_BRSKI_SIGNCERT),
-                    .method = HTTP_METHOD_POST,
-                    .handle = masa_signcert});
-
   routes.push_back({.path = std::string(PATH_EST_CACERTS),
                     .method = HTTP_METHOD_GET,
                     .handle = get_est_cacerts});
