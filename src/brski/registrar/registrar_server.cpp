@@ -38,9 +38,9 @@ void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
                     .method = HTTP_METHOD_POST,
                     .handle = registrar_enrollstatus});
 
-  routes.push_back({.path = std::string(PATH_BRSKI_SIGNCERT),
+  routes.push_back({.path = std::string(PATH_EST_SIMPLEENROLL),
                     .method = HTTP_METHOD_POST,
-                    .handle = registrar_signcert});
+                    .handle = registrar_est_simpleenroll});
 }
 
 int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,

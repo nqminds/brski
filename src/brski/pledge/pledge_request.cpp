@@ -258,7 +258,7 @@ int post_sign_cert(struct pledge_config *pconf, struct registrar_config *rconf,
   struct BinaryArray pinned_domain_cert = {};
   int status;
   char *pki_str = NULL;
-  std::string path = PATH_BRSKI_SIGNCERT;
+  std::string path = PATH_EST_SIMPLEENROLL;
   std::string content_type = "application/voucher-cms+json";
   std::string registrar_ca_cert;
   ssize_t length;

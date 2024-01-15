@@ -29,11 +29,6 @@ int voucher_req_cb(const char *serial_number,
                    void *user_ctx, struct BinaryArray *pinned_domain_cert) {
   struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
 
-  if (context->ldevid_ca_key == NULL) {
-    log_error("ldevid_ca_key is NULL");
-    return -1;
-  }
-
   if (context->ldevid_ca_cert == NULL) {
     log_error("ldevid_ca_cert is NULL");
     return -1;
@@ -102,12 +97,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
     goto masa_requestvoucher_fail;
   }
 
-  if ((context->ldevid_ca_key = file_to_keybuf(mconf->ldevid_ca_key_path)) ==
-      NULL) {
-    log_error("file_to_keybuf fail");
-    goto masa_requestvoucher_fail;
-  }
-
   if ((masa_sign_cert = file_to_x509buf(mconf->cms_sign_cert_path)) == NULL) {
     log_error("file_to_x509buf fail");
     goto masa_requestvoucher_fail;
@@ -168,7 +157,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
 
   sys_free(base64);
   free_binary_array(context->ldevid_ca_cert);
-  free_binary_array(context->ldevid_ca_key);
   free_binary_array(masa_sign_key);
   free_binary_array(masa_sign_cert);
   free_array_list(registrar_verify_certs);
@@ -182,7 +170,6 @@ int masa_requestvoucher(const RequestHeader &request_header,
 
 masa_requestvoucher_fail:
   free_binary_array(context->ldevid_ca_cert);
-  free_binary_array(context->ldevid_ca_key);
   free_binary_array(masa_sign_cert);
   free_binary_array(masa_sign_key);
   free_array_list(registrar_verify_certs);
@@ -337,74 +324,4 @@ int get_est_csrattrs(const RequestHeader &request_header,
   response.assign("get_est_csrattrs");
   response_header["Content-Type"] = "text/plain";
   return 503;
-}
-
-int masa_signcert(const RequestHeader &request_header,
-                  const std::string &request_body, CRYPTO_CERT peer_certificate,
-                  ResponseHeader &response_header, std::string &response,
-                  void *user_ctx) {
-  struct MasaContext *context = static_cast<struct MasaContext *>(user_ctx);
-  struct registrar_config *rconf = context->rconf;
-  struct masa_config *mconf = context->mconf;
-
-  struct BinaryArray cert_to_sign = {};
-  struct BinaryArray *ldevid_ca_cert = NULL;
-  struct BinaryArray *ldevid_ca_key = NULL;
-  ssize_t length;
-
-  char *cert_str = (char *)request_body.c_str();
-
-  response_header["Content-Type"] = "text/plain";
-
-  log_trace("masa_signcert:");
-
-  if ((length = serialize_base64str2array((const uint8_t *)cert_str,
-                                          strlen(cert_str),
-                                          &cert_to_sign.array)) < 0) {
-    log_errno("serialize_base64str2array fail");
-    goto masa_signcert_err;
-  }
-  cert_to_sign.length = length;
-
-  /* Here check the registrar */
-
-  if ((ldevid_ca_cert = file_to_x509buf(mconf->ldevid_ca_cert_path)) == NULL) {
-    log_error("file_to_x509buf fail");
-    goto masa_signcert_err;
-  }
-
-  if ((ldevid_ca_key = file_to_keybuf(mconf->ldevid_ca_key_path)) == NULL) {
-    log_error("file_to_keybuf fail");
-    goto masa_signcert_err;
-  }
-
-  length = crypto_sign_cert(ldevid_ca_key->array, ldevid_ca_key->length,
-                            ldevid_ca_cert->array, ldevid_ca_cert->length,
-                            cert_to_sign.length, &cert_to_sign.array);
-  if (length < 0) {
-    log_error("file_to_x509buf fail");
-    goto masa_signcert_err;
-  }
-  cert_to_sign.length = length;
-  cert_str = NULL;
-
-  if (serialize_array2base64str(cert_to_sign.array, cert_to_sign.length,
-                                (uint8_t **)&cert_str) < 0) {
-    log_error("serialize_array2base64str fail");
-    goto masa_signcert_err;
-  }
-
-  response.assign((char *)cert_str);
-
-  sys_free(cert_str);
-  free_binary_array_content(&cert_to_sign);
-  free_binary_array(ldevid_ca_cert);
-  free_binary_array(ldevid_ca_key);
-  return 200;
-
-masa_signcert_err:
-  free_binary_array_content(&cert_to_sign);
-  free_binary_array(ldevid_ca_cert);
-  free_binary_array(ldevid_ca_key);
-  return 400;
 }
