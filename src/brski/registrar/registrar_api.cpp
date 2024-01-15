@@ -304,7 +304,7 @@ int registrar_enrollstatus(const RequestHeader &request_header,
   return 200;
 }
 
-int registrar_signcert(const RequestHeader &request_header,
+int registrar_est_simpleenroll(const RequestHeader &request_header,
                        const std::string &request_body,
                        CRYPTO_CERT peer_certificate,
                        ResponseHeader &response_header, std::string &response,
@@ -319,7 +319,7 @@ int registrar_signcert(const RequestHeader &request_header,
   struct BinaryArray *tls_ca_cert = NULL;
   ssize_t length;
 
-  log_trace("registrar_signcert:");
+  log_trace("registrar_est_simpleenroll:");
 
   char *cert_str = (char *)request_body.c_str();
 

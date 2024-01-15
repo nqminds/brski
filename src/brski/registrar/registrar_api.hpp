@@ -76,7 +76,7 @@ int registrar_enrollstatus(const RequestHeader &request_header,
  * @retval 500 Internal Server Error.
  * @retval 502 Bad Gateway
  */
-int registrar_signcert(const RequestHeader &request_header,
+int registrar_est_simpleenroll(const RequestHeader &request_header,
                        const std::string &request_body,
                        CRYPTO_CERT peer_certificate,
                        ResponseHeader &response_header, std::string &response,
