@@ -19,6 +19,7 @@ bindAddress = "0.0.0.0"
 port = 12345
 tlsKeyPath = ""
 tlsCertPath = ""
+tlsCAKeyPath = ""
 tlsCACertPath = ""
 cmsSignKeyPath = ""
 cmsSignCertPath = ""
@@ -29,9 +30,7 @@ cmsVerifyStorePath = ""
 [masa]
 bindAddress = "0.0.0.0"
 expiresOn = ""
-expiresOn = ""
 port = 12346
-ldevidCAKeyPath = ""
 ldevidCACertPath = ""
 tlsKeyPath = ""
 tlsCertPath = ""
