@@ -272,7 +272,7 @@ static void generate_registrar_tls_certs(void **state) {
   push_keyvalue_list(registrar_tls_ca_meta.issuer, "CN", "registrar-tls-ca");
   push_keyvalue_list(registrar_tls_ca_meta.subject, "C", "IE");
   push_keyvalue_list(registrar_tls_ca_meta.subject, "CN", "registrar-tls-ca");
-
+  
   struct BinaryArray registrar_tls_ca_key = {};
   struct BinaryArray registrar_tls_ca_cert = {};
   registrar_tls_ca_key.length =
