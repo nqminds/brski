@@ -89,7 +89,7 @@ static void show_help(const char *name) {
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
   std::fprintf(stdout, "\t-o filename\t The output file\n");
-  std::fprintf(stdout, "\t-p port\t The registrar port number\n");
+  std::fprintf(stdout, "\t-p port\t\t The registrar port number\n");
   std::fprintf(stdout, "\t-a address\t The registrar peer address\n");
   std::fprintf(stdout, "\t-d\t\t Make verbose\n");
   std::fprintf(stdout, "\t-h\t\t Show help\n");
