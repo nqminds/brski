@@ -25,8 +25,8 @@ void log_lock_fun(bool lock);
 #include "version.h"
 
 const std::string OPT_STRING = ":c:o:p:a:dvh";
-const std::string USAGE_STRING =
-    "\t%s [-c filename] [-o filename] [-p port] [-a address] [-d] [-h] [-v] <command>\n";
+const std::string USAGE_STRING = "\t%s [-c filename] [-o filename] [-p port] "
+                                 "[-a address] [-d] [-h] [-v] <command>\n";
 
 enum class CommandId {
   COMMAND_EXPORT_PVR = 1,
@@ -125,9 +125,8 @@ static CommandId get_command_id(const std::string &command_label) {
 
 static void process_options(int argc, char *const argv[], int &verbose,
                             std::string &config_filename,
-                            std::string &out_filename,
-                            unsigned int *port, std::string &address,
-                            CommandId &command_id) {
+                            std::string &out_filename, unsigned int *port,
+                            std::string &address, CommandId &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
@@ -219,8 +218,8 @@ int main(int argc, char *argv[]) {
   CommandId command_id;
   char outf[255];
 
-  process_options(argc, argv, verbose, config_filename, out_filename,
-                  &port, address, command_id);
+  process_options(argc, argv, verbose, config_filename, out_filename, &port,
+                  address, command_id);
 
   log_set_lock(log_lock_fun);
 
@@ -237,9 +236,8 @@ int main(int argc, char *argv[]) {
   }
 
   if (command_id == CommandId::COMMAND_PLEDGE_REQUEST ||
-    command_id == CommandId::COMMAND_SIGN_CERT ||
-    command_id == CommandId::COMMAND_START_REGISTRAR)
-  {
+      command_id == CommandId::COMMAND_SIGN_CERT ||
+      command_id == CommandId::COMMAND_START_REGISTRAR) {
     if (port)
       config.rconf.port = port;
 
