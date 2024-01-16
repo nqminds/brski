@@ -24,9 +24,9 @@ void log_lock_fun(bool lock);
 
 #include "version.h"
 
-const std::string OPT_STRING = ":c:o:dvh";
+const std::string OPT_STRING = ":c:o:p:a:dvh";
 const std::string USAGE_STRING =
-    "\t%s [-c filename] [-o filename] [-d] [-h] [-v] <command>\n";
+    "\t%s [-c filename] [-o filename] [-p port] [-a address] [-d] [-h] [-v] <command>\n";
 
 enum class CommandId {
   COMMAND_EXPORT_PVR = 1,
@@ -89,6 +89,8 @@ static void show_help(const char *name) {
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
   std::fprintf(stdout, "\t-o filename\t The output file\n");
+  std::fprintf(stdout, "\t-p port\t The registrar port number\n");
+  std::fprintf(stdout, "\t-a address\t The registrar peer address\n");
   std::fprintf(stdout, "\t-d\t\t Make verbose\n");
   std::fprintf(stdout, "\t-h\t\t Show help\n");
   std::fprintf(stdout, "\t-v\t\t Show app version\n\n");
@@ -123,7 +125,9 @@ static CommandId get_command_id(const std::string &command_label) {
 
 static void process_options(int argc, char *const argv[], int &verbose,
                             std::string &config_filename,
-                            std::string &out_filename, CommandId &command_id) {
+                            std::string &out_filename,
+                            unsigned int *port, std::string &address,
+                            CommandId &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
@@ -139,6 +143,12 @@ static void process_options(int argc, char *const argv[], int &verbose,
         break;
       case 'o':
         out_filename.assign(optarg);
+        break;
+      case 'p':
+        *port = strtol(optarg, NULL, 10);
+        break;
+      case 'a':
+        address.assign(optarg);
         break;
       case 'd':
         verbose = 1;
@@ -203,12 +213,14 @@ void print_key(const char *key, int prefix) {
 
 int main(int argc, char *argv[]) {
   int verbose = 0;
+  unsigned int port = 0;
   std::string config_filename, in_filename, out_filename;
+  std::string address;
   CommandId command_id;
   char outf[255];
 
   process_options(argc, argv, verbose, config_filename, out_filename,
-                  command_id);
+                  &port, address, command_id);
 
   log_set_lock(log_lock_fun);
 
@@ -222,6 +234,24 @@ int main(int argc, char *argv[]) {
   if (load_brski_config(config_filename.c_str(), &config) < 0) {
     log_error("load_config fail");
     return EXIT_FAILURE;
+  }
+
+  if (command_id == CommandId::COMMAND_PLEDGE_REQUEST ||
+    command_id == CommandId::COMMAND_SIGN_CERT ||
+    command_id == CommandId::COMMAND_START_REGISTRAR)
+  {
+    if (port)
+      config.rconf.port = port;
+
+    if (!address.empty()) {
+      if (config.rconf.bind_address != NULL)
+        sys_free(config.rconf.bind_address);
+
+      if ((config.rconf.bind_address = strdup(address.c_str())) == NULL) {
+        log_errno("strdup fail");
+        return EXIT_FAILURE;
+      }
+    }
   }
 
   struct RegistrarContext *rcontext = NULL;
