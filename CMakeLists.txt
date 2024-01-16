@@ -8,7 +8,7 @@ project(BRSKI
   LANGUAGES C CXX
 )
 # CMake proposal for semver https://gitlab.kitware.com/cmake/cmake/-/issues/23649
-set(PROJECT_VERSION_PRERELEASE alpha.0)
+set(PROJECT_VERSION_PRERELEASE)
 
 set(
   PROJECT_VERSION
