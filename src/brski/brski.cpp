@@ -25,8 +25,9 @@ void log_lock_fun(bool lock);
 #include "version.h"
 
 const std::string OPT_STRING = ":c:i:o:p:a:dvh";
-const std::string USAGE_STRING = "\t%s [-c filename] [-i filename] [-o filename] [-p port] "
-                                 "[-a address] [-d] [-h] [-v] <command>\n";
+const std::string USAGE_STRING =
+    "\t%s [-c filename] [-i filename] [-o filename] [-p port] "
+    "[-a address] [-d] [-h] [-v] <command>\n";
 
 enum class CommandId {
   COMMAND_EXPORT_PVR = 1,
@@ -50,7 +51,8 @@ const std::array<struct command_config, 6> command_list = {{
      "\tpreq\t\tSend a pledge-voucher request to the registrar and\n"
      "\t\t\t return the pinned-domain-cert."},
     {"sign", CommandId::COMMAND_SIGN_CERT, "\tsign\t\tSign a certificate\n"},
-    {"serial", CommandId::COMMAND_GET_SERIAL, "\tserial\t\tReturns the serial number of a certificate\n"},
+    {"serial", CommandId::COMMAND_GET_SERIAL,
+     "\tserial\t\tReturns the serial number of a certificate\n"},
     {"registrar", CommandId::COMMAND_START_REGISTRAR,
      "\tregistrar\tStarts the registrar"},
     {"masa", CommandId::COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
@@ -127,9 +129,10 @@ static CommandId get_command_id(const std::string &command_label) {
 }
 
 static void process_options(int argc, char *const argv[], int &verbose,
-                            std::string &config_filename, std::string &in_filename,
-                            std::string &out_filename, unsigned int *port,
-                            std::string &address, CommandId &command_id) {
+                            std::string &config_filename,
+                            std::string &in_filename, std::string &out_filename,
+                            unsigned int *port, std::string &address,
+                            CommandId &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {

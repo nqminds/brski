@@ -134,7 +134,7 @@ crypto_getcert_issuer(CRYPTO_CERT cert);
  * @param[in] meta The input certificate metadata
  * @return The serial number string or NULL on failure
  */
-char* crypto_getcert_serial(struct crypto_cert_meta *meta);
+char *crypto_getcert_serial(struct crypto_cert_meta *meta);
 
 /**
  * @brief Generate a private RSA key for a given number of bits

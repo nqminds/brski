@@ -197,7 +197,7 @@ int generate_sign_cert(struct BinaryArray *scert_cert,
   uint8_t rand[8];
   char rands[17];
   struct BinaryArray buf = {.array = rand, .length = 8};
-  
+
   struct crypto_cert_meta sign_cert_meta = {
       .serial_number = 12345,
       .not_before = 0,
@@ -237,9 +237,8 @@ int generate_sign_cert(struct BinaryArray *scert_cert,
     goto generate_sign_cert_err;
   }
 
-  if (push_keyvalue_list(sign_cert_meta.subject,
-                         (char *)"serialNumber", rands) < 0)
-  {
+  if (push_keyvalue_list(sign_cert_meta.subject, (char *)"serialNumber",
+                         rands) < 0) {
     log_error("push_keyvalue_list fail");
     goto generate_sign_cert_err;
   }

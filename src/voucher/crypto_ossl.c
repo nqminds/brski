@@ -1679,10 +1679,9 @@ crypto_verify_cms_fail:
   return -1;
 }
 
-int crypto_getrand(struct BinaryArray *buf)
-{
+int crypto_getrand(struct BinaryArray *buf) {
   int ret;
-  
+
   if (buf == NULL)
     return -1;
 
@@ -1691,9 +1690,9 @@ int crypto_getrand(struct BinaryArray *buf)
 
   ret = RAND_bytes(buf->array, buf->length);
 
-  if(ret != 1) {
+  if (ret != 1) {
     log_error("RAND_bytes fail with code=%s",
-          ERR_error_string(ERR_get_error(), NULL));
+              ERR_error_string(ERR_get_error(), NULL));
     return -1;
   }
 
