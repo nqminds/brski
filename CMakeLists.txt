@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.14.0) # required for FindSQLite3
 cmake_policy(VERSION 3.14.0...3.24.0)
 
 project(BRSKI
-  VERSION 0.2.3
+  VERSION 0.2.4
   HOMEPAGE_URL "https://github.com/nqminds/brski"
   DESCRIPTION "Bootstrapping Remote Secure Key Infrastructure (BRSKI)"
   LANGUAGES C CXX
