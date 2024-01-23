@@ -99,7 +99,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
   char *serial_number = NULL;
   const char *cms_str = request_body.c_str();
 
-  log_trace("registrar_requestvoucher:");
+  log_trace("registrar_requestvoucher: %p", peer_certificate);
   response_header["Content-Type"] = "application/voucher-cms+json";
 
   struct CrypoCertMeta : public crypto_cert_meta {

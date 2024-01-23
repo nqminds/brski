@@ -368,8 +368,7 @@ int main(int argc, char *argv[]) {
     }
 
     case CommandId::COMMAND_START_REGISTRAR:
-      if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
-                          &rcontext) < 0) {
+      if (registrar_start(&config.rconf, &config.mconf, &rcontext) < 0) {
         log_error("https_start fail");
         return EXIT_FAILURE;
       }

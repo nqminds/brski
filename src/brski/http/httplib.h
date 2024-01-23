@@ -8872,6 +8872,13 @@ static SSLInit sslinit_;
 
 } // namespace detail
 
+// Accepty the client certificate as it is, vrefication not needed
+int SSL_verify_fn(int preverify_ok, X509_STORE_CTX *x509_ctx) {
+  (void) preverify_ok;
+  (void) x509_ctx;
+  return 1;
+}
+
 // SSL HTTP server implementation
 inline SSLServer::SSLServer(const char *cert_path, const char *private_key_path,
                             const char *client_ca_cert_file_path,
@@ -8904,6 +8911,10 @@ inline SSLServer::SSLServer(const char *cert_path, const char *private_key_path,
 
       SSL_CTX_set_verify(
           ctx_, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, nullptr);
+    }
+
+    if (client_ca_cert_file_path == nullptr && client_ca_cert_dir_path == nullptr) {
+      SSL_CTX_set_verify(ctx_, SSL_VERIFY_PEER | SSL_VERIFY_FAIL_IF_NO_PEER_CERT, SSL_verify_fn);
     }
   }
 }
