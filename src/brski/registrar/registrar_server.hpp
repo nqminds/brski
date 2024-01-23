@@ -19,12 +19,10 @@
  *
  * @param[in] rconf The registrar config
  * @param[in] mconf The masa config
- * @param[in] pconf The pledge config
  * @param[out] context The registrar context
  * @return int 0 on success, -1 on failure
  */
 int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,
-                    struct pledge_config *pconf,
                     struct RegistrarContext **context);
 
 /**

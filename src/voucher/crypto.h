@@ -82,6 +82,14 @@ enum CRYPTO_CERTIFICATE_TYPE {
 };
 
 /**
+ * @brief Fills in an array with random bytes
+ *
+ * @param[in] buf The input array
+ * @return 0 on success, -1 on failure
+ */
+int crypto_getrand(struct BinaryArray *buf);
+
+/**
  * @brief Makes a copy of the certificate structire
  *
  * @param[in] cert The input certificate structure
@@ -119,6 +127,14 @@ int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta);
  */
 __must_free_binary_array struct BinaryArray *
 crypto_getcert_issuer(CRYPTO_CERT cert);
+
+/**
+ * @brief Returns the certificater serial number from the subject
+ *
+ * @param[in] meta The input certificate metadata
+ * @return The serial number string or NULL on failure
+ */
+char *crypto_getcert_serial(struct crypto_cert_meta *meta);
 
 /**
  * @brief Generate a private RSA key for a given number of bits

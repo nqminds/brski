@@ -1678,3 +1678,35 @@ crypto_verify_cms_fail:
   free_x509_store(cert_store, x509_store_list);
   return -1;
 }
+
+int crypto_getrand(struct BinaryArray *buf) {
+  int ret;
+
+  if (buf == NULL)
+    return -1;
+
+  if (buf->array == NULL || buf->length == 0)
+    return -1;
+
+  ret = RAND_bytes(buf->array, buf->length);
+
+  if (ret != 1) {
+    log_error("RAND_bytes fail with code=%s",
+              ERR_error_string(ERR_get_error(), NULL));
+    return -1;
+  }
+
+  return 0;
+}
+
+char *crypto_getcert_serial(struct crypto_cert_meta *meta) {
+  struct keyvalue_list *el = NULL, *next = NULL;
+  dl_list_for_each_safe(el, next, &(meta->subject)->list, struct keyvalue_list,
+                        list) {
+    if (strcmp(el->key, "serialNumber") == 0) {
+      return el->value;
+    }
+  }
+
+  return NULL;
+}

@@ -24,14 +24,16 @@ void log_lock_fun(bool lock);
 
 #include "version.h"
 
-const std::string OPT_STRING = ":c:o:p:a:dvh";
-const std::string USAGE_STRING = "\t%s [-c filename] [-o filename] [-p port] "
-                                 "[-a address] [-d] [-h] [-v] <command>\n";
+const std::string OPT_STRING = ":c:i:o:p:a:dvh";
+const std::string USAGE_STRING =
+    "\t%s [-c filename] [-i filename] [-o filename] [-p port] "
+    "[-a address] [-d] [-h] [-v] <command>\n";
 
 enum class CommandId {
   COMMAND_EXPORT_PVR = 1,
   COMMAND_PLEDGE_REQUEST,
   COMMAND_SIGN_CERT,
+  COMMAND_GET_SERIAL,
   COMMAND_START_REGISTRAR,
   COMMAND_START_MASA,
 };
@@ -42,13 +44,15 @@ struct command_config {
   const std::string info;
 };
 
-const std::array<struct command_config, 5> command_list = {{
+const std::array<struct command_config, 6> command_list = {{
     {"epvr", CommandId::COMMAND_EXPORT_PVR,
      "\tepvr\t\tExport the pledge voucher request as base64 CMS file"},
     {"preq", CommandId::COMMAND_PLEDGE_REQUEST,
      "\tpreq\t\tSend a pledge-voucher request to the registrar and\n"
      "\t\t\t return the pinned-domain-cert."},
     {"sign", CommandId::COMMAND_SIGN_CERT, "\tsign\t\tSign a certificate\n"},
+    {"serial", CommandId::COMMAND_GET_SERIAL,
+     "\tserial\t\tReturns the serial number of a certificate\n"},
     {"registrar", CommandId::COMMAND_START_REGISTRAR,
      "\tregistrar\tStarts the registrar"},
     {"masa", CommandId::COMMAND_START_MASA, "\tmasa\t\tStarts the MASA"},
@@ -88,6 +92,7 @@ static void show_help(const char *name) {
   }
   std::fprintf(stdout, "\nOptions:\n");
   std::fprintf(stdout, "\t-c filename\t Path to the config file\n");
+  std::fprintf(stdout, "\t-i filename\t The input file\n");
   std::fprintf(stdout, "\t-o filename\t The output file\n");
   std::fprintf(stdout, "\t-p port\t\t The registrar port number\n");
   std::fprintf(stdout, "\t-a address\t The registrar peer address\n");
@@ -125,8 +130,9 @@ static CommandId get_command_id(const std::string &command_label) {
 
 static void process_options(int argc, char *const argv[], int &verbose,
                             std::string &config_filename,
-                            std::string &out_filename, unsigned int *port,
-                            std::string &address, CommandId &command_id) {
+                            std::string &in_filename, std::string &out_filename,
+                            unsigned int *port, std::string &address,
+                            CommandId &command_id) {
   int opt;
 
   while ((opt = getopt(argc, argv, OPT_STRING.c_str())) != -1) {
@@ -139,6 +145,9 @@ static void process_options(int argc, char *const argv[], int &verbose,
         std::exit(EXIT_SUCCESS);
       case 'c':
         config_filename.assign(optarg);
+        break;
+      case 'i':
+        in_filename.assign(optarg);
         break;
       case 'o':
         out_filename.assign(optarg);
@@ -218,8 +227,8 @@ int main(int argc, char *argv[]) {
   CommandId command_id;
   char outf[255];
 
-  process_options(argc, argv, verbose, config_filename, out_filename, &port,
-                  address, command_id);
+  process_options(argc, argv, verbose, config_filename, in_filename,
+                  out_filename, &port, address, command_id);
 
   log_set_lock(log_lock_fun);
 
@@ -229,10 +238,12 @@ int main(int argc, char *argv[]) {
   else
     log_set_level(LOGC_TRACE);
 
-  BrskiConfig config;
-  if (load_brski_config(config_filename.c_str(), &config) < 0) {
-    log_error("load_config fail");
-    return EXIT_FAILURE;
+  BrskiConfig config = {};
+  if (command_id != CommandId::COMMAND_GET_SERIAL) {
+    if (load_brski_config(config_filename.c_str(), &config) < 0) {
+      log_error("load_config fail");
+      return EXIT_FAILURE;
+    }
   }
 
   if (command_id == CommandId::COMMAND_PLEDGE_REQUEST ||
@@ -366,10 +377,54 @@ int main(int argc, char *argv[]) {
       free_binary_array_content(&out_key);
       break;
     }
+    case CommandId::COMMAND_GET_SERIAL: {
+      if (in_filename.empty()) {
+        log_error("No input certificate file");
+        return EXIT_FAILURE;
+      }
+      log_info("Getting certificate %s serial number", in_filename.c_str());
+      struct BinaryArray *cert_buf = file_to_x509buf(in_filename.c_str());
+      if (cert_buf == NULL) {
+        log_error("file_to_keybuf fail");
+        return EXIT_FAILURE;
+      }
+      CRYPTO_CERT cert = crypto_cert2context(cert_buf->array, cert_buf->length);
+      if (cert == NULL) {
+        log_error("crypto_cert2context fail");
+        return EXIT_FAILURE;
+      }
+      struct crypto_cert_meta meta = {};
+      meta.issuer = init_keyvalue_list();
+      meta.subject = init_keyvalue_list();
+
+      if (meta.issuer == NULL || meta.subject == NULL) {
+        log_error("error allocation");
+        return EXIT_FAILURE;
+      }
+
+      if (crypto_getcert_meta(cert, &meta) < 0) {
+        log_error("crypto_getcert_meta fail");
+        return EXIT_FAILURE;
+      }
+
+      char *serial_number = crypto_getcert_serial(&meta);
+
+      if (serial_number == NULL) {
+        log_error("Empty serial number");
+        return EXIT_FAILURE;
+      }
+
+      fprintf(stdout, "%s", serial_number);
+
+      free_keyvalue_list(meta.issuer);
+      free_keyvalue_list(meta.subject);
+      free_binary_array(cert_buf);
+      crypto_free_certcontext(cert);
+      break;
+    }
 
     case CommandId::COMMAND_START_REGISTRAR:
-      if (registrar_start(&config.rconf, &config.mconf, &config.pconf,
-                          &rcontext) < 0) {
+      if (registrar_start(&config.rconf, &config.mconf, &rcontext) < 0) {
         log_error("https_start fail");
         return EXIT_FAILURE;
       }

@@ -14,6 +14,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.2.4] - 2024-1-23
+
+### 🚀 Features
+
+* Added get certificate serial command
+
+#### voucher
+
+#### Build
+
+### Changed
+
+* The registrar doesn't check the pledge certificate
+
+#### voucher
+
+
 ## [0.2.3] - 2024-1-16
 
 ### 🚀 Features
