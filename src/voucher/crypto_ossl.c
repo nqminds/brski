@@ -1699,3 +1699,15 @@ int crypto_getrand(struct BinaryArray *buf)
 
   return 0;
 }
+
+char *crypto_getcert_serial(struct crypto_cert_meta *meta) {
+  struct keyvalue_list *el = NULL, *next = NULL;
+  dl_list_for_each_safe(el, next, &(meta->subject)->list, struct keyvalue_list,
+                        list) {
+    if (strcmp(el->key, "serialNumber") == 0) {
+      return el->value;
+    }
+  }
+
+  return NULL;
+}

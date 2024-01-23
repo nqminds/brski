@@ -28,18 +28,6 @@ extern "C" {
 #include "../config.h"
 }
 
-char *get_cert_serial(struct crypto_cert_meta *meta) {
-  struct keyvalue_list *el = NULL, *next = NULL;
-  dl_list_for_each_safe(el, next, &(meta->subject)->list, struct keyvalue_list,
-                        list) {
-    if (strcmp(el->key, "serialNumber") == 0) {
-      return el->value;
-    }
-  }
-
-  return NULL;
-}
-
 int post_voucher_request(struct BinaryArray *voucher_request_cms,
                          struct masa_config *mconf,
                          struct registrar_config *rconf,
@@ -121,7 +109,7 @@ int registrar_requestvoucher(const RequestHeader &request_header,
     return 400;
   }
 
-  serial_number = get_cert_serial(&idev_meta);
+  serial_number = crypto_getcert_serial(&idev_meta);
 
   if (serial_number == NULL) {
     log_error("Empty serial number");

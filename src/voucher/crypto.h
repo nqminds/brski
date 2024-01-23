@@ -129,6 +129,14 @@ __must_free_binary_array struct BinaryArray *
 crypto_getcert_issuer(CRYPTO_CERT cert);
 
 /**
+ * @brief Returns the certificater serial number from the subject
+ *
+ * @param[in] meta The input certificate metadata
+ * @return The serial number string or NULL on failure
+ */
+char* crypto_getcert_serial(struct crypto_cert_meta *meta);
+
+/**
  * @brief Generate a private RSA key for a given number of bits
  * The generated key is binary (DER) raw format
  *
