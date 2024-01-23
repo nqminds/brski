@@ -82,6 +82,14 @@ enum CRYPTO_CERTIFICATE_TYPE {
 };
 
 /**
+ * @brief Fills in an array with random bytes
+ *
+ * @param[in] buf The input array
+ * @return 0 on success, -1 on failure
+ */
+int crypto_getrand(struct BinaryArray *buf);
+
+/**
  * @brief Makes a copy of the certificate structire
  *
  * @param[in] cert The input certificate structure
