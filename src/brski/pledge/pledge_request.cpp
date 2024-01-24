@@ -192,16 +192,26 @@ std::string create_cert_string(const char *cert) {
   return out;
 }
 
+uint64_t gen_rand64(void)
+{
+  uint64_t value = 0x0;
+
+  srand(time(0));
+  
+  for (int i=0; i<64; i += 15) {
+    value = value*((uint64_t)RAND_MAX + 1) + rand();
+  }
+  return value;
+}
+
 int generate_sign_cert(struct BinaryArray *scert_cert,
                        struct BinaryArray *scert_key) {
   uint8_t rand[8];
-  uint8_t serial_number_rand[8];
   char rands[17];
   struct BinaryArray buf = {.array = rand, .length = 8};
-  struct BinaryArray serial_buf = {.array = serial_number_rand, .length = 8};
   
   struct crypto_cert_meta sign_cert_meta = {
-      .serial_number = (uint64_t)serial_number_rand,
+      .serial_number = gen_rand64(),
       .not_before = 0,
       // Long-lived pledge certificate
       .not_after_absolute = (char *)"99991231235959Z",
@@ -209,11 +219,6 @@ int generate_sign_cert(struct BinaryArray *scert_cert,
       .subject = NULL,
       .basic_constraints = (char *)"CA:false"};
   
-  if (crypto_getrand(&serial_buf) < 0) {
-    log_error("crypto_getrand for serial number fail");
-    return -1;
-  }
-
   if (crypto_getrand(&buf) < 0) {
     log_error("crypto_getrand fail");
     return -1;
