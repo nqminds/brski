@@ -712,7 +712,7 @@ int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
   } else {
     if (!ASN1_INTEGER_get_uint64(&meta->serial_number, asn1_serial)) {
       log_error("ASN1_INTEGER_get_uint64 fail with code=%s",
-              ERR_error_string(ERR_get_error(), NULL));
+                ERR_error_string(ERR_get_error(), NULL));
     }
   }
 

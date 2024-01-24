@@ -28,8 +28,7 @@ extern "C" {
 #include "../config.h"
 }
 
-void save_to_log(CRYPTO_CERT icert, CRYPTO_CERT lcert, char *log_path)
-{
+void save_to_log(CRYPTO_CERT icert, CRYPTO_CERT lcert, char *log_path) {
   struct crypto_cert_meta imeta = {};
   imeta.issuer = init_keyvalue_list();
   imeta.subject = init_keyvalue_list();
@@ -74,9 +73,9 @@ void save_to_log(CRYPTO_CERT icert, CRYPTO_CERT lcert, char *log_path)
 
   FILE *f = fopen(log_path, "a");
   if (f != NULL) {
-    fprintf(f, "%lu 0x%" PRIx64 " \"%s\" 0x%"  PRIx64 " \"%s\"\n", time(NULL), imeta.serial_number,
-      (iserial != NULL) ? iserial : "NULL", lmeta.serial_number,
-      (lserial != NULL) ? lserial : "NULL");
+    fprintf(f, "%lu 0x%" PRIx64 " \"%s\" 0x%" PRIx64 " \"%s\"\n", time(NULL),
+            imeta.serial_number, (iserial != NULL) ? iserial : "NULL",
+            lmeta.serial_number, (lserial != NULL) ? lserial : "NULL");
     fclose(f);
   } else {
     log_errno("fopen fail");
@@ -418,7 +417,6 @@ int registrar_est_simpleenroll(const RequestHeader &request_header,
     save_to_log(peer_certificate, scert, context->log_path);
     crypto_free_certcontext(scert);
   }
-
 
   sys_free(cert_str);
   free_binary_array_content(&cert_to_sign);
