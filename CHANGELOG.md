@@ -19,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### 🚀 Features
 
 * Added certificate serial number logging. By default the registrar logs to `/var/log/brski-registrar.log`.
-  
+
 #### voucher
 
 #### Build
