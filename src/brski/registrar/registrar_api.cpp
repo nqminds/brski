@@ -28,6 +28,65 @@ extern "C" {
 #include "../config.h"
 }
 
+void save_to_log(CRYPTO_CERT icert, CRYPTO_CERT lcert, char *log_path) {
+  struct crypto_cert_meta imeta = {};
+  imeta.issuer = init_keyvalue_list();
+  imeta.subject = init_keyvalue_list();
+
+  log_trace("Saving the log");
+
+  if (imeta.issuer == NULL || imeta.subject == NULL) {
+    log_error("error allocation metadata");
+    return;
+  }
+
+  if (crypto_getcert_meta(icert, &imeta) < 0) {
+    log_error("crypto_getcert_meta fail");
+    free_keyvalue_list(imeta.issuer);
+    free_keyvalue_list(imeta.subject);
+    return;
+  }
+
+  char *iserial = crypto_getcert_serial(&imeta);
+
+  struct crypto_cert_meta lmeta = {};
+  lmeta.issuer = init_keyvalue_list();
+  lmeta.subject = init_keyvalue_list();
+
+  if (lmeta.issuer == NULL || lmeta.subject == NULL) {
+    log_error("error allocation metadata");
+    free_keyvalue_list(imeta.issuer);
+    free_keyvalue_list(imeta.subject);
+    return;
+  }
+
+  if (crypto_getcert_meta(lcert, &lmeta) < 0) {
+    log_error("crypto_getcert_meta fail");
+    free_keyvalue_list(imeta.issuer);
+    free_keyvalue_list(imeta.subject);
+    free_keyvalue_list(lmeta.issuer);
+    free_keyvalue_list(lmeta.subject);
+    return;
+  }
+
+  char *lserial = crypto_getcert_serial(&lmeta);
+
+  FILE *f = fopen(log_path, "a");
+  if (f != NULL) {
+    fprintf(f, "%lu 0x%" PRIx64 " \"%s\" 0x%" PRIx64 " \"%s\"\n", time(NULL),
+            imeta.serial_number, (iserial != NULL) ? iserial : "NULL",
+            lmeta.serial_number, (lserial != NULL) ? lserial : "NULL");
+    fclose(f);
+  } else {
+    log_errno("fopen fail");
+  }
+
+  free_keyvalue_list(imeta.issuer);
+  free_keyvalue_list(imeta.subject);
+  free_keyvalue_list(lmeta.issuer);
+  free_keyvalue_list(lmeta.subject);
+}
+
 int post_voucher_request(struct BinaryArray *voucher_request_cms,
                          struct masa_config *mconf,
                          struct registrar_config *rconf,
@@ -306,6 +365,7 @@ int registrar_est_simpleenroll(const RequestHeader &request_header,
   struct BinaryArray *tls_ca_key = NULL;
   struct BinaryArray *tls_ca_cert = NULL;
   ssize_t length;
+  CRYPTO_CERT scert;
 
   log_trace("registrar_est_simpleenroll:");
 
@@ -350,6 +410,13 @@ int registrar_est_simpleenroll(const RequestHeader &request_header,
   }
 
   response.assign((char *)cert_str);
+
+  scert = crypto_cert2context(cert_to_sign.array, cert_to_sign.length);
+
+  if (scert != NULL) {
+    save_to_log(peer_certificate, scert, context->log_path);
+    crypto_free_certcontext(scert);
+  }
 
   sys_free(cert_str);
   free_binary_array_content(&cert_to_sign);

@@ -219,7 +219,7 @@ CRYPTO_KEY crypto_key2context(const uint8_t *key, const size_t length);
  *
  * Caller is responsible for freeing the certificate context
  *
- * @param[in] key The input certirficate buffer (DER format)
+ * @param[in] key The input certificate buffer (DER format)
  * @param[in] length The certificate buffer length
  * @return CRYPTO_CERT certificate context, NULL on failure
  */

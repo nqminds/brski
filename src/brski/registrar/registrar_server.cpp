@@ -21,6 +21,8 @@ extern "C" {
 #include "registrar_config.h"
 #include "registrar_server.hpp"
 
+#define LOG_PATH "/var/log/brski-registrar.log"
+
 void setup_registrar_routes(std::vector<struct RouteTuple> &routes) {
   routes.push_back({.path = std::string(PATH_BRSKI_REQUESTVOUCHER),
                     .method = HTTP_METHOD_POST,
@@ -53,6 +55,7 @@ int registrar_start(struct registrar_config *rconf, struct masa_config *mconf,
     *context = new RegistrarContext();
     (*context)->rconf = rconf;
     (*context)->mconf = mconf;
+    sys_strlcpy((*context)->log_path, LOG_PATH, 255);
   } catch (...) {
     log_error("failed to allocate RegistrarContext");
     return -1;

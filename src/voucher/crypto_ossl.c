@@ -691,6 +691,7 @@ int get_x509_keyvalue(X509_NAME *name, struct keyvalue_list *list) {
 
 int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
   X509 *x509 = (X509 *)cert;
+  ASN1_INTEGER *asn1_serial = NULL;
 
   if (cert == NULL) {
     log_error("cert param is NULL");
@@ -700,6 +701,19 @@ int crypto_getcert_meta(CRYPTO_CERT cert, struct crypto_cert_meta *meta) {
   if (meta == NULL) {
     log_error("meta param is NULL");
     return -1;
+  }
+
+  meta->serial_number = 0;
+
+  asn1_serial = X509_get_serialNumber(x509);
+  if (asn1_serial == NULL) {
+    log_error("X509_get_serialNumber fail with code=%s",
+              ERR_error_string(ERR_get_error(), NULL));
+  } else {
+    if (!ASN1_INTEGER_get_uint64(&meta->serial_number, asn1_serial)) {
+      log_error("ASN1_INTEGER_get_uint64 fail with code=%s",
+                ERR_error_string(ERR_get_error(), NULL));
+    }
   }
 
   X509_NAME *issuer = X509_get_issuer_name(x509);
