@@ -29,6 +29,7 @@ struct RegistrarContext {
   struct registrar_config *rconf;
   struct masa_config *mconf;
   void *srv_ctx;
+  char log_path[255];
 };
 
 #endif
