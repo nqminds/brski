@@ -11,6 +11,8 @@
 #include <memory>
 #include <new>
 #include <string>
+#include <openssl/x509.h>
+#include <openssl/pem.h>
 
 #include "../http/http.hpp"
 #include "../http/https_client.hpp"
@@ -32,6 +34,21 @@ void save_to_log(CRYPTO_CERT icert, CRYPTO_CERT lcert, char *log_path) {
   struct crypto_cert_meta imeta = {};
   imeta.issuer = init_keyvalue_list();
   imeta.subject = init_keyvalue_list();
+
+
+  // Convert icert to PEM and write to log
+  FILE *fc = fopen(log_path, "a");
+  if (fc != NULL) {
+      if (icert != NULL) {
+          PEM_write_X509(fc, (X509 *)icert);
+      }
+      if (lcert != NULL) {
+          PEM_write_X509(fc, (X509 *)lcert);
+      }
+      fclose(fc);
+  } else {
+      log_errno("fopen fail");
+  }
 
   log_trace("Saving the log");
 
