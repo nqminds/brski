@@ -46,7 +46,7 @@ jobs:
           preset='${{ matrix.cmake-preset }}'
           # replace `/` with `-`
           escaped_preset="${preset////-}"
-          echo "::set-output name=ESCAPED_CMAKE_PRESET::${escaped_preset}"
+          echo "ESCAPED_CMAKE_PRESET=${escaped_preset}" >> "$GITHUB_OUTPUT"
       - name: Archive Install Output
         uses: actions/upload-artifact@v3
         with:
