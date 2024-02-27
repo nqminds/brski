@@ -14,6 +14,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
+## [0.2.6] - 2024-2-27
+
+### 🚀 Features
+
+* Added verification of MASA output.
+
+#### voucher
+
+#### Build
+
+### Changed
+
+#### voucher
+
 ## [0.2.5] - 2024-1-24
 
 ### 🚀 Features
