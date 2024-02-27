@@ -51,7 +51,8 @@ int post_sign_cert(struct pledge_config *pconf, struct registrar_config *rconf,
  * registrar
  *
  * @param[in] pconf The pledge configuration structure
- * @param[in] masa_pledge_voucher_cms The masa pledge request reply in CMS format
+ * @param[in] masa_pledge_voucher_cms The masa pledge request reply in CMS
+ * format
  * @param[in] registrar_tls_cert The registrar certificate in DER format
  * @param[out] pinned_domain_cert The pinned domain certificate in DER format
  * @return int 0 on success, -1 on failure

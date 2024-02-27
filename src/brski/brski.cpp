@@ -5,8 +5,8 @@
 #include <cstdlib>
 #include <mutex>
 #include <string>
-#include <vector>
 #include <unistd.h>
+#include <vector>
 
 #include "masa/masa_server.hpp"
 #include "pledge/pledge_request.hpp"
@@ -19,7 +19,7 @@ extern "C" {
 #include "config.h"
 #include "pledge/pledge_utils.h"
 
-#define MAX_STDIN_SIZE  4096
+#define MAX_STDIN_SIZE 4096
 
 // declare here, since we pass a pointer to this to C code
 void log_lock_fun(bool lock);
@@ -54,7 +54,8 @@ const std::array<struct command_config, 7> command_list = {{
     {"preq", CommandId::COMMAND_PLEDGE_REQUEST,
      "\tpreq\t\tSend a pledge-voucher request to the registrar and\n"
      "\t\t\t return the pinned-domain-cert."},
-    {"vmasa", CommandId::COMMAND_VERIFY_MASA, "\tvmasa\t\tVerify masa pledge reply\n"},
+    {"vmasa", CommandId::COMMAND_VERIFY_MASA,
+     "\tvmasa\t\tVerify masa pledge reply\n"},
     {"sign", CommandId::COMMAND_SIGN_CERT, "\tsign\t\tSign a certificate\n"},
     {"serial", CommandId::COMMAND_GET_SERIAL,
      "\tserial\t\tReturns the serial number of a certificate\n"},
@@ -224,10 +225,9 @@ void print_key(const char *key, int prefix) {
     std::fprintf(stdout, "-----END PRIVATE KEY-----\n");
 }
 
-int read_stdin(uint8_t buf[])
-{
+int read_stdin(uint8_t buf[]) {
   int cnt = 0;
-  while(read(STDIN_FILENO, &buf[cnt], 1) > 0) {
+  while (read(STDIN_FILENO, &buf[cnt], 1) > 0) {
     cnt++;
     if (cnt > MAX_STDIN_SIZE)
       return -1;
@@ -237,8 +237,7 @@ int read_stdin(uint8_t buf[])
 }
 
 int output_domain_cert(struct BinaryArray *pinned_domain_cert,
-  std::string &out_filename)
-{
+                       std::string &out_filename) {
   char outf[255];
 
   if (out_filename.empty()) {
@@ -261,7 +260,6 @@ int output_domain_cert(struct BinaryArray *pinned_domain_cert,
 
   return 0;
 }
-
 
 int main(int argc, char *argv[]) {
   int verbose = 0;
@@ -319,7 +317,7 @@ int main(int argc, char *argv[]) {
         log_error("file_to_x509buf fail");
         return EXIT_FAILURE;
       }
-      
+
       if (out_filename.empty()) {
         char *base64 =
             voucher_pledge_request_to_base64(&config.pconf, tls_cert);
@@ -416,7 +414,7 @@ int main(int argc, char *argv[]) {
       }
 
       log_info("Verifying MASA response with registrar tsl cert at %s",
-        in_filename.c_str());
+               in_filename.c_str());
 
       int sz = read_stdin(inbuf);
       if (sz < 0) {
@@ -430,21 +428,22 @@ int main(int argc, char *argv[]) {
       struct BinaryArray masa_pledge_voucher_cms = {};
 
       if ((masa_pledge_voucher_cms.length =
-           serialize_base64str2array((const uint8_t *)inbuf, sz,
-                                     &masa_pledge_voucher_cms.array)) < 0) {
+               serialize_base64str2array((const uint8_t *)inbuf, sz,
+                                         &masa_pledge_voucher_cms.array)) < 0) {
         log_errno("serialize_base64str2array fail");
         return EXIT_FAILURE;
       }
 
-      struct BinaryArray *registrar_tls_cert = file_to_x509buf(in_filename.c_str());
+      struct BinaryArray *registrar_tls_cert =
+          file_to_x509buf(in_filename.c_str());
       if (registrar_tls_cert == NULL) {
         log_error("file_to_keybuf fail");
         return EXIT_FAILURE;
       }
 
       if (verify_masa_pledge_request(&config.pconf, &masa_pledge_voucher_cms,
-                               registrar_tls_cert, &pinned_domain_cert) < 0)
-      {
+                                     registrar_tls_cert,
+                                     &pinned_domain_cert) < 0) {
         log_error("verify_masa_pledge_request fail");
         return EXIT_FAILURE;
       }

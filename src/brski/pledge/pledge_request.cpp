@@ -35,8 +35,7 @@ extern "C" {
 int verify_masa_pledge_request(struct pledge_config *pconf,
                                struct BinaryArray *masa_pledge_voucher_cms,
                                struct BinaryArray *registrar_tls_cert,
-                               struct BinaryArray *pinned_domain_cert)
-{
+                               struct BinaryArray *pinned_domain_cert) {
   struct BinaryArray *nonce = NULL;
   struct BinaryArrayList *masa_verify_certs = NULL;
   struct BinaryArrayList *masa_store_certs = NULL;
@@ -178,7 +177,6 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   const char *masa_pledge_voucher_str = http_res.response.c_str();
   struct BinaryArray masa_pledge_voucher_cms = {};
 
-
   if ((masa_pledge_voucher_cms.length =
            serialize_base64str2array((const uint8_t *)masa_pledge_voucher_str,
                                      strlen(masa_pledge_voucher_str),
@@ -187,9 +185,8 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
     goto post_voucher_pledge_request_fail;
   }
 
-  if (verify_masa_pledge_request(pconf,
-        &masa_pledge_voucher_cms, registrar_tls_cert, pinned_domain_cert) < 0)
-  {
+  if (verify_masa_pledge_request(pconf, &masa_pledge_voucher_cms,
+                                 registrar_tls_cert, pinned_domain_cert) < 0) {
     log_errno("verify_masa_pledge_request fail");
     goto post_voucher_pledge_request_fail;
   }
