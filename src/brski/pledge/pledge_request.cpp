@@ -32,6 +32,64 @@ extern "C" {
 #include "../pledge/pledge_utils.h"
 }
 
+int verify_masa_pledge_request(struct pledge_config *pconf,
+                               struct BinaryArray *masa_pledge_voucher_cms,
+                               struct BinaryArray *registrar_tls_cert,
+                               struct BinaryArray *pinned_domain_cert)
+{
+  struct BinaryArray *nonce = NULL;
+  struct BinaryArrayList *masa_verify_certs = NULL;
+  struct BinaryArrayList *masa_store_certs = NULL;
+
+  int result;
+
+  if (pconf->nonce != NULL) {
+    if ((nonce = init_binary_array()) == NULL) {
+      log_errno("init_binary_array");
+      goto verify_masa_pledge_request_fail;
+    }
+    ssize_t length;
+    if ((length = serialize_base64str2array((const uint8_t *)pconf->nonce,
+                                            strlen(pconf->nonce),
+                                            &nonce->array)) < 0) {
+      log_errno("serialize_base64str2array fail");
+      free_binary_array(nonce);
+      goto verify_masa_pledge_request_fail;
+    }
+    nonce->length = length;
+  }
+
+  if (load_cert_files(pconf->cms_verify_certs_paths, &masa_verify_certs) < 0) {
+    log_error("load_cert_files");
+    goto verify_masa_pledge_request_fail;
+  }
+
+  if (load_cert_files(pconf->cms_verify_store_paths, &masa_store_certs) < 0) {
+    log_error("load_cert_files");
+    goto verify_masa_pledge_request_fail;
+  }
+
+  result = verify_masa_pledge_voucher(
+      masa_pledge_voucher_cms, pconf->serial_number, nonce, registrar_tls_cert,
+      NULL, masa_verify_certs, masa_store_certs, NULL, pinned_domain_cert);
+
+  if (result < 0) {
+    log_error("verify_masa_pledge_voucher fail");
+    goto verify_masa_pledge_request_fail;
+  }
+
+  free_binary_array(nonce);
+  free_array_list(masa_verify_certs);
+  free_array_list(masa_store_certs);
+  return 0;
+
+verify_masa_pledge_request_fail:
+  free_binary_array(nonce);
+  free_array_list(masa_verify_certs);
+  free_array_list(masa_store_certs);
+  return -1;
+}
+
 int post_voucher_pledge_request(struct pledge_config *pconf,
                                 struct registrar_config *rconf,
                                 struct masa_config *mconf,
@@ -119,11 +177,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
 
   const char *masa_pledge_voucher_str = http_res.response.c_str();
   struct BinaryArray masa_pledge_voucher_cms = {};
-  struct BinaryArray *nonce = NULL;
-  struct BinaryArrayList *masa_verify_certs = NULL;
-  struct BinaryArrayList *masa_store_certs = NULL;
 
-  int result;
 
   if ((masa_pledge_voucher_cms.length =
            serialize_base64str2array((const uint8_t *)masa_pledge_voucher_str,
@@ -133,54 +187,20 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
     goto post_voucher_pledge_request_fail;
   }
 
-  if (pconf->nonce != NULL) {
-    if ((nonce = init_binary_array()) == NULL) {
-      log_errno("init_binary_array");
-      goto post_voucher_pledge_request_fail;
-    }
-    ssize_t length;
-    if ((length = serialize_base64str2array((const uint8_t *)pconf->nonce,
-                                            strlen(pconf->nonce),
-                                            &nonce->array)) < 0) {
-      log_errno("serialize_base64str2array fail");
-      free_binary_array(nonce);
-      goto post_voucher_pledge_request_fail;
-    }
-    nonce->length = length;
-  }
-
-  if (load_cert_files(pconf->cms_verify_certs_paths, &masa_verify_certs) < 0) {
-    log_error("load_cert_files");
-    goto post_voucher_pledge_request_fail;
-  }
-
-  if (load_cert_files(pconf->cms_verify_store_paths, &masa_store_certs) < 0) {
-    log_error("load_cert_files");
-    goto post_voucher_pledge_request_fail;
-  }
-
-  result = verify_masa_pledge_voucher(
-      &masa_pledge_voucher_cms, pconf->serial_number, nonce, registrar_tls_cert,
-      NULL, masa_verify_certs, masa_store_certs, NULL, pinned_domain_cert);
-
-  if (result < 0) {
-    log_error("verify_masa_pledge_voucher fail");
+  if (verify_masa_pledge_request(pconf,
+        &masa_pledge_voucher_cms, registrar_tls_cert, pinned_domain_cert) < 0)
+  {
+    log_errno("verify_masa_pledge_request fail");
     goto post_voucher_pledge_request_fail;
   }
 
   free_binary_array_content(&masa_pledge_voucher_cms);
-  free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);
-  free_array_list(masa_verify_certs);
-  free_array_list(masa_store_certs);
   return 0;
 
 post_voucher_pledge_request_fail:
   free_binary_array_content(&masa_pledge_voucher_cms);
-  free_binary_array(nonce);
   free_binary_array(registrar_tls_cert);
-  free_array_list(masa_verify_certs);
-  free_array_list(masa_store_certs);
   return -1;
 }
 
