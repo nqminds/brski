@@ -410,11 +410,13 @@ int main(int argc, char *argv[]) {
     case CommandId::COMMAND_VERIFY_MASA: {
       struct BinaryArray pinned_domain_cert = {};
       uint8_t inbuf[MAX_STDIN_SIZE];
-
       if (in_filename.empty()) {
         log_error("No input registrar certificate file");
         return EXIT_FAILURE;
       }
+
+      log_info("Verifying MASA response with registrar tsl cert at %s",
+        in_filename.c_str());
 
       int sz = read_stdin(inbuf);
       if (sz < 0) {
@@ -453,6 +455,7 @@ int main(int argc, char *argv[]) {
       }
       free_binary_array(registrar_tls_cert);
       free_binary_array_content(&pinned_domain_cert);
+      break;
     }
     case CommandId::COMMAND_GET_SERIAL: {
       if (in_filename.empty()) {
