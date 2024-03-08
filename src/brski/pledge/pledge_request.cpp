@@ -124,7 +124,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
     log_error("https_post_request fail");
     return -1;
   }
-
+/* parse the certificate into a buffer */
   if ((registrar_tls_cert = crypto_cert2buf(http_res.peer_certificate)) ==
       NULL) {
     log_error("crypto_cert2buf fail");
@@ -134,6 +134,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
 
   crypto_free_certcontext(http_res.peer_certificate);
 
+  /* create the voucher request and packate up for the reset API */
   char *cms = voucher_pledge_request_to_base64(pconf, registrar_tls_cert);
   free_binary_array(registrar_tls_cert);
 
@@ -147,7 +148,7 @@ int post_voucher_pledge_request(struct pledge_config *pconf,
   sys_free(cms);
 
   log_info("Request pledge voucher from %s", path.c_str());
-
+/* this bit posts teh */
   status = https_post_request(pconf->idevid_key_path, pconf->idevid_cert_path,
                               rconf->bind_address, rconf->port, path, false,
                               body, content_type, http_res);
