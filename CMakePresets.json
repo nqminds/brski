@@ -53,6 +53,27 @@
       "cacheVariables": {
         "SANITIZE_ADDRESS": true
       }
+    },
+    {
+      "name": "cheribsd-morello",
+      "inherits": "default",
+      "displayName": "CHERIBSD Morello",
+      "description": "Build for CHERIBSD/Morello",
+      "binaryDir": "${sourceDir}/build/cheribsd-morello",
+      "cacheVariables": {
+        "CMAKE_SYSROOT": "/usr/local/cheri/sdk",
+        "CMAKE_C_COMPILER": "clang",
+        "CMAKE_CXX_COMPILER": "clang++",
+        "CMAKE_C_FLAGS": "-march=morello -mabi=aapcs",
+        "CMAKE_CXX_FLAGS": "-march=morello -mabi=aapcs",
+        "CMAKE_EXE_LINKER_FLAGS": "-march=morello -mabi=aapcs",
+        "OPENSSL_ROOT_DIR": "/usr/local64/openssl",
+        "USE_CPPHTTPLIB_LIB": true,
+        "BUILD_OPENSSL3_LIB": false,
+        "USE_VOUCHER_OPENSSL": true,
+        "USE_VOUCHER_WOLFSSL": false,
+        "SANITIZE_ADDRESS": false
+      }
     }
   ],
   "buildPresets": [
@@ -71,6 +92,10 @@
     {
       "name": "linux-sanitize",
       "configurePreset": "linux-sanitize"
+    },
+    {
+      "name": "cheribsd-morello",
+      "configurePreset": "cheribsd-morello"
     }
   ],
   "testPresets": [
@@ -89,6 +114,10 @@
     {
       "name": "linux-sanitize",
       "configurePreset": "linux-sanitize"
+    },
+    {
+      "name": "cheribsd-morello",
+      "configurePreset": "cheribsd-morello"
     }
   ]
 }
