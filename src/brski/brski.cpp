@@ -7,6 +7,7 @@
 #include <string>
 #include <unistd.h>
 #include <vector>
+#include <algorithm>
 
 #include "masa/masa_server.hpp"
 #include "pledge/pledge_request.hpp"
@@ -79,17 +80,18 @@ void log_lock_fun(bool lock) {
   }
 }
 
-static void show_version(void) {
-  std::fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
-}
-
 static void show_help(const char *name) {
   const std::string string_name(name);
-  std::vector<char> basename_buffer(string_name.begin(), string_name.end());
+  // Extract the basename manually
+  std::string basename = string_name;
+  size_t last_slash = basename.find_last_of('/');
+  if (last_slash != std::string::npos) {
+    basename = basename.substr(last_slash + 1);
+  }
 
   show_version();
   std::fprintf(stdout, "Usage:\n");
-  std::fprintf(stdout, USAGE_STRING.c_str(), basename(basename_buffer.data()));
+  std::fprintf(stdout, USAGE_STRING.c_str(), basename.c_str()); // Use the extracted basename
   std::fprintf(stdout, "\n");
   std::fprintf(stdout, "%s", description_string.c_str());
   std::fprintf(stdout, "\nCommands:\n");
