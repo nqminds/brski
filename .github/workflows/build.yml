@@ -22,9 +22,9 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Cache CMake build/dl folder
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: ./build/dl
           key: ${{ runner.os }}-${{ matrix.cmake-preset }}-${{ hashFiles( 'lib/*' ) }}
@@ -48,7 +48,7 @@ jobs:
           escaped_preset="${preset////-}"
           echo "::set-output name=ESCAPED_CMAKE_PRESET::${escaped_preset}"
       - name: Archive Install Output
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: brski-build-${{ steps.escape_preset.outputs.ESCAPED_CMAKE_PRESET }}
           retention-days: 7
@@ -71,14 +71,14 @@ jobs:
         deb [arch=arm64] http://ports.ubuntu.com/ubuntu-ports ${{ matrix.distribution }} main universe | deb [arch=amd64] http://archive.ubuntu.com/ubuntu ${{ matrix.distribution }} main universe
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Create pbuilder cache dir
         # The actions/cache action does not have permissions to create the pbuilder
         # cache folder if it doesn't exist
         run: sudo mkdir -m777 -p /var/cache/pbuilder/
       - name: Cache pbuilder base
         id: cache-pbuilder-base
-        uses: actions/cache@v3
+        uses: actions/cache@v4
         with:
           path: |
             /var/cache/pbuilder/base.tgz
@@ -107,7 +107,7 @@ jobs:
           mkdir -p '${{ runner.temp }}/pbuilder/result'
           pdebuild --buildresult '${{ runner.temp }}/pbuilder/result' --debbuildopts "-us -uc" -- --override-config --distribution ${{ matrix.distribution }} --mirror "" --othermirror "$OTHER_MIRROR" --host-arch ${{ matrix.architecture }}
       - name: Archive built debs
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: brski-built-debs
           retention-days: 7
