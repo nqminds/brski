@@ -61,7 +61,6 @@
       "description": "Build for CHERIBSD/Morello",
       "binaryDir": "${sourceDir}/build/cheribsd-morello",
       "cacheVariables": {
-        "CMAKE_SYSROOT": "/usr/local/cheri/sdk",
         "CMAKE_C_COMPILER": "clang",
         "CMAKE_CXX_COMPILER": "clang++",
         "CMAKE_C_FLAGS": "-march=morello -mabi=aapcs",
