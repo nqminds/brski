@@ -80,6 +80,10 @@ void log_lock_fun(bool lock) {
   }
 }
 
+static void show_version(void) {
+  std::fprintf(stdout, "brski version %s\n", BRSKI_VERSION);
+}
+
 static void show_help(const char *name) {
   const std::string string_name(name);
   // Extract the basename manually
